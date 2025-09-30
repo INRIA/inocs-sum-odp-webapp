@@ -28,3 +28,9 @@ export function getYearFromDate(date?: string): number | undefined {
   if (Number.isNaN(d.getTime())) return undefined;
   return d.getFullYear();
 }
+
+export function toSafeJsonString(obj: any): string {
+  return JSON.stringify(obj, (key, value) =>
+    typeof value === "bigint" ? value.toString() : value
+  );
+}

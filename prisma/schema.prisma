@@ -1,0 +1,166 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model categories {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name        String    @unique(map: "categories_name_unique") @db.VarChar(255)
+  description String?   @db.Text
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model failed_jobs {
+  id         BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  uuid       String   @unique(map: "failed_jobs_uuid_unique") @db.VarChar(255)
+  connection String   @db.Text
+  queue      String   @db.Text
+  payload    String   @db.LongText
+  exception  String   @db.LongText
+  failed_at  DateTime @default(now()) @db.Timestamp(0)
+}
+
+model item_tag {
+  id      Int    @id @default(autoincrement())
+  item_id BigInt @db.UnsignedBigInt
+  tag_id  BigInt @db.UnsignedBigInt
+  items   items  @relation(fields: [item_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "item_tag_item_id_foreign")
+  tags    tags   @relation(fields: [tag_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "item_tag_tag_id_foreign")
+
+  @@index([item_id], map: "item_tag_item_id_foreign")
+  @@index([tag_id], map: "item_tag_tag_id_foreign")
+}
+
+model items {
+  id          BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
+  url         String?    @db.VarChar(512)
+  name        String     @unique(map: "items_name_unique") @db.VarChar(255)
+  orgname     String     @db.VarChar(400)
+  picture     String?    @db.VarChar(255)
+  file        String?    @db.VarChar(255)
+  fileorgname String     @db.VarChar(255)
+  project_id  BigInt     @db.UnsignedBigInt
+  category_id BigInt     @db.UnsignedBigInt
+  description String?    @db.Text
+  status      String?    @db.VarChar(255)
+  homepage    Boolean    @default(false)
+  options     String?    @db.Text
+  date        DateTime?  @db.Date
+  created_at  DateTime?  @db.Timestamp(0)
+  updated_at  DateTime?  @db.Timestamp(0)
+  user_id     Int?
+  visible     Int?       @db.TinyInt
+  item_tag    item_tag[]
+}
+
+model kpidefinitions {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(100)
+  description String   @db.VarChar(5000)
+  metric      String   @db.VarChar(50)
+  created_at  DateTime @default(now()) @db.Timestamp(0)
+  updated_at  DateTime @default(dbgenerated("'0000-00-00 00:00:00'")) @db.Timestamp(0)
+}
+
+model kpiresults {
+  id               Int      @id @default(autoincrement())
+  kpidefinition_id Int
+  value            String   @db.VarChar(1000)
+  date             DateTime @db.Date
+  created_at       DateTime @default(now()) @db.Timestamp(0)
+  updated_at       DateTime @default(dbgenerated("'0000-00-00 00:00:00'")) @db.Timestamp(0)
+  project_id       Int
+  user_id          Int?
+  description      String?  @db.VarChar(5000)
+}
+
+model labs {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name        String    @unique(map: "categories_name_unique") @db.VarChar(255)
+  country     String?   @db.VarChar(512)
+  flag        String?   @db.VarChar(512)
+  description String?   @db.Text
+  lat         String?   @db.VarChar(25)
+  lng         String?   @db.VarChar(25)
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model migrations {
+  id        Int    @id @default(autoincrement()) @db.UnsignedInt
+  migration String @db.VarChar(255)
+  batch     Int
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model password_resets {
+  email      String    @db.VarChar(255)
+  token      String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+
+  @@index([email], map: "password_resets_email_index")
+  @@ignore
+}
+
+model personal_access_tokens {
+  id             BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  tokenable_type String    @db.VarChar(255)
+  tokenable_id   BigInt    @db.UnsignedBigInt
+  name           String    @db.VarChar(255)
+  token          String    @unique(map: "personal_access_tokens_token_unique") @db.VarChar(64)
+  abilities      String?   @db.Text
+  last_used_at   DateTime? @db.Timestamp(0)
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+
+  @@index([tokenable_type, tokenable_id], map: "personal_access_tokens_tokenable_type_tokenable_id_index")
+}
+
+model projects {
+  id          BigInt    @id @default(autoincrement())
+  name        String    @unique(map: "projects_name_unique") @db.VarChar(255)
+  description String?   @db.Text
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+  lab_id      BigInt?
+}
+
+model roles {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name        String    @unique(map: "roles_name_unique") @db.VarChar(255)
+  description String?   @db.Text
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+  users       users[]
+}
+
+model tags {
+  id          BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
+  name        String     @unique(map: "tags_name_unique") @db.VarChar(255)
+  color       String?    @db.VarChar(255)
+  created_at  DateTime?  @db.Timestamp(0)
+  updated_at  DateTime?  @db.Timestamp(0)
+  description String?    @db.VarChar(1024)
+  item_tag    item_tag[]
+}
+
+model users {
+  id                BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name              String    @db.VarChar(255)
+  email             String    @unique(map: "users_email_unique") @db.VarChar(255)
+  role_id           BigInt    @db.UnsignedBigInt
+  role              roles     @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  email_verified_at DateTime? @db.Timestamp(0)
+  password          String    @db.VarChar(255)
+  picture           String?   @db.VarChar(255)
+  location          String?   @db.VarChar(255)
+  phone             String?   @db.VarChar(255)
+  remember_token    String?   @db.VarChar(100)
+  created_at        DateTime? @db.Timestamp(0)
+  updated_at        DateTime? @db.Timestamp(0)
+}
