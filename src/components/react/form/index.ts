@@ -1,4 +1,5 @@
 export * from "./SignupForm";
+export * from "./LoginForm";
 export * from "./LivingLabForm";
 export * from "./LivingLabTransportModeForm";
 export * from "./LivingLabKpiResultForm";

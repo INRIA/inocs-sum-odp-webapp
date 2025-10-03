@@ -8,7 +8,6 @@ import {
   Dropdown,
   DropdownButton,
   DropdownMenu,
-  Link,
   DropdownItem,
   DropdownLabel,
   StackedLayout,
@@ -91,19 +90,17 @@ export function SiteNavBar({ livingLabs, children }: Props) {
   return (
     <StackedLayout
       navbar={
-        <Navbar>
-          <Link href={HOME_URL} aria-label="Home">
-            <img
-              src={getUrl("/sum_logo.jpg")}
-              alt="SUM Logo"
-              className="w-40 mx-4"
-            />
-          </Link>
+        <Navbar className="flex flex-row w-full min-w-0 flex-1">
+          <img
+            src={getUrl("/sum_logo.jpg")}
+            alt="SUM Logo"
+            className="w-40 mx-4"
+          />
 
           <NavbarSpacer />
 
           {/* desktop navbar items (hidden on smaller screens) */}
-          <NavbarSection className="px-10 max-lg:hidden">
+          <NavbarSection className="px-10 max-lg:hidden w-full flex justify-end">
             {items.map((item) => (
               <React.Fragment key={item.label}>
                 {item.subItems?.length !== undefined && (

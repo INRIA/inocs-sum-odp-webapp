@@ -39,7 +39,7 @@ export class UserRepository {
       return user
         ? _safe
           ? (this.mapPrismaUserToUser(user) as User)
-          : (user as UserDto)
+          : this.getUserDtoWithSafeMethod(user)
         : null;
     } catch (error) {
       console.error(`Error fetching user with id ${id}:`, error);
@@ -50,8 +50,12 @@ export class UserRepository {
   /**
    * Get user by email with role populated
    */
-  async findByEmail(email: string): Promise<User | null> {
+  async findByEmail(
+    email: string,
+    safe?: boolean
+  ): Promise<User | UserDto | null> {
     try {
+      const _safe = safe !== undefined ? safe : true;
       const user = await prisma.users.findUnique({
         where: { email },
         include: {
@@ -59,7 +63,11 @@ export class UserRepository {
         },
       });
 
-      return user ? this.mapPrismaUserToUser(user) : null;
+      return user
+        ? _safe
+          ? (this.mapPrismaUserToUser(user) as User)
+          : this.getUserDtoWithSafeMethod(user)
+        : null;
     } catch (error) {
       console.error(`Error fetching user with email ${email}:`, error);
       throw new Error("Failed to fetch user");
@@ -167,6 +175,16 @@ export class UserRepository {
       console.error(`Error fetching users with role_id ${roleId}:`, error);
       throw new Error("Failed to fetch users by role");
     }
+  }
+
+  private getUserDtoWithSafeMethod(
+    user: Omit<UserDto, "getSafeUser">
+  ): UserDto {
+    const { password, old_password, password_confirmation, ...safeUser } = user;
+    return {
+      ...user,
+      getSafeUser: () => safeUser,
+    };
   }
 
   /**

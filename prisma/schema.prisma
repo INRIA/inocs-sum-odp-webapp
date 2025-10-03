@@ -91,12 +91,6 @@ model labs {
   updated_at  DateTime? @db.Timestamp(0)
 }
 
-model migrations {
-  id        Int    @id @default(autoincrement()) @db.UnsignedInt
-  migration String @db.VarChar(255)
-  batch     Int
-}
-
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
 model password_resets {
   email      String    @db.VarChar(255)
@@ -154,7 +148,6 @@ model users {
   name              String    @db.VarChar(255)
   email             String    @unique(map: "users_email_unique") @db.VarChar(255)
   role_id           BigInt    @db.UnsignedBigInt
-  role              roles     @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   email_verified_at DateTime? @db.Timestamp(0)
   password          String    @db.VarChar(255)
   picture           String?   @db.VarChar(255)
@@ -163,4 +156,7 @@ model users {
   remember_token    String?   @db.VarChar(100)
   created_at        DateTime? @db.Timestamp(0)
   updated_at        DateTime? @db.Timestamp(0)
+  role              roles     @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([role_id], map: "users_role_id_fkey")
 }

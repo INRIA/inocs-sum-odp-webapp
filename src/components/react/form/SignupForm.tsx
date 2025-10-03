@@ -93,15 +93,7 @@ export default function SignupForm() {
       )}
 
       <div className="flex gap-6">
-        <RButton
-          type="submit"
-          variant="primary"
-          text={
-            mode === "create"
-              ? "Signup and create new Living Lab"
-              : "Signup and join existing Living Lab"
-          }
-        />
+        <RButton type="submit" variant="primary" text="Signup" />
 
         <RButton
           type="button"
@@ -115,6 +107,18 @@ export default function SignupForm() {
             setMode("create");
           }}
         />
+      </div>
+
+      <div className="text-center mt-6">
+        <p className="text-sm text-gray-600">
+          Already have an account?{" "}
+          <a
+            href={getUrl("/lab-admin/login")}
+            className="text-blue-600 hover:text-blue-800 underline"
+          >
+            Sign in to your account
+          </a>
+        </p>
       </div>
     </form>
   );

@@ -19,6 +19,7 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
   Cog8ToothIcon,
+  ArrowRightStartOnRectangleIcon
 } from "@heroicons/react/16/solid";
 import {
   Cog6ToothIcon,
@@ -36,16 +37,10 @@ import { getUrl } from "../../../lib/helpers";
 
 interface Props {
   children?: React.ReactNode;
-
-  userMenuItems?: Array<{
-    label: string;
-    icon: React.ReactNode;
-    href: string;
-  }>;
   userInfo?: {
     name: string;
     email: string;
-    avatar: string;
+    avatar?: string;
   };
 }
 
@@ -108,7 +103,15 @@ const HELP_MENU_ITEMS = [
   },
 ];
 
-export function SidebarMenu({ children, userMenuItems, userInfo }: Props) {
+const DEFAULT_USER_MENU_ITEMS = [
+  {
+    label: "Logout",
+    icon: <ArrowRightStartOnRectangleIcon />,
+    href: getUrl("/lab-admin/logout"),
+  },
+];
+
+export function SidebarMenu({ children, userInfo }: Props) {
   const sidebarContent = (
     <Sidebar>
       <SidebarHeader>
@@ -180,34 +183,33 @@ export function SidebarMenu({ children, userMenuItems, userInfo }: Props) {
                 {userInfo.avatar ? (
                   <Avatar
                     src={userInfo.avatar}
-                    className="size-10"
+                    className="size-8"
                     square
                     alt=""
                   />
                 ) : (
-                  <UserIcon className="size-10" />
+                  <UserIcon className="size-8" />
                 )}
-                <span className="min-w-0">
-                  <span className="block truncate text-sm/5 font-medium text-zinc-950 dark:text-white">
+                <span className="max-w-32 flex flex-col">
+                  <span className="text-sm/5 font-medium text-zinc-950 dark:text-white">
                     {userInfo.name}
                   </span>
-                  <span className="block truncate text-xs/5 font-normal text-zinc-500 dark:text-zinc-400">
-                    {userInfo.email}
-                  </span>
+                  <small className="text-dark">{userInfo.email}</small>
                 </span>
               </span>
               <ChevronUpIcon />
             </DropdownButton>
-            {userMenuItems?.length && userMenuItems?.length > 0 && (
-              <DropdownMenu className="min-w-64" anchor="top start">
-                {userMenuItems.map((item) => (
-                  <DropdownItem key={item.label} href={item.href}>
-                    {item.icon}
-                    <DropdownLabel>{item.label}</DropdownLabel>
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            )}
+            {DEFAULT_USER_MENU_ITEMS?.length &&
+              DEFAULT_USER_MENU_ITEMS?.length > 0 && (
+                <DropdownMenu className="min-w-64" anchor="top start">
+                  {DEFAULT_USER_MENU_ITEMS.map((item) => (
+                    <DropdownItem key={item.label} href={item.href}>
+                      {item.icon}
+                      <DropdownLabel>{item.label}</DropdownLabel>
+                    </DropdownItem>
+                  ))}
+                </DropdownMenu>
+              )}
           </Dropdown>
         )}
       </SidebarFooter>

@@ -14,13 +14,17 @@ export interface UserDto {
   phone?: string | null;
   picture?: string | null;
   role_id: number;
-  status: "signup" | "active" | "disabled";
+  //status: "signup" | "active" | "disabled";
   created_at: Date;
   role?: Role; // Populated role object
+  getSafeUser?: () => User; // Method to get safe user object without sensitive info
 }
 
 export interface User
-  extends Omit<UserDto, "password" | "old_password" | "password_confirmation"> {}
+  extends Omit<
+    UserDto,
+    "password" | "old_password" | "password_confirmation"
+  > {}
 
 export interface CreateUserInput {
   email: string;

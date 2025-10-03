@@ -4,9 +4,11 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@astrojs/react";
 import node from "@astrojs/node";
 
+import auth from "auth-astro";
+
 // https://astro.build/config
 export default defineConfig({
-  integrations: [react()],
+  integrations: [react(), auth()],
   output: "server", // Changed from "static" to enable SSR and API routes
   adapter: node({
     mode: "standalone",

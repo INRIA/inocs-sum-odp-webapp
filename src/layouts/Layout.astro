@@ -15,6 +15,13 @@ const labsItems = labs.map((lab) => ({
   href: getUrl(`/living-lab-city/${lab.id}`),
   label: lab.name,
 }));
+
+const userInfo = Astro.locals.user
+  ? {
+      name: Astro.locals.user?.name ?? "User",
+      email: Astro.locals.user?.email ?? "",
+    }
+  : undefined;
 ---
 
 <!doctype html>
@@ -55,7 +62,7 @@ const labsItems = labs.map((lab) => ({
     }
     {
       role === "editor" && (
-        <SidebarMenu client:load>
+        <SidebarMenu userInfo={userInfo} client:load>
           <slot />
         </SidebarMenu>
       )
