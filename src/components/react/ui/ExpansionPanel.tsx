@@ -22,12 +22,12 @@ export const ExpansionPanel: React.FC<ExpansionPanelProps> = ({
   return (
     <div className="mb-2 w-full flex flex-col min-w-0">
       <div
-        className="flex items-center cursor-pointer px-4 py-3 select-none w-full"
+        className="flex items-center cursor-pointer py-3 select-none w-full"
         onClick={handleToggle}
       >
         <div className="flex-1">{header}</div>
         {arrow && (
-          <span className="ml-2 transition-transform duration-200">
+          <span className="ml-0 transition-transform duration-200">
             {isOpen ? (
               <svg width="24" height="24" viewBox="0 0 24 24">
                 <polyline
@@ -51,7 +51,7 @@ export const ExpansionPanel: React.FC<ExpansionPanelProps> = ({
         )}
       </div>
       {isOpen && (
-        <div className="p-4 border-t border-gray-200 w-full">{content}</div>
+        <div className="border-t border-gray-200 w-full">{content}</div>
       )}
     </div>
   );

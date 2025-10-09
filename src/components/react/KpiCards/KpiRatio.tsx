@@ -20,9 +20,9 @@ import {
 } from "../../../types";
 import {
   formatMonthYear,
-  formatRatio,
+  formatValue,
+  getChange,
   getRatioComparedToCar,
-  getChangeFlat,
 } from "../../../lib/helpers";
 
 ChartJS.register(
@@ -44,17 +44,22 @@ export default function KpiRatio({ kpiResults }: Props) {
   const before = kpiResults?.result_before ?? null;
   const after = kpiResults?.result_after ?? null;
 
-  const valueNum = after?.value ?? before?.value ?? null;
-  const displayValue = formatRatio(valueNum);
+  const currentValue = formatValue(
+    after?.value ?? before?.value ?? null,
+    kpiResults.metric
+  );
+  const beforeValue = before?.value
+    ? formatValue(before?.value, kpiResults.metric)
+    : null;
   const displayDate = formatMonthYear(after?.date ?? before?.date);
 
-  const change = getChangeFlat(
+  const change = getChange(
     before?.value ?? null,
     after?.value ?? null,
+    kpiResults.metric,
     kpiResults.progression_target
   );
-
-  const comparison = getRatioComparedToCar(valueNum);
+  const comparison = getRatioComparedToCar(currentValue);
 
   // Build chart labels & datasets
   const labels: string[] = [];
@@ -103,6 +108,7 @@ export default function KpiRatio({ kpiResults }: Props) {
     responsive: true,
     plugins: {
       legend: { display: false },
+      tooltip: { enabled: true },
     },
     scales: {
       y: {

@@ -13,7 +13,6 @@ import { KpiTypeBadge } from "./KpiTypeBadge";
 import { KpiMetricTypeBadge } from "./KpiMetricTypeBadge";
 import { Badge, ExpansionPanel } from "./ui";
 import type { ICategory } from "../../types/Category";
-import { tr } from "motion/react-client";
 
 type Props = {
   kpis: IKpi[];
@@ -22,7 +21,7 @@ type Props = {
   categories: ICategory[];
 };
 
-export function LivingLabKPIs({
+export function LivingLabKPIsEdition({
   kpis = [],
   livingLabId,
   kpiResults: livingLabKpis = [],
@@ -135,4 +134,4 @@ export function LivingLabKPIs({
   );
 }
 
-export default LivingLabKPIs;
+export default LivingLabKPIsEdition;

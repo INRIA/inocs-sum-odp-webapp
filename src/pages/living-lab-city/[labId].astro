@@ -1,41 +1,170 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import ApiClient from "../../lib/api-client/ApiClient";
-import { KpiCard } from "../../components/react/KpiCards";
-export function getStaticPaths() {
-  return [
-    { params: { labId: 1 } },
-    { params: { labId: 2 } },
-    { params: { labId: 3 } },
-    { params: { labId: 4 } },
-    { params: { labId: 5 } },
-    { params: { labId: 6 } },
-    { params: { labId: 7 } },
-    { params: { labId: 8 } },
-    { params: { labId: 9 } },
-  ];
-}
+import { MapViewer } from "../../components/react/MapViewer";
+import { TransportBadge } from "../../components/react/TransportBadge";
+import ModalSplitChart from "../../components/react/KpiCards/ModalSplitChart";
+import { MeasuresSection } from "../../components/react/MobilityMeasures";
+import {
+  getNSMTransportModes,
+  separateMeasures,
+  prepareModalSplitData,
+  createMapMarker,
+} from "../../lib/helpers/living-lab";
+import { DataDisplayCard, LivingLabKPIsView } from "../../components/react";
+import type { IIKpiResultBeforeAfter } from "../../types";
 
-//TODO : get mocked data for transport modes and modal split (KPI 15)
-// init json file for a living lab, from WP1 reports
 const api = new ApiClient();
 
 const { labId } = Astro.params;
-const livingLabKpis = await api.getLivingLabAndData(Number(labId));
+const livingLabData = await api.getLivingLabAndData(Number(labId));
+const allTransportModes = await api.getTransportModes();
+const allKpis = await api.getKPIs();
+const categories = await api.getCategories("KPI_SIEF");
+
+// Prepare data for components
+const nsmTransportModes = getNSMTransportModes(
+  livingLabData,
+  allTransportModes
+);
+const { pushMeasures, pullMeasures } = separateMeasures(
+  livingLabData.measures || []
+);
+const { before, after } = prepareModalSplitData(
+  livingLabData,
+  allTransportModes
+);
+
+const mapMarker = createMapMarker(livingLabData);
+
+const kpiResultsByCategory = categories.map((category) => ({
+  ...category,
+  kpiResults: livingLabData?.kpi_results.filter((kpiResult) =>
+    category.kpis?.some((kpi) => kpi.id === kpiResult.id)
+  ),
+}));
 ---
 
 <Layout>
-  <div class="lg:mx-20 mx-auto px-4 py-8 flex flex-col gap-8">
-    <h2><strong>{livingLabKpis?.name}</strong>Living lab data dashboard</h2>
-    <h3>Key Performance Indicators (KPIs)</h3>
-    <p>Explore the KPIs related to the living lab.</p>
+  <div class="lg:mx-10 mx-auto px-1 py-4 flex flex-col gap-8">
+    <h2>
+      <strong>{livingLabData?.name}</strong> Living lab data dashboard
+    </h2>
 
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <!-- Map Section -->
+    <section class="flex flex-col lg:flex-row gap-4">
+      <div class="h-96 w-full lg:w-3/4 rounded-lg overflow-hidden shadow-md">
+        <MapViewer
+          center={[mapMarker.coordinates.lat, mapMarker.coordinates.lng]}
+          zoom={10}
+          markers={[mapMarker]}
+          scrollWheelZoom={true}
+          client:only="react"
+        />
+      </div>
+      <div class="w-full lg:w-1/4">
+        <DataDisplayCard
+          data={[
+            { label: "Living Lab", value: livingLabData?.name },
+            {
+              label: "Location",
+              //value: `${livingLabData?.city}, ${livingLabData?.country}`,
+            },
+            {
+              label: "Population",
+              value: livingLabData?.population,
+            },
+            {
+              label: "Area (km²)",
+              value: livingLabData.area,
+            },
+            {
+              label: "Density (inhabitants/km²)",
+              value: livingLabData?.density,
+            },
+          ]}
+        />
+      </div>
+    </section>
+
+    <div class="flex flex-col gap-8">
+      <!-- Transport Modes Section -->
       {
-        livingLabKpis?.kpi_results.map((kpiResult) => (
-          <KpiCard kpiResults={kpiResult} client:load />
-        ))
+        nsmTransportModes.length > 0 && (
+          <div class="flex flex-col gap-4">
+            <h3 class="text-center">Shared Mobility Services</h3>
+            <div class="flex flex-wrap gap-2 mx-auto">
+              {nsmTransportModes.map((mode) => (
+                <TransportBadge
+                  name={mode.name}
+                  size="xl"
+                  color="secondary"
+                  client:load
+                />
+              ))}
+            </div>
+          </div>
+        )
+      }
+      <!-- Push & Pull Measures Section -->
+      {
+        (pushMeasures.length > 0 || pullMeasures.length > 0) && (
+          <section class="flex flex-col md:flex-row gap-8 items-start">
+            <MeasuresSection
+              heading="🔴 Push measures"
+              smallText={``}
+              paragraph={``}
+              measures={pushMeasures}
+              hideDescription={true}
+              cols={1}
+              style="list"
+              client:load
+            />
+
+            <MeasuresSection
+              heading="🟢 Pull measures"
+              smallText={``}
+              paragraph={``}
+              measures={pullMeasures}
+              hideDescription={true}
+              cols={1}
+              style="list"
+              client:load
+            />
+          </section>
+        )
       }
     </div>
+
+    <!-- Modal Split Section -->
+    {
+      (before?.data?.length > 0 || after?.data?.length > 0) && (
+        <section class="flex flex-col gap-4">
+          <h3 class="text-center">Modal Split</h3>
+          <p>
+            Distribution of transport modes usage before and after measures:
+          </p>
+          <div class="bg-white p-6 rounded-lg shadow-md">
+            <ModalSplitChart data={[before, after]} client:load />
+          </div>
+        </section>
+      )
+    }
+
+    <!-- KPIs Section -->
+    <section class="flex flex-col gap-4">
+      <h3 class="text-center">Key Performance Indicators (KPIs)</h3>
+      <p>
+        Explore living lab metrics and track progress of the impact of
+        shared-mobility integration.
+      </p>
+      <div class="flex flex-wrap gap-0">
+        <LivingLabKPIsView
+          categories={kpiResultsByCategory}
+          kpis={allKpis}
+          client:load
+        />
+      </div>
+    </section>
   </div>
 </Layout>

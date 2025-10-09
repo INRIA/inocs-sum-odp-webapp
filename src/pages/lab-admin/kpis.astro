@@ -1,6 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import { LivingLabKPIs, InfoAlert } from "../../components/react";
+import { LivingLabKPIsEdition, InfoAlert } from "../../components/react";
 import ApiClient from "../../lib/api-client/ApiClient";
 
 //TODO : get mocked data for transport modes and modal split (KPI 15)
@@ -35,7 +35,7 @@ const categories = await api.getCategories("KPI_SIEF");
       >
     </InfoAlert>
 
-    <LivingLabKPIs
+    <LivingLabKPIsEdition
       categories={categories}
       kpis={filteredKpis}
       livingLabId={labId}

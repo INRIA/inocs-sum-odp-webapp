@@ -1,5 +1,5 @@
 import React from "react";
-import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
+import { Tooltip } from "./Tooltip";
 
 export type BadgeColor =
   | "primary"
@@ -10,7 +10,7 @@ export type BadgeColor =
   | "light"
   | "transparent"
   | "success";
-export type BadgeSize = "sm" | "md" | "lg";
+export type BadgeSize = "sm" | "md" | "lg" | "xl";
 
 export interface BadgeProps {
   icon?: React.ReactNode;
@@ -38,13 +38,15 @@ const COLOR_CLASSES: Record<BadgeColor, string> = {
 const SIZE_CLASSES: Record<BadgeSize, string> = {
   sm: "p-0.5 text-xs",
   md: "p-1 text-sm",
-  lg: "px-4 py-1.5 text-base",
+  lg: "p-1.5 text-base",
+  xl: "p-2 text-lg",
 };
 
 const ICON_WRAPPER: Record<BadgeSize, string> = {
   sm: "h-3 w-3",
   md: "h-5 w-5",
   lg: "h-7 w-7",
+  xl: "h-10 w-10",
 };
 
 export function Badge({
@@ -64,7 +66,7 @@ export function Badge({
 
   const [displayTooltip, setDisplayTooltip] = React.useState(false);
   return (
-    <div className="relative inline-block cursor-pointer ">
+    <div className="">
       <span
         className={`inline-flex items-center gap-2 rounded-full font-medium ${colorClass} ${sizeClass} ${className}`}
         role={role}
@@ -79,19 +81,9 @@ export function Badge({
         ) : null}
         {children}
         {displayTooltipIcon && !!tooltip?.length ? (
-          <QuestionMarkCircleIcon className={`h-4 w-4 text-warning`} />
+          <Tooltip content={tooltip} open={displayTooltip} />
         ) : null}
       </span>
-      {!!tooltip?.length && (
-        <div
-          role="tooltip"
-          className={`w-40 absolute z-10 invisible inline-block p-2 text-xs text-primary transition-opacity duration-300 bg-light/80 rounded-lg shadow-xs opacity-0 tooltip ${
-            displayTooltip ? "visible opacity-100" : ""
-          }`}
-        >
-          <small>{tooltip}</small>
-        </div>
-      )}
     </div>
   );
 }

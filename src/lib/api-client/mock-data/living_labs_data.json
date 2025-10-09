@@ -39,26 +39,26 @@
       {
         "id": 7,
         "kpi_number": "5",
-        "value_before": 5.0,
-        "value_after": 4.836873
+        "value_before": 0.05,
+        "value_after": 0.04836873
       },
       {
         "id": 9,
         "kpi_number": "6.1",
-        "value_before": 6.1,
-        "value_after": 5.092395
+        "value_before": 0.061,
+        "value_after": 0.05092395
       },
       {
         "id": 10,
         "kpi_number": "6.2",
-        "value_before": 6.2,
-        "value_after": 6.7496
+        "value_before": 0.062,
+        "value_after": 0.067496
       },
       {
         "id": 11,
         "kpi_number": "6.3",
-        "value_before": 6.3,
-        "value_after": 5.960147
+        "value_before": 0.063,
+        "value_after": 0.05960147
       },
       {
         "id": 13,
@@ -105,14 +105,14 @@
       {
         "id": 20,
         "kpi_number": "8",
-        "value_before": 8.0,
-        "value_after": 8.435708
+        "value_before": 0.09,
+        "value_after": 0.08435708
       },
       {
         "id": 21,
         "kpi_number": "9",
-        "value_before": 9.0,
-        "value_after": 10.744935
+        "value_before": 0.09,
+        "value_after": 0.10744935
       },
       {
         "id": 23,
@@ -243,14 +243,14 @@
       {
         "id": 47,
         "kpi_number": "13",
-        "value_before": 13.0,
-        "value_after": 14.832937
+        "value_before": 0.13,
+        "value_after": 0.14832937
       },
       {
         "id": 48,
         "kpi_number": "14",
-        "value_before": 14.0,
-        "value_after": 11.263972
+        "value_before": 0.14,
+        "value_after": 0.11263972
       },
       {
         "id": 49,
@@ -258,7 +258,6 @@
         "value_before": 16.0,
         "value_after": 18.531749
       },
-
       {
         "id": 521,
         "kpidefinition_id": 52,

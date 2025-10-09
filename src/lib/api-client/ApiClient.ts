@@ -124,8 +124,9 @@ export default class ApiClient {
     return measures;
   }
 
-  async getKPIs({ kpi_number }: { kpi_number?: string }): Promise<IKpi[]> {
+  async getKPIs(data?: { kpi_number?: string }): Promise<IKpi[]> {
     //return this.get(`/kpis`);
+    const { kpi_number } = data ?? {};
 
     let kpisData = kpis as IKpi[];
     if (kpi_number) {

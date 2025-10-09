@@ -1,8 +1,10 @@
 import { InformationCircleIcon } from "@heroicons/react/20/solid";
+import { Tooltip } from "./Tooltip";
 
 type InfoCardProps = {
   title: string;
   description?: string;
+  tooltip?: string;
   imageUrl?: string;
   href?: string;
   className?: string;
@@ -16,6 +18,7 @@ export function InfoCard({
   href = "#",
   className = "",
   iconRound = false,
+  tooltip,
 }: InfoCardProps) {
   return (
     <div
@@ -45,9 +48,17 @@ export function InfoCard({
 
       <div className="min-w-0 flex-1 gap-y-1 text-center">
         <span aria-hidden="true" className="absolute inset-0" />
-        <span className="font-semibold text-sm">{title}</span><br></br>
-        {description ? <small className="mt-0 leading-0">{description}</small> : null}
+        <span className="font-semibold text-sm">{title}</span>
+        <br></br>
+        {description ? (
+          <small className="mt-0 leading-0">{description}</small>
+        ) : null}
       </div>
+      {tooltip ? (
+        <div className="absolute top-2 right-2">
+          <Tooltip content={tooltip} placement="right" />
+        </div>
+      ) : null}
     </div>
   );
 }

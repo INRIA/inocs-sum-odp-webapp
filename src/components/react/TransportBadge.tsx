@@ -9,14 +9,18 @@ export type TransportType =
   | "e-car"
   | "e-bus"
   | "metro"
-  | "scooter";
+  | "scooter"
+  | "e-scooter"
+  | "walking"
+  | "car-sharing";
 
 export interface TransportBadgeProps {
+  name?: string; // transport mode name
   type?: TransportType; // selects the badge (default "bus")
   title?: React.ReactNode; // fallback to capitalized type
   icon?: React.ReactNode; // react node icon (preferred)
   iconSrc?: string; // string path fallback
-  size?: "sm" | "md" | "lg"; // controls padding/text/icon size
+  size?: "sm" | "md" | "lg" | "xl"; // controls padding/text/icon size
   className?: string;
   color?:
     | "primary-light"
@@ -36,6 +40,8 @@ const DEFAULT_ICONS: Record<string, string> = {
   "e-bus": "/icons/e-bus.svg",
   metro: "/icons/metro.svg",
   scooter: "/icons/scooter.svg",
+  "e-scooter": "/icons/e-scooter.svg",
+  walking: "/icons/pedestrian.svg",
 };
 
 function capitalize(str: string) {
@@ -43,6 +49,7 @@ function capitalize(str: string) {
 }
 
 export function TransportBadge({
+  name,
   type = "bus",
   title,
   icon,
@@ -70,6 +77,33 @@ export function TransportBadge({
       />
     ) : null);
 
+  const transportByName = name
+    ? transportModes.find(
+        (mode) => mode.name.toLowerCase() === name?.toLowerCase()
+      )
+    : null;
+
+  if (transportByName) {
+    return (
+      <div className="flex flex-col items-center justify-center">
+        <Badge
+          icon={
+            <img
+              src={getUrl(DEFAULT_ICONS[transportByName.icon])}
+              alt={`${transportByName.name} icon`}
+              className="h-full w-full"
+            />
+          }
+          size={size}
+          color={transportByName.color}
+          className={className}
+          aria-label={`${transportByName.name} transport badge`}
+        ></Badge>
+        <small> {transportByName.name}</small>
+      </div>
+    );
+  }
+
   return (
     <Badge
       icon={iconNode}
@@ -82,3 +116,71 @@ export function TransportBadge({
     </Badge>
   );
 }
+
+const transportModes = [
+  {
+    name: "Private Car",
+    color: "#004494",
+    icon: "car",
+  },
+  {
+    name: "Motorcycle / Scooter",
+    color: "#FF632F",
+    icon: "scooter",
+  },
+  {
+    name: "Carsharing",
+    color: "#6FAE24",
+    icon: "car-sharing",
+  },
+  {
+    name: "Bicycle",
+    color: "#81BF2D",
+    icon: "bike",
+  },
+  {
+    name: "E-scooter",
+    color: "#98C33A",
+    icon: "e-scooter",
+  },
+  {
+    name: "Walking",
+    color: "#DADADA",
+    icon: "walking",
+  },
+  {
+    name: "Micromobility",
+    color: "#B4D952",
+    icon: "bike",
+  },
+  {
+    name: "Ride hailing",
+    color: "#D0F06A",
+    icon: "car-sharing",
+  },
+  {
+    name: "Taxi",
+    color: "#55910b",
+    icon: "car-sharing",
+  },
+  {
+    name: "Train",
+    color: "#f97448",
+    icon: "metro",
+  },
+  {
+    name: "Bus",
+    color: "#4797d8",
+    icon: "bus",
+  },
+  {
+    name: "Metro / Subway",
+    color: "#75BDFB",
+    icon: "metro",
+  },
+  {
+    name: "Other",
+    color: "#606060",
+    icon: "walking",
+  },
+];

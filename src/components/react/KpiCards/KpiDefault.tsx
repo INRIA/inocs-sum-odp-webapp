@@ -17,7 +17,12 @@ import {
   COLOR_SUCCESS,
   COLOR_SUCCESS_OPACITY_50,
 } from "../../../types";
-import { formatMonthYear, formatValue, getChange } from "../../../lib/helpers";
+import {
+  formatValue,
+  formatMonthYear,
+  getChange,
+  getFormattedValueString,
+} from "../../../lib/helpers";
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -33,7 +38,7 @@ type Props = {
   kpiResults: IIKpiResultBeforeAfter;
 };
 
-export function KpiPercentage({ kpiResults }: Props) {
+export function KpiDefault({ kpiResults }: Props) {
   const before = kpiResults?.result_before ?? null;
   const after = kpiResults?.result_after ?? null;
 
@@ -56,12 +61,12 @@ export function KpiPercentage({ kpiResults }: Props) {
   //Chartjs data
   const chartDatasets: number[] = [];
   const chartLabels: string[] = [];
-  if (before?.value !== undefined && before?.value !== null) {
-    chartDatasets.push(before.value * 100);
+  if (before && beforeValue !== undefined && beforeValue !== null) {
+    chartDatasets.push(beforeValue);
     chartLabels.push(before.date ? formatMonthYear(before.date) : "?");
   }
-  if (after?.value !== undefined && after?.value !== null) {
-    chartDatasets.push(after.value * 100);
+  if (after && currentValue !== undefined && currentValue !== null) {
+    chartDatasets.push(currentValue);
     chartLabels.push(after.date ? formatMonthYear(after.date) : "?");
   }
   const backgroundColor = change?.startsWith("+")
@@ -69,12 +74,12 @@ export function KpiPercentage({ kpiResults }: Props) {
     : COLOR_DANGER_OPACITY_50;
   const borderColor = change?.startsWith("+") ? COLOR_SUCCESS : COLOR_DANGER;
   const chartData = {
-    labels: chartLabels,
+    labels: ["", ...chartLabels, ""],
     datasets: [
       {
         label: "",
-        data: chartDatasets,
-        fill: true,
+        data: [null, ...chartDatasets, null],
+        //fill: true,
         backgroundColor,
         borderColor,
       },
@@ -98,38 +103,42 @@ export function KpiPercentage({ kpiResults }: Props) {
 
   return (
     <div className="flex flex-col gap-3 md:gap-6">
-      <div className="mt-6 flex flex-col md:flex-row md:items-end md:justify-between gap-1 md:gap-4">
+      <div className="mt-6 flex flex-col md:flex-row md:items-end md:justify-between gap-1 md:gap-2">
         <div className="flex flex-col items-start justify-end">
           <h3 className="text-4xl font-extrabold text-gray-900 dark:text-white leading-none">
-            {currentValue}
+            {getFormattedValueString(currentValue, kpiResults.metric)}
           </h3>
           <p className="mt-2 text-lg text-muted">{displayDate}</p>
         </div>
 
         {change?.length > 0 && (
           <div className="flex flex-col items-end justify-end mb-1">
-            <span className="text-lg font-semibold">{beforeValue}</span>
-            <span
-              className={`text-xs ${
+            <p className="font-semibold">
+              {getFormattedValueString(beforeValue, kpiResults.metric)}
+            </p>
+            <small
+              className={`italic ${
                 change?.startsWith("+") ? "text-success" : "text-danger"
               }`}
             >
-              ({change === null ? "" : `${change}`}
-            </span>
-            <span className="text-xs text-muted">
-              {before?.date
-                ? `from ${new Date(before.date).getFullYear()}`
-                : ""}
-              )
-            </span>
+              {change === null ? "" : `${change}`}
+            </small>
+            <small className="italic">
+              {before?.date ? `in ${new Date(before.date).getFullYear()}` : ""}
+            </small>
           </div>
         )}
       </div>
-      <div className="flex flex-col w-full">
-        <Line options={chartOptions} data={chartData} className="w-full" />
+      <div className="flex flex-col w-full mt-4 h-fit ">
+        <Line
+          options={chartOptions}
+          data={chartData}
+          className="w-full"
+          height={200}
+        />
       </div>
     </div>
   );
 }
 
-export default KpiPercentage;
+export default KpiDefault;

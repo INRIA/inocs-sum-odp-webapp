@@ -5,7 +5,7 @@ import ApiClient from "../lib/api-client/ApiClient";
 import { getUrl } from "../lib/helpers";
 
 interface Props {
-  role: "visitor" | "editor" | "admin";
+  role?: "visitor" | "editor" | "admin";
 }
 
 const { role = "visitor" } = Astro.props;

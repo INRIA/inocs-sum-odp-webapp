@@ -41,23 +41,15 @@ export default function ModalSplitChart({ data }: Props) {
         display: false, // custom legend below for clearer percent display
       },
       tooltip: {
-        callbacks: {
-          label(context) {
-            const idx = context.dataIndex ?? 0;
-            const raw = context.dataset.data[idx] as number;
-            const pct = percents[idx];
-            return `${context.label}: ${raw} (${pct}%)`;
-          },
-        },
+        enabled: true,
       },
     },
   };
 
   const getChartDataAndOptions = (dataset: Dataset) => {
     const labels = dataset.data.map((d) => d.label);
-    const values = dataset.data.map((d) => Number(d.value) || 0);
+    const values = normalizePercentages(dataset.data);
     const backgroundColor = dataset.data.map((d) => d.color);
-    const percents = normalizePercentages(dataset.data);
 
     const chartData = {
       labels,
@@ -75,20 +67,20 @@ export default function ModalSplitChart({ data }: Props) {
       return <></>;
     }
     return (
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 w-full">
         <h5>{dataset.label}</h5>
         <div className="flex flex-row gap-2">
-          <div className="h-60 w-2/3">
+          <div className="h-60 w-1/2">
             <Doughnut data={chartData} options={options} />
           </div>
-          <div className="w-1/3 flex flex-col h-60 gap-0">
+          <div className="w-1/2 flex flex-col h-60 gap-0">
             {[...dataset.data]
-              .map((item, i) => ({ ...item, percent: percents[i] }))
+              .map((item, i) => ({ ...item, percent: values[i] }))
               .sort((a, b) => b.percent - a.percent)
               .map((item, i) => (
                 <li
                   key={item.label}
-                  className="flex items-center gap-1 justify-between"
+                  className="flex items-center gap-1 justify-between text-sm"
                 >
                   <span
                     className="inline-block rounded-[3px] flex-shrink-0 w-3 h-3"
@@ -97,8 +89,8 @@ export default function ModalSplitChart({ data }: Props) {
                     }}
                   />
                   <small className="flex-1">{item.label}</small>
-                  <strong className="min-w-[48px] text-right">
-                    {percents[i]}%
+                  <strong className="lg:min-w-[48px] text-right">
+                    {values[i]}%
                   </strong>
                 </li>
               ))}
@@ -109,9 +101,16 @@ export default function ModalSplitChart({ data }: Props) {
   };
 
   return (
-    <div className="flex flex-row gap-8">
+    <div className="flex flex-col lg:flex-row gap-8">
       {data.map((dataset, i) => (
-        <div key={i} className="flex-1">
+        <div
+          key={i}
+          className={`flex-1 ${
+            i !== 0
+              ? "border-t pt-8 lg:border-t-0 lg:pt-0 lg:border-l lg:pl-8 border-gray-300"
+              : ""
+          }`}
+        >
           {getChartDataAndOptions(dataset)}
         </div>
       ))}

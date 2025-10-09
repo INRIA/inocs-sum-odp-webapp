@@ -1,51 +1,39 @@
-import {
-  EnumKpiMetricType,
-  EnumKpiType,
-  type IIKpiResultBeforeAfter,
-} from "../../../types";
-import { Badge } from "../ui";
-import KpiPercentage from "./KpiPercentage";
-import KpiRatio from "./KpiRatio";
+import { type IIKpiResultBeforeAfter } from "../../../types";
+import { Badge, Tooltip } from "../ui";
+import KpiDefault from "./KpiDefault";
 
 type Props = {
   kpiResults: IIKpiResultBeforeAfter;
 };
 
 export function KpiCard({ kpiResults }: Props) {
-  const getKpiComponent = (type: EnumKpiMetricType) => {
-    switch (type) {
-      case EnumKpiMetricType.PERCENTAGE:
-        return <KpiPercentage kpiResults={kpiResults} />;
-      case EnumKpiMetricType.RATIO:
-        return <KpiRatio kpiResults={kpiResults} />;
-      default:
-        return (
-          <p>
-            Value before: {kpiResults?.result_before?.value ?? "—"}
-            <br></br> Value after: {kpiResults?.result_after?.value ?? "—"}
-          </p>
-        );
-    }
-  };
-
   return (
-    <div className="relative rounded-2xl border-primary-light border p-3">
-      <div className="absolute -top-1 right-0">
-        <Badge size="sm" color="light" className="rounded-2xl">
-          KPI {kpiResults.kpi_number}
-        </Badge>
-      </div>
+    <div className="p-1 lg:p-2 ">
+      <div className="p-2 relative rounded-2xl border-primary-light border ">
+        <div className="absolute -top-1 right-0">
+          <Badge size="sm" color="light" className="rounded-2xl">
+            KPI {kpiResults.kpi_number}
+            <Tooltip
+              content={kpiResults.description}
+              placement="left"
+              iconClassName="h-3 w-3 text-primary"
+            />
+          </Badge>
+        </div>
 
-      <div className="text-center mt-1">
-        <p>{kpiResults?.name ?? "KPI"}</p>
-        {kpiResults?.description ? (
+        <div className="flex flex-col text-center mt-2">
+          <h6 className="text-center text-black">
+            {kpiResults?.name ?? "KPI"}
+          </h6>
+          {/* {kpiResults?.description ? (
           <div className="text-sm text-muted mt-2 max-w-xl mx-auto">
             {kpiResults.description}
           </div>
-        ) : null}
-      </div>
+        ) : null} */}
+        </div>
 
-      {getKpiComponent(kpiResults?.metric)}
+        {<KpiDefault kpiResults={kpiResults} />}
+      </div>
     </div>
   );
 }
