@@ -1,16 +1,18 @@
-import type { IMeasure } from "../../types";
+import type { IProject } from "../../types";
 import { LivingLabMeasureForm } from "./form/LivingLabMeasureForm";
 
 type LivingLabMeasuresProps = {
-  livingLabId: number;
+  livingLabId: string;
   title: string;
-  measures?: IMeasure[];
+  measures?: IProject[];
+  selectedMeasureIds?: string[];
   className?: string;
 };
 
 export function LivingLabMeasures({
   livingLabId,
   measures = [],
+  selectedMeasureIds = [],
   title = "Measures",
   className = "",
 }: LivingLabMeasuresProps) {
@@ -27,6 +29,7 @@ export function LivingLabMeasures({
               key={m.name}
               measure={m}
               disabled={true}
+              initialChecked={selectedMeasureIds.includes(m.id)}
             />
           ))}
         </div>

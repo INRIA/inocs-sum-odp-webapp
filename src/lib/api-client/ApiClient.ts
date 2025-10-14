@@ -7,7 +7,7 @@ import type {
   IKpi,
   IIKpiResultBeforeAfter,
   ILivingLabPopulated,
-  IMeasure,
+  IProject,
   ITransportMode,
   ILivingLabTransportMode,
   ILivingLab,
@@ -20,25 +20,73 @@ export default class ApiClient {
     "Content-Type": "application/json",
   };
 
-  constructor(baseUrl: string = "http://localhost:8080") {
-    this.baseUrl = baseUrl.replace(/\/+$/, ""); // strip trailing slashes
+  private token?: string;
+
+  constructor(request?: Request) {
+    const isServer = typeof window === "undefined";
+
+    // --- Determine base URL ---
+    if (isServer) {
+      // SSR (Node)
+      this.baseUrl = "http://localhost:4321/api/v1";
+
+      // In production, derive from the incoming request
+      if (request) {
+        const url = new URL(request.url);
+        this.baseUrl = `${url.origin}/api/v1`;
+
+        // Try extracting auth token from cookies (SSR)
+        const cookieHeader = request.headers.get("cookie");
+        this.token = this.extractTokenFromCookies(cookieHeader);
+      }
+    } else {
+      // Browser
+      this.baseUrl = `${window.location.origin}/api/v1`;
+
+      // Extract token from browser cookies
+      this.token = this.extractTokenFromCookies(document.cookie);
+    }
   }
 
-  private async get<T = any>(path: string): Promise<T> {
-    const url = `${this.baseUrl}${path}`;
-    const res = await fetch(url, {
-      method: "GET",
-      headers: this.defaultHeaders,
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(
-        `Request failed: ${res.status} ${res.statusText} ${
-          text ? `- ${text}` : ""
-        }`
-      );
+  // Extract JWT or session token from cookie string
+  private extractTokenFromCookies(
+    cookieHeader?: string | null
+  ): string | undefined {
+    if (!cookieHeader) return undefined;
+
+    // Assuming your auth cookie name is 'sessionToken'
+    const match = cookieHeader.match(/(?:^|;\s*)sessionToken=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : undefined;
+  }
+
+  private async request<T>(
+    path: string,
+    options?: RequestInit
+  ): Promise<T | null> {
+    const url = `${this.baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
+
+    // Always include auth header if token is present
+    const headers: HeadersInit = {
+      ...(options?.headers ?? {}),
+    };
+    if (this.token) {
+      headers["Authorization"] = `Bearer ${this.token}`;
     }
-    return (await res.json()) as T;
+
+    const res = await fetch(url, { ...options, headers });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`API Error (${res.status}): ${text}`);
+    }
+
+    // Auto-parse JSON if possible
+    const contentType = res.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      return res.json() as Promise<T>;
+    }
+
+    return null;
   }
 
   populateLivingLabData(lab: any) {
@@ -77,7 +125,7 @@ export default class ApiClient {
         return 0;
       });
     const populatedMeasures = lab?.measures?.map((measure) => {
-      const measureData = measures.find((m) => m.id === measure.id) as IMeasure;
+      const measureData = measures.find((m) => m.id === measure.id) as IProject;
       return { ...measure, ...measureData };
     });
 
@@ -100,10 +148,32 @@ export default class ApiClient {
     } as ILivingLabPopulated;
   }
 
-  async getLivingLabs(): Promise<ILivingLab[]> {
-    //return this.get(`/livinglabs`);
+  async getLivingLabs(
+    fields?: string[]
+  ): Promise<(ILivingLab | ILivingLabPopulated)[] | null> {
+    const defaultFields = ["projects", "kpiresults", "transport_modes"];
 
-    return livinglabs;
+    return this.request<(ILivingLab | ILivingLabPopulated)[] | null>(
+      "/labs" +
+        (fields
+          ? `?fields=${fields?.join(",")}`
+          : `?fields=${defaultFields.join(",")}`)
+    );
+  }
+
+  async getLivingLab(
+    livingLabId: string,
+    fields?: string[]
+  ): Promise<ILivingLabPopulated | null> {
+    const defaultFields = ["projects", "kpiresults", "transport_modes"];
+
+    return this.request<ILivingLabPopulated | null>(
+      "/labs?id=" +
+        encodeURIComponent(livingLabId) +
+        (fields
+          ? `&fields=${fields.join(",")}`
+          : `&fields=${defaultFields.join(",")}`)
+    );
   }
 
   async getLivingLabsAndData(): Promise<ILivingLabPopulated[]> {
@@ -118,10 +188,22 @@ export default class ApiClient {
     return this.populateLivingLabData(lab);
   }
 
-  async getMeasures(): Promise<IMeasure[]> {
-    //return this.get(`/measures`);
+  async getMeasures(): Promise<IProject[] | null> {
+    return this.request<IProject[] | null>("/projects");
+  }
 
-    return measures;
+  async updateLivingLabMeasure(data: { labId: string; projectId: string }) {
+    return this.request<IProject>(`/labs-projects`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteLivingLabMeasure(data: { labId: string; projectId: string }) {
+    return this.request<void>(`/labs-projects`, {
+      method: "DELETE",
+      body: JSON.stringify(data),
+    });
   }
 
   async getKPIs(data?: { kpi_number?: string }): Promise<IKpi[]> {

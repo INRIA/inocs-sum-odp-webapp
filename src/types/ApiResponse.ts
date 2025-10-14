@@ -26,14 +26,16 @@ export class ApiResponse extends Response {
 
     // Create the response with JSON stringified data
     super(
-      toSafeJsonString({
-        ...data,
-        success:
-          data.success !== undefined ? data.success : data.error ? false : true,
-      }),
+      data.data
+        ? toSafeJsonString(data.data)
+        : data
+        ? JSON.stringify(data)
+        : null,
       {
         ...init,
         headers,
+        status: data.status ?? 200,
+        statusText: data.error ?? data.message ?? "OK",
       }
     );
   }
@@ -171,13 +173,7 @@ export class ApiResponse extends Response {
    * Create a no content response (204)
    */
   static noContent(): ApiResponse {
-    return new ApiResponse(
-      {
-        success: true,
-        status: 204,
-      },
-      { status: 204 }
-    );
+    return new Response(null, { status: 204 });
   }
 
   /**

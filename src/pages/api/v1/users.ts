@@ -38,7 +38,7 @@ export const GET: APIRoute = async ({ request, url }) => {
 
     if (user) {
       data.push(user);
-    } else {
+    } else if (status || roleId) {
       // Get users with optional filtering
       const options: any = {};
       if (status) options.status = status;
@@ -48,7 +48,7 @@ export const GET: APIRoute = async ({ request, url }) => {
       data.push(...users);
     }
 
-    if (!data) {
+    if (!data.length) {
       return new ApiResponse({
         error: "User not found",
         status: 404,

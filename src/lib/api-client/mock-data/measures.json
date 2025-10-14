@@ -1,7 +1,6 @@
 [
   {
     "id": 1,
-    "key": "measure_001",
     "name": "Congestion charges",
     "description": "Fees imposed on vehicles entering designated city areas to reduce traffic congestion.",
     "type": "PUSH",
@@ -9,7 +8,6 @@
   },
   {
     "id": 2,
-    "key": "measure_002",
     "name": "Parking charges",
     "description": "Increased parking fees to discourage long-term car use and promote modal shift.",
     "type": "PUSH",
@@ -17,7 +15,6 @@
   },
   {
     "id": 3,
-    "key": "measure_003",
     "name": "Restricted parking",
     "description": "Reductions in available public parking to limit car access, especially in central zones.",
     "type": "PUSH",
@@ -25,7 +22,6 @@
   },
   {
     "id": 4,
-    "key": "measure_004",
     "name": "Limited traffic zone / Pedestrianisation of streets",
     "description": "Car-free or low-emission zones that prioritize pedestrians, cyclists, and shared mobility.",
     "type": "PUSH",
@@ -33,7 +29,6 @@
   },
   {
     "id": 5,
-    "key": "measure_005",
     "name": "Parking supply management",
     "description": "Policies that reduce or restructure parking supply to manage demand and encourage alternatives.",
     "type": "PUSH",
@@ -41,7 +36,6 @@
   },
   {
     "id": 6,
-    "key": "measure_006",
     "name": "Speed limits",
     "description": "Lowering vehicle speed limits to improve safety and promote non-motorized travel.",
     "type": "PUSH",
@@ -49,7 +43,6 @@
   },
   {
     "id": 7,
-    "key": "measure_007",
     "name": "Mobility hubs (see task T3.2)",
     "description": "Centralized locations where multiple transport modes (e.g., bikes, buses, taxis) are integrated.",
     "type": "PULL",
@@ -57,7 +50,6 @@
   },
   {
     "id": 8,
-    "key": "measure_008",
     "name": "Scheduling integration in MaaS services (see task T2.3)",
     "description": "Coordinated schedules across transport services to streamline connections.",
     "type": "PULL",
@@ -65,7 +57,6 @@
   },
   {
     "id": 9,
-    "key": "measure_009",
     "name": "Ticketing integration in MaaS services (see task T3.4)",
     "description": "Unified or digital ticketing across services to simplify travel.",
     "type": "PULL",
@@ -73,7 +64,6 @@
   },
   {
     "id": 10,
-    "key": "measure_010",
     "name": "Improved NSM infrastructure, e.g. bike lanes & \"park & ride\"",
     "description": "New infrastructure like bike lanes, “park & ride” stations to support non-car travel.",
     "type": "PULL",
@@ -81,7 +71,6 @@
   },
   {
     "id": 11,
-    "key": "measure_011",
     "name": "On demand vehicle sharing action plan",
     "description": "Access to shared vehicles (cars, bikes, e-scooters) on demand via apps or stations.",
     "type": "PULL",
@@ -89,7 +78,6 @@
   },
   {
     "id": 12,
-    "key": "measure_012",
     "name": "Nudging (gamification or rewards)",
     "description": "Use of rewards or games to encourage use of shared or sustainable transport.",
     "type": "PULL",
@@ -97,7 +85,6 @@
   },
   {
     "id": 13,
-    "key": "measure_013",
     "name": "Dynamic pricing of NSM",
     "description": "Flexible pricing (e.g., cheaper off-peak rides) to balance demand and promote use.",
     "type": "PULL",
@@ -105,7 +92,6 @@
   },
   {
     "id": 14,
-    "key": "measure_014",
     "name": "Improved information about the availability of shared modes",
     "description": "Real-time data on vehicle availability and travel options via digital platforms.",
     "type": "PULL",
@@ -113,7 +99,6 @@
   },
   {
     "id": 15,
-    "key": "measure_015",
     "name": "Introduction of new NSM services (ex. bike-sharing)",
     "description": "Launch of bike-sharing, scooter-sharing, or other new transport options.",
     "type": "PULL",
@@ -121,7 +106,6 @@
   },
   {
     "id": 16,
-    "key": "measure_016",
     "name": "Introduction of new PT infrastructures/lines (ex. e-buses, LRT)",
     "description": "Deployment of new public transport lines like electric buses or tram extensions.",
     "type": "PULL",
@@ -129,7 +113,6 @@
   },
   {
     "id": 17,
-    "key": "measure_017",
     "name": "Streets retrofitting/introduction of priority lanes",
     "description": "Street redesign for better walking/cycling and priority lanes for buses or shared modes.",
     "type": "PULL",
@@ -137,7 +120,6 @@
   },
   {
     "id": 18,
-    "key": "measure_018",
     "name": "Dedicated parking spaces for carsharing/micromobility",
     "description": "Reserved spaces to support the use of shared cars or micromobility vehicles.",
     "type": "PULL",
@@ -145,7 +127,6 @@
   },
   {
     "id": 19,
-    "key": "measure_019",
     "name": "Widening PT geographical area",
     "description": "Extending public transport coverage to reach underserved zones.",
     "type": "PULL",
@@ -153,7 +134,6 @@
   },
   {
     "id": 20,
-    "key": "measure_020",
     "name": "Central PT planning and construction program",
     "description": "Comprehensive public transport network planning to enhance coordination and efficiency.",
     "type": "PULL",

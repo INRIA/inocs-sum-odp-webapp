@@ -1,5 +1,5 @@
 import { UserRepository } from "../repositories/user.repository";
-import type { User, UserDto } from "../types";
+import type { User, UserDto } from "../../types";
 import PasswordUtils from "../../lib/utils/PasswordUtils";
 
 export interface LoginCredentials {
@@ -41,7 +41,6 @@ export class AuthService {
         email,
         false
       )) as UserDto;
-
       if (!userData) {
         return {
           success: false,

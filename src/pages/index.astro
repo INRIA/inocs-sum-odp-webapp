@@ -14,22 +14,23 @@ import mcdaImage from "../assets/img/sum-mcda.png";
 import impactImage from "../assets/img/sum-measure-kpi-impact.png";
 import ApiClient from "../lib/api-client/ApiClient";
 import { getUrl } from "../lib/helpers";
+import type { ILivingLabPopulated } from "../types";
 
-const api = new ApiClient();
+const api = new ApiClient(Astro.request);
 
-const livingLabsData = await api.getLivingLabsAndData();
+const livingLabsData = (await api.getLivingLabs()) as ILivingLabPopulated[];
 const measures = await api.getMeasures();
 
-const labs = livingLabsData.map((lab) => ({
+const labs = livingLabsData?.map((lab) => ({
   id: lab.id,
   name: lab.name,
   coordinates: { lat: lab.lat, lng: lab.lng },
   radius: lab.radius ?? 50,
-  status: lab.status,
-  totalMeasures: lab.measures.length,
-  kpisBefore: lab.kpi_results.filter((kpi) => kpi.result_before).length,
-  kpisAfter: lab.kpi_results.filter((kpi) => kpi.result_after).length,
-  transportModes: lab.transport_modes.length,
+  // status: lab.status,
+  totalMeasures: lab.projects?.length,
+  kpisBefore: lab.kpi_results?.filter((kpi) => kpi.result_before).length,
+  kpisAfter: lab.kpi_results?.filter((kpi) => kpi.result_after).length,
+  transportModes: lab.transport_modes?.length,
   sustainablePercentage: 0.4,
 }));
 ---

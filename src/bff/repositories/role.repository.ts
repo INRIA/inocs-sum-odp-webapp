@@ -1,5 +1,5 @@
 import prisma from '../db/client';
-import type { Role } from '../types';
+import type { Role } from '../../types';
 
 export class RoleRepository {
   /**

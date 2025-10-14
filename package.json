@@ -7,6 +7,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "db:init": "prisma migrate reset --force && prisma migrate dev --name 0_init",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:pull": "prisma db pull",

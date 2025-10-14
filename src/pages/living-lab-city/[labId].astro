@@ -17,7 +17,7 @@ import type { IIKpiResultBeforeAfter } from "../../types";
 const api = new ApiClient();
 
 const { labId } = Astro.params;
-const livingLabData = await api.getLivingLabAndData(Number(labId));
+const livingLabData = await api.getLivingLab(labId);
 const allTransportModes = await api.getTransportModes();
 const allKpis = await api.getKPIs();
 const categories = await api.getCategories("KPI_SIEF");
@@ -27,8 +27,9 @@ const nsmTransportModes = getNSMTransportModes(
   livingLabData,
   allTransportModes
 );
+
 const { pushMeasures, pullMeasures } = separateMeasures(
-  livingLabData.measures || []
+  livingLabData?.projects ?? []
 );
 const { before, after } = prepareModalSplitData(
   livingLabData,
@@ -39,7 +40,7 @@ const mapMarker = createMapMarker(livingLabData);
 
 const kpiResultsByCategory = categories.map((category) => ({
   ...category,
-  kpiResults: livingLabData?.kpi_results.filter((kpiResult) =>
+  kpiResults: livingLabData?.kpi_results?.filter((kpiResult) =>
     category.kpis?.some((kpi) => kpi.id === kpiResult.id)
   ),
 }));
@@ -76,7 +77,7 @@ const kpiResultsByCategory = categories.map((category) => ({
             },
             {
               label: "Area (km²)",
-              value: livingLabData.area,
+              value: livingLabData?.area,
             },
             {
               label: "Density (inhabitants/km²)",

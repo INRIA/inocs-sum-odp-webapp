@@ -1,5 +1,6 @@
 export * from "./TransportMode";
 export * from "./KPIs";
-export * from "./Measure";
+export * from "./Project";
 export * from "./LivingLab";
 export * from "./Constants";
+export * from "./User";

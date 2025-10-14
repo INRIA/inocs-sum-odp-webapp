@@ -1,5 +1,5 @@
 import prisma from "../db/client";
-import type { User, CreateUserInput, UpdateUserInput, UserDto } from "../types";
+import type { User, CreateUserInput, UpdateUserInput, UserDto } from "../../types";
 
 export class UserRepository {
   /**

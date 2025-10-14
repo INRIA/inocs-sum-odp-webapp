@@ -3,13 +3,12 @@ import Layout from "../../layouts/Layout.astro";
 import { InfoAlert, LivingLabMeasures } from "../../components/react";
 import ApiClient from "../../lib/api-client/ApiClient";
 
-//TODO : get mocked data for transport modes and modal split (KPI 15)
-// init json file for a living lab, from WP1 reports
-const api = new ApiClient();
+const api = new ApiClient(Astro.request);
 
-const labId = 2;
+//TODO: get labId from logged in user
+const labId = "2";
 const measures = await api.getMeasures();
-const livinglab = await api.getLivingLabAndData(labId);
+const livinglab = await api.getLivingLab(labId, ["projects"]);
 ---
 
 <Layout role="editor">
@@ -46,8 +45,9 @@ const livinglab = await api.getLivingLabAndData(labId);
 
     <LivingLabMeasures
       livingLabId={labId}
-      measures={measures.filter((m) => m.type === "PUSH")}
+      measures={measures?.filter((m) => m.type === "PUSH")}
       title="Select the PUSH Measures to be implemented in your living lab"
+      selectedMeasureIds={livinglab?.projects?.map((m) => m.id) ?? []}
       client:load
     />
 
@@ -64,8 +64,9 @@ const livinglab = await api.getLivingLabAndData(labId);
 
     <LivingLabMeasures
       livingLabId={labId}
-      measures={measures.filter((m) => m.type === "PULL")}
+      measures={measures?.filter((m) => m.type === "PULL")}
       title="Select the PULL Measures to be implemented in your living lab"
+      selectedMeasureIds={livinglab?.projects?.map((m) => m.id) ?? []}
       client:load
     />
   </div>

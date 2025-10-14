@@ -1,7 +1,7 @@
 import type {
   ILivingLabPopulated,
   ITransportMode,
-  IMeasure,
+  IProject,
   IIKpiResultBeforeAfter,
 } from "../../types";
 import type { SplitItem } from "../../components/react/KpiCards/ModalSplitChart";
@@ -30,9 +30,9 @@ export function getNSMTransportModes(
 /**
  * Separate measures into push and pull categories
  */
-export function separateMeasures(measures: IMeasure[]): {
-  pushMeasures: IMeasure[];
-  pullMeasures: IMeasure[];
+export function separateMeasures(measures: IProject[]): {
+  pushMeasures: IProject[];
+  pullMeasures: IProject[];
 } {
   if (!measures) return { pushMeasures: [], pullMeasures: [] };
 

@@ -64,7 +64,7 @@ model kpidefinitions {
   description String   @db.VarChar(5000)
   metric      String   @db.VarChar(50)
   created_at  DateTime @default(now()) @db.Timestamp(0)
-  updated_at  DateTime @default(dbgenerated("'0000-00-00 00:00:00'")) @db.Timestamp(0)
+  updated_at  DateTime @default(now()) @db.Timestamp(0)
 }
 
 model kpiresults {
@@ -73,22 +73,36 @@ model kpiresults {
   value            String   @db.VarChar(1000)
   date             DateTime @db.Date
   created_at       DateTime @default(now()) @db.Timestamp(0)
-  updated_at       DateTime @default(dbgenerated("'0000-00-00 00:00:00'")) @db.Timestamp(0)
+  updated_at       DateTime @default(now()) @db.Timestamp(0)
   project_id       Int
   user_id          Int?
   description      String?  @db.VarChar(5000)
 }
 
 model labs {
-  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
-  name        String    @unique(map: "categories_name_unique") @db.VarChar(255)
-  country     String?   @db.VarChar(512)
-  flag        String?   @db.VarChar(512)
-  description String?   @db.Text
-  lat         String?   @db.VarChar(25)
-  lng         String?   @db.VarChar(25)
-  created_at  DateTime? @db.Timestamp(0)
-  updated_at  DateTime? @db.Timestamp(0)
+  id                                 BigInt                               @id @default(autoincrement()) @db.UnsignedBigInt
+  name                               String                               @unique(map: "categories_name_unique") @db.VarChar(255)
+  country                            String?                              @db.VarChar(512)
+  flag                               String?                              @db.VarChar(512)
+  description                        String?                              @db.Text
+  area                               Int?                                 
+  radius                             Int?                                 
+  population                         Int?                                 
+  country_code2                      String?                              @db.VarChar(512)
+  lat                                String?                              @db.VarChar(25)
+  lng                                String?                              @db.VarChar(25)
+  created_at                         DateTime?                            @db.Timestamp(0)
+  updated_at                         DateTime?                            @db.Timestamp(0)
+  user_id                            BigInt?                              @db.UnsignedBigInt
+  validated_at                       DateTime?                            @db.Timestamp(0)
+  validated_by_user_id               BigInt?                              @db.UnsignedBigInt
+
+  created_by                         users?                               @relation(name: "created_by", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "labs_user_id_foreign")
+  validated_by                       users?                               @relation(name: "validated_by", fields: [validated_by_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "labs_validated_by_user_id_foreign")
+  living_lab_projects_implementation living_lab_projects_implementation[]
+
+  @@index([validated_by_user_id], map: "labs_validated_by_user_id_foreign")
+  @@index([user_id], map: "labs_user_id_foreign")
 }
 
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
@@ -116,12 +130,31 @@ model personal_access_tokens {
 }
 
 model projects {
-  id          BigInt    @id @default(autoincrement())
-  name        String    @unique(map: "projects_name_unique") @db.VarChar(255)
-  description String?   @db.Text
-  created_at  DateTime? @db.Timestamp(0)
-  updated_at  DateTime? @db.Timestamp(0)
-  lab_id      BigInt?
+  id                                 BigInt                               @id @default(autoincrement()) @db.UnsignedBigInt
+  name                               String                               @unique(map: "projects_name_unique") @db.VarChar(255)
+  description                        String?                              @db.Text
+  created_at                         DateTime?                            @db.Timestamp(0)
+  updated_at                         DateTime?                            @db.Timestamp(0)
+  type                               String                              @db.VarChar(255)
+  image_url                          String?                              @db.Text
+  living_lab_projects_implementation living_lab_projects_implementation[]
+}
+
+model living_lab_projects_implementation {
+  id            BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  project_id    BigInt    @db.UnsignedBigInt
+  living_lab_id BigInt    @db.UnsignedBigInt
+  user_id       String?   @db.VarChar(255)
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+  start_at      DateTime? @db.Timestamp(0)
+
+  project projects @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "lab_projects_project_id_foreign")
+  lab     labs     @relation(fields: [living_lab_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "lab_projects_living_lab_id_foreign")
+
+  @@index([project_id], map: "lab_projects_project_id_foreign")
+  @@index([living_lab_id], map: "lab_projects_living_lab_id_foreign")
+  @@unique([living_lab_id, project_id], map: "uniq_lab_project")
 }
 
 model roles {
@@ -156,7 +189,11 @@ model users {
   remember_token    String?   @db.VarChar(100)
   created_at        DateTime? @db.Timestamp(0)
   updated_at        DateTime? @db.Timestamp(0)
+
   role              roles     @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  created_labs      labs[]    @relation(name: "created_by") @ignore
+  validated_labs    labs[]    @relation(name: "validated_by") @ignore
 
   @@index([role_id], map: "users_role_id_fkey")
 }

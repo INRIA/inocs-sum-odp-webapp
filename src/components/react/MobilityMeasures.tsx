@@ -1,11 +1,11 @@
 import { getUrl } from "../../lib/helpers";
-import type { IMeasure } from "../../types";
+import type { IProject } from "../../types";
 import { Tooltip } from "./ui";
 import { InfoCard } from "./ui/InfoCard";
 
 type MobilityMeasuresProps = {
-  pushMeasures?: IMeasure[];
-  pullMeasures?: IMeasure[];
+  pushMeasures?: IProject[];
+  pullMeasures?: IProject[];
   className?: string;
   hideDescription?: boolean;
   cols?: 1 | 2 | 4;
@@ -16,7 +16,7 @@ type MeasuresSectionProps = {
   heading: string;
   smallText?: string;
   paragraph?: string;
-  measures: IMeasure[];
+  measures: IProject[];
   hideDescription?: boolean;
   cols?: 1 | 2 | 4;
   style?: "card" | "list";
@@ -37,7 +37,7 @@ export function MeasuresSection({
     4: "grid grid-cols-2 lg:grid-cols-4 mx-1 lg:mx-4 gap-4",
   };
 
-  const getRenderItem = (m: IMeasure) => {
+  const getRenderItem = (m: IProject) => {
     if (style === "list") {
       return (
         <div key={m.name} className="flex items-center space-x-2">

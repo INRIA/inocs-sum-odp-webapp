@@ -9,9 +9,9 @@ interface Props {
 }
 
 const { role = "visitor" } = Astro.props;
-const api = new ApiClient();
-const labs = await api.getLivingLabs();
-const labsItems = labs.map((lab) => ({
+const api = new ApiClient(Astro.request);
+const labs = await api.getLivingLabs([]);
+const labsItems = labs?.map((lab) => ({
   href: getUrl(`/living-lab-city/${lab.id}`),
   label: lab.name,
 }));

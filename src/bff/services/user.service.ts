@@ -1,5 +1,10 @@
 import { UserRepository } from "../repositories/user.repository";
-import type { User, CreateUserInput, UpdateUserInput, UserDto } from "../types";
+import type {
+  User,
+  CreateUserInput,
+  UpdateUserInput,
+  UserDto,
+} from "../../types";
 
 export class UserService {
   private userRepository: UserRepository;

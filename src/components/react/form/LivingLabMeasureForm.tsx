@@ -1,13 +1,15 @@
 import { useState } from "react";
-import type { IMeasure } from "../../../types";
+import type { IProject } from "../../../types";
 import { getUrl } from "../../../lib/helpers";
+import ApiClient from "../../../lib/api-client/ApiClient";
+const api = new ApiClient();
 
 type Props = {
-  livingLabId: number;
-  measure: IMeasure;
+  livingLabId: string;
+  measure: IProject;
   initialChecked?: boolean;
   disabled?: boolean;
-  onToggle?: (m: IMeasure, checked: boolean) => void;
+  onToggle?: (m: IProject, checked: boolean) => void;
   className?: string;
 };
 
@@ -26,6 +28,29 @@ export function LivingLabMeasureForm({
     // Will be called when user toggles checkbox or clicks the card.
     //api call POST /living-labs/${livingLabId}/projects/${measure.id} with body {selected: next}
     //backend will handle create or delete based on 'next' value
+    if (next) {
+      api
+        .updateLivingLabMeasure({
+          labId: livingLabId,
+          projectId: measure.id,
+        })
+        .catch((error) => {
+          console.error("Error adding measure to living lab:", error);
+          // Optionally revert UI state or show error to user
+          setChecked(!next); // revert state on error
+        });
+    } else {
+      api
+        .deleteLivingLabMeasure({
+          labId: livingLabId,
+          projectId: measure.id,
+        })
+        .catch((error) => {
+          console.error("Error removing measure from living lab:", error);
+          // Optionally revert UI state or show error to user
+          setChecked(!next); // revert state on error
+        });
+    }
   }
 
   function toggle(e?: React.MouseEvent) {
