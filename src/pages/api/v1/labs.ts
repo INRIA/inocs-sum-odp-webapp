@@ -14,9 +14,9 @@ export const GET: APIRoute = async ({ request, url }) => {
       ? {
           projects: fields.includes("projects"),
           transportModes: fields.includes("transport_modes"),
+          kpiResults: fields.includes("kpiresults"),
         }
       : undefined;
-
     let data = null;
     if (id) {
       const labId = parseInt(id, 10);
@@ -38,7 +38,6 @@ export const GET: APIRoute = async ({ request, url }) => {
     } else {
       data = await labService.getAllLabs(include);
     }
-
     return new ApiResponse({
       data: data ?? [],
     });

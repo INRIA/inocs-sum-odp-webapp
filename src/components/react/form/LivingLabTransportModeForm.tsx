@@ -54,7 +54,7 @@ export function LivingLabTransportModeForm({
   const handleSave = async (status: EnumTransportModeStatus) => {
     // let _id = id;
     // if (_id) {
-    //   api.updateLivingLabTransportModes
+    //   api.upsertLivingLabTransportModes
     // }
     let _id = id;
     if (!id && status === EnumTransportModeStatus.NOT_AVAILABLE) {
@@ -75,7 +75,7 @@ export function LivingLabTransportModeForm({
       });
       setEditing(false);
     } else {
-      const newData = await api.updateLivingLabTransportModes({
+      const newData = await api.upsertLivingLabTransportModes({
         living_lab_id: livingLabId,
         transport_mode_id: transportModeId,
         status,

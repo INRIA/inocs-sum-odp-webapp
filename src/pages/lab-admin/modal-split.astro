@@ -9,12 +9,12 @@ const api = new ApiClient(Astro.request);
 //TODO get labId from session
 const labId = "2";
 const transportModes = await api.getTransportModes();
-const modalSplitKpis = (await api.getKPIs({ kpi_number: "15" })).filter(
+const modalSplitKpis = (await api.getKPIs({ kpi_number: "15" }))?.filter(
   (kpi) => kpi.metric !== EnumKpiMetricType.NONE
 );
 const livingLabData = await api.getLivingLab(labId);
-const modalSplitResults = livingLabData?.kpi_results?.filter((kpi) =>
-  modalSplitKpis.some((mk) => mk.id === kpi.id)
+const modalSplitResults = livingLabData?.kpi_results?.filter((result) =>
+  modalSplitKpis?.some((mk) => mk.id === result.kpidefinition_id)
 );
 ---
 
@@ -42,7 +42,7 @@ const modalSplitResults = livingLabData?.kpi_results?.filter((kpi) =>
 
     <LivingLabModalSplit
       modes={transportModes ?? []}
-      kpis={modalSplitKpis}
+      kpis={modalSplitKpis ?? []}
       livingLabId={labId}
       livingLabTransportModes={livingLabData?.transport_mode_living_lab_implementation ||
         []}

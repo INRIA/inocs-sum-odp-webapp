@@ -10,20 +10,11 @@ export class LabRepository {
   /**
    * Get all labs
    */
-  async findAll({
-    projects,
-    transportModes,
-  }: {
-    projects?: boolean;
-    transportModes?: boolean;
-  }): Promise<ILivingLab[]> {
+  async findAll(include?: Record<string, any>): Promise<ILivingLab[]> {
     try {
       const labs = await prisma.labs.findMany({
         orderBy: { name: "desc" },
-        include: {
-          living_lab_projects_implementation: projects === true,
-          transport_mode_living_lab_implementation: transportModes === true,
-        },
+        include: include ?? {},
       });
       return labs.map(this.mapPrismaLabToLab);
     } catch (error) {
@@ -37,24 +28,12 @@ export class LabRepository {
    */
   async findById(
     id: string,
-    {
-      projects,
-      transportModes,
-    }: { projects?: boolean; transportModes?: boolean }
+    include?: Record<string, any>
   ): Promise<ILivingLab | null> {
     try {
       const lab = await prisma.labs.findUnique({
         where: { id: BigInt(id) },
-        include: {
-          living_lab_projects_implementation: projects === true && {
-            include: {
-              project: true,
-            },
-          },
-          transport_mode_living_lab_implementation: transportModes === true && {
-            include: { transport_mode: true },
-          },
-        },
+        include,
       });
       return lab ? this.mapPrismaLabToLab(lab) : null;
     } catch (error) {
@@ -98,6 +77,49 @@ export class LabRepository {
    * Map Prisma ILivingLab to our ILivingLab interface
    */
   private mapPrismaLabToLab(prismaLab: ILivingLab): ILivingLabPopulated {
+    const sortedKpiResults = prismaLab.kpiresults?.sort((a, b) => {
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    });
+
+    const distinctUniqueKeys = new Map<
+      string,
+      { kpidefinition_id: string; transport_mode_id: string | null }
+    >();
+    sortedKpiResults?.forEach((kr) => {
+      const key = `${kr.kpidefinition_id}-${kr.transport_mode_id ?? "none"}`;
+      if (!distinctUniqueKeys.has(key)) {
+        distinctUniqueKeys.set(key, {
+          kpidefinition_id: kr.kpidefinition_id,
+          transport_mode_id: kr.transport_mode_id ?? null,
+        });
+      }
+    });
+
+    const kpi_results = Array.from(distinctUniqueKeys.values()).map(
+      ({ kpidefinition_id, transport_mode_id }) => {
+        const groupedResults =
+          sortedKpiResults?.filter(
+            (kr) =>
+              kr.kpidefinition_id === kpidefinition_id &&
+              (transport_mode_id
+                ? kr.transport_mode_id === transport_mode_id
+                : !kr.transport_mode_id)
+          ) || [];
+        const minKpiResult = groupedResults?.[0];
+        const maxKpiResult =
+          groupedResults.length > 1
+            ? groupedResults[groupedResults.length - 1]
+            : null;
+        return {
+          living_lab_id: prismaLab?.id || null,
+          kpidefinition_id: minKpiResult?.kpidefinition_id || null,
+          transport_mode_id: minKpiResult?.transport_mode_id || null,
+          result_before: minKpiResult ?? null,
+          result_after: maxKpiResult ?? null,
+        };
+      }
+    );
+
     return {
       ...prismaLab,
       projects:
@@ -105,9 +127,10 @@ export class LabRepository {
           ?.filter((impl) => impl.project)
           ?.map((impl) => impl.project) || [],
       transport_modes:
-        prismaLab?.transport_mode_living_lab_implementation?.map(
-          (impl) => impl.transport_mode
-        ) || [],
+        prismaLab?.transport_mode_living_lab_implementation
+          ?.filter((impl) => impl.transport_mode)
+          ?.map((impl) => impl.transport_mode) || [],
+      kpi_results,
     };
   }
 
@@ -131,14 +154,14 @@ export class LabRepository {
           },
         },
         update: {
+          ...updateData,
           living_lab_id: BigInt(labId),
           project_id: BigInt(projectId),
-          updateData,
         },
         create: {
+          ...updateData,
           living_lab_id: BigInt(labId),
           project_id: BigInt(projectId),
-          updateData,
         },
       });
     } catch (error) {

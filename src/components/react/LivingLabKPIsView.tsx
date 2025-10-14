@@ -1,16 +1,4 @@
-import { useState } from "react";
-import {
-  Table,
-  TableHead,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "../react-catalyst-ui-kit";
 import type { IKpi, IIKpiResultBeforeAfter } from "../../types";
-import { BeforeAndAfterDates, LivingLabKpiResultsForm } from "./form";
-import { KpiTypeBadge } from "./KpiTypeBadge";
-import { KpiMetricTypeBadge } from "./KpiMetricTypeBadge";
 import { Badge, ExpansionPanel } from "./ui";
 import type { ICategory } from "../../types/Category";
 import { KpiCard, KpiMultiple } from "./KpiCards";
@@ -28,7 +16,6 @@ export function LivingLabKPIsView({ categories = [], kpis }: Props) {
     parentKpi: IKpi,
     resultKpis: IIKpiResultBeforeAfter[] = []
   ) => {
-    console.log("resultKpis:", resultKpis.length);
     if (resultKpis.length === 1) {
       return <KpiCard key={parentKpi.id} kpiResults={resultKpis[0]} />;
     }
@@ -45,10 +32,12 @@ export function LivingLabKPIsView({ categories = [], kpis }: Props) {
     }
   };
   const getCategorySection = (kpiResults: IIKpiResultBeforeAfter[]) => {
-    const parentKpis = new Map<number, IIKpiResultBeforeAfter>();
-    const kpiResultsMap = new Map<number, IIKpiResultBeforeAfter[]>();
+    const parentKpis = new Map<string, IKpi>();
+    const kpiResultsMap = new Map<string, IIKpiResultBeforeAfter[]>();
     kpiResults?.forEach((kpi) => {
-      const key = kpi.parent_kpi_id ? kpi.parent_kpi_id : kpi.id;
+      const kpiData = kpis?.find((k) => k.id === kpi.kpidefinition_id);
+      if (!kpiData) return;
+      const key = kpiData.parent_kpi_id ?? kpiData.id;
       if (!kpiResultsMap.has(key)) {
         kpiResultsMap.set(key, []);
       }

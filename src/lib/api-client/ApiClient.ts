@@ -1,5 +1,3 @@
-import kpis from "./mock-data/kpis.json";
-import categories from "./mock-data/categories.json";
 import type {
   IKpi,
   ILivingLabPopulated,
@@ -8,6 +6,7 @@ import type {
   ILivingLab,
   ITransportModeLivingLabEdit,
   ITransportModeLivingLabDelete,
+  IKpiResultInput,
 } from "../../types";
 import type { ICategory } from "../../types/Category";
 
@@ -70,17 +69,21 @@ export default class ApiClient {
       headers["Authorization"] = `Bearer ${this.token}`;
     }
 
-    const res = await fetch(url, { ...options, headers });
+    try {
+      const res = await fetch(url, { ...options, headers });
 
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`API Error (${res.status}): ${text}`);
-    }
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`API Error (${res.status}): ${text}`);
+      }
 
-    // Auto-parse JSON if possible
-    const contentType = res.headers.get("content-type");
-    if (contentType && contentType.includes("application/json")) {
-      return res.json() as Promise<T>;
+      // Auto-parse JSON if possible
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        return res.json() as Promise<T>;
+      }
+    } catch (error) {
+      console.error(`Error during API request to ${url}:`, error);
     }
 
     return null;
@@ -90,12 +93,13 @@ export default class ApiClient {
     fields?: string[]
   ): Promise<(ILivingLab | ILivingLabPopulated)[] | null> {
     const defaultFields = ["projects", "kpiresults", "transport_modes"];
-
+    const params = new URLSearchParams();
+    const fieldsToUse = fields ?? defaultFields;
+    if (fieldsToUse.length > 0) {
+      params.set("fields", fieldsToUse.join(","));
+    }
     return this.request<(ILivingLab | ILivingLabPopulated)[] | null>(
-      "/labs" +
-        (fields
-          ? `?fields=${fields?.join(",")}`
-          : `?fields=${defaultFields.join(",")}`)
+      "/labs?" + params.toString()
     );
   }
 
@@ -104,13 +108,13 @@ export default class ApiClient {
     fields?: string[]
   ): Promise<ILivingLabPopulated | null> {
     const defaultFields = ["projects", "kpiresults", "transport_modes"];
-
+    const params = new URLSearchParams({ id: livingLabId });
+    const fieldsToUse = fields ?? defaultFields;
+    if (fieldsToUse.length > 0) {
+      params.set("fields", fieldsToUse.join(","));
+    }
     return this.request<ILivingLabPopulated | null>(
-      "/labs?id=" +
-        encodeURIComponent(livingLabId) +
-        (fields
-          ? `&fields=${fields.join(",")}`
-          : `&fields=${defaultFields.join(",")}`)
+      `/labs?${params.toString()}`
     );
   }
 
@@ -132,50 +136,48 @@ export default class ApiClient {
     });
   }
 
-  async getKPIs(data?: { kpi_number?: string }): Promise<IKpi[]> {
-    //return this.get(`/kpis`);
-    const { kpi_number } = data ?? {};
+  async getKPIs(data?: { kpi_number?: string }): Promise<IKpi[] | null> {
+    const kpi_number = data?.kpi_number;
+    return this.request<IKpi[]>(
+      "/kpidefinitions" + (kpi_number ? `?kpi_number=${kpi_number}` : "")
+    );
+  }
 
-    let kpisData = kpis as IKpi[];
-    if (kpi_number) {
-      const parentKpi = kpis.filter(
-        (kpi) => kpi.kpi_number === kpi_number
-      ) as IKpi[];
-      const childrenKpis = kpis.filter(
-        (kpi) => kpi.parent_kpi_id === parentKpi[0]?.id
-      ) as IKpi[];
+  async upsertKpiResult(data: IKpiResultInput) {
+    return this.request<IKpiResultInput>(`/kpiresults`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
 
-      kpisData = [...parentKpi, ...childrenKpis] as IKpi[];
-    }
+  async deleteKpiResult(id: string) {
+    return this.request<void>(`/kpiresults/${id}`, {
+      method: "DELETE",
+    });
+  }
 
-    return kpisData.sort((a, b) => {
-      const parseKpiNumber = (num: string) =>
-        num.split(".").map((n) => parseInt(n, 10));
-      if (!a.kpi_number || !b.kpi_number) return 0;
-      const aParts = parseKpiNumber(a.kpi_number);
-      const bParts = parseKpiNumber(b.kpi_number);
-      for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
-        const aVal = aParts[i] ?? 0;
-        const bVal = bParts[i] ?? 0;
-        if (aVal !== bVal) return aVal - bVal;
-      }
-      return 0;
+  async upsertLivingLabKpiResults(
+    data: IKpiResultInput
+  ): Promise<IKpiResultInput | null> {
+    return this.request<IKpiResultInput>(`/kpiresults`, {
+      method: "PUT",
+      body: JSON.stringify(data),
     });
   }
 
   async getCategories(
     type: "KPI_SIEF" | "ITEM" | "KPI_IMPACT"
-  ): Promise<ICategory[]> {
-    //return this.get(`/categories?type=${encodeURIComponent(type)}`);
-
-    return categories.filter((cat) => cat.type === type) as ICategory[];
+  ): Promise<ICategory[] | null> {
+    return this.request<ICategory[]>(
+      `/categories?type=${encodeURIComponent(type)}`
+    );
   }
 
   async getTransportModes(): Promise<ITransportMode[] | null> {
     return this.request<ITransportMode[]>("/transport-modes");
   }
 
-  async updateLivingLabTransportModes(data: ITransportModeLivingLabEdit) {
+  async upsertLivingLabTransportModes(data: ITransportModeLivingLabEdit) {
     return this.request<IProject>(`/labs-transport-modes`, {
       method: "PUT",
       body: JSON.stringify(data),

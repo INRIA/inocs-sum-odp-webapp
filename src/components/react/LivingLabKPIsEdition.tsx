@@ -16,7 +16,7 @@ import type { ICategory } from "../../types/Category";
 
 type Props = {
   kpis: IKpi[];
-  livingLabId: number;
+  livingLabId: string;
   kpiResults: IIKpiResultBeforeAfter[];
   categories: ICategory[];
 };
@@ -24,20 +24,22 @@ type Props = {
 export function LivingLabKPIsEdition({
   kpis = [],
   livingLabId,
-  kpiResults: livingLabKpis = [],
+  kpiResults = [],
   categories = [],
 }: Props) {
   if (!kpis || kpis.length === 0) {
     return <div>No KPIs available.</div>;
   }
 
-  const livingLabKpiMap = new Map(livingLabKpis.map((kpi) => [kpi.id, kpi]));
+  const livingLabKpiMap = new Map(
+    kpiResults.map((kpi) => [kpi.kpidefinition_id, kpi])
+  );
   // Data collection date input state (YYYY-MM-DD)
   const today = new Date().toISOString().slice(0, 10);
   const [beforeDate, setBeforeDate] = useState<string>(today);
   const [afterDate, setAfterDate] = useState<string>(today);
 
-  const getKpiRow = (kpiId: number) => {
+  const getKpiRow = (kpiId: string) => {
     let kpi = kpis.find((k) => k.id === kpiId);
     const hasChildren = kpis.some((k) => k.parent_kpi_id === kpiId);
     const idChild = kpi?.parent_kpi_id ? true : false;

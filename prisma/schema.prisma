@@ -8,11 +8,14 @@ datasource db {
 }
 
 model categories {
-  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
-  name        String    @unique(map: "categories_name_unique") @db.VarChar(255)
-  description String?   @db.Text
-  created_at  DateTime? @db.Timestamp(0)
-  updated_at  DateTime? @db.Timestamp(0)
+  id                          BigInt                    @id @default(autoincrement()) @db.UnsignedBigInt
+  name                        String                    @unique(map: "categories_name_unique") @db.VarChar(255)
+  description                 String?                   @db.Text
+  type                        String                    @db.VarChar(50)
+  created_at                  DateTime?                 @db.Timestamp(0)
+  updated_at                  DateTime?                 @db.Timestamp(0)
+
+  kpidefinitions_category     kpidefinitions_category[]
 }
 
 model failed_jobs {
@@ -59,24 +62,60 @@ model items {
 }
 
 model kpidefinitions {
-  id          Int      @id @default(autoincrement())
-  name        String   @db.VarChar(100)
-  description String   @db.VarChar(5000)
-  metric      String   @db.VarChar(50)
-  created_at  DateTime @default(now()) @db.Timestamp(0)
-  updated_at  DateTime @default(now()) @db.Timestamp(0)
+  id                          BigInt              @id @default(autoincrement()) @db.UnsignedBigInt 
+  parent_kpi_id               BigInt?              @db.UnsignedBigInt
+  kpi_number                  String              @db.VarChar(50)
+  type                        String              @db.VarChar(50)
+  name                        String              @db.VarChar(100)
+  description                 String              @db.Text
+  metric                      String              @db.VarChar(50)
+  metric_description          String?             @db.Text
+  disclaimer                  String?             @db.Text
+  progression_target          Int       
+  min_value                   Float?              @db.Float
+  max_value                   Float?              @db.Float
+  created_at                  DateTime            @default(now()) @db.Timestamp(0)
+  updated_at                  DateTime            @default(now()) @db.Timestamp(0)
+
+  kpiresults                  kpiresults[]
+  kpidefinitions_category     kpidefinitions_category[]
+  children_kpis               kpidefinitions[]    @relation("kpi_parent_child")
+
+  parent_kpi                  kpidefinitions?      @relation("kpi_parent_child", fields: [parent_kpi_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "kpidefinitions_parent_kpi_id_index")
+  
+  @@index([parent_kpi_id], map: "kpidefinitions_parent_kpi_id_index")
+  @@index([kpi_number], map: "kpidefinitions_kpi_number_index")
+}
+
+model kpidefinitions_category {
+  id                  BigInt             @id @default(autoincrement()) @db.UnsignedBigInt 
+  kpidefinition_id    BigInt             @db.UnsignedBigInt
+  category_id         BigInt             @db.UnsignedBigInt
+
+  kpidefinition       kpidefinitions     @relation(fields: [kpidefinition_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "kpidefinitions_category_kpidefinition_id_foreign")
+  category            categories         @relation(fields: [category_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "kpidefinitions_category_category_id_foreign")
+
+  @@index([kpidefinition_id], map: "kpidefinitions_category_kpidefinition_id_foreign")
+  @@index([category_id], map: "kpidefinitions_category_category_id_foreign")
+  @@unique([kpidefinition_id, category_id], map: "uniq_kpidefinition_category")
 }
 
 model kpiresults {
-  id               Int      @id @default(autoincrement())
-  kpidefinition_id Int
-  value            String   @db.VarChar(1000)
-  date             DateTime @db.Date
-  created_at       DateTime @default(now()) @db.Timestamp(0)
-  updated_at       DateTime @default(now()) @db.Timestamp(0)
-  project_id       Int
-  user_id          Int?
-  description      String?  @db.VarChar(5000)
+  id                  BigInt       @id @default(autoincrement()) @db.UnsignedBigInt 
+  kpidefinition_id    BigInt       @db.UnsignedBigInt     
+  living_lab_id       BigInt       @db.UnsignedBigInt     
+  transport_mode_id   BigInt?      @db.UnsignedBigInt     
+  value               Float        @db.Float
+  description         String?      @db.VarChar(5000)
+  date                DateTime     @db.Date
+  created_at          DateTime     @default(now()) @db.Timestamp(0)
+  updated_at          DateTime     @default(now()) @db.Timestamp(0)
+  user_id             BigInt?      @db.UnsignedBigInt
+
+  kpidefinition       kpidefinitions   @relation(fields: [kpidefinition_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  living_lab          labs             @relation(fields: [living_lab_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  transport_mode      transport_mode?  @relation(fields: [transport_mode_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user                users?           @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
 }
 
 model labs {
@@ -101,7 +140,7 @@ model labs {
   validated_by                       users?                               @relation(name: "validated_by", fields: [validated_by_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "labs_validated_by_user_id_foreign")
   living_lab_projects_implementation        living_lab_projects_implementation[]
   transport_mode_living_lab_implementation  transport_mode_living_lab_implementation[]
-
+  kpiresults            kpiresults[]
 
   @@index([validated_by_user_id], map: "labs_validated_by_user_id_foreign")
   @@index([user_id], map: "labs_user_id_foreign")
@@ -137,7 +176,7 @@ model projects {
   description                        String?                              @db.Text
   created_at                         DateTime?                            @db.Timestamp(0)
   updated_at                         DateTime?                            @db.Timestamp(0)
-  type                               String                              @db.VarChar(255)
+  type                               String                               @db.VarChar(255)
   image_url                          String?                              @db.Text
   living_lab_projects_implementation living_lab_projects_implementation[]
 }
@@ -193,7 +232,7 @@ model users {
   updated_at        DateTime? @db.Timestamp(0)
 
   role              roles     @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-
+  kpiresults        kpiresults[]
   created_labs      labs[]    @relation(name: "created_by") @ignore
   validated_labs    labs[]    @relation(name: "validated_by") @ignore
 
@@ -208,6 +247,7 @@ model transport_mode {
   created_at  DateTime?          @db.Timestamp(0)
 
   transport_mode_living_lab_implementation transport_mode_living_lab_implementation[]
+  kpiresults            kpiresults[]
 }
 
 model transport_mode_living_lab_implementation {

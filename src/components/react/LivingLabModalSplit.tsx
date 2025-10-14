@@ -51,7 +51,7 @@ export function LivingLabModalSplit({
   >(
     new Map(
       kpiResults.map((resultKpi) => [
-        `${resultKpi.id}_${resultKpi.result_before?.transport_mode_id}`,
+        `${resultKpi.kpidefinition_id}_${resultKpi?.transport_mode_id ?? "none"}`,
         resultKpi,
       ])
     )
@@ -68,7 +68,7 @@ export function LivingLabModalSplit({
       let beforeSum = 0;
       let afterSum = 0;
       kpiResults.forEach((r) => {
-        if (r.id !== kpi.id) return;
+        if (r.kpidefinition_id !== kpi.id) return;
         const b = r.result_before?.value;
         const a = r.result_after?.value;
         const bn = typeof b === "number" ? b : Number(b ?? 0);
@@ -89,7 +89,7 @@ export function LivingLabModalSplit({
     const dataBefore: SplitItem[] = [];
     const dataAfter: SplitItem[] = [];
     Array.from(livingLabKpiMap.values())
-      .filter((result) => result.id === kpiId)
+      .filter((result) => result.kpidefinition_id === kpiId)
       .forEach((result) => {
         const transportModeId = result.result_before?.transport_mode_id;
         const mode = modes.find((m) => m.id === transportModeId);

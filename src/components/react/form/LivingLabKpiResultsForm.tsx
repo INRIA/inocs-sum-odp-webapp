@@ -7,10 +7,10 @@ import {
 } from "@heroicons/react/20/solid";
 
 type Props = {
-  livingLabId: number;
-  kpiId: number;
+  livingLabId: string;
+  kpiId: string;
   kpiMetric: string;
-  transportModeId?: number;
+  transportModeId?: string;
   initialBefore?: any;
   initialAfter?: any;
   defaultBeforeDate?: string;

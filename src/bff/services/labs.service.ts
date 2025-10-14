@@ -1,6 +1,7 @@
 import { LabRepository } from "../repositories/labs.repository";
 import type {
   ILivingLab,
+  ILivingLabIncludeOptions,
   ITransportModeLivingLabEdit,
   ITransportModeLivingLabImplementation,
   UpdateLabInput,
@@ -16,15 +17,9 @@ export class LabService {
   /**
    * Get all labs
    */
-  async getAllLabs(include?: {
-    projects?: boolean;
-    transportModes?: boolean;
-  }): Promise<ILivingLab[]> {
+  async getAllLabs(include?: ILivingLabIncludeOptions): Promise<ILivingLab[]> {
     try {
-      return await this.labRepository.findAll({
-        projects: include?.projects === true,
-        transportModes: include?.transportModes === true,
-      });
+      return await this.labRepository.findAll(this.getIncludeOptions(include));
     } catch (error) {
       console.error("Error in getAllLabs service:", error);
       throw new Error("Failed to retrieve labs");
@@ -36,20 +31,39 @@ export class LabService {
    */
   async getLabById(
     id: string,
-    include?: { projects?: boolean; transportModes?: boolean }
+    include?: ILivingLabIncludeOptions
   ): Promise<ILivingLab | null> {
     try {
       if (!id || isNaN(Number(id)) || Number(id) <= 0) {
         throw new Error("Invalid lab ID provided");
       }
-      return await this.labRepository.findById(id, {
-        projects: include?.projects === true,
-        transportModes: include?.transportModes === true,
-      });
+      return await this.labRepository.findById(
+        id,
+        this.getIncludeOptions(include)
+      );
     } catch (error) {
       console.error("Error in getLabById service:", error);
       throw new Error("Failed to retrieve lab");
     }
+  }
+
+  getIncludeOptions(include?: ILivingLabIncludeOptions): any {
+    return {
+      living_lab_projects_implementation:
+        include?.projects === true ? { include: { project: true } } : {},
+      transport_mode_living_lab_implementation:
+        include?.transportModes === true
+          ? {
+              include: { transport_mode: true },
+            }
+          : {},
+      kpiresults:
+        include?.kpiResults === true
+          ? {
+              include: { kpidefinition: true },
+            }
+          : {},
+    };
   }
 
   /**

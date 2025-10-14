@@ -5,25 +5,29 @@ import {
   XMarkIcon,
   PlusCircleIcon,
 } from "@heroicons/react/20/solid";
-import { EnumKpiMetricType, type IKpiResult } from "../../../types/KPIs";
+import {
+  EnumKpiMetricType,
+  type IKpiResult,
+  type IKpiResultInput,
+} from "../../../types/KPIs";
 import { Field, Input } from "../../react-catalyst-ui-kit";
 import {
   formatDateToMothYear,
   getKpiValueByMetricType,
   parseDateToInputHtml,
 } from "../../../lib/helpers";
+import ApiClient from "../../../lib/api-client/ApiClient";
+const api = new ApiClient();
 
 type Props = {
   initial?: IKpiResult | null;
-  kpiId: number;
-  livingLabId: number;
-  transportModeId?: number;
+  kpiId: string;
+  livingLabId: string;
+  transportModeId?: string;
   kpiMetric?: string;
   defaultDate?: string;
   defaultValue?: number;
-  onChange?: (
-    result: Pick<IKpiResult, "id" | "value" | "date" | "transport_mode_id">
-  ) => void;
+  onChange?: (result: IKpiResultInput) => void;
   min?: number;
   max?: number;
   placeholder?: string;
@@ -54,30 +58,33 @@ export function LivingLabKpiResultForm({
   );
   const [date, setDate] = useState<string>(initial?.date ?? defaultDate);
   const [error, setError] = useState<string | null>(null);
+  const [id, setId] = useState<string | undefined>(initial?.id);
 
-  // useEffect(() => {
-  //   setValue(_setValue(initial?.value));
-  //   setDate(initial?.date ?? defaultDate);
-  // }, [initial, defaultDate]);
-
-  const handleSave = (e?: React.FormEvent) => {
+  const handleSave = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!value || !validateValue(value) || !validateDate(date)) return;
 
-    let id = initial?.id;
-    if (id) {
-      //TODO update with id PUT /api/living-lab/${livingLabId}/kpi/${kpiId}/result/${id}
-      //set transportModeId if provided
-    } else {
-      //TODO create POST /api/living-lab/${livingLabId}/kpi/${kpiId}/result
-      //set transportModeId if provided
-      id = Date.now();
+    try {
+      const result = await api.upsertLivingLabKpiResults({
+        id: id,
+        kpidefinition_id: kpiId,
+        living_lab_id: livingLabId,
+        value: Number(value),
+        date,
+        transport_mode_id: transportModeId,
+      });
+      setId(result?.id);
+    } catch (err) {
+      console.error("Error saving KPI result:", err);
+      return;
     }
 
     onChange?.({
       id,
       value: Number(value),
       date: date,
+      kpidefinition_id: kpiId,
+      living_lab_id: livingLabId,
       transport_mode_id: transportModeId,
     });
     setEditing(false);

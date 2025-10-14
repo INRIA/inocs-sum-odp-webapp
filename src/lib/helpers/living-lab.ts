@@ -2,7 +2,7 @@ import type {
   ILivingLabPopulated,
   ITransportMode,
   IProject,
-  IIKpiResultBeforeAfter,
+  IKpi,
 } from "../../types";
 import type { SplitItem } from "../../components/react/KpiCards/ModalSplitChart";
 import type { MarkerData } from "../../components/react/MapViewer";
@@ -15,11 +15,8 @@ export function getNSMTransportModes(
   allTransportModes: ITransportMode[]
 ): ITransportMode[] {
   if (!livingLab.transport_modes || !allTransportModes) return [];
-
   // Get the transport mode IDs from the living lab
-  const labTransportModeIds = livingLab.transport_modes.map(
-    (tm) => tm.transport_mode_id
-  );
+  const labTransportModeIds = livingLab.transport_modes.map((tm) => tm.id);
 
   // Filter transport modes that are in the living lab and are NSM type
   return allTransportModes.filter(
@@ -48,7 +45,8 @@ export function separateMeasures(measures: IProject[]): {
  */
 export function prepareModalSplitData(
   livingLab: ILivingLabPopulated,
-  allTransportModes: ITransportMode[]
+  allTransportModes: ITransportMode[],
+  kpidefinitions: IKpi[]
 ): {
   before: { label: string; data: SplitItem[] };
   after: { label: string; data: SplitItem[] };
@@ -65,8 +63,10 @@ export function prepareModalSplitData(
   }
 
   // Find KPI 15.a results (modal split)
-  const modalSplitKpis = livingLab.kpi_results.filter(
-    (kpi) => kpi.kpi_number === "15.a"
+  const modalSplitKpis = livingLab.kpi_results?.filter(
+    (kpi) =>
+      kpidefinitions?.find((def) => def.id === kpi.kpidefinition_id)
+        ?.kpi_number === "15.a"
   );
 
   if (modalSplitKpis.length === 0) {

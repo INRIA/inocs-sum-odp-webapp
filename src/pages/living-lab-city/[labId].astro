@@ -12,15 +12,20 @@ import {
   createMapMarker,
 } from "../../lib/helpers/living-lab";
 import { DataDisplayCard, LivingLabKPIsView } from "../../components/react";
-import type { IIKpiResultBeforeAfter } from "../../types";
 
 const api = new ApiClient(Astro.request);
 
 const { labId } = Astro.params;
+if (!labId) {
+  return Astro.redirect("/404");
+}
 const livingLabData = await api.getLivingLab(labId);
-const allTransportModes = await api.getTransportModes();
-const allKpis = await api.getKPIs();
-const categories = await api.getCategories("KPI_SIEF");
+if (!livingLabData) {
+  return Astro.redirect("/");
+}
+const allTransportModes = (await api.getTransportModes()) ?? [];
+const allKpis = (await api.getKPIs()) ?? [];
+const categories = (await api.getCategories("KPI_SIEF")) ?? [];
 
 // Prepare data for components
 const nsmTransportModes = getNSMTransportModes(
@@ -33,17 +38,18 @@ const { pushMeasures, pullMeasures } = separateMeasures(
 );
 const { before, after } = prepareModalSplitData(
   livingLabData,
-  allTransportModes
+  allTransportModes,
+  allKpis
 );
 
 const mapMarker = createMapMarker(livingLabData);
-
 const kpiResultsByCategory = categories.map((category) => ({
   ...category,
   kpiResults: livingLabData?.kpi_results?.filter((kpiResult) =>
-    category.kpis?.some((kpi) => kpi.id === kpiResult.id)
+    category.kpis?.some((kpi) => kpi.id === kpiResult.kpidefinition_id)
   ),
 }));
+
 ---
 
 <Layout>
@@ -161,7 +167,7 @@ const kpiResultsByCategory = categories.map((category) => ({
       </p>
       <div class="flex flex-wrap gap-0">
         <LivingLabKPIsView
-          categories={kpiResultsByCategory}
+          categories={kpiResultsByCategory ?? []}
           kpis={allKpis}
           client:load
         />
