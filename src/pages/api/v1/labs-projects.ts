@@ -32,8 +32,7 @@ export const GET: APIRoute = async ({ request, url }) => {
 export const PUT: APIRoute = async ({ request, url }) => {
   try {
     const data = await request.json();
-    const labId = data.labId;
-    const projectId = data.projectId;
+    const { labId, projectId, ...updateData } = data;
 
     if (!labId) {
       return new ApiResponse({
@@ -52,7 +51,7 @@ export const PUT: APIRoute = async ({ request, url }) => {
     const updatedLab = await labService.upsertLabProjectImplementation(
       labId,
       projectId,
-      data
+      updateData
     );
     return new ApiResponse({
       data: updatedLab,

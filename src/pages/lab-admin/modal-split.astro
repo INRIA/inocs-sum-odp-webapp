@@ -4,17 +4,16 @@ import { InfoAlert, LivingLabModalSplit } from "../../components/react";
 import ApiClient from "../../lib/api-client/ApiClient";
 import { EnumKpiMetricType } from "../../types";
 
-//TODO : get mocked data for transport modes and modal split (KPI 15)
-// init json file for a living lab, from WP1 reports
-const api = new ApiClient();
+const api = new ApiClient(Astro.request);
 
-const labId = 1;
+//TODO get labId from session
+const labId = "2";
 const transportModes = await api.getTransportModes();
 const modalSplitKpis = (await api.getKPIs({ kpi_number: "15" })).filter(
   (kpi) => kpi.metric !== EnumKpiMetricType.NONE
 );
-const livingLabData = await api.getLivingLabAndData(labId);
-const modalSplitResults = livingLabData.kpi_results?.filter((kpi) =>
+const livingLabData = await api.getLivingLab(labId);
+const modalSplitResults = livingLabData?.kpi_results?.filter((kpi) =>
   modalSplitKpis.some((mk) => mk.id === kpi.id)
 );
 ---
@@ -42,11 +41,12 @@ const modalSplitResults = livingLabData.kpi_results?.filter((kpi) =>
     </InfoAlert>
 
     <LivingLabModalSplit
-      modes={transportModes}
+      modes={transportModes ?? []}
       kpis={modalSplitKpis}
       livingLabId={labId}
-      livingLabTransportModes={livingLabData?.transport_modes || []}
-      kpiResults={modalSplitResults}
+      livingLabTransportModes={livingLabData?.transport_mode_living_lab_implementation ||
+        []}
+      kpiResults={modalSplitResults ?? []}
       client:load
     />
   </div>

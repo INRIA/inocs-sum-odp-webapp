@@ -1,6 +1,9 @@
 import type { IIKpiResultBeforeAfter } from "./KPIs";
 import type { IProject, LivingLabProjectsImplementation } from "./Project";
-import type { ILivingLabTransportMode } from "./TransportMode";
+import type {
+  ITransportMode,
+  ITransportModeLivingLabImplementation,
+} from "./TransportMode";
 
 export interface ILivingLab {
   id: number;
@@ -20,6 +23,7 @@ export interface ILivingLab {
   validated_at?: Date | null;
   validated_by_user_id?: number | null;
   living_lab_projects_implementation?: LivingLabProjectsImplementation[];
+  transport_mode_living_lab_implementation?: ITransportModeLivingLabImplementation[];
 }
 
 export interface UpdateLabInput extends Partial<Omit<ILivingLab, "id">> {}
@@ -33,7 +37,7 @@ export interface ILivingLabPopulated extends ILivingLab {
   /**
    * Transport modes list — may be empty
    */
-  transport_modes?: ILivingLabTransportMode[];
+  transport_modes?: ITransportMode[];
   // allow additional unknown fields if present in future
   [key: string]: unknown;
 }

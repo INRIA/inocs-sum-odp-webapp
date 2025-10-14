@@ -14,7 +14,7 @@ import {
 import { DataDisplayCard, LivingLabKPIsView } from "../../components/react";
 import type { IIKpiResultBeforeAfter } from "../../types";
 
-const api = new ApiClient();
+const api = new ApiClient(Astro.request);
 
 const { labId } = Astro.params;
 const livingLabData = await api.getLivingLab(labId);

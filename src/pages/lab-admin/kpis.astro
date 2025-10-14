@@ -5,16 +5,16 @@ import ApiClient from "../../lib/api-client/ApiClient";
 
 //TODO : get mocked data for transport modes and modal split (KPI 15)
 // init json file for a living lab, from WP1 reports
-const api = new ApiClient();
+const api = new ApiClient(Astro.request);
 
-const labId = 2;
+const labId = "2";
 const kpis = await api.getKPIs({});
 const modalSplitKpi = kpis.find((kpi) => kpi.kpi_number === "15");
 const filteredKpis = kpis.filter(
   (kpi) =>
     kpi.id !== modalSplitKpi?.id && kpi.parent_kpi_id !== modalSplitKpi?.id
 );
-const livingLabKpis = await api.getLivingLabAndData(labId);
+const livingLab = await api.getLivingLab(labId);
 const categories = await api.getCategories("KPI_SIEF");
 ---
 
@@ -39,7 +39,7 @@ const categories = await api.getCategories("KPI_SIEF");
       categories={categories}
       kpis={filteredKpis}
       livingLabId={labId}
-      kpiResults={livingLabKpis?.kpi_results || []}
+      kpiResults={livingLab?.kpi_results || []}
       client:load
     />
   </div>

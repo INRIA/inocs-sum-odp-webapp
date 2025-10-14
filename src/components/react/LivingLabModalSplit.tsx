@@ -4,7 +4,7 @@ import {
   type ITransportMode,
   type IIKpiResultBeforeAfter,
   type IKpi,
-  type ILivingLabTransportMode,
+  type ITransportModeLivingLabImplementation,
 } from "../../types";
 import { BeforeAndAfterDates, LivingLabKpiResultsForm } from "./form";
 import { TransportTypeBadge } from "./TransportTypeBadge";
@@ -22,8 +22,8 @@ import ModalSplitChart, { type SplitItem } from "./KpiCards/ModalSplitChart";
 interface Props {
   modes: ITransportMode[];
   kpis: IKpi[];
-  livingLabId: number;
-  livingLabTransportModes: ILivingLabTransportMode[];
+  livingLabId: string;
+  livingLabTransportModes: ITransportModeLivingLabImplementation[];
   kpiResults: IIKpiResultBeforeAfter[];
 }
 
@@ -39,7 +39,7 @@ export function LivingLabModalSplit({
   const [afterDate, setAfterDate] = useState<string>(today);
 
   const [livingLabTransportModesMap, setLivingLabTransportModesMap] = useState<
-    Map<number, ILivingLabTransportMode>
+    Map<string, ITransportModeLivingLabImplementation>
   >(
     new Map(
       livingLabTransportModes.map((mode) => [mode.transport_mode_id, mode])
@@ -58,12 +58,12 @@ export function LivingLabModalSplit({
   );
   // totals per KPI id: { before: number, after: number }
   const [kpiTotals, setKpiTotals] = useState<
-    Map<number, { before: number; after: number }>
+    Map<string, { before: number; after: number }>
   >(new Map());
 
   // compute initial totals on mount from kpis + kpiResults
   useEffect(() => {
-    const totals = new Map<number, { before: number; after: number }>();
+    const totals = new Map<string, { before: number; after: number }>();
     kpis.forEach((kpi) => {
       let beforeSum = 0;
       let afterSum = 0;
@@ -83,7 +83,7 @@ export function LivingLabModalSplit({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const getChartValues = (kpiId: number) => {
+  const getChartValues = (kpiId: string) => {
     let beforeDate = "";
     let afterDate = "";
     const dataBefore: SplitItem[] = [];

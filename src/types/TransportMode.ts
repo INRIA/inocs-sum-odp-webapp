@@ -2,7 +2,7 @@ import type { IIKpiResultBeforeAfter } from "./KPIs";
 import type { ILivingLabPopulated } from "./LivingLab";
 
 export interface ITransportMode {
-  id: number;
+  id: string;
   name: string;
   description?: string;
   type: EnumTransportModeType;
@@ -13,21 +13,25 @@ export interface ITransportModeSplit extends ITransportMode {
   kpi_results?: IIKpiResultBeforeAfter[];
 }
 
-export interface ILivingLabTransportMode {
-  id: number;
-  transport_mode_id: number;
+export interface ITransportModeLivingLabImplementation {
+  id: string;
+  transport_mode_id: string;
   transport_mode?: ITransportMode;
-  living_lab_id: number;
+  living_lab_id: string;
   living_lab?: ILivingLabPopulated;
   status: EnumTransportModeStatus;
 }
 
-export type ILivingLabTransportModeForm = Pick<
-  ILivingLabTransportMode,
-  "status" | "transport_mode_id" | "living_lab_id"
-> & {
-  id?: number;
-};
+export interface ITransportModeLivingLabEdit
+  extends Pick<
+    ITransportModeLivingLabImplementation,
+    "status" | "transport_mode_id" | "living_lab_id"
+  > {}
+export interface ITransportModeLivingLabDelete
+  extends Pick<
+    ITransportModeLivingLabImplementation,
+    "transport_mode_id" | "living_lab_id"
+  > {}
 
 export enum EnumTransportModeType {
   NSM = "NSM",

@@ -1,24 +1,20 @@
 import { useState } from "react";
 import { Field, Select } from "../../react-catalyst-ui-kit";
-import { Badge } from "../ui";
 import {
   EnumTransportModeStatus,
-  type ILivingLabTransportMode,
+  type ITransportModeLivingLabImplementation,
 } from "../../../types";
 import { useEffect, useRef } from "react";
-import {
-  PencilSquareIcon,
-  CheckCircleIcon,
-  XMarkIcon,
-} from "@heroicons/react/20/solid";
+import ApiClient from "../../../lib/api-client/ApiClient";
+const api = new ApiClient();
 
 interface Props {
-  value?: ILivingLabTransportMode;
-  transportModeId: number;
-  livingLabId: number;
+  value?: ITransportModeLivingLabImplementation;
+  transportModeId: string;
+  livingLabId: string;
   onCancel?: () => void;
-  onChange?: (data: ILivingLabTransportMode) => void;
-  onDelete?: (id: number) => void;
+  onChange?: (data: ITransportModeLivingLabImplementation) => void;
+  onDelete?: (id: string) => void;
 }
 
 export function LivingLabTransportModeForm({
@@ -34,7 +30,7 @@ export function LivingLabTransportModeForm({
     value?.status ?? EnumTransportModeStatus.NOT_AVAILABLE
   );
   const prevStatusRef = useRef<EnumTransportModeStatus>(status);
-  const [id, setId] = useState<number | undefined>(value?.id);
+  const [id, setId] = useState<string | undefined>(value?.id);
 
   const badgeConfig = {
     [EnumTransportModeStatus.NOT_AVAILABLE]: {
@@ -55,25 +51,46 @@ export function LivingLabTransportModeForm({
     },
   };
 
-  const handleSave = (status: EnumTransportModeStatus) => {
+  const handleSave = async (status: EnumTransportModeStatus) => {
+    // let _id = id;
+    // if (_id) {
+    //   api.updateLivingLabTransportModes
+    // }
     let _id = id;
-    if (_id) {
-      //TODO call update PUT /api/living-labs/${livingLabId}/transport-modes/${transportModeId}/${id}
-    } else {
-      //TODO call create POST /api/living-labs/${livingLabId}/transport-modes/${transportModeId}
-      _id = Math.floor(Math.random() * 1000000); // temporary id until backend is ready
-      setId(_id);
+    if (!id && status === EnumTransportModeStatus.NOT_AVAILABLE) {
+      // nothing to do
+      return;
     }
 
-    if (_id && status) {
+    if (id && status === EnumTransportModeStatus.NOT_AVAILABLE) {
+      await api.deleteLivingLabTransportModes({
+        living_lab_id: livingLabId,
+        transport_mode_id: transportModeId,
+      });
       onChange?.({
-        id: _id,
+        id,
         status,
         transport_mode_id: transportModeId,
         living_lab_id: livingLabId,
       });
       setEditing(false);
+    } else {
+      const newData = await api.updateLivingLabTransportModes({
+        living_lab_id: livingLabId,
+        transport_mode_id: transportModeId,
+        status,
+      });
+      _id = newData?.id;
+      setId(_id);
     }
+
+    onChange?.({
+      id: _id,
+      status,
+      transport_mode_id: transportModeId,
+      living_lab_id: livingLabId,
+    });
+    setEditing(false);
   };
 
   useEffect(() => {

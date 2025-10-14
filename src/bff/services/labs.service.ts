@@ -1,5 +1,10 @@
 import { LabRepository } from "../repositories/labs.repository";
-import type { ILivingLab, UpdateLabInput } from "../../types";
+import type {
+  ILivingLab,
+  ITransportModeLivingLabEdit,
+  ITransportModeLivingLabImplementation,
+  UpdateLabInput,
+} from "../../types";
 
 export class LabService {
   private labRepository: LabRepository;
@@ -11,10 +16,14 @@ export class LabService {
   /**
    * Get all labs
    */
-  async getAllLabs(include?: { projects?: boolean }): Promise<ILivingLab[]> {
+  async getAllLabs(include?: {
+    projects?: boolean;
+    transportModes?: boolean;
+  }): Promise<ILivingLab[]> {
     try {
       return await this.labRepository.findAll({
         projects: include?.projects === true,
+        transportModes: include?.transportModes === true,
       });
     } catch (error) {
       console.error("Error in getAllLabs service:", error);
@@ -27,7 +36,7 @@ export class LabService {
    */
   async getLabById(
     id: string,
-    include?: { projects?: boolean }
+    include?: { projects?: boolean; transportModes?: boolean }
   ): Promise<ILivingLab | null> {
     try {
       if (!id || isNaN(Number(id)) || Number(id) <= 0) {
@@ -35,6 +44,7 @@ export class LabService {
       }
       return await this.labRepository.findById(id, {
         projects: include?.projects === true,
+        transportModes: include?.transportModes === true,
       });
     } catch (error) {
       console.error("Error in getLabById service:", error);
@@ -118,6 +128,10 @@ export class LabService {
   }
 
   /**
+   * RELATIONS IMPLEMENTATIONS
+   */
+
+  /**
    * Upsert a LabProjectImplementation for a given lab and project
    */
   async upsertLabProjectImplementation(
@@ -160,6 +174,72 @@ export class LabService {
     } catch (error) {
       console.error("Error in deleteLabProjectImplementation service:", error);
       throw new Error("Failed to delete LabProjectImplementation");
+    }
+  }
+
+  /**
+   * Upsert a LabTransportModeImplementation for a given lab and transport mode
+   */
+  async upsertLabTransportModeImplementation(
+    data: ITransportModeLivingLabEdit
+  ): Promise<ITransportModeLivingLabImplementation> {
+    try {
+      const { living_lab_id, transport_mode_id } = data;
+      if (
+        !living_lab_id ||
+        isNaN(Number(living_lab_id)) ||
+        Number(living_lab_id) <= 0
+      )
+        throw new Error("Invalid lab ID");
+      if (
+        !transport_mode_id ||
+        isNaN(Number(transport_mode_id)) ||
+        Number(transport_mode_id) <= 0
+      )
+        throw new Error("Invalid transport mode ID");
+      // You may want to validate implementationData here
+
+      return await this.labRepository.upsertTransportModesImplementation(
+        living_lab_id,
+        transport_mode_id,
+        data
+      );
+    } catch (error) {
+      console.error(
+        "Error in upsertLabTransportModeImplementation service:",
+        error
+      );
+      throw new Error("Failed to upsert LabTransportModeImplementation");
+    }
+  }
+
+  /**
+   * Delete a LabTransportModeImplementation for a given lab and transport mode
+   */
+  async deleteLabTransportModeImplementation(
+    labId: string,
+    transportModeId: string
+  ): Promise<void> {
+    try {
+      if (!labId || isNaN(Number(labId)) || Number(labId) <= 0)
+        throw new Error("Invalid lab ID");
+      if (
+        !transportModeId ||
+        isNaN(Number(transportModeId)) ||
+        Number(transportModeId) <= 0
+      )
+        throw new Error("Invalid transport mode ID");
+
+      await this.labRepository.deleteTransportModesImplementation(
+        labId,
+        transportModeId
+      );
+    } catch (error) {
+      console.error(
+        "Error in deleteLabTransportModeImplementation service:",
+        error
+      );
+      throw new Error("Failed to delete LabTransportModeImplementation");
     }
   }
 }

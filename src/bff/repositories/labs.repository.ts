@@ -2,6 +2,7 @@ import prisma from "../db/client";
 import type {
   ILivingLab,
   ILivingLabPopulated,
+  ITransportModeLivingLabImplementation,
   UpdateLabInput,
 } from "../../types";
 
@@ -9,12 +10,19 @@ export class LabRepository {
   /**
    * Get all labs
    */
-  async findAll({ projects }: { projects?: boolean }): Promise<ILivingLab[]> {
+  async findAll({
+    projects,
+    transportModes,
+  }: {
+    projects?: boolean;
+    transportModes?: boolean;
+  }): Promise<ILivingLab[]> {
     try {
       const labs = await prisma.labs.findMany({
         orderBy: { name: "desc" },
         include: {
           living_lab_projects_implementation: projects === true,
+          transport_mode_living_lab_implementation: transportModes === true,
         },
       });
       return labs.map(this.mapPrismaLabToLab);
@@ -29,17 +37,22 @@ export class LabRepository {
    */
   async findById(
     id: string,
-    { projects }: { projects?: boolean }
+    {
+      projects,
+      transportModes,
+    }: { projects?: boolean; transportModes?: boolean }
   ): Promise<ILivingLab | null> {
     try {
       const lab = await prisma.labs.findUnique({
         where: { id: BigInt(id) },
         include: {
-          //   living_lab_projects_implementation: projects === true,
           living_lab_projects_implementation: projects === true && {
             include: {
               project: true,
             },
+          },
+          transport_mode_living_lab_implementation: transportModes === true && {
+            include: { transport_mode: true },
           },
         },
       });
@@ -91,9 +104,16 @@ export class LabRepository {
         prismaLab.living_lab_projects_implementation
           ?.filter((impl) => impl.project)
           ?.map((impl) => impl.project) || [],
+      transport_modes:
+        prismaLab?.transport_mode_living_lab_implementation?.map(
+          (impl) => impl.transport_mode
+        ) || [],
     };
   }
 
+  /**
+   * RELATION TABLE METHODS
+   */
   /**
    * Upsert a project implementation for a lab
    */
@@ -113,12 +133,12 @@ export class LabRepository {
         update: {
           living_lab_id: BigInt(labId),
           project_id: BigInt(projectId),
-          //   ...updateData,
+          updateData,
         },
         create: {
           living_lab_id: BigInt(labId),
           project_id: BigInt(projectId),
-          //   ...updateData,
+          updateData,
         },
       });
     } catch (error) {
@@ -150,6 +170,67 @@ export class LabRepository {
         error
       );
       throw new Error("Failed to delete project implementation");
+    }
+  }
+
+  /**
+   * Upsert transport modes implementations for a lab
+   */
+
+  async upsertTransportModesImplementation(
+    labId: string,
+    transportModeId: string,
+    updateData: Record<string, any>
+  ): Promise<ITransportModeLivingLabImplementation> {
+    try {
+      // First, delete existing implementations for the lab
+      return prisma.transport_mode_living_lab_implementation.upsert({
+        where: {
+          transport_mode_id_living_lab_id: {
+            living_lab_id: BigInt(labId),
+            transport_mode_id: BigInt(transportModeId),
+          },
+        },
+        update: {
+          living_lab_id: BigInt(labId),
+          transport_mode_id: BigInt(transportModeId),
+          ...updateData,
+        },
+        create: {
+          living_lab_id: BigInt(labId),
+          transport_mode_id: BigInt(transportModeId),
+          ...updateData,
+        },
+      });
+    } catch (error) {
+      console.error(
+        `Error upserting transport mode implementation for lab ${labId} and transport mode ${transportModeId}:`,
+        error
+      );
+      throw new Error("Failed to upsert transport mode implementation");
+    }
+  }
+
+  /**
+   * Delete a transport mode implementation from a lab
+   */
+  async deleteTransportModesImplementation(
+    labId: string,
+    transportModeId: string
+  ): Promise<void> {
+    try {
+      await prisma.transport_mode_living_lab_implementation.deleteMany({
+        where: {
+          living_lab_id: BigInt(labId),
+          transport_mode_id: BigInt(transportModeId),
+        },
+      });
+    } catch (error) {
+      console.error(
+        `Error deleting transport mode implementation for lab ${labId} and transport mode ${transportModeId}:`,
+        error
+      );
+      throw new Error("Failed to delete transport mode implementation");
     }
   }
 }

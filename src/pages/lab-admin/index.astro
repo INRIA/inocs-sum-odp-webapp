@@ -3,60 +3,61 @@ import Layout from "../../layouts/Layout.astro";
 import { CTACard, LabDashboardTabs } from "../../components/react";
 import ApiClient from "../../lib/api-client/ApiClient.ts";
 import { getUrl } from "../../lib/helpers";
+const api = new ApiClient(Astro.request);
 
-const labId = 2;
-const api = new ApiClient();
+//TODO: get labId from logged in user
+const labId = "2";
 const user = {
   id: "john_doe",
   name: "John Doe",
   email: "john.doe@example.com",
 };
 const kpis = await api.getKPIs({});
-const livingLab = await api.getLivingLabAndData(labId);
+const livingLab = await api.getLivingLab(labId);
 
 const counters = {
   kpisBefore: {
     total:
-      livingLab.kpi_results?.filter((kpi) => kpi.result_before)?.length || 0,
+      livingLab?.kpi_results?.filter((kpi) => kpi.result_before)?.length || 0,
     global:
-      livingLab.kpi_results?.filter(
+      livingLab?.kpi_results?.filter(
         (kpi) => kpi.result_before && kpi.type === "GLOBAL"
       ).length || 0,
     local:
-      livingLab.kpi_results?.filter(
+      livingLab?.kpi_results?.filter(
         (kpi) => kpi.result_before && kpi.type === "LOCAL"
       ).length || 0,
   },
   kpisAfter: {
     total:
-      livingLab.kpi_results?.filter((kpi) => kpi.result_after)?.length || 0,
+      livingLab?.kpi_results?.filter((kpi) => kpi.result_after)?.length || 0,
     global:
-      livingLab.kpi_results?.filter(
+      livingLab?.kpi_results?.filter(
         (kpi) => kpi.result_after && kpi.type === "GLOBAL"
       ).length || 0,
     local:
-      livingLab.kpi_results?.filter(
+      livingLab?.kpi_results?.filter(
         (kpi) => kpi.result_after && kpi.type === "LOCAL"
       ).length || 0,
   },
   measures: {
-    total: livingLab.measures?.length || 0,
+    total: livingLab?.projects?.length || 0,
     push:
-      livingLab.measures?.filter((measure) => measure.type === "PUSH").length ||
-      0,
+      livingLab?.projects?.filter((measure) => measure.type === "PUSH")
+        .length || 0,
     pull:
-      livingLab.measures?.filter((measure) => measure.type === "PULL").length ||
-      0,
+      livingLab?.projects?.filter((measure) => measure.type === "PULL")
+        .length || 0,
   },
   transport: {
-    total: livingLab.transport_modes?.length || 0,
+    total: livingLab?.transport_modes?.length || 0,
     nsm:
-      livingLab.transport_modes?.filter(
-        (mode) => mode.type.toLowerCase() === "nsm"
+      livingLab?.transport_modes?.filter(
+        (mode) => mode?.type?.toLowerCase() === "nsm"
       ).length || 0,
     other:
-      livingLab.transport_modes?.filter(
-        (mode) => mode.type.toLowerCase() !== "nsm"
+      livingLab?.transport_modes?.filter(
+        (mode) => mode?.type?.toLowerCase() !== "nsm"
       ).length || 0,
   },
 };

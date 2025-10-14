@@ -11,7 +11,10 @@ export const GET: APIRoute = async ({ request, url }) => {
     const fields = searchParams.get("fields");
 
     const include = fields?.length
-      ? { projects: fields.includes("projects") }
+      ? {
+          projects: fields.includes("projects"),
+          transportModes: fields.includes("transport_modes"),
+        }
       : undefined;
 
     let data = null;
@@ -26,18 +29,18 @@ export const GET: APIRoute = async ({ request, url }) => {
       }
 
       data = await labService.getLabById(id, include);
+      if (!data) {
+        return new ApiResponse({
+          error: "No labs found",
+          status: 404,
+        });
+      }
     } else {
       data = await labService.getAllLabs(include);
     }
 
-    if (!data || (Array.isArray(data) && data.length === 0)) {
-      return new ApiResponse({
-        error: "No labs found",
-        status: 404,
-      });
-    }
     return new ApiResponse({
-      data,
+      data: data ?? [],
     });
   } catch (error) {
     console.error("Error in GET /api/v1/labs:", error);

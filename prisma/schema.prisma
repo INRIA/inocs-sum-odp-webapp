@@ -99,7 +99,9 @@ model labs {
 
   created_by                         users?                               @relation(name: "created_by", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "labs_user_id_foreign")
   validated_by                       users?                               @relation(name: "validated_by", fields: [validated_by_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "labs_validated_by_user_id_foreign")
-  living_lab_projects_implementation living_lab_projects_implementation[]
+  living_lab_projects_implementation        living_lab_projects_implementation[]
+  transport_mode_living_lab_implementation  transport_mode_living_lab_implementation[]
+
 
   @@index([validated_by_user_id], map: "labs_validated_by_user_id_foreign")
   @@index([user_id], map: "labs_user_id_foreign")
@@ -196,4 +198,28 @@ model users {
   validated_labs    labs[]    @relation(name: "validated_by") @ignore
 
   @@index([role_id], map: "users_role_id_fkey")
+}
+
+model transport_mode {
+  id          BigInt             @id @default(autoincrement()) @db.UnsignedBigInt
+  name        String             @db.VarChar(255)
+  description String?            @db.Text
+  type        String?            @db.VarChar(255)
+  created_at  DateTime?          @db.Timestamp(0)
+
+  transport_mode_living_lab_implementation transport_mode_living_lab_implementation[]
+}
+
+model transport_mode_living_lab_implementation {
+  id                    BigInt          @id @default(autoincrement()) @db.UnsignedBigInt
+  transport_mode_id     BigInt          @db.UnsignedBigInt
+  living_lab_id         BigInt          @db.UnsignedBigInt
+  status                String          @db.VarChar(255)
+
+  transport_mode        transport_mode  @relation(fields: [transport_mode_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "tmlli_transport_mode_id_foreign")
+  lab                   labs            @relation(fields: [living_lab_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "tmlli_living_lab_id_foreign")
+
+  @@index([transport_mode_id], map: "tmlli_transport_mode_id_foreign")
+  @@index([living_lab_id], map: "tmlli_living_lab_id_foreign")
+  @@unique([transport_mode_id, living_lab_id], map: "uniq_tmlli")
 }
