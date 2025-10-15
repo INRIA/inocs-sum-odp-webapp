@@ -83,9 +83,9 @@ export class LabService {
   /**
    * Update an existing lab with validation
    */
-  async updateLab(id: number, labData: UpdateLabInput): Promise<ILivingLab> {
+  async updateLab(id: string, labData: UpdateLabInput): Promise<ILivingLab> {
     try {
-      if (!id || id <= 0) {
+      if (!id || isNaN(Number(id)) || Number(id) <= 0) {
         throw new Error("Invalid lab ID provided");
       }
 

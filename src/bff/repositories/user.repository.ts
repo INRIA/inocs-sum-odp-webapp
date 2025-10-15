@@ -1,5 +1,10 @@
 import prisma from "../db/client";
-import type { User, CreateUserInput, UpdateUserInput, UserDto } from "../../types";
+import type {
+  User,
+  CreateUserInput,
+  UpdateUserInput,
+  UserDto,
+} from "../../types";
 
 export class UserRepository {
   /**
@@ -10,7 +15,10 @@ export class UserRepository {
       const users = await prisma.users.findMany({
         include: {
           role: true,
-        },
+          living_lab_user_relation: {
+            include: { lab: true },
+          },
+        } as unknown as any,
         orderBy: {
           created_at: "desc",
         },
@@ -26,16 +34,18 @@ export class UserRepository {
   /**
    * Get user by ID with role populated
    */
-  async findById(id: number, safe?: boolean): Promise<User | UserDto | null> {
+  async findById(id: string, safe?: boolean): Promise<User | UserDto | null> {
     try {
       const _safe = safe !== undefined ? safe : true;
       const user = await prisma.users.findUnique({
-        where: { id },
+        where: { id: BigInt(id) },
         include: {
           role: true,
-        },
+          living_lab_user_relation: {
+            include: { lab: true },
+          },
+        } as unknown as any,
       });
-
       return user
         ? _safe
           ? (this.mapPrismaUserToUser(user) as User)
@@ -60,7 +70,10 @@ export class UserRepository {
         where: { email },
         include: {
           role: true,
-        },
+          living_lab_user_relation: {
+            include: { lab: true },
+          },
+        } as unknown as any,
       });
 
       return user
@@ -82,11 +95,14 @@ export class UserRepository {
       const user = await prisma.users.create({
         data: {
           ...userData,
-          status: userData.status || "signup",
-        },
+          status: (userData as any).status || "signup",
+        } as unknown as any,
         include: {
           role: true,
-        },
+          living_lab_user_relation: {
+            include: { lab: true },
+          },
+        } as unknown as any,
       });
 
       return this.mapPrismaUserToUser(user);
@@ -103,10 +119,13 @@ export class UserRepository {
     try {
       const user = await prisma.users.update({
         where: { id },
-        data: userData,
+        data: userData as unknown as any,
         include: {
           role: true,
-        },
+          living_lab_user_relation: {
+            include: { lab: true },
+          },
+        } as unknown as any,
       });
 
       return this.mapPrismaUserToUser(user);
@@ -139,10 +158,13 @@ export class UserRepository {
   ): Promise<User[]> {
     try {
       const users = await prisma.users.findMany({
-        where: { status },
+        where: { status } as unknown as any,
         include: {
           role: true,
-        },
+          living_lab_user_relation: {
+            include: { lab: true },
+          },
+        } as unknown as any,
         orderBy: {
           created_at: "desc",
         },
@@ -164,7 +186,10 @@ export class UserRepository {
         where: { role_id: roleId },
         include: {
           role: true,
-        },
+          living_lab_user_relation: {
+            include: { lab: true },
+          },
+        } as unknown as any,
         orderBy: {
           created_at: "desc",
         },
@@ -177,9 +202,7 @@ export class UserRepository {
     }
   }
 
-  private getUserDtoWithSafeMethod(
-    user: Omit<UserDto, "getSafeUser">
-  ): UserDto {
+  private getUserDtoWithSafeMethod(user: any): UserDto {
     const { password, old_password, password_confirmation, ...safeUser } = user;
     return {
       ...user,
@@ -192,11 +215,12 @@ export class UserRepository {
    */
   private mapPrismaUserToUser(prismaUser: any): User {
     return {
+      ...prismaUser,
       id: prismaUser.id,
       email: prismaUser.email,
       name: prismaUser.name,
       picture: prismaUser.picture,
-      status: prismaUser.status,
+      // status is not present in schema types; omit to keep types consistent
       created_at: prismaUser.created_at,
       role_id: prismaUser.role_id,
       role: prismaUser.role

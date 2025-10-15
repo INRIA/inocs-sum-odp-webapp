@@ -238,6 +238,19 @@ CREATE TABLE `users` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `living_lab_user_relation` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` BIGINT UNSIGNED NOT NULL,
+    `living_lab_id` BIGINT UNSIGNED NOT NULL,
+    `created_at` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+
+    INDEX `llur_user_id_foreign`(`user_id`),
+    INDEX `llur_living_lab_id_foreign`(`living_lab_id`),
+    UNIQUE INDEX `uniq_llur_user_lab`(`user_id`, `living_lab_id`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `transport_mode` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(255) NOT NULL,
@@ -302,6 +315,12 @@ ALTER TABLE `living_lab_projects_implementation` ADD CONSTRAINT `lab_projects_li
 
 -- AddForeignKey
 ALTER TABLE `users` ADD CONSTRAINT `users_role_id_fkey` FOREIGN KEY (`role_id`) REFERENCES `roles`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE `living_lab_user_relation` ADD CONSTRAINT `llur_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE `living_lab_user_relation` ADD CONSTRAINT `llur_living_lab_id_foreign` FOREIGN KEY (`living_lab_id`) REFERENCES `labs`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE `transport_mode_living_lab_implementation` ADD CONSTRAINT `tmlli_transport_mode_id_foreign` FOREIGN KEY (`transport_mode_id`) REFERENCES `transport_mode`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;

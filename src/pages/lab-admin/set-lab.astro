@@ -1,0 +1,128 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { setLivingLabCookie } from "../../lib/utils/cookies";
+import { UserService } from "../../bff/services/user.service";
+import { type SessionLivingLabCookie } from "../../types";
+
+const searchParams = new URL(Astro.request.url).searchParams;
+const requestedId = searchParams.get("id");
+
+const userService = new UserService();
+
+let status: "loading" | "success" | "error" = "loading";
+let message = "Setting your lab...";
+let selectedLab: SessionLivingLabCookie | undefined = undefined;
+
+// Ensure user is available from middleware
+const currentUser = Astro.locals.user;
+if (!currentUser?.id) {
+	status = "error";
+	message = "You must be logged in to manage living labs.";
+} else {
+	try {
+		// Get labs accessible by this user
+		const myLabs = await userService.getUserLabs(String(currentUser.id));
+        const authorizedLabs = myLabs?.map((l) => ({ id: l.id, name: l.name }));
+
+		if (!requestedId) {
+			if (myLabs.length > 0) {
+				// Auto-pick first lab
+				selectedLab = {
+					id: myLabs[0].id,
+					name: myLabs[0].name,
+					authorizedLabs,
+				};
+			} else {
+				status = "error";
+				message =
+					"You are not authorized to manage living labs. Please contact the administrator to provide you access.";
+			}
+		} else {
+			// Validate access to requested lab
+			const authorizedLab = myLabs.find((l) => l.id === String(requestedId));
+			if (!authorizedLab) {
+				status = "error";
+				message =
+					"You are not authorized to manage this living lab. Please contact the administrator to provide you access.";
+			} else {
+				selectedLab = {
+                    id: String(authorizedLab.id),
+                    name: authorizedLab.name,
+                    authorizedLabs,
+				};
+			}
+		}
+
+		if (selectedLab) {
+			status = "success";
+            message = `✅ Living lab "${selectedLab.name}" set successfully! Redirecting...`;
+		}
+        // Set cookie and locals
+        setLivingLabCookie(Astro.cookies, selectedLab, {
+            secure: Astro.url.protocol === "https:",
+        });
+        Astro.locals.livingLab = selectedLab ?? undefined;
+	} catch (error) {
+		console.error("Error in set-lab page:", error);
+		status = "error";
+		message = "Unexpected error while setting the living lab.";
+	}
+}
+---
+
+<Layout role="editor">
+	<div class="px-6 py-12">
+		<section class="max-w-xl mx-auto text-center">
+			{
+				status === "loading" && (
+					<div class="inline-flex items-center gap-3 rounded-md bg-info/10 text-info border border-info/30 px-4 py-3">
+						<svg class="animate-spin h-5 w-5 text-info" viewBox="0 0 24 24">
+							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+						</svg>
+						<span>{message}</span>
+					</div>
+				)
+			}
+
+			{
+				status === "success" && (
+					<div class="rounded-md bg-success/10 text-success border border-success/30 px-4 py-3">
+						<p>{message}</p>
+					</div>
+				)
+			}
+
+			{
+				status === "error" && (
+					<div class="rounded-md bg-danger/10 text-danger border border-danger/30 px-4 py-3 text-left">
+						<div class="flex items-start gap-3">
+							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+							</svg>
+							<div>
+								<p class="font-semibold mb-1">Couldn't set your living lab</p>
+								<p>{message}</p>
+							</div>
+						</div>
+					</div>
+				)
+			}
+		</section>
+	</div>
+
+	{
+		status === "success" && (
+			<script>
+				setTimeout(() => { window.location.href = '/lab-admin'; }, 500);
+			</script>
+		)
+	}
+	{
+		status === "loading" && selectedLab && (
+			<script>
+				setTimeout(() => { window.location.href = '/lab-admin'; }, 500);
+			</script>
+		)
+	}
+</Layout>

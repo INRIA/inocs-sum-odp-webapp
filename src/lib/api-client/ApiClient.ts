@@ -118,6 +118,13 @@ export default class ApiClient {
     );
   }
 
+  async updateLivingLab(data: ILivingLab): Promise<ILivingLab | null> {
+    return this.request<ILivingLab | null>(`/labs`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+
   async getMeasures(): Promise<IProject[] | null> {
     return this.request<IProject[] | null>("/projects");
   }

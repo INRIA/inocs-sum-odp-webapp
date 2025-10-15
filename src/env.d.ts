@@ -2,6 +2,7 @@
 
 declare namespace App {
   interface Locals {
-    user?: import('./bff/types').User;
+    user?: import("./types").User;
+    livingLab?: import("./types").SessionLivingLabCookie;
   }
 }

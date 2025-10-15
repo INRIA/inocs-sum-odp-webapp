@@ -1,6 +1,18 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import LivingLabForm from "../../components/react/form/LivingLabForm";
+import ApiClient from "../../lib/api-client/ApiClient";
+
+const labId = Astro.locals.livingLab?.id;
+if (!labId) {
+  return Astro.redirect(getUrl("/lab-admin/set-lab"));
+}
+
+const api = new ApiClient(Astro.request);
+let initialLab = await api.getLivingLab(labId);
+if (!initialLab) {
+  return Astro.redirect(getUrl("/lab-admin/set-lab"));
+}
 ---
 
 <Layout role="editor">
@@ -11,7 +23,7 @@ import LivingLabForm from "../../components/react/form/LivingLabForm";
         Use the form to provide a name and approximate geolocation and activity
         metrics for visualization purposes.
       </p>
-      <LivingLabForm client:load />
+      <LivingLabForm livingLab={initialLab ?? undefined} client:load />
     </section>
   </div>
 </Layout>

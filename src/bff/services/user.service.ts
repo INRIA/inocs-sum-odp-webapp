@@ -14,6 +14,29 @@ export class UserService {
   }
 
   /**
+   * Get labs accessible by the given user id.
+   * Returns an array of minimal lab data for selection.
+   */
+  async getUserLabs(
+    userId: string
+  ): Promise<Array<{ id: string; name: string }>> {
+    try {
+      const user = await this.userRepository.findById(userId);
+      if (!user) {
+        throw new Error("User not found");
+      }
+      const labs = user.living_lab_user_relation?.map(
+        (relation) => relation.lab
+      );
+
+      return labs?.map((l: any) => ({ id: String(l.id), name: l.name })) || [];
+    } catch (error) {
+      console.error("Error in getUserLabs service:", error);
+      throw new Error("Failed to retrieve user labs");
+    }
+  }
+
+  /**
    * Get all users with pagination and filtering
    */
   async getAllUsers(options?: {
@@ -36,12 +59,47 @@ export class UserService {
     }
   }
 
+  async findUsers(filter: {
+    id?: string;
+    email?: string;
+    status?: string;
+    roleId?: string;
+  }): Promise<User[]> {
+    const { id, email, status, roleId } = filter;
+    let user = null;
+    let data = [];
+
+    try {
+      if (id) {
+        user = await this.getUserById(id);
+      } else if (email) {
+        user = await this.getUserByEmail(email);
+      }
+
+      if (user) {
+        data.push(user);
+      } else if (status || roleId) {
+        // Get users with optional filtering
+        const options: any = {};
+        if (status) options.status = status;
+        if (roleId) options.roleId = parseInt(roleId, 10);
+
+        const users = await this.getAllUsers(options);
+        data.push(...users);
+      }
+      return data;
+    } catch (error) {
+      console.error("Error in findUsers service:", error);
+      return [];
+    }
+  }
+
   /**
    * Get user by ID
    */
-  async getUserById(id: number): Promise<User | null> {
+  async getUserById(id: string): Promise<User | null> {
     try {
-      if (!id || id <= 0) {
+      if (!id || isNaN(parseInt(id, 10))) {
         throw new Error("Invalid user ID provided");
       }
 
@@ -52,9 +110,9 @@ export class UserService {
     }
   }
 
-  async getUserDtoById(id: number): Promise<UserDto | null> {
+  async getUserDtoById(id: string): Promise<UserDto | null> {
     try {
-      if (!id || id <= 0) {
+      if (!id || isNaN(parseInt(id, 10))) {
         throw new Error("Invalid user ID provided");
       }
 
@@ -120,11 +178,11 @@ export class UserService {
    * Update an existing user with business validation
    */
   async updateUser(
-    id: number,
+    id: string,
     userData: UpdateUserInput
   ): Promise<User | null> {
     try {
-      if (!id || id <= 0) {
+      if (!id || isNaN(parseInt(id, 10))) {
         throw new Error("Invalid user ID provided");
       }
 
@@ -165,9 +223,9 @@ export class UserService {
   /**
    * Delete a user (soft delete by setting status to disabled)
    */
-  async deleteUser(id: number): Promise<boolean> {
+  async deleteUser(id: string): Promise<boolean> {
     try {
-      if (!id || id <= 0) {
+      if (!id || isNaN(parseInt(id, 10))) {
         throw new Error("Invalid user ID provided");
       }
 

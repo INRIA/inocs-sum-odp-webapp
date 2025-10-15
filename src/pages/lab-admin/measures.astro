@@ -3,10 +3,12 @@ import Layout from "../../layouts/Layout.astro";
 import { InfoAlert, LivingLabMeasures } from "../../components/react";
 import ApiClient from "../../lib/api-client/ApiClient";
 
+const labId = Astro.locals.livingLab?.id;
+if (!labId) {
+  return Astro.redirect(getUrl("/lab-admin/set-lab"));
+}
 const api = new ApiClient(Astro.request);
 
-//TODO: get labId from logged in user
-const labId = "2";
 const measures = await api.getMeasures();
 const livinglab = await api.getLivingLab(labId, ["projects"]);
 ---

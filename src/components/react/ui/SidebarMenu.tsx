@@ -2,9 +2,16 @@ import {
   Avatar,
   Dropdown,
   DropdownButton,
+  DropdownDivider,
   DropdownItem,
   DropdownLabel,
   DropdownMenu,
+  Navbar,
+  NavbarDivider,
+  NavbarItem,
+  NavbarLabel,
+  NavbarSection,
+  NavbarSpacer,
   Sidebar,
   SidebarBody,
   SidebarFooter,
@@ -19,7 +26,7 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
   Cog8ToothIcon,
-  ArrowRightStartOnRectangleIcon
+  ArrowRightStartOnRectangleIcon,
 } from "@heroicons/react/16/solid";
 import {
   Cog6ToothIcon,
@@ -31,9 +38,14 @@ import {
   ChartBarSquareIcon,
   QueueListIcon,
   PresentationChartLineIcon,
+  UserCircleIcon,
+  EyeIcon,
+  ArrowsRightLeftIcon,
 } from "@heroicons/react/20/solid";
 import { UserIcon } from "@heroicons/react/24/solid";
 import { getUrl } from "../../../lib/helpers";
+import React from "react";
+import type { SessionLivingLabCookie } from "../../../types";
 
 interface Props {
   children?: React.ReactNode;
@@ -42,6 +54,16 @@ interface Props {
     email: string;
     avatar?: string;
   };
+  currentLivingLab?: SessionLivingLabCookie;
+}
+
+interface MenuItem {
+  label?: string;
+  href?: string;
+  icon?: React.ReactNode;
+  separator?: Boolean;
+  className?: string;
+  subItems?: MenuItem[];
 }
 
 const HOME_ITEM = {
@@ -55,6 +77,7 @@ const DEFAULT_MENU_ITEMS = [
     label: "Data Overview",
     icon: <PresentationChartLineIcon />,
     href: getUrl("/lab-admin"),
+    separator: true,
   },
   {
     label: "Modal Split",
@@ -73,34 +96,22 @@ const DEFAULT_MENU_ITEMS = [
   },
 ];
 
-const DEFAULT_DROPDOWN_HEADER = {
-  label: "My Living Lab",
-  icon: <Cog6ToothIcon />,
-};
-const DEFAULT_DROPDOWN_HEADER_ITEMS = [
-  {
-    label: "Edit",
-    icon: <Cog8ToothIcon />,
-    href: getUrl("/lab-admin/edit"),
-  },
-];
-
 const HELP_MENU_ITEMS = [
-  {
-    label: "Useful Resources",
-    icon: <BookOpenIcon />,
-    href: getUrl("#"),
-  },
-  {
-    label: "FAQ",
-    icon: <QuestionMarkCircleIcon />,
-    href: getUrl("#"),
-  },
-  {
-    label: "Contact SUM team",
-    icon: <EnvelopeIcon />,
-    href: getUrl("#"),
-  },
+  // {
+  //   label: "Useful Resources",
+  //   icon: <BookOpenIcon />,
+  //   href: getUrl("#"),
+  // },
+  // {
+  //   label: "FAQ",
+  //   icon: <QuestionMarkCircleIcon />,
+  //   href: getUrl("#"),
+  // },
+  // {
+  //   label: "Contact SUM team",
+  //   icon: <EnvelopeIcon />,
+  //   href: getUrl("#"),
+  // },
 ];
 
 const DEFAULT_USER_MENU_ITEMS = [
@@ -111,7 +122,69 @@ const DEFAULT_USER_MENU_ITEMS = [
   },
 ];
 
-export function SidebarMenu({ children, userInfo }: Props) {
+export function SidebarMenu({ children, userInfo, currentLivingLab }: Props) {
+  const labItem = {
+    label: currentLivingLab?.name ?? "My Living Lab",
+    icon: <Cog6ToothIcon />,
+  };
+  const labMenu: MenuItem[] = [
+    {
+      label: "Edit",
+      icon: <Cog8ToothIcon />,
+      href: getUrl("/lab-admin/edit"),
+    },
+    {
+      label: "View public dashboard",
+      icon: <EyeIcon />,
+      href: getUrl("/living-lab-city/" + currentLivingLab?.id),
+      separator: true,
+    },
+  ];
+
+  const navbarItems: MenuItem[] = [
+    {
+      label: "Home",
+      icon: <HomeIcon />,
+      href: getUrl("/"),
+      className: "max-md:hidden",
+      separator: true,
+    },
+    // {
+    //   icon: <QuestionMarkCircleIcon />,
+    //   subItems: HELP_MENU_ITEMS,
+    //   className: "max-md:hidden",
+    //   separator: true,
+    // },
+  ];
+  if (currentLivingLab) {
+    if (
+      currentLivingLab?.authorizedLabs?.length &&
+      currentLivingLab?.authorizedLabs?.length > 1
+    ) {
+      navbarItems.push({
+        label: "Labs",
+        icon: <ArrowsRightLeftIcon />,
+        subItems: currentLivingLab?.authorizedLabs?.map((item) => ({
+          label: item.name,
+          href: getUrl("/lab-admin/set-lab?id=" + item.id),
+        })),
+      });
+    }
+    navbarItems.push({
+      ...labItem,
+      subItems: [...labMenu, ...DEFAULT_MENU_ITEMS],
+      separator: true,
+    });
+  }
+
+  if (userInfo)
+    navbarItems.push({
+      label: userInfo?.name,
+      icon: <UserCircleIcon />,
+      subItems: DEFAULT_USER_MENU_ITEMS,
+      className: "max-md:hidden",
+    });
+
   const sidebarContent = (
     <Sidebar>
       <SidebarHeader>
@@ -120,28 +193,23 @@ export function SidebarMenu({ children, userInfo }: Props) {
           alt="SUM Logo"
           className="w-40 my-4"
         />
-        {DEFAULT_DROPDOWN_HEADER && (
+        {labItem && (
           <Dropdown>
             <DropdownButton as={SidebarItem} className="mb-2.5">
-              {DEFAULT_DROPDOWN_HEADER.icon ? (
-                DEFAULT_DROPDOWN_HEADER.icon
-              ) : (
-                <Avatar src="/sum_logo.svg" />
-              )}
-              <SidebarLabel>{DEFAULT_DROPDOWN_HEADER.label}</SidebarLabel>
+              {labItem.icon ? labItem.icon : <Avatar src="/sum_logo.svg" />}
+              <SidebarLabel>{labItem.label}</SidebarLabel>
               <ChevronDownIcon />
             </DropdownButton>
-            {DEFAULT_DROPDOWN_HEADER_ITEMS?.length &&
-              DEFAULT_DROPDOWN_HEADER_ITEMS?.length > 0 && (
-                <DropdownMenu className="min-w-64" anchor="bottom start">
-                  {DEFAULT_DROPDOWN_HEADER_ITEMS.map((item) => (
-                    <DropdownItem key={item.label} href={item.href}>
-                      {item.icon}
-                      <DropdownLabel>{item.label}</DropdownLabel>
-                    </DropdownItem>
-                  ))}
-                </DropdownMenu>
-              )}
+            {labMenu?.length && labMenu?.length > 0 && (
+              <DropdownMenu className="min-w-64" anchor="bottom start">
+                {labMenu.map((item) => (
+                  <DropdownItem key={item.label} href={item.href}>
+                    {item.icon}
+                    <DropdownLabel>{item.label}</DropdownLabel>
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            )}
           </Dropdown>
         )}
         <SidebarItem key={HOME_ITEM.label} href={HOME_ITEM.href}>
@@ -164,7 +232,7 @@ export function SidebarMenu({ children, userInfo }: Props) {
       </SidebarBody>
 
       <SidebarFooter>
-        {HELP_MENU_ITEMS?.length && HELP_MENU_ITEMS?.length > 0 && (
+        {HELP_MENU_ITEMS?.length > 0 && (
           <SidebarSection>
             {HELP_MENU_ITEMS.map((item) => (
               <SidebarItem key={item.label} href={item.href}>
@@ -218,9 +286,62 @@ export function SidebarMenu({ children, userInfo }: Props) {
 
   return (
     <StackedLayout
-      navbar={sidebarContent}
+      navbar={
+        <Navbar className="flex flex-row gap-x-0">
+          <img
+            src={getUrl("/sum_logo.jpg")}
+            alt="SUM Logo"
+            className="w-40 mx-4 max-sm:w-20"
+          />
+
+          <NavbarSpacer />
+
+          {navbarItems.map((item) => (
+            <NavbarSection className={item.className ?? ""} key={item.label}>
+              {item.subItems?.length !== undefined && (
+                <Dropdown>
+                  <DropdownButton
+                    as={NavbarItem}
+                    aria-label={`${item.label} menu`}
+                  >
+                    {item.label && (
+                      <NavbarLabel className="text-primary">
+                        {item.label}
+                      </NavbarLabel>
+                    )}
+                    {item.icon ? item.icon : <ChevronDownIcon />}
+                  </DropdownButton>
+
+                  <DropdownMenu anchor="bottom start">
+                    {item?.subItems?.length > 0 &&
+                      item.subItems?.map((sub) => (
+                        <React.Fragment key={sub.label}>
+                          <DropdownItem href={sub.href}>
+                            {sub.icon}
+                            <DropdownLabel>{sub.label}</DropdownLabel>
+                          </DropdownItem>
+                          {sub?.separator && (
+                            <DropdownDivider key={`${sub.label}-divider`} />
+                          )}
+                        </React.Fragment>
+                      ))}
+                  </DropdownMenu>
+                </Dropdown>
+              )}
+              {item?.href && (
+                <NavbarItem href={item.href}>
+                  <NavbarLabel className="text-primary">
+                    {item.label}
+                  </NavbarLabel>
+                </NavbarItem>
+              )}
+              {item.separator && <NavbarDivider />}
+            </NavbarSection>
+          ))}
+        </Navbar>
+      }
       sidebar={sidebarContent}
-      sidebarOnly={true}
+      sidebarOnly={false}
     >
       {children}
     </StackedLayout>

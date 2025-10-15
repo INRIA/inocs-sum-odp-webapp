@@ -3,15 +3,14 @@ import Layout from "../../layouts/Layout.astro";
 import { CTACard, LabDashboardTabs } from "../../components/react";
 import ApiClient from "../../lib/api-client/ApiClient.ts";
 import { getUrl } from "../../lib/helpers";
+
+const labId = Astro.locals.livingLab?.id;
+if (!labId) {
+  return Astro.redirect(getUrl("/lab-admin/set-lab"));
+}
+const user = Astro.locals.user;
 const api = new ApiClient(Astro.request);
 
-//TODO: get labId from logged in user
-const labId = "2";
-const user = {
-  id: "john_doe",
-  name: "John Doe",
-  email: "john.doe@example.com",
-};
 const kpis = await api.getKPIs({});
 const livingLab = await api.getLivingLab(labId);
 
@@ -213,7 +212,9 @@ const steps = [
       </div>
 
       {/* Help Section */}
-      <div class="mt-12 p-6 bg-gray-50 border border-gray-200 rounded-lg">
+      <div
+        class="hidden mt-12 p-6 bg-gray-50 border border-gray-200 rounded-lg"
+      >
         <h3 class="text-lg font-semibold text-gray-800 mb-2">
           Need help completing a step?
         </h3>

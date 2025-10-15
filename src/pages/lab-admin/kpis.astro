@@ -3,9 +3,12 @@ import Layout from "../../layouts/Layout.astro";
 import { LivingLabKPIsEdition, InfoAlert } from "../../components/react";
 import ApiClient from "../../lib/api-client/ApiClient";
 
+const labId = Astro.locals.livingLab?.id;
+if (!labId) {
+  return Astro.redirect(getUrl("/lab-admin/set-lab"));
+}
 const api = new ApiClient(Astro.request);
 
-const labId = "2";
 const kpis = (await api.getKPIs({})) || [];
 const modalSplitKpi = kpis.find((kpi) => kpi.kpi_number === "15");
 const filteredKpis = kpis.filter(

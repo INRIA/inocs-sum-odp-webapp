@@ -22,6 +22,8 @@ const userInfo = Astro.locals.user
       email: Astro.locals.user?.email ?? "",
     }
   : undefined;
+
+const currentLivingLab = Astro.locals.livingLab;
 ---
 
 <!doctype html>
@@ -55,14 +57,23 @@ const userInfo = Astro.locals.user
   <body>
     {
       role === "visitor" && (
-        <SiteNavBar livingLabs={labsItems} client:load>
+        <SiteNavBar
+          livingLabs={labsItems}
+          userInfo={userInfo}
+          currentLivingLab={currentLivingLab}
+          client:load
+        >
           <slot />
         </SiteNavBar>
       )
     }
     {
       role === "editor" && (
-        <SidebarMenu userInfo={userInfo} client:load>
+        <SidebarMenu
+          userInfo={userInfo}
+          currentLivingLab={currentLivingLab}
+          client:load
+        >
           <slot />
         </SidebarMenu>
       )

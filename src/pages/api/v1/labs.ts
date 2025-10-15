@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { LabService } from "../../../bff/services/labs.service";
 import ApiResponse from "../../../types/ApiResponse";
+import type { ILivingLab } from "../../../types";
 
 const labService = new LabService();
 
@@ -44,6 +45,32 @@ export const GET: APIRoute = async ({ request, url }) => {
   } catch (error) {
     console.error("Error in GET /api/v1/labs:", error);
 
+    return new ApiResponse({
+      success: false,
+      error: error instanceof Error ? error.message : "Internal server error",
+    });
+  }
+};
+
+export const PUT: APIRoute = async ({ request }) => {
+  try {
+    const labData = (await request.json()) as ILivingLab;
+    const { id, ...updatedData } = labData;
+
+    if (!labData.id || isNaN(Number(labData.id)) || Number(labData.id) <= 0) {
+      return new ApiResponse({
+        error: "Invalid lab ID provided",
+        status: 400,
+      });
+    }
+
+    const updatedLab = await labService.updateLab(labData.id, updatedData);
+    return new ApiResponse({
+      data: updatedLab,
+      message: "Lab updated successfully",
+    });
+  } catch (error) {
+    console.error("Error in PUT /api/v1/labs:", error);
     return new ApiResponse({
       success: false,
       error: error instanceof Error ? error.message : "Internal server error",

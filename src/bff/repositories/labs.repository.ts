@@ -60,10 +60,10 @@ export class LabRepository {
   /**
    * Update an existing lab
    */
-  async update(id: number, labData: UpdateLabInput): Promise<ILivingLab> {
+  async update(id: string, labData: UpdateLabInput): Promise<ILivingLab> {
     try {
       const lab = await prisma.labs.update({
-        where: { id },
+        where: { id: BigInt(id) },
         data: labData,
       });
       return this.mapPrismaLabToLab(lab);

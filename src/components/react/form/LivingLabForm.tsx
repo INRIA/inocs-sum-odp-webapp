@@ -1,17 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { Input } from "../../react-catalyst-ui-kit/typescript/input";
-import { Label } from "../../react-catalyst-ui-kit/typescript/fieldset";
 import { RButton } from "../ui/RButton";
 import { getUrl } from "../../../lib/helpers";
 import { MapViewer, type MarkerData } from "../MapViewer";
+import type { ILivingLab } from "../../../types";
+import ApiClient from "../../../lib/api-client/ApiClient";
+const api = new ApiClient();
 
-export default function LivingLabForm() {
-  const [name, setName] = useState("");
-  const [latitude, setLatitude] = useState("");
-  const [longitude, setLongitude] = useState("");
-  const [radius, setRadius] = useState("");
-  const [area, setArea] = useState("");
-  const [population, setPopulation] = useState("");
+type Props = {
+  livingLab?: ILivingLab;
+};
+
+export default function LivingLabForm({ livingLab }: Props) {
+  const [name, setName] = useState(livingLab?.name ?? "");
+  const [latitude, setLatitude] = useState(livingLab?.lat ?? "");
+  const [longitude, setLongitude] = useState(livingLab?.lng ?? "");
+  const [radius, setRadius] = useState(`${livingLab?.radius ?? ""}`);
+  const [area, setArea] = useState(`${livingLab?.area ?? ""}`);
+  const [population, setPopulation] = useState(
+    `${livingLab?.population ?? ""}`
+  );
 
   const [mapMarker, setMapMarker] = useState<MarkerData | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>([50, 10]);
@@ -22,19 +30,21 @@ export default function LivingLabForm() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!livingLab?.id) return;
+
     const payload = {
+      id: livingLab?.id,
       name,
-      latitude: parseFloat(latitude || "0"),
-      longitude: parseFloat(longitude || "0"),
-      radius: parseFloat(radius || "0"),
-      area: area || undefined,
+      lat: latitude || "0",
+      lng: longitude || "0",
+      radius: radius ? parseFloat(radius) : 0,
+      area: area ? parseInt(area, 10) : undefined,
       population: population ? parseInt(population, 10) : undefined,
     };
-
-    // For now we just log the captured values. Replace with real API call later.
-    // Keep output minimal so it's easy to replace with fetch/axios when needed.
-    // eslint-disable-next-line no-console
-    window.location.href = getUrl("/lab-admin");
+    api.updateLivingLab(payload).then(() => {
+      // Handle successful update
+      window.location.href = getUrl("/lab-admin");
+    });
   }
 
   useEffect(() => {

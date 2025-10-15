@@ -17,18 +17,40 @@ import {
   SidebarLabel,
   SidebarSection,
   SidebarDivider,
+  NavbarDivider,
+  DropdownDivider,
 } from "../../react-catalyst-ui-kit";
-import { ChevronDownIcon } from "@heroicons/react/16/solid";
+import {
+  ChevronDownIcon,
+  UserCircleIcon,
+  ArrowRightStartOnRectangleIcon,
+  Cog8ToothIcon,
+} from "@heroicons/react/16/solid";
 import { getUrl } from "../../../lib/helpers";
+import type { SessionLivingLabCookie } from "../../../types";
 
-type MenuItem = { href?: string; label: string; subItems?: MenuItem[] };
 const HOME_URL = getUrl("/");
 interface Props {
   livingLabs: MenuItem[];
   children?: React.ReactNode;
+  userInfo?: { name: string; email: string; avatar?: string };
+  currentLivingLab?: SessionLivingLabCookie;
 }
-export function SiteNavBar({ livingLabs, children }: Props) {
-  const items = [
+interface MenuItem {
+  label?: string;
+  href?: string;
+  icon?: React.ReactNode;
+  separator?: Boolean;
+  className?: string;
+  subItems?: MenuItem[];
+}
+export function SiteNavBar({
+  livingLabs,
+  children,
+  userInfo,
+  currentLivingLab,
+}: Props) {
+  const navbarItems: MenuItem[] = [
     {
       label: "Home",
       href: HOME_URL,
@@ -53,6 +75,32 @@ export function SiteNavBar({ livingLabs, children }: Props) {
       ],
     },
   ];
+  if (userInfo) {
+    const userMenu: MenuItem = {
+      label: userInfo?.name,
+      icon: <UserCircleIcon />,
+      subItems: [
+        {
+          label: "Logout",
+          icon: <ArrowRightStartOnRectangleIcon />,
+          href: getUrl("/lab-admin/logout"),
+          separator: true,
+        },
+      ],
+      className: "max-md:hidden",
+    };
+    if (currentLivingLab?.authorizedLabs?.length) {
+      // If there are authorized labs, add them to the navbar
+      userMenu.subItems?.push(
+        ...currentLivingLab.authorizedLabs.map((lab) => ({
+          label: `Manage ${lab.name}`,
+          icon: <Cog8ToothIcon />,
+          href: getUrl(`/lab-admin/set-lab?id=${lab.id}`),
+        }))
+      );
+    }
+    navbarItems.push(userMenu);
+  }
 
   const analysisTools: MenuItem[] = [
     { href: "#", label: "Measures impact" },
@@ -100,8 +148,8 @@ export function SiteNavBar({ livingLabs, children }: Props) {
           <NavbarSpacer />
 
           {/* desktop navbar items (hidden on smaller screens) */}
-          <NavbarSection className="px-10 max-lg:hidden w-full flex justify-end">
-            {items.map((item) => (
+          <NavbarSection className="max-lg:hidden flex justify-end">
+            {navbarItems.map((item) => (
               <React.Fragment key={item.label}>
                 {item.subItems?.length !== undefined && (
                   <Dropdown>
@@ -112,17 +160,20 @@ export function SiteNavBar({ livingLabs, children }: Props) {
                       <NavbarLabel className="text-primary">
                         {item.label}
                       </NavbarLabel>
-                      <ChevronDownIcon />
+                      {item.icon ? item.icon : <ChevronDownIcon />}
                     </DropdownButton>
-                    <DropdownMenu
-                      className="min-w-64 bg-white"
-                      anchor="bottom start"
-                    >
+                    <DropdownMenu anchor="bottom start">
                       {item?.subItems?.length > 0 &&
                         item.subItems?.map((sub) => (
-                          <DropdownItem key={sub.label} href={sub.href}>
-                            <DropdownLabel>{sub.label}</DropdownLabel>
-                          </DropdownItem>
+                          <React.Fragment key={sub.label}>
+                            <DropdownItem href={sub.href}>
+                              {sub.icon}
+                              <DropdownLabel>{sub.label}</DropdownLabel>
+                            </DropdownItem>
+                            {sub?.separator && (
+                              <DropdownDivider key={`${sub.label}-divider`} />
+                            )}
+                          </React.Fragment>
                         ))}
                     </DropdownMenu>
                   </Dropdown>
@@ -134,6 +185,7 @@ export function SiteNavBar({ livingLabs, children }: Props) {
                     </NavbarLabel>
                   </NavbarItem>
                 )}
+                {item.separator && <NavbarDivider />}
               </React.Fragment>
             ))}
           </NavbarSection>
@@ -143,7 +195,7 @@ export function SiteNavBar({ livingLabs, children }: Props) {
         <Sidebar>
           <SidebarBody>
             <SidebarSection>
-              {items.map((item) => (
+              {navbarItems.map((item) => (
                 <React.Fragment key={item.label}>
                   {item.subItems ? (
                     <>

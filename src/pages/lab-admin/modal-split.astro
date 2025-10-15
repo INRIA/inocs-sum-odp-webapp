@@ -4,10 +4,12 @@ import { InfoAlert, LivingLabModalSplit } from "../../components/react";
 import ApiClient from "../../lib/api-client/ApiClient";
 import { EnumKpiMetricType } from "../../types";
 
+const labId = Astro.locals.livingLab?.id;
+if (!labId) {
+  return Astro.redirect(getUrl("/lab-admin/set-lab"));
+}
 const api = new ApiClient(Astro.request);
 
-//TODO get labId from session
-const labId = "2";
 const transportModes = await api.getTransportModes();
 const modalSplitKpis = (await api.getKPIs({ kpi_number: "15" }))?.filter(
   (kpi) => kpi.metric !== EnumKpiMetricType.NONE

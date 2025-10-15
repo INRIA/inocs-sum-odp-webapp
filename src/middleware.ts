@@ -1,5 +1,6 @@
 import { defineMiddleware } from "astro:middleware";
 import { getSession } from "auth-astro/server";
+import { getLivingLabCookie } from "./lib/utils/cookies";
 
 // Routes that require authentication
 const PROTECTED_ROUTES = ["/lab-admin"];
@@ -34,6 +35,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   // User is authenticated, add user info to context for use in pages
   context.locals.user = user;
+  // Also attach current living lab from cookie if available
+  const livingLab = getLivingLabCookie(context.cookies);
+  if (livingLab) {
+    context.locals.livingLab = livingLab;
+  }
 
   return next();
 });
