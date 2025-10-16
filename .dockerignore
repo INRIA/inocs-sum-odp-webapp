@@ -1,0 +1,24 @@
+# Node & build artifacts
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Output directories
+.dist
+/build
+dist
+
+# VCS & editor
+.git
+.gitignore
+.vscode
+.DS_Store
+
+# Prisma generated files can be regenerated
+prisma/*.db
+
+# Local env files (provide via secrets at runtime)
+.env
+.env.*
