@@ -29,18 +29,15 @@ import {
   ArrowRightStartOnRectangleIcon,
 } from "@heroicons/react/16/solid";
 import {
-  Cog6ToothIcon,
+  GlobeEuropeAfricaIcon,
   HomeIcon,
-  QuestionMarkCircleIcon,
-  EnvelopeIcon,
-  BookOpenIcon,
+  MapPinIcon,
   ChartPieIcon,
   ChartBarSquareIcon,
   QueueListIcon,
   PresentationChartLineIcon,
   UserCircleIcon,
   EyeIcon,
-  ArrowsRightLeftIcon,
 } from "@heroicons/react/20/solid";
 import { UserIcon } from "@heroicons/react/24/solid";
 import { getUrl } from "../../../lib/helpers";
@@ -125,7 +122,7 @@ const DEFAULT_USER_MENU_ITEMS = [
 export function SidebarMenu({ children, userInfo, currentLivingLab }: Props) {
   const labItem = {
     label: currentLivingLab?.name ?? "My Living Lab",
-    icon: <Cog6ToothIcon />,
+    icon: <MapPinIcon />,
   };
   const labMenu: MenuItem[] = [
     {
@@ -163,7 +160,7 @@ export function SidebarMenu({ children, userInfo, currentLivingLab }: Props) {
     ) {
       navbarItems.push({
         label: "Labs",
-        icon: <ArrowsRightLeftIcon />,
+        icon: <GlobeEuropeAfricaIcon />,
         subItems: currentLivingLab?.authorizedLabs?.map((item) => ({
           label: item.name,
           href: getUrl("/lab-admin/set-lab?id=" + item.id),
@@ -174,6 +171,7 @@ export function SidebarMenu({ children, userInfo, currentLivingLab }: Props) {
       ...labItem,
       subItems: [...labMenu, ...DEFAULT_MENU_ITEMS],
       separator: true,
+      className: "bg-warning/50 rounded-lg",
     });
   }
 
@@ -320,9 +318,7 @@ export function SidebarMenu({ children, userInfo, currentLivingLab }: Props) {
                             {sub.icon}
                             <DropdownLabel>{sub.label}</DropdownLabel>
                           </DropdownItem>
-                          {sub?.separator && (
-                            <DropdownDivider key={`${sub.label}-divider`} />
-                          )}
+                          {sub?.separator && <DropdownDivider />}
                         </React.Fragment>
                       ))}
                   </DropdownMenu>
