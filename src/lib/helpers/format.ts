@@ -1,6 +1,6 @@
 import { EnumKpiMetricType } from "../../types";
 
-export function formatDateToMothYear(date?: string): string {
+export function formatDateToMonthYear(date?: string): string {
   if (!date) return "";
   const d = new Date(date);
   if (Number.isNaN(d.getTime())) return String(date);

@@ -12,7 +12,7 @@ import {
 } from "../../../types/KPIs";
 import { Field, Input } from "../../react-catalyst-ui-kit";
 import {
-  formatDateToMothYear,
+  formatDateToMonthYear,
   getKpiValueByMetricType,
   parseDateToInputHtml,
 } from "../../../lib/helpers";
@@ -167,7 +167,7 @@ export function LivingLabKpiResultForm({
             )}
           </button>
         </div>
-        {value && date && <small>{formatDateToMothYear(date)}</small>}
+        {value && date && <small>{formatDateToMonthYear(date)}</small>}
       </div>
     );
   }

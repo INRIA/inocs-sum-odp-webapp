@@ -1,56 +1,33 @@
 import type { APIRoute } from "astro";
 import { LabService } from "../../../bff/services/labs.service";
 import ApiResponse from "../../../types/ApiResponse";
+import type { LivingLabProjectsImplementationInput } from "../../../types";
 
 const labService = new LabService();
-
-export const GET: APIRoute = async ({ request, url }) => {
-  try {
-    const searchParams = new URL(request.url).searchParams;
-    const labId = searchParams.get("labId");
-    const data = await labService.getLabById(labId ? parseInt(labId, 10) : 0);
-
-    if (!data) {
-      return new ApiResponse({
-        error: "No lab found",
-        status: 404,
-      });
-    }
-    return new ApiResponse({
-      data,
-    });
-  } catch (error) {
-    console.error("Error in GET /api/v1/labs-projects:", error);
-
-    return new ApiResponse({
-      success: false,
-      error: error instanceof Error ? error.message : "Internal server error",
-    });
-  }
-};
 
 export const PUT: APIRoute = async ({ request, url }) => {
   try {
     const data = await request.json();
-    const { labId, projectId, ...updateData } = data;
+    const { living_lab_id, project_id, ...updateData } =
+      data as LivingLabProjectsImplementationInput;
 
-    if (!labId) {
+    if (!living_lab_id) {
       return new ApiResponse({
-        error: "labId query parameter is required",
+        error: "living_lab_id query parameter is required",
         status: 400,
       });
     }
 
-    if (!projectId) {
+    if (!project_id) {
       return new ApiResponse({
-        error: "projectId query parameter is required",
+        error: "project_id query parameter is required",
         status: 400,
       });
     }
 
     const updatedLab = await labService.upsertLabProjectImplementation(
-      labId,
-      projectId,
+      living_lab_id,
+      project_id,
       updateData
     );
     return new ApiResponse({

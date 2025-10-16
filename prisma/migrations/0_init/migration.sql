@@ -185,6 +185,7 @@ CREATE TABLE `living_lab_projects_implementation` (
     `created_at` TIMESTAMP(0) NULL,
     `updated_at` TIMESTAMP(0) NULL,
     `start_at` TIMESTAMP(0) NULL,
+    `description` TEXT NULL,
 
     INDEX `lab_projects_project_id_foreign`(`project_id`),
     INDEX `lab_projects_living_lab_id_foreign`(`living_lab_id`),

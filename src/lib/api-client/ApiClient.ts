@@ -7,6 +7,7 @@ import type {
   ITransportModeLivingLabEdit,
   ITransportModeLivingLabDelete,
   IKpiResultInput,
+  LivingLabProjectsImplementationInput,
 } from "../../types";
 import type { ICategory } from "../../types/Category";
 
@@ -129,7 +130,7 @@ export default class ApiClient {
     return this.request<IProject[] | null>("/projects");
   }
 
-  async updateLivingLabMeasure(data: { labId: string; projectId: string }) {
+  async updateLivingLabMeasure(data: LivingLabProjectsImplementationInput) {
     return this.request<IProject>(`/labs-projects`, {
       method: "PUT",
       body: JSON.stringify(data),
