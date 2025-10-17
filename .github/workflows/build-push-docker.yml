@@ -34,7 +34,6 @@ jobs:
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.PROJECT_PATH }}/${{ env.IMAGE_NAME }}:0.0.1
-            ${{ env.REGISTRY }}/${{ env.PROJECT_PATH }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
       - name: Logout
         run: docker logout ${{ env.REGISTRY }}
