@@ -244,6 +244,7 @@ CREATE TABLE `living_lab_user_relation` (
     `user_id` BIGINT UNSIGNED NOT NULL,
     `living_lab_id` BIGINT UNSIGNED NOT NULL,
     `created_at` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+    `updated_at` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
 
     INDEX `llur_user_id_foreign`(`user_id`),
     INDEX `llur_living_lab_id_foreign`(`living_lab_id`),
@@ -272,6 +273,24 @@ CREATE TABLE `transport_mode_living_lab_implementation` (
     INDEX `tmlli_transport_mode_id_foreign`(`transport_mode_id`),
     INDEX `tmlli_living_lab_id_foreign`(`living_lab_id`),
     UNIQUE INDEX `uniq_tmlli`(`transport_mode_id`, `living_lab_id`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `messages` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `from_user_id` BIGINT UNSIGNED NOT NULL,
+    `from_email` VARCHAR(255) NOT NULL,
+    `to_user_id` BIGINT UNSIGNED NOT NULL,
+    `to_email` VARCHAR(255) NOT NULL,
+    `message` TEXT NOT NULL,
+    `sent_at` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+    `living_lab_id` BIGINT UNSIGNED NULL,
+    `created_at` TIMESTAMP(0) NOT NULL,
+    `item_id` BIGINT UNSIGNED NULL,
+    `kpiresult_id` BIGINT UNSIGNED NULL,
+    `living_lab_project_implementation_id` BIGINT UNSIGNED NULL,
+
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -328,3 +347,21 @@ ALTER TABLE `transport_mode_living_lab_implementation` ADD CONSTRAINT `tmlli_tra
 
 -- AddForeignKey
 ALTER TABLE `transport_mode_living_lab_implementation` ADD CONSTRAINT `tmlli_living_lab_id_foreign` FOREIGN KEY (`living_lab_id`) REFERENCES `labs`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE `messages` ADD CONSTRAINT `messages_from_user_id_fkey` FOREIGN KEY (`from_user_id`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `messages` ADD CONSTRAINT `messages_to_user_id_fkey` FOREIGN KEY (`to_user_id`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `messages` ADD CONSTRAINT `messages_living_lab_id_fkey` FOREIGN KEY (`living_lab_id`) REFERENCES `labs`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `messages` ADD CONSTRAINT `messages_item_id_fkey` FOREIGN KEY (`item_id`) REFERENCES `items`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `messages` ADD CONSTRAINT `messages_kpiresult_id_fkey` FOREIGN KEY (`kpiresult_id`) REFERENCES `kpiresults`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `messages` ADD CONSTRAINT `messages_living_lab_project_implementation_id_fkey` FOREIGN KEY (`living_lab_project_implementation_id`) REFERENCES `living_lab_projects_implementation`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;

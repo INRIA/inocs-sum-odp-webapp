@@ -59,6 +59,8 @@ model items {
   user_id     Int?
   visible     Int?       @db.TinyInt
   item_tag    item_tag[]
+
+  messages    messages[]
 }
 
 model kpidefinitions {
@@ -116,6 +118,7 @@ model kpiresults {
   living_lab          labs             @relation(fields: [living_lab_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   transport_mode      transport_mode?  @relation(fields: [transport_mode_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   user                users?           @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  messages            messages[]
 }
 
 model labs {
@@ -142,6 +145,7 @@ model labs {
   transport_mode_living_lab_implementation  transport_mode_living_lab_implementation[]
   kpiresults                                kpiresults[]
   living_lab_user_relation                  living_lab_user_relation[]
+  messages                                  messages[]
 
   @@index([validated_by_user_id], map: "labs_validated_by_user_id_foreign")
   @@index([user_id], map: "labs_user_id_foreign")
@@ -192,8 +196,9 @@ model living_lab_projects_implementation {
   start_at      DateTime? @db.Timestamp(0)
   description   String?   @db.Text
 
-  project projects @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "lab_projects_project_id_foreign")
-  lab     labs     @relation(fields: [living_lab_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "lab_projects_living_lab_id_foreign")
+  project   projects @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "lab_projects_project_id_foreign")
+  lab       labs     @relation(fields: [living_lab_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "lab_projects_living_lab_id_foreign")
+  messages  messages[]
 
   @@index([project_id], map: "lab_projects_project_id_foreign")
   @@index([living_lab_id], map: "lab_projects_living_lab_id_foreign")
@@ -238,6 +243,8 @@ model users {
   created_labs                  labs[]    @relation(name: "created_by") @ignore
   validated_labs                labs[]    @relation(name: "validated_by") @ignore
   living_lab_user_relation      living_lab_user_relation[]
+  messages_sent                 messages[] @relation(name: "from_user")
+  messages_received             messages[] @relation(name: "to_user")
 
   @@index([role_id], map: "users_role_id_fkey")
 }
@@ -247,6 +254,7 @@ model living_lab_user_relation {
   user_id         BigInt    @db.UnsignedBigInt
   living_lab_id   BigInt    @db.UnsignedBigInt
   created_at      DateTime  @default(now()) @db.Timestamp(0)
+  updated_at      DateTime  @default(now()) @db.Timestamp(0)
 
   user            users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "llur_user_id_foreign")
   lab             labs      @relation(fields: [living_lab_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "llur_living_lab_id_foreign")
@@ -279,4 +287,26 @@ model transport_mode_living_lab_implementation {
   @@index([transport_mode_id], map: "tmlli_transport_mode_id_foreign")
   @@index([living_lab_id], map: "tmlli_living_lab_id_foreign")
   @@unique([transport_mode_id, living_lab_id], map: "uniq_tmlli")
+}
+
+model messages {
+  id                                   BigInt       @id @default(autoincrement()) @db.UnsignedBigInt
+  from_user_id                         BigInt       @db.UnsignedBigInt
+  from_email                           String       @db.VarChar(255)
+  to_user_id                           BigInt       @db.UnsignedBigInt
+  to_email                             String       @db.VarChar(255)
+  message                              String       @db.Text
+  sent_at                              DateTime     @db.Timestamp(0) @default(now())
+  living_lab_id                        BigInt?      @db.UnsignedBigInt
+  created_at                           DateTime     @db.Timestamp(0)
+  item_id                              BigInt?      @db.UnsignedBigInt
+  kpiresult_id                         BigInt?      @db.UnsignedBigInt
+  living_lab_project_implementation_id BigInt?      @db.UnsignedBigInt
+
+  from_user   users?    @relation("from_user", fields: [from_user_id], references: [id])
+  to_user     users?    @relation("to_user", fields: [to_user_id], references: [id])
+  living_lab  labs?     @relation(fields: [living_lab_id], references: [id])
+  item        items?    @relation(fields: [item_id], references: [id])
+  kpiresult   kpiresults? @relation(fields: [kpiresult_id], references: [id])
+  living_lab_project_implementation living_lab_projects_implementation? @relation(fields: [living_lab_project_implementation_id], references: [id])
 }
