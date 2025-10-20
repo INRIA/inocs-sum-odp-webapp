@@ -1,3 +1,68 @@
+INSERT INTO `roles` (`id`, `name`, `description`, `created_at`, `updated_at`) VALUES
+(1, 'Admin', 'This is the administration role, create and manage all pages and users', '2023-11-13 12:02:30', '2023-11-20 11:46:07'),
+(2, 'Creator', 'Create and manage own pages.', '2023-11-13 12:02:31', '2023-11-20 11:45:52'),
+(3, 'Member', 'Read only', '2023-11-13 12:02:31', '2023-11-20 11:46:14');
+
+INSERT INTO `users` (`id`, `name`, `email`, `role_id`, `status`, `email_verified_at`, `password`, `picture`, `location`, `phone`, `remember_token`, `created_at`, `updated_at`) VALUES
+(1, 'ODP admin', 'odp.admin@yopmail.com', 1, 'active', NULL, '$2y$10$QMeJTMNLcJLZZZ1tgA1vz.dIFakyc2snJUER/nAYxb6XKI/UrBHJa', NULL, NULL, NULL, NULL, '2025-06-27 06:42:33', '2025-06-27 06:42:33');
+
+
+INSERT INTO `labs` (`id`, `name`, `lat`, `lng`, `radius`) VALUES
+(1, 'Munich', '48.1351', '11.5820', 50),
+(2, 'Geneva', '46.2044', '6.1432', 50),
+(3, 'Jerusalem', '31.7683', '35.2137', 50),
+(4, 'Penteli', '38.0451', '23.8625', 50),
+(5, 'Rotterdam', '51.9225', '4.47917', 50),
+(6, 'Krakow', '50.0647', '19.9450', 50),
+(7, 'Fredrikstad', '59.2181', '10.9298', 50),
+(8, 'Larnaca', '34.9229', '33.6233', 50),
+(9, 'Coimbra', '40.2033', '-8.4103', 50);
+
+
+INSERT INTO `living_lab_user_relation` (`id`, `user_id`, `living_lab_id`, `created_at`) VALUES
+(1, 1, 1, now()),
+(2, 1, 2, now());
+
+
+INSERT INTO `projects` (`name`, `description`, `type`, `image_url`, `created_at`, `updated_at`) VALUES
+('Congestion charges', 'Fees imposed on vehicles entering designated city areas to reduce traffic congestion.', 'PUSH', '/icons/ticket.svg', NOW(), NOW()),
+('Parking charges', 'Increased parking fees to discourage long-term car use and promote modal shift.', 'PUSH', '/icons/parking_sign.svg', NOW(), NOW()),
+('Restricted parking', 'Reductions in available public parking to limit car access, especially in central zones.', 'PUSH', '/icons/no_cars.svg', NOW(), NOW()),
+('Limited traffic zone / Pedestrianisation of streets', 'Car-free or low-emission zones that prioritize pedestrians, cyclists, and shared mobility.', 'PUSH', '/icons/pedestrian.svg', NOW(), NOW()),
+('Parking supply management', 'Policies that reduce or restructure parking supply to manage demand and encourage alternatives.', 'PUSH', '/icons/parking_sign.svg', NOW(), NOW()),
+('Speed limits', 'Lowering vehicle speed limits to improve safety and promote non-motorized travel.', 'PUSH', '/icons/30sign.svg', NOW(), NOW()),
+('Mobility hubs', 'Centralized locations where multiple transport modes (e.g., bikes, buses, taxis) are integrated.', 'PULL', '/icons/cityz_zones.svg', NOW(), NOW()),
+('Scheduling integration in MaaS services', 'Coordinated schedules across transport services to streamline connections.', 'PULL', '/icons/time_table.svg', NOW(), NOW()),
+('Ticketing integration in MaaS services', 'Unified or digital ticketing across services to simplify travel.', 'PULL', '/icons/mobile.svg', NOW(), NOW()),
+('Improved NSM infrastructure, e.g. bike lanes & "park & ride"', 'New infrastructure like bike lanes, "park & ride" stations to support non-car travel.', 'PULL', '/icons/bike_lane.svg', NOW(), NOW()),
+('On demand vehicle sharing action plan', 'Access to shared vehicles (cars, bikes, e-scooters) on demand via apps or stations.', 'PULL', '/icons/mobile.svg', NOW(), NOW()),
+('Nudging (gamification or rewards)', 'Use of rewards or games to encourage use of shared or sustainable transport.', 'PULL', '/icons/kid1.svg', NOW(), NOW()),
+('Dynamic pricing of NSM', 'Flexible pricing (e.g., cheaper off-peak rides) to balance demand and promote use.', 'PULL', '/icons/ticket.svg', NOW(), NOW()),
+('Improved information about the availability of shared modes', 'Real-time data on vehicle availability and travel options via digital platforms.', 'PULL', '/icons/mobile.svg', NOW(), NOW()),
+('Introduction of new NSM services', 'Launch of bike-sharing, scooter-sharing, or other new transport options.', 'PULL', '/icons/e-scooter.svg', NOW(), NOW()),
+('Introduction of new PT infrastructures/lines', 'Deployment of new public transport lines like electric buses or tram extensions.', 'PULL', '/icons/metro_tunnel.svg', NOW(), NOW()),
+('Streets retrofitting/introduction of priority lanes', 'Street redesign for better walking/cycling and priority lanes for buses or shared modes.', 'PULL', '/icons/cityz_zones.svg', NOW(), NOW()),
+('Dedicated parking spaces for carsharing/micromobility', 'Reserved spaces to support the use of shared cars or micromobility vehicles.', 'PULL', '/icons/bycicle_parking.svg', NOW(), NOW()),
+('Widening PT geographical area', 'Extending public transport coverage to reach underserved zones.', 'PULL', '/icons/metro_map.svg', NOW(), NOW()),
+('Central PT planning and construction program', 'Comprehensive public transport network planning to enhance coordination and efficiency.', 'PULL', '/icons/cityz_zones.svg', NOW(), NOW());
+
+
+INSERT INTO `transport_mode` (`id`, `name`, `description`, `type`, `created_at`) VALUES
+(1, 'Private Car', 'Individually owned motor vehicle used for personal trips.', 'PRIVATE', NOW()),
+(2, 'Motorcycle / Scooter', 'Two-wheeled motorised vehicle for solo or two-person travel.', 'PRIVATE', NOW()),
+(3, 'Carsharing', 'Shared access to cars on demand through a membership or app.', 'NSM', NOW()),
+(4, 'Bicycle', 'User-owned bicycle for short-to-medium distance trips.', 'NSM', NOW()),
+(5, 'E-scooter', 'Electric micromobility vehicles', 'NSM', NOW()),
+(6, 'Walking', 'Pedestrian travel for short distances; zero-emission active mode.', 'OTHER', NOW()),
+(7, 'Micromobility', '', 'NSM', NOW()),
+(8, 'Ride hailing', 'Flexible shared transit that adapts routes and schedules to demand.', 'NSM', NOW()),
+(9, 'Taxi', 'Taxi ride hailing', 'NSM', NOW()),
+(10, 'Train', 'Rail services connecting cities and suburbs over longer distances.', 'PUBLIC_TRANSPORT', NOW()),
+(11, 'Bus', 'Scheduled public transport on roads serving local or regional routes.', 'PUBLIC_TRANSPORT', NOW()),
+(12, 'Metro / Subway', 'High-capacity rapid transit serving dense urban areas.', 'PUBLIC_TRANSPORT', NOW()),
+(13, 'Other', 'Other means of transport', 'PRIVATE', NOW());
+
+
 INSERT INTO `kpidefinitions` (
   `id`,
   `parent_kpi_id`,
@@ -72,11 +137,82 @@ INSERT INTO `kpidefinitions` (
 (62, NULL, '19', 'LOCAL', 'Energy consumption ratio', 'The total energy consumption per km of only the passenger transport modes', 'custom_unit', 'MJ/y', NULL, 0, 1.5, 3.5, NOW(), NOW()),
 (63, NULL, '20', 'LOCAL', 'Accessibility ratio', 'It is the accessibility provided by NSM and/or Public Transport over the accessibility private by private car', 'ratio', 'share of accessible infrastructure (%)', 'Private car is considered as the dominant transport mode. This indicator is estimated per zone of each LL. Maximum and minimum values can also be considered as reference points to describe potential changes.', 1, 0, NULL, NOW(), NOW()),
 (64, NULL, '21', 'LOCAL', 'Horizontal social equity', 'It refers to the distribution of accessibility level among individuals, groups or geographic areas considered equal in capabilities and requirements.', 'ratio', 'equity level, from equity (0) to inequity (1)', 'The calculation of the GINI index is required.', 0, 0, 1, NOW(), NOW()),
-(65, NULL, '22', 'LOCAL', 'Vertical social equity', 'It refers to the distribution of accessibility level among individuals, groups or geographic areas that differ in needs and abilities in each LL.', 'ratio', 'accessibility level, from -1 to 1', 'The calculation of the Bivariate Local Moran\'s I is required.', 0, -1, 1, NOW(), NOW()),
+(65, NULL, '22', 'LOCAL', 'Vertical social equity', 'It refers to the distribution of accessibility level among individuals, groups or geographic areas that differ in needs and abilities in each LL.', 'ratio', 'accessibility level, from -1 to 1', 'The calculation of the Bivariate Local Moran`s I is required.', 0, -1, 1, NOW(), NOW()),
 (66, NULL, '23', 'LOCAL', 'Social inclusion', 'It is the inclusion of Public Transport and/or NSM services to persons with reduced mobility.', 'percentage', '% of inclusion', 'considering the vehicles/stations/stops that are accessible and comfort to those groups in each LL', 1, 0, 1, NOW(), NOW()),
 (50, NULL, '24', 'GLOBAL', 'Congestion and travel delays', 'It is the average ratio between of travel time at peak hours and off-peak hours considering all transport modes', 'ratio', 'travel time ratio', 'A sample of 5 main traffic corridors is determined to measure it. The modal shares are utilized as weights to derive a mean value about travel delays.', 0, 0, 3, NOW(), NOW()),
 (67, NULL, '25', 'LOCAL', 'Social welfare', 'It is defined as the total profits of passengers using NSM and Public Transport, expressed in time savings, plus the total profits of transport operators', 'custom_unit', 'euros', 'The total profits of transport operators is the ridership minus the cost of operation. In other words, it is the consumer surplus plus the producer surplus.', 1, 0, NULL, NOW(), NOW()),
 (68, NULL, '26', 'LOCAL', 'Profitability of NSM operators', 'It is the annual change (%) in total profits of all NSMs that have been integrated in the transport system', 'percentage', '% of profit change', 'Total profits is defined as the ridership minus the cost of operation', 1, 0, 1, NOW(), NOW()),
 (69, NULL, '27', 'LOCAL', 'Profitability of MaaS platforms', 'It is defined as the percentage change in total profits month-over-month', 'percentage', '% of profit change', 'Total profits are determined by the aggregate net income generated from all integrated transport services minus the operational costs incurred by the MaaS platform itself.', 1, 0, 1, NOW(), NOW()),
-(70, NULL, '28', 'LOCAL', 'Operation revenue of NSMs', 'Revenue Per Month (€/Month) for NSM services per LL is a metric that represents the total income generated/ or/ predicted to be generated from the service within a month.', 'custom_unit', 'euros/month', 'It aggregates earnings from all operational activities related to the NSM service, including user/passenger fees per trip (which can be based on time, distance, or a flat rate), subscription fees, and any other associated service charges. It provides insight into the service\'s monthly performance, understanding the service\'s market position.', 1, 0, NULL, NOW(), NOW()),
+(70, NULL, '28', 'LOCAL', 'Operation revenue of NSMs', 'Revenue Per Month (€/Month) for NSM services per LL is a metric that represents the total income generated/ or/ predicted to be generated from the service within a month.', 'custom_unit', 'euros/month', 'It aggregates earnings from all operational activities related to the NSM service, including user/passenger fees per trip (which can be based on time, distance, or a flat rate), subscription fees, and any other associated service charges. It provides insight into the service`s monthly performance, understanding the service`s market position.', 1, 0, NULL, NOW(), NOW()),
 (71, NULL, '29', 'LOCAL', 'Service utilization rate', 'The proportion of operational vehicles within the entire fleet', 'percentage', '% of operational vehicles', 'calculated typically on an hourly or daily basis but often averaged over a month or year for comparative analysis. It serves as a benchmark for assessing fleet utilization efficiency.', 1, 0, 1, NOW(), NOW());
+
+
+INSERT INTO `categories` (`id`, `name`, `type`, `description`) VALUES
+(1, 'Policies', 'KPI_SIEF', NULL),
+(2, 'Transport System - Time', 'KPI_SIEF', NULL),
+(3, 'Transport System - Safety/Comfort', 'KPI_SIEF', NULL),
+(4, 'Transport System - Cost', 'KPI_SIEF', NULL),
+(5, 'Impact - Environment', 'KPI_SIEF', NULL),
+(6, 'Impact - Society', 'KPI_SIEF', NULL),
+(7, 'Impact - Economy', 'KPI_SIEF', NULL);
+
+INSERT INTO `kpidefinitions_category` (`kpidefinition_id`, `category_id`) VALUES
+(1, 1),
+(2, 1),
+(3, 1),
+(4, 1),
+(5, 1),
+(6, 1),
+(12, 2),
+(13, 2),
+(14, 2),
+(15, 2),
+(16, 2),
+(17, 2),
+(18, 2),
+(19, 2),
+(33, 2),
+(34, 2),
+(35, 2),
+(36, 2),
+(37, 2),
+(38, 2),
+(39, 2),
+(8, 3),
+(9, 3),
+(10, 3),
+(11, 3),
+(40, 3),
+(41, 3),
+(42, 3),
+(43, 3),
+(44, 3),
+(45, 3),
+(46, 3),
+(47, 3),
+(22, 4),
+(23, 4),
+(24, 4),
+(25, 4),
+(26, 4),
+(27, 4),
+(28, 4),
+(29, 4),
+(30, 4),
+(31, 4),
+(32, 4),
+(48, 4),
+(49, 5),
+(60, 5),
+(61, 5),
+(62, 5),
+(63, 6),
+(64, 6),
+(65, 6),
+(66, 6),
+(50, 7),
+(67, 7),
+(68, 7),
+(69, 7),
+(70, 7);
+
