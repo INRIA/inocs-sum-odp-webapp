@@ -10,8 +10,7 @@ import {
 import type { IKpi, IIKpiResultBeforeAfter } from "../../types";
 import { BeforeAndAfterDates, LivingLabKpiResultsForm } from "./form";
 import { KpiTypeBadge } from "./KpiTypeBadge";
-import { KpiMetricTypeBadge } from "./KpiMetricTypeBadge";
-import { Badge, ExpansionPanel } from "./ui";
+import { Badge, ExpansionPanel, Tooltip } from "./ui";
 import type { ICategory } from "../../types/Category";
 
 type Props = {
@@ -19,6 +18,8 @@ type Props = {
   livingLabId: string;
   kpiResults: IIKpiResultBeforeAfter[];
   categories: ICategory[];
+  valueBeforeDate?: string;
+  valueAfterDate?: string;
 };
 
 export function LivingLabKPIsEdition({
@@ -26,6 +27,8 @@ export function LivingLabKPIsEdition({
   livingLabId,
   kpiResults = [],
   categories = [],
+  valueBeforeDate,
+  valueAfterDate,
 }: Props) {
   if (!kpis || kpis.length === 0) {
     return <div>No KPIs available.</div>;
@@ -36,8 +39,12 @@ export function LivingLabKPIsEdition({
   );
   // Data collection date input state (YYYY-MM-DD)
   const today = new Date().toISOString().slice(0, 10);
-  const [beforeDate, setBeforeDate] = useState<string>(today);
-  const [afterDate, setAfterDate] = useState<string>(today);
+  const [beforeDate, setBeforeDate] = useState<string>(
+    valueBeforeDate ?? today
+  );
+  const [afterDate, setAfterDate] = useState<string | undefined>(
+    valueAfterDate
+  );
 
   const getKpiRow = (kpiId: string) => {
     let kpi = kpis.find((k) => k.id === kpiId);
@@ -50,30 +57,23 @@ export function LivingLabKPIsEdition({
         key={kpiId}
         className={hasChildren || !idChild ? "border-t-2 border-info/30" : ""}
       >
-        <TableCell className="flex flex-col w-22">
+        <TableCell className={`flex flex-col w-22 ${idChild ? "ml-2" : ""}`}>
           {kpi.kpi_number}
           <KpiTypeBadge type={kpi.type} />
         </TableCell>
         <TableCell className="whitespace-pre-line break-words">
-          {kpi.name}
-          <Badge tooltip={kpi.description} size="sm" color="info" />
+          <Tooltip content={kpi.description} placement="top">
+            <p className={idChild ? "ml-2" : "font-bold"}>{kpi.name} ⓘ</p>
+          </Tooltip>
         </TableCell>
         <TableCell>
-          {!hasChildren && (
-            <div className="flex flex-col text-xs">
-              <KpiMetricTypeBadge type={kpi.metric} />
-              {kpi.metric_description?.length &&
-                kpi.metric_description?.length > 0 && (
-                  <strong>{kpi.metric_description}</strong>
-                )}
-              {typeof kpi.min_value === "number" && (
-                <span>Min: {kpi.min_value} </span>
-              )}
-              {typeof kpi.max_value === "number" && (
-                <span>Max: {kpi.max_value}</span>
-              )}
-            </div>
-          )}
+          <div className="flex flex-col text-xs">
+            {kpi.metric_description}
+            <span>
+              {typeof kpi.min_value === "number" && <>min: {kpi.min_value} </>}
+              {typeof kpi.max_value === "number" && <>max: {kpi.max_value}</>}
+            </span>
+          </div>
         </TableCell>
         <TableCell className="w-20">
           {!hasChildren && (
@@ -94,6 +94,8 @@ export function LivingLabKPIsEdition({
   return (
     <div className="flex flex-col gap-8 mx-auto">
       <BeforeAndAfterDates
+        valueBeforeDate={beforeDate}
+        valueAfterDate={afterDate}
         onChangeBeforeDate={setBeforeDate}
         onChangeAfterDate={setAfterDate}
       />
@@ -101,7 +103,7 @@ export function LivingLabKPIsEdition({
         <ExpansionPanel
           key={id}
           header={
-            <div className="flex flex-row justify-center items-center gap-2 rounded-2xl border-info bg-info px-2 py-1">
+            <div className="flex flex-row justify-start items-center gap-2 rounded-2xl border-info bg-info px-2 py-1">
               <h5>{name}</h5>
               <Badge
                 color="light"

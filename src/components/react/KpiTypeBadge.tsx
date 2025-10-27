@@ -9,7 +9,7 @@ export interface KpiScopeBadgeProps {
 
 export function KpiTypeBadge({
   type = "GLOBAL",
-  size = "sm",
+  size = "xs",
 }: KpiScopeBadgeProps) {
   return (
     <Badge
@@ -17,6 +17,7 @@ export function KpiTypeBadge({
       color={type === "GLOBAL" ? "light" : "dark"}
       className={""}
       aria-label={`${type} KPI badge`}
+      inline={false}
     >
       {type}
     </Badge>

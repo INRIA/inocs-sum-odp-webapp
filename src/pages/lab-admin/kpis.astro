@@ -15,14 +15,45 @@ const filteredKpis = kpis.filter(
   (kpi) =>
     kpi.id !== modalSplitKpi?.id && kpi.parent_kpi_id !== modalSplitKpi?.id
 );
-const livingLab = await api.getLivingLab(labId);
+const livingLabData = await api.getLivingLab(labId);
 const categories = await api.getCategories("KPI_SIEF");
+
+const modalSplitResults = livingLabData?.kpi_results?.filter((result) =>
+  filteredKpis?.some((mk) => mk.id === result.kpidefinition_id)
+);
+
+const valueBeforeDate = modalSplitResults?.reduce(
+  (minDate, result) => {
+    const dateStr = result.result_before?.date;
+    if (dateStr) {
+      const date = new Date(dateStr);
+      if (!minDate || date < minDate) {
+        return date;
+      }
+    }
+    return minDate;
+  },
+  null as Date | null
+);
+
+const valueAfterDate = modalSplitResults?.reduce(
+  (maxDate, result) => {
+    const dateStr = result.result_after?.date;
+    if (dateStr) {
+      const date = new Date(dateStr);
+      if (!maxDate || date > maxDate) {
+        return date;
+      }
+    }
+    return maxDate;
+  },
+  null as Date | null
+);
 ---
 
 <Layout role="editor">
   <div class="mx-auto px-4 py-8 flex flex-col gap-8">
     <h2>Share your Key Performance Indicators - KPI</h2>
-    <p>Find the relevant KPIs for seamless urban mobility.</p>
 
     <InfoAlert
       title="How to calculate KPIs ?"
@@ -31,8 +62,14 @@ const categories = await api.getCategories("KPI_SIEF");
       actionText="Access documentation"
     >
       <small
-        >Access the survey template and documents to support your KPI
-        calculations.</small
+        >Provide KPI values to quantify the impact of urban mobility measures
+        implemented in your Living Lab.<br />
+
+        <strong>Tip:</strong> Use the provided template to ensure all necessary data
+        is captured. The <strong
+          ><a href="/files/SIEF_All_KPIs-template.xlsx">SIEF KPIs template</a
+          ></strong
+        > will guide you to calculate the KPI values.</small
       >
     </InfoAlert>
 
@@ -40,7 +77,13 @@ const categories = await api.getCategories("KPI_SIEF");
       categories={categories || []}
       kpis={filteredKpis}
       livingLabId={labId}
-      kpiResults={livingLab?.kpi_results || []}
+      kpiResults={livingLabData?.kpi_results || []}
+      valueAfterDate={valueAfterDate
+        ? valueAfterDate.toISOString().slice(0, 10)
+        : undefined}
+      valueBeforeDate={valueBeforeDate
+        ? valueBeforeDate.toISOString().slice(0, 10)
+        : undefined}
       client:load
     />
   </div>

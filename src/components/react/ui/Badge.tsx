@@ -10,7 +10,7 @@ export type BadgeColor =
   | "light"
   | "transparent"
   | "success";
-export type BadgeSize = "sm" | "md" | "lg" | "xl";
+export type BadgeSize = "xs" | "sm" | "md" | "lg" | "xl";
 
 export interface BadgeProps {
   icon?: React.ReactNode;
@@ -22,6 +22,7 @@ export interface BadgeProps {
   "aria-label"?: string;
   tooltip?: string;
   displayTooltipIcon?: boolean;
+  inline?: boolean;
 }
 
 const COLOR_CLASSES: Record<BadgeColor, string> = {
@@ -36,6 +37,7 @@ const COLOR_CLASSES: Record<BadgeColor, string> = {
 };
 
 const SIZE_CLASSES: Record<BadgeSize, string> = {
+  xs: "p-0.5 text-[0.5rem]",
   sm: "p-0.5 text-xs",
   md: "p-1 text-sm",
   lg: "p-1.5 text-base",
@@ -43,6 +45,7 @@ const SIZE_CLASSES: Record<BadgeSize, string> = {
 };
 
 const ICON_WRAPPER: Record<BadgeSize, string> = {
+  xs: "h-1 w-1",
   sm: "h-3 w-3",
   md: "h-5 w-5",
   lg: "h-7 w-7",
@@ -59,16 +62,18 @@ export function Badge({
   tooltip,
   displayTooltipIcon = true,
   "aria-label": ariaLabel,
+  inline = true,
 }: BadgeProps) {
   const colorClass = COLOR_CLASSES[color] ?? COLOR_CLASSES.secondary;
   const sizeClass = SIZE_CLASSES[size] ?? SIZE_CLASSES.md;
   const iconClass = ICON_WRAPPER[size] ?? ICON_WRAPPER.md;
+  const displayStyle = inline ? "inline-flex" : "";
 
   const [displayTooltip, setDisplayTooltip] = React.useState(false);
   return (
     <div className="">
       <span
-        className={`inline-flex items-center gap-2 rounded-full font-medium ${colorClass} ${sizeClass} ${className}`}
+        className={`items-center gap-2 rounded-full font-medium ${colorClass} ${sizeClass} ${className} ${displayStyle} border`}
         role={role}
         aria-label={ariaLabel}
         onMouseEnter={() => setDisplayTooltip(true)}

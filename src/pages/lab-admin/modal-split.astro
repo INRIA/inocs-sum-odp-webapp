@@ -49,10 +49,18 @@ const valueAfterDate = modalSplitResults?.reduce(
 <Layout role="editor">
   <div class="mx-auto px-4 py-8 flex flex-col gap-8">
     <h2 class="text-2xl font-bold mb-4">Modal split KPI</h2>
-    <p class="text-sm text-gray-600 mb-6">
-      Enter each mode, type, status, and optionally provide trips, passenger-km,
-      or vehicle-km. At least one of the three is required.
-    </p>
+
+    <InfoAlert title="" icon="question" variant="info">
+      <small
+        >This page collects modal split for all transport modes.<br />
+        The status of the transport mode provides insights about the scheduled changes
+        on the transport network within the Living Lab.<br />
+        <i
+          >If there is a New Shared Mobility Service introduced, please record
+          with 0% at the before implementation phase.</i
+        ><br />
+      </small>
+    </InfoAlert>
 
     <InfoAlert
       title=""
@@ -61,19 +69,14 @@ const valueAfterDate = modalSplitResults?.reduce(
       actionText="Modal Split KPI template"
       actionHref={"/files/SIEF_Modal_Split_KPI-template.xlsx"}
     >
-      <small
-        >This page collects modal split for all transport modes.<br />
-        The status of the transport mode provides insights about the scheduled changes
-        on the transport network within the Living Lab.<br />
-        If there is a New Shared Mobility Service introduced, please record with
-        0% at the before implementation phase.<br />
-        The final Modal Split KPI values can be identified with the <strong
+      <small>
+        <strong>Tip:</strong> the Modal Split KPI values can be identified with the
+        <strong
           ><a href="/files/SIEF_Modal_Split_KPI-template.xlsx"
             >Modal Split template spreadsheet</a
           ></strong
-        >, which will guide you to calculate the values.</small
-      >
-      <br />
+        >, which will guide you to calculate the values.
+      </small>
     </InfoAlert>
   </div>
 
