@@ -47,20 +47,20 @@ INSERT INTO `projects` (`name`, `description`, `type`, `image_url`, `created_at`
 ('Central PT planning and construction program', 'Comprehensive public transport network planning to enhance coordination and efficiency.', 'PULL', '/icons/cityz_zones.svg', NOW(), NOW());
 
 
-INSERT INTO `transport_mode` (`id`, `name`, `description`, `type`, `created_at`) VALUES
-(1, 'Private Car', 'Individually owned motor vehicle used for personal trips.', 'PRIVATE', NOW()),
-(2, 'Motorcycle / Scooter', 'Two-wheeled motorised vehicle for solo or two-person travel.', 'PRIVATE', NOW()),
-(3, 'Carsharing', 'Shared access to cars on demand through a membership or app.', 'NSM', NOW()),
-(4, 'Bicycle', 'User-owned bicycle for short-to-medium distance trips.', 'NSM', NOW()),
-(5, 'E-scooter', 'Electric micromobility vehicles', 'NSM', NOW()),
-(6, 'Walking', 'Pedestrian travel for short distances; zero-emission active mode.', 'OTHER', NOW()),
-(7, 'Micromobility', '', 'NSM', NOW()),
-(8, 'Ride hailing', 'Flexible shared transit that adapts routes and schedules to demand.', 'NSM', NOW()),
-(9, 'Taxi', 'Taxi ride hailing', 'NSM', NOW()),
-(10, 'Train', 'Rail services connecting cities and suburbs over longer distances.', 'PUBLIC_TRANSPORT', NOW()),
-(11, 'Bus', 'Scheduled public transport on roads serving local or regional routes.', 'PUBLIC_TRANSPORT', NOW()),
-(12, 'Metro / Subway', 'High-capacity rapid transit serving dense urban areas.', 'PUBLIC_TRANSPORT', NOW()),
-(13, 'Other', 'Other means of transport', 'PRIVATE', NOW());
+INSERT INTO `transport_mode` (`id`, `name`, `description`, `type`, `color`, `created_at`) VALUES
+(1, 'Private Car', 'Individually owned motor vehicle used for personal trips.', 'PRIVATE', '#004494', NOW()),
+(2, 'Motorcycle / Scooter', 'Two-wheeled motorised vehicle for solo or two-person travel.', 'PRIVATE', '#FF632F', NOW()),
+(3, 'Carsharing', 'Shared access to cars on demand through a membership or app.', 'NSM', '#6FAE24', NOW()),
+(4, 'Bicycle', 'User-owned bicycle for short-to-medium distance trips.', 'NSM', '#81BF2D', NOW()),
+(5, 'E-scooter', 'Electric micromobility vehicles', 'NSM', '#98C33A', NOW()),
+(6, 'Walking', 'Pedestrian travel for short distances; zero-emission active mode.', 'OTHER', '#DADADA', NOW()),
+(7, 'Micromobility', '', 'NSM', '#B4D952', NOW()),
+(8, 'Ride hailing', 'Flexible shared transit that adapts routes and schedules to demand.', 'NSM', '#D0F06A', NOW()),
+(9, 'Taxi', 'Taxi ride hailing', 'NSM', '#55910b', NOW()),
+(10, 'Train', 'Rail services connecting cities and suburbs over longer distances.', 'PUBLIC_TRANSPORT', '#f97448', NOW()),
+(11, 'Bus', 'Scheduled public transport on roads serving local or regional routes.', 'PUBLIC_TRANSPORT', '#4797d8', NOW()),
+(12, 'Metro / Subway', 'High-capacity rapid transit serving dense urban areas.', 'PUBLIC_TRANSPORT', '#75BDFB', NOW()),
+(13, 'Other', 'Other means of transport', 'PRIVATE', '#606060', NOW());
 
 
 INSERT INTO `kpidefinitions` (

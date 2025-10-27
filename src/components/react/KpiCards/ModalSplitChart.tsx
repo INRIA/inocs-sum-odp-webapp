@@ -1,5 +1,5 @@
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
-import { Pie, Doughnut } from "react-chartjs-2";
+import { Doughnut } from "react-chartjs-2";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -9,13 +9,13 @@ export interface SplitItem {
   color: string;
 }
 
-interface Dataset {
+export interface ModalSplitChartDataset {
   label: string;
   data: SplitItem[];
 }
 
 interface Props {
-  data: Dataset[];
+  data: ModalSplitChartDataset[];
   colors?: string[];
 }
 

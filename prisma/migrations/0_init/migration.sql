@@ -256,9 +256,10 @@ CREATE TABLE `living_lab_user_relation` (
 -- CreateTable
 CREATE TABLE `transport_mode` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `name` VARCHAR(255) NOT NULL,
+    `name` VARCHAR(100) NOT NULL,
     `description` TEXT NULL,
-    `type` VARCHAR(255) NULL,
+    `type` VARCHAR(100) NULL,
+    `color` VARCHAR(10) NULL,
     `created_at` TIMESTAMP(0) NULL,
 
     PRIMARY KEY (`id`)

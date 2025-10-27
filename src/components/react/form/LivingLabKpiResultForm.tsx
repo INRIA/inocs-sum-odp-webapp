@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   PencilSquareIcon,
   CheckCircleIcon,
@@ -31,6 +31,7 @@ type Props = {
   min?: number;
   max?: number;
   placeholder?: string;
+  changeDateAllowed?: boolean;
 };
 
 export function LivingLabKpiResultForm({
@@ -45,6 +46,7 @@ export function LivingLabKpiResultForm({
   min,
   max,
   placeholder = "Enter value",
+  changeDateAllowed = true,
 }: Props) {
   //TODO adapt to metric type
   const _setValue = (value?: number | undefined) => {
@@ -59,6 +61,22 @@ export function LivingLabKpiResultForm({
   const [date, setDate] = useState<string>(initial?.date ?? defaultDate);
   const [error, setError] = useState<string | null>(null);
   const [id, setId] = useState<string | undefined>(initial?.id);
+
+  useEffect(() => {
+    if (defaultDate) {
+      if (initial && initial?.id && initial.date) {
+        api.upsertLivingLabKpiResults({
+          id: id,
+          kpidefinition_id: kpiId,
+          living_lab_id: livingLabId,
+          value: Number(value),
+          date: defaultDate,
+          transport_mode_id: transportModeId,
+        });
+      }
+      setDate(defaultDate);
+    }
+  }, [defaultDate]);
 
   const handleSave = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -128,8 +146,8 @@ export function LivingLabKpiResultForm({
   };
 
   const validateDate = (d: string) => {
-    if (d && isNaN(new Date(d).getTime())) {
-      setError("Invalid date");
+    if (!d?.length || (d && isNaN(new Date(d).getTime()))) {
+      setError("Set a collection date first (top of the page)");
       return false;
     } else {
       setError(null);
@@ -167,7 +185,9 @@ export function LivingLabKpiResultForm({
             )}
           </button>
         </div>
-        {value && date && <small>{formatDateToMonthYear(date)}</small>}
+        {changeDateAllowed && value && date && (
+          <small>{formatDateToMonthYear(date)}</small>
+        )}
       </div>
     );
   }
@@ -175,9 +195,9 @@ export function LivingLabKpiResultForm({
   return (
     <form
       onSubmit={handleSave}
-      className="flex flex-col items-start space-x-3 gap-2 w-28"
+      className="flex flex-col items-start space-x-3 gap-2 w-32"
     >
-      <Field className="w-28">
+      <Field className="w-32">
         <Input
           placeholder={placeholder}
           type="number"
@@ -192,14 +212,16 @@ export function LivingLabKpiResultForm({
         <small className="text-red-600">{error}</small>
       </Field>
 
-      <Field className="w-28">
-        <Input
-          type="date"
-          name="date"
-          value={parseDateToInputHtml(date)}
-          onChange={(e) => setDate(e.target.value)}
-        />
-      </Field>
+      {changeDateAllowed && (
+        <Field className="w-32">
+          <Input
+            type="date"
+            name="date"
+            value={parseDateToInputHtml(date)}
+            onChange={(e) => setDate(e.target.value)}
+          />
+        </Field>
+      )}
 
       <div className="flex flex-row justify-end items-end w-full space-x-2">
         <button

@@ -16,6 +16,7 @@ type Props = {
   defaultBeforeDate?: string;
   defaultAfterDate?: string;
   onChange?: (before: number | null, after: number | null) => void;
+  changeDateAllowed?: boolean;
 };
 
 export function LivingLabKpiResultsForm({
@@ -28,6 +29,7 @@ export function LivingLabKpiResultsForm({
   defaultBeforeDate,
   defaultAfterDate,
   onChange,
+  changeDateAllowed,
 }: Props) {
   const [before, setBefore] = useState<number | null>(initialBefore?.value);
   const [after, setAfter] = useState<number | null>(initialAfter?.value);
@@ -60,6 +62,7 @@ export function LivingLabKpiResultsForm({
             setBefore(result?.value ?? null);
             if (onChange) onChange(result?.value, after);
           }}
+          changeDateAllowed={changeDateAllowed}
         />
       </div>
       <div className="flex items-center justify-center mx-4">
@@ -80,6 +83,7 @@ export function LivingLabKpiResultsForm({
               setAfter(result?.value ?? null);
               if (onChange) onChange(before, result?.value);
             }}
+            changeDateAllowed={changeDateAllowed}
           />
         )}
       </div>

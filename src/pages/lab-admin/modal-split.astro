@@ -2,8 +2,6 @@
 import Layout from "../../layouts/Layout.astro";
 import { InfoAlert, LivingLabModalSplit } from "../../components/react";
 import ApiClient from "../../lib/api-client/ApiClient";
-import { EnumKpiMetricType } from "../../types";
-
 const labId = Astro.locals.livingLab?.id;
 if (!labId) {
   return Astro.redirect(getUrl("/lab-admin/set-lab"));
@@ -12,44 +10,86 @@ const api = new ApiClient(Astro.request);
 
 const transportModes = await api.getTransportModes();
 const modalSplitKpis = (await api.getKPIs({ kpi_number: "15" }))?.filter(
-  (kpi) => kpi.metric !== EnumKpiMetricType.NONE
+  (kpi) => kpi.parent_kpi_id
 );
 const livingLabData = await api.getLivingLab(labId);
 const modalSplitResults = livingLabData?.kpi_results?.filter((result) =>
   modalSplitKpis?.some((mk) => mk.id === result.kpidefinition_id)
 );
+
+const valueBeforeDate = modalSplitResults?.reduce(
+  (minDate, result) => {
+    const dateStr = result.result_before?.date;
+    if (dateStr) {
+      const date = new Date(dateStr);
+      if (!minDate || date < minDate) {
+        return date;
+      }
+    }
+    return minDate;
+  },
+  null as Date | null
+);
+
+const valueAfterDate = modalSplitResults?.reduce(
+  (maxDate, result) => {
+    const dateStr = result.result_after?.date;
+    if (dateStr) {
+      const date = new Date(dateStr);
+      if (!maxDate || date > maxDate) {
+        return date;
+      }
+    }
+    return maxDate;
+  },
+  null as Date | null
+);
 ---
 
 <Layout role="editor">
   <div class="mx-auto px-4 py-8 flex flex-col gap-8">
-    <h2 class="text-2xl font-bold mb-4">Transport Modes</h2>
+    <h2 class="text-2xl font-bold mb-4">Modal split KPI</h2>
     <p class="text-sm text-gray-600 mb-6">
       Enter each mode, type, status, and optionally provide trips, passenger-km,
       or vehicle-km. At least one of the three is required.
     </p>
 
     <InfoAlert
-      title="How to collect information ?"
+      title=""
       icon="question"
       variant="success"
-      actionText="Access documentation"
+      actionText="Modal Split KPI template"
+      actionHref={"/files/SIEF_Modal_Split_KPI-template.xlsx"}
     >
       <small
-        >This page collects modal split for all transport modes, and will also
-        allow to identify shared modes in service or scheduled to be integrated
-        in the living lab network. Summary information, how to ? Examples
-        resources, survey examples, any other usefull information ?</small
+        >This page collects modal split for all transport modes.<br />
+        The status of the transport mode provides insights about the scheduled changes
+        on the transport network within the Living Lab.<br />
+        If there is a New Shared Mobility Service introduced, please record with
+        0% at the before implementation phase.<br />
+        The final Modal Split KPI values can be identified with the <strong
+          ><a href="/files/SIEF_Modal_Split_KPI-template.xlsx"
+            >Modal Split template spreadsheet</a
+          ></strong
+        >, which will guide you to calculate the values.</small
       >
+      <br />
     </InfoAlert>
-
-    <LivingLabModalSplit
-      modes={transportModes ?? []}
-      kpis={modalSplitKpis ?? []}
-      livingLabId={labId}
-      livingLabTransportModes={livingLabData?.transport_mode_living_lab_implementation ||
-        []}
-      kpiResults={modalSplitResults ?? []}
-      client:load
-    />
   </div>
+
+  <LivingLabModalSplit
+    modes={transportModes ?? []}
+    kpis={modalSplitKpis ?? []}
+    livingLabId={labId}
+    livingLabTransportModes={livingLabData?.transport_mode_living_lab_implementation ||
+      []}
+    kpiResults={modalSplitResults ?? []}
+    valueAfterDate={valueAfterDate
+      ? valueAfterDate.toISOString().slice(0, 10)
+      : undefined}
+    valueBeforeDate={valueBeforeDate
+      ? valueBeforeDate.toISOString().slice(0, 10)
+      : undefined}
+    client:load
+  />
 </Layout>

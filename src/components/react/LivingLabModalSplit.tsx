@@ -25,6 +25,8 @@ interface Props {
   livingLabId: string;
   livingLabTransportModes: ITransportModeLivingLabImplementation[];
   kpiResults: IIKpiResultBeforeAfter[];
+  valueBeforeDate?: string;
+  valueAfterDate?: string;
 }
 
 export function LivingLabModalSplit({
@@ -33,10 +35,16 @@ export function LivingLabModalSplit({
   livingLabId,
   livingLabTransportModes = [],
   kpiResults = [],
+  valueBeforeDate,
+  valueAfterDate,
 }: Props) {
   const today = new Date().toISOString().slice(0, 10);
-  const [beforeDate, setBeforeDate] = useState<string>(today);
-  const [afterDate, setAfterDate] = useState<string>(today);
+  const [beforeDate, setBeforeDate] = useState<string>(
+    valueBeforeDate ?? today
+  );
+  const [afterDate, setAfterDate] = useState<string | undefined>(
+    valueAfterDate
+  );
 
   const [livingLabTransportModesMap, setLivingLabTransportModesMap] = useState<
     Map<string, ITransportModeLivingLabImplementation>
@@ -51,7 +59,9 @@ export function LivingLabModalSplit({
   >(
     new Map(
       kpiResults.map((resultKpi) => [
-        `${resultKpi.kpidefinition_id}_${resultKpi?.transport_mode_id ?? "none"}`,
+        `${resultKpi.kpidefinition_id}_${
+          resultKpi?.transport_mode_id ?? "none"
+        }`,
         resultKpi,
       ])
     )
@@ -125,12 +135,8 @@ export function LivingLabModalSplit({
     ];
   };
 
-  return (
-    <div className="bg-white shadow rounded-md flex flex-col gap-6">
-      <BeforeAndAfterDates
-        onChangeBeforeDate={setBeforeDate}
-        onChangeAfterDate={setAfterDate}
-      />
+  const getTabs = () => {
+    return (
       <Tabs
         align="right"
         tabs={
@@ -141,6 +147,64 @@ export function LivingLabModalSplit({
           })) ?? []
         }
       ></Tabs>
+    );
+  };
+
+  const onKpiValuesChange = (
+    kpiId: string,
+    transportModeId: string,
+    before: number | null,
+    after: number | null
+  ) => {
+    const key = `${kpiId}_${transportModeId}`;
+    // previous entry for this KPI+mode
+    const prevEntry = livingLabKpiMap.get(key);
+
+    const prevBefore = prevEntry?.result_before?.value ?? null;
+    const prevAfter = prevEntry?.result_after?.value ?? null;
+
+    // compute deltas (treat null as 0 for totals adjustment)
+    const deltaBefore = (before ?? 0) - (prevBefore ?? 0);
+    const deltaAfter = (after ?? 0) - (prevAfter ?? 0);
+
+    setLivingLabKpiMap((prevMap) => {
+      const updatedMap = new Map(prevMap);
+      updatedMap.set(key, {
+        ...prevEntry,
+        result_before: {
+          transport_mode_id: transportModeId,
+          value: before,
+        },
+        result_after: {
+          transport_mode_id: transportModeId,
+          value: after,
+        },
+      });
+      return updatedMap;
+    });
+    // update totals for this KPI
+    setKpiTotals((prev) => {
+      const updated = new Map(prev);
+      const existingTotals = updated.get(kpiId) ?? {
+        before: 0,
+        after: 0,
+      };
+      existingTotals.before = (existingTotals.before ?? 0) + deltaBefore;
+      existingTotals.after = (existingTotals.after ?? 0) + deltaAfter;
+      updated.set(kpiId, existingTotals);
+      return updated;
+    });
+  };
+
+  return (
+    <div className="bg-white shadow rounded-md flex flex-col gap-6">
+      <BeforeAndAfterDates
+        valueBeforeDate={beforeDate}
+        valueAfterDate={afterDate}
+        onChangeBeforeDate={setBeforeDate}
+        onChangeAfterDate={setAfterDate}
+      />
+      {getTabs()}
       <div className="p-4 overflow-x-auto">
         <Table
           grid
@@ -233,49 +297,9 @@ export function LivingLabModalSplit({
                           defaultBeforeDate={beforeDate}
                           defaultAfterDate={afterDate}
                           onChange={(before, after) => {
-                            const key = `${kpi.id}_${m.id}`;
-                            // previous entry for this KPI+mode
-                            const prevEntry = livingLabKpiMap.get(key);
-                            const prevBefore =
-                              prevEntry?.result_before?.value ?? null;
-                            const prevAfter =
-                              prevEntry?.result_after?.value ?? null;
-
-                            // compute deltas (treat null as 0 for totals adjustment)
-                            const deltaBefore =
-                              (before ?? 0) - (prevBefore ?? 0);
-                            const deltaAfter = (after ?? 0) - (prevAfter ?? 0);
-
-                            setLivingLabKpiMap((prevMap) => {
-                              const updatedMap = new Map(prevMap);
-                              updatedMap.set(key, {
-                                id: kpi.id,
-                                result_before: {
-                                  transport_mode_id: m.id,
-                                  value: before,
-                                },
-                                result_after: {
-                                  transport_mode_id: m.id,
-                                  value: after,
-                                },
-                              });
-                              return updatedMap;
-                            });
-                            // update totals for this KPI
-                            setKpiTotals((prev) => {
-                              const updated = new Map(prev);
-                              const existingTotals = updated.get(kpi.id) ?? {
-                                before: 0,
-                                after: 0,
-                              };
-                              existingTotals.before =
-                                (existingTotals.before ?? 0) + deltaBefore;
-                              existingTotals.after =
-                                (existingTotals.after ?? 0) + deltaAfter;
-                              updated.set(kpi.id, existingTotals);
-                              return updated;
-                            });
+                            onKpiValuesChange(kpi.id, m.id, before, after);
                           }}
+                          changeDateAllowed={false}
                         />
                       </div>
                     </TableCell>

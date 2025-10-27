@@ -25,6 +25,7 @@ export type InfoAlertProps = {
   variant?: AlertVariant;
   icon?: AlertIconVariant;
   actionText?: string;
+  actionHref?: string;
   onAction?: () => void;
   className?: string;
 };
@@ -80,6 +81,7 @@ export function InfoAlert({
   children,
   variant = "info",
   actionText,
+  actionHref,
   onAction,
   className = "",
 }: InfoAlertProps) {
@@ -104,6 +106,7 @@ export function InfoAlert({
             <RButton
               variant="link"
               onClick={onAction}
+              href={actionHref}
               className={`${v.buttonBg}`}
               text={actionText}
               defaultArrow
