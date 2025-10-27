@@ -284,8 +284,7 @@ export function LivingLabModalSplit({
                         <LivingLabKpiResultsForm
                           transportModeId={m.id}
                           livingLabId={livingLabId}
-                          kpiId={kpi.id}
-                          kpiMetric={kpi.metric}
+                          kpi={kpi}
                           initialBefore={
                             livingLabKpiMap.get(`${kpi.id}_${m.id}`)
                               ?.result_before

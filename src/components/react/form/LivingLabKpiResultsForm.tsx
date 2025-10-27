@@ -5,11 +5,11 @@ import {
   ArrowTrendingUpIcon,
   EqualsIcon,
 } from "@heroicons/react/20/solid";
+import type { IKpi } from "../../../types";
 
 type Props = {
   livingLabId: string;
-  kpiId: string;
-  kpiMetric: string;
+  kpi: IKpi;
   transportModeId?: string;
   initialBefore?: any;
   initialAfter?: any;
@@ -20,9 +20,8 @@ type Props = {
 };
 
 export function LivingLabKpiResultsForm({
+  kpi,
   livingLabId,
-  kpiId,
-  kpiMetric,
   transportModeId,
   initialBefore,
   initialAfter,
@@ -52,8 +51,7 @@ export function LivingLabKpiResultsForm({
       <div className="flex-1">
         <LivingLabKpiResultForm
           livingLabId={livingLabId}
-          kpiId={kpiId}
-          kpiMetric={kpiMetric}
+          kpi={kpi}
           transportModeId={transportModeId}
           initial={initialBefore}
           defaultDate={defaultBeforeDate}
@@ -72,8 +70,7 @@ export function LivingLabKpiResultsForm({
         {initialBefore?.value && (
           <LivingLabKpiResultForm
             livingLabId={livingLabId}
-            kpiId={kpiId}
-            kpiMetric={kpiMetric}
+            kpi={kpi}
             transportModeId={transportModeId}
             initial={initialAfter}
             defaultValue={initialBefore?.value}

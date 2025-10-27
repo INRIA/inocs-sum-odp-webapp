@@ -7,6 +7,7 @@ import {
 } from "@heroicons/react/20/solid";
 import {
   EnumKpiMetricType,
+  type IKpi,
   type IKpiResult,
   type IKpiResultInput,
 } from "../../../types/KPIs";
@@ -21,34 +22,27 @@ const api = new ApiClient();
 
 type Props = {
   initial?: IKpiResult | null;
-  kpiId: string;
+  kpi: IKpi;
   livingLabId: string;
   transportModeId?: string;
-  kpiMetric?: string;
   defaultDate?: string;
   defaultValue?: number;
   onChange?: (result: IKpiResultInput) => void;
-  min?: number;
-  max?: number;
   placeholder?: string;
   changeDateAllowed?: boolean;
 };
 
 export function LivingLabKpiResultForm({
-  kpiId,
+  kpi,
   initial,
   livingLabId,
   transportModeId,
-  kpiMetric,
   defaultDate = "",
   defaultValue,
   onChange,
-  min,
-  max,
   placeholder = "Enter value",
   changeDateAllowed = true,
 }: Props) {
-  //TODO adapt to metric type
   const _setValue = (value?: number | undefined) => {
     return value !== undefined && value !== null
       ? Math.round(Number(value) * 100) / 100
@@ -61,6 +55,12 @@ export function LivingLabKpiResultForm({
   const [date, setDate] = useState<string>(initial?.date ?? defaultDate);
   const [error, setError] = useState<string | null>(null);
   const [id, setId] = useState<string | undefined>(initial?.id);
+  const {
+    id: kpiId,
+    metric: kpiMetric,
+    min_value: min,
+    max_value: max,
+  } = kpi ?? {};
 
   useEffect(() => {
     if (defaultDate) {
@@ -121,7 +121,7 @@ export function LivingLabKpiResultForm({
       min !== null &&
       val < min
     ) {
-      setError(`Min value is ${min}, lower values are not accepted`);
+      setError(`Invalid value, min value is ${min}`);
       return false;
     } else if (
       kpiMetric === EnumKpiMetricType.PERCENTAGE &&
@@ -129,15 +129,15 @@ export function LivingLabKpiResultForm({
       max !== null &&
       val > max
     ) {
-      setError(`Max value is ${max}, higher values are not accepted`);
+      setError(`Invalid value, max value is ${max}`);
       return false;
     } else if (min !== undefined && min !== null && val < min) {
       setError(
-        `Min value observed is ${min}, are you sure your value is correct ?`
+        `Min value observed is ${min}. \nAre you sure the value is correct ?`
       );
     } else if (max !== undefined && max !== null && val > max) {
       setError(
-        `Max value observed is ${max}, are you sure your value is correct ?`
+        `Max value observed is ${max}. \nAre you sure the value is correct ?`
       );
     } else {
       setError(null);
@@ -209,7 +209,7 @@ export function LivingLabKpiResultForm({
           min={kpiMetric === EnumKpiMetricType.PERCENTAGE ? 0 : undefined}
           max={kpiMetric === EnumKpiMetricType.PERCENTAGE ? 1 : undefined}
         />
-        <small className="text-red-600">{error}</small>
+        <small className="text-red-600 whitespace-pre-line">{error}</small>
       </Field>
 
       {changeDateAllowed && (

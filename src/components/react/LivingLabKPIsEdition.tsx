@@ -79,8 +79,7 @@ export function LivingLabKPIsEdition({
           {!hasChildren && (
             <LivingLabKpiResultsForm
               livingLabId={livingLabId}
-              kpiId={kpi.id}
-              kpiMetric={kpi.metric}
+              kpi={kpi}
               initialBefore={livingLabKpiMap.get(kpi.id)?.result_before}
               initialAfter={livingLabKpiMap.get(kpi.id)?.result_after}
               defaultBeforeDate={beforeDate}
