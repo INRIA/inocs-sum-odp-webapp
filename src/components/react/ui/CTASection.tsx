@@ -48,7 +48,7 @@ export function CTASection({
             )}
             <div className="w-full flex-auto">
               <h2
-                className={`${
+                className={`mb-4 ${
                   order === "center" ? "text-center lg:px-20" : "text-left"
                 }`}
               >

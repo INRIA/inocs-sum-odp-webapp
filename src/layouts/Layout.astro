@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import Footer from "../components/Footer.astro";
 import { SidebarMenu, SiteNavBar } from "../components/react/ui";
 import ApiClient from "../lib/api-client/ApiClient";
 import { getUrl } from "../lib/helpers";
@@ -24,6 +25,59 @@ const userInfo = Astro.locals.user
   : undefined;
 
 const currentLivingLab = Astro.locals.livingLab;
+
+const menuItems = [
+  {
+    label: "Home",
+    href: getUrl("/"),
+  },
+  {
+    label: "Living Labs",
+    subItems: labsItems,
+  },
+  {
+    label: "Data",
+    subItems: [
+      // { href: "#", label: "KPIs" },
+      { href: "/data/measures", label: "Measures" },
+      // { href: "#", label: "Modal split" },
+    ],
+  },
+  // {
+  //   label: "Analysis Tools",
+  //   subItems: [
+  //     { href: "#", label: "Measures impact" },
+  //     { href: "#", label: "Multi‑criteria decision tool" },
+  //   ],
+  // },
+];
+
+const footerMenuItems = [
+  {
+    title: "Open Data Platform",
+    items: [
+      { label: "About", href: getUrl("/") },
+      { label: "Measures", href: getUrl("/data/measures") },
+      // { label: "Analysis Tools", href: "#" },
+    ],
+  },
+  {
+    title: "SUM project",
+    items: [
+      {
+        label: "About",
+        href: "https://sum-project.eu/about",
+      },
+      { label: "Partners", href: "https://sum-project.eu/partners" },
+      { label: "Resources", href: "https://sum-project.eu/resources/" },
+      { label: "Contact", href: "https://sum-project.eu/contact/" },
+    ],
+  },
+  {
+    title: "Living Labs",
+    items: labsItems,
+  },
+];
 ---
 
 <!doctype html>
@@ -58,7 +112,7 @@ const currentLivingLab = Astro.locals.livingLab;
     {
       role === "visitor" && (
         <SiteNavBar
-          livingLabs={labsItems}
+          menuItems={menuItems}
           userInfo={userInfo}
           currentLivingLab={currentLivingLab}
           client:load
@@ -78,6 +132,8 @@ const currentLivingLab = Astro.locals.livingLab;
         </SidebarMenu>
       )
     }
+
+    <Footer sections={footerMenuItems} />
   </body>
 </html>
 

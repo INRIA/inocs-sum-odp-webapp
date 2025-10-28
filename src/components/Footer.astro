@@ -1,0 +1,181 @@
+---
+import cofoundedLogo from "../assets/img/EN-Co-Funded-by-the-EU_POS-1.png";
+import civitasLogo from "../assets/img/CIVITAS_Logo_EU_transparent.png";
+import sumLogo from "../assets/img/sum_logo.svg";
+export interface FooterItem {
+  label: string;
+  href: string;
+}
+export interface FooterSection {
+  title: string;
+  items: FooterItem[];
+}
+
+const {
+  sections = [],
+  projectLogo = sumLogo.src,
+  leftLogo = cofoundedLogo.src,
+  rightLogo = civitasLogo.src,
+} = Astro.props as {
+  sections?: FooterSection[];
+  projectLogo?: string;
+  leftLogo?: string;
+  rightLogo?: string;
+};
+---
+
+<footer class="bg-gray-100 text-gray-700 border-t border-gray-200">
+  <div class="max-w-7xl mx-auto px-6 py-10">
+    <div
+      class="flex flex-col md:flex-row md:items-start md:justify-between gap-8"
+    >
+      <div class="mx-auto md:w-1/4 flex flex-col gap-4">
+        <div class="flex items-center gap-4">
+          <img
+            src={projectLogo}
+            alt="SUM project logo"
+            class="h-20 w-auto object-contain"
+          />
+        </div>
+
+        <div class="text-sm text-gray-600 flex flex-col gap-2">
+          <small class="flex items-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              id="Groupe_57"
+              data-name="Groupe 57"
+              width="20"
+              height="20"
+              viewBox="0 0 30 30"
+              ><path
+                id="Tracé_234"
+                data-name="Tracé 234"
+                d="M17.626,8a4.813,4.813,0,1,0,4.813,4.813A4.812,4.812,0,0,0,17.626,8Zm0,12.032C14.419,20.032,8,21.639,8,24.845v2.406H27.252V24.845C27.252,21.639,20.832,20.032,17.626,20.032Z"
+                transform="translate(-2.626 -2.626)"
+                fill="#98c33a"></path><path
+                id="Tracé_235"
+                data-name="Tracé 235"
+                d="M0,0H30V30H0Z"
+                fill="none"></path></svg
+            >
+            <a
+              class="text-secondary hover:underline"
+              href="mailto:sum-coordinator@inria.fr"
+              >Coordinator: <br />sum-coordinator@inria.fr</a
+            >
+          </small>
+          <small class="flex items-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 20 14.285"
+              ><g
+                id="Groupe_58"
+                data-name="Groupe 58"
+                transform="translate(0 0)"
+                ><path
+                  id="Union_1"
+                  data-name="Union 1"
+                  d="M2.144,14.285A2.143,2.143,0,0,1,0,12.142v-10a2.118,2.118,0,0,1,.072-.529L9.643,7.8l.12.057h.058a.656.656,0,0,0,.178,0,.7.7,0,0,0,.208-.057h.057l.123-.057,9.542-6.129A2.189,2.189,0,0,1,20,2.143v10a2.144,2.144,0,0,1-2.143,2.143ZM.872.428A2.141,2.141,0,0,1,2.144,0H17.857a2.141,2.141,0,0,1,1.271.428L10,6.292Z"
+                  transform="translate(0 0)"
+                  fill="#98c33a"></path></g
+              ></svg
+            >
+            <a
+              class="text-secondary hover:underline"
+              href="mailto:info@sum-project.eu">info@sum-project.eu</a
+            >
+          </small>
+        </div>
+        <div class="flex flex-row gap-4">
+          <a
+            class="text-secondary hover:underline h-5 w-5"
+            href="https://www.linkedin.com/company/sum-project-horizon-europe/"
+            target="_blank"
+            rel="noopener noreferrer"
+            ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"
+              ><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+              <path
+                fill="#004494"
+                d="M416 32L31.9 32C14.3 32 0 46.5 0 64.3L0 447.7C0 465.5 14.3 480 31.9 480L416 480c17.6 0 32-14.5 32-32.3l0-383.4C448 46.5 433.6 32 416 32zM135.4 416l-66.4 0 0-213.8 66.5 0 0 213.8-.1 0zM102.2 96a38.5 38.5 0 1 1 0 77 38.5 38.5 0 1 1 0-77zM384.3 416l-66.4 0 0-104c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9l0 105.8-66.4 0 0-213.8 63.7 0 0 29.2 .9 0c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9l0 117.2z"
+              ></path></svg
+            ></a
+          >
+          <a
+            class="text-secondary hover:underline h-5 w-5"
+            href="https://x.com/SUMProjectHoEU"
+            target="_blank"
+            rel="noopener noreferrer"
+            ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"
+              ><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+              <path
+                fill="#004494"
+                d="M357.2 48L427.8 48 273.6 224.2 455 464 313 464 201.7 318.6 74.5 464 3.8 464 168.7 275.5-5.2 48 140.4 48 240.9 180.9 357.2 48zM332.4 421.8l39.1 0-252.4-333.8-42 0 255.3 333.8z"
+              ></path></svg
+            ></a
+          >
+
+          <a
+            class="text-secondary hover:underline h-7 w-7"
+            href="https://www.youtube.com/@SUMProjectHorizonEurope"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"
+              ><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+              <path
+                fill="#004494"
+                d="M549.7 124.1C543.5 100.4 524.9 81.8 501.4 75.5 458.9 64 288.1 64 288.1 64S117.3 64 74.7 75.5C51.2 81.8 32.7 100.4 26.4 124.1 15 167 15 256.4 15 256.4s0 89.4 11.4 132.3c6.3 23.6 24.8 41.5 48.3 47.8 42.6 11.5 213.4 11.5 213.4 11.5s170.8 0 213.4-11.5c23.5-6.3 42-24.2 48.3-47.8 11.4-42.9 11.4-132.3 11.4-132.3s0-89.4-11.4-132.3zM232.2 337.6l0-162.4 142.7 81.2-142.7 81.2z"
+              ></path></svg
+            >
+          </a>
+        </div>
+      </div>
+
+      <div class="mx-auto md:w-3/4 grid grid-cols-2 sm:grid-cols-3 gap-6">
+        {
+          sections.slice(0, 3).map((section) => (
+            <div class="flex flex-col">
+              <h6 class="text-dark font-semibold mb-3">{section.title}</h6>
+              <ul class="space-y-1 text-sm flex flex-col -ml-4">
+                {section.items.map((item) => (
+                  <li>
+                    <a class="text-dark hover:text-dark·" href={item.href}>
+                      {item.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="flex flex-col md:flex-row justify-between items-center mt-10">
+      <div class="md:w-3/12">
+        <img
+          src={leftLogo}
+          alt="Co-funded by the European Union"
+          class="h-12 w-auto object-contain"
+        />
+      </div>
+
+      <div
+        class="md:w-6/12 border-t border-gray-200 pt-6 text-center text-sm text-gray-500"
+      >
+        © SUM Open Data Platform 2025 All Rights Reserved.
+      </div>
+
+      <!-- Right: policies, social icons area, CIVITAS logo -->
+      <div class="md:w-3/12 max-w-72">
+        <img
+          src={rightLogo}
+          alt="CIVITAS logo"
+          class="w-full h-auto object-contain"
+        />
+      </div>
+    </div>
+  </div>
+</footer>

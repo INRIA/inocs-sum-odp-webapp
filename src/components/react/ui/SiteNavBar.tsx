@@ -28,10 +28,10 @@ import {
 } from "@heroicons/react/16/solid";
 import { getUrl } from "../../../lib/helpers";
 import type { SessionLivingLabCookie } from "../../../types";
+import { RButton } from "./RButton";
 
-const HOME_URL = getUrl("/");
 interface Props {
-  livingLabs: MenuItem[];
+  menuItems?: MenuItem[];
   children?: React.ReactNode;
   userInfo?: { name: string; email: string; avatar?: string };
   currentLivingLab?: SessionLivingLabCookie;
@@ -45,36 +45,12 @@ interface MenuItem {
   subItems?: MenuItem[];
 }
 export function SiteNavBar({
-  livingLabs,
+  menuItems,
   children,
   userInfo,
   currentLivingLab,
 }: Props) {
-  const navbarItems: MenuItem[] = [
-    {
-      label: "Home",
-      href: HOME_URL,
-    },
-    {
-      label: "Living Labs",
-      subItems: livingLabs,
-    },
-    {
-      label: "Data",
-      subItems: [
-        { href: "#", label: "KPIs" },
-        { href: "/data/measures", label: "Measures" },
-        { href: "#", label: "Modal split" },
-      ],
-    },
-    {
-      label: "Analysis Tools",
-      subItems: [
-        { href: "#", label: "Measures impact" },
-        { href: "#", label: "Multi‑criteria decision tool" },
-      ],
-    },
-  ];
+  let navbarItems: MenuItem[] = menuItems ?? [];
   if (userInfo) {
     const userMenu: MenuItem = {
       label: userInfo?.name,
@@ -99,19 +75,8 @@ export function SiteNavBar({
         }))
       );
     }
-    navbarItems.push(userMenu);
+    navbarItems = [...navbarItems, userMenu];
   }
-
-  const analysisTools: MenuItem[] = [
-    { href: "#", label: "Measures impact" },
-    { href: "#", label: "Multi‑criteria decision tool" },
-  ];
-
-  // state to track which submenu is open
-  const [openMenu, setOpenMenu] = useState<
-    null | "living" | "data" | "analysis"
-  >(null);
-
   // refs for outside click detection
   const livingRef = useRef<HTMLDivElement | null>(null);
   const dataRef = useRef<HTMLDivElement | null>(null);
@@ -128,8 +93,6 @@ export function SiteNavBar({
         // click inside one of the menus -> do nothing
         return;
       }
-      // click outside -> close all
-      setOpenMenu(null);
     }
     document.addEventListener("mousedown", onDocClick);
     return () => document.removeEventListener("mousedown", onDocClick);
@@ -149,8 +112,8 @@ export function SiteNavBar({
 
           {/* desktop navbar items (hidden on smaller screens) */}
           <NavbarSection className="max-lg:hidden flex justify-end">
-            {navbarItems.map((item) => (
-              <React.Fragment key={item.label}>
+            {navbarItems.map((item, index) => (
+              <React.Fragment key={`${item.label}-${index}`}>
                 {item.subItems?.length !== undefined && (
                   <Dropdown>
                     <DropdownButton
@@ -189,6 +152,13 @@ export function SiteNavBar({
               </React.Fragment>
             ))}
           </NavbarSection>
+          {!userInfo && (
+            <RButton
+              variant="primary"
+              text="Login"
+              href={getUrl("/lab-admin/login")}
+            />
+          )}
         </Navbar>
       }
       sidebar={

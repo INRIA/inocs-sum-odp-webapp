@@ -92,9 +92,7 @@ function MeasureItem({
           <div
             className={`flex flex-col py-2 items-center space-x-2 rounded-lg border border-gray-300 bg-light shadow-xs cursor-pointer `}
           >
-            <small className="text-center font-bold">
-              Living Labs implementing
-            </small>
+            <small className="text-center">Living Labs implementing</small>
             <div className={`flex flex-wrap gap-2`}>
               {labs.map(({ key, labName, description, startDate }, idx) => (
                 <Badge

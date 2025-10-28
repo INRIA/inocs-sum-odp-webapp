@@ -55,7 +55,7 @@ small {
 }
 
 ul {
-  @apply mt-10 grid grid-cols-1 gap-x-8 gap-y-3 text-base sm:grid-cols-2;
+  @apply text-base ;
 }
 
 li {

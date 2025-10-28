@@ -10,8 +10,6 @@ import {
   LivingLabsMapSection,
 } from "../components/react";
 import heroImage from "../assets/img/sum-hero.png";
-import mcdaImage from "../assets/img/sum-mcda.png";
-import impactImage from "../assets/img/sum-measure-kpi-impact.png";
 import ApiClient from "../lib/api-client/ApiClient";
 import { getUrl } from "../lib/helpers";
 import type { ILivingLabPopulated } from "../types";
@@ -20,6 +18,10 @@ const api = new ApiClient(Astro.request);
 
 const livingLabsData = (await api.getLivingLabs()) as ILivingLabPopulated[];
 const measures = await api.getMeasures();
+const kpis = (await api.getKPIs())?.filter((kpi) => !kpi.parent_kpi_id);
+const transportModes = (await api.getTransportModes())?.filter(
+  (tm) => tm.type === "NSM"
+);
 
 const labs = livingLabsData?.map((lab) => ({
   id: lab.id,
@@ -30,7 +32,7 @@ const labs = livingLabsData?.map((lab) => ({
   totalMeasures: lab.projects?.length,
   kpisBefore: lab.kpi_results?.filter((kpi) => kpi.result_before).length,
   kpisAfter: lab.kpi_results?.filter((kpi) => kpi.result_after).length,
-  transportModes: lab.transport_modes?.length,
+  transportModes: lab.transport_modes?.filter((tm) => tm.type === "NSM").length,
   sustainablePercentage: 0.4,
 }));
 ---
@@ -46,7 +48,7 @@ const labs = livingLabsData?.map((lab) => ({
     }}
     secondary={{
       text: "Explore the Living Labs",
-      href: "#",
+      href: "#labs-section",
     }}
   />
   <div class="text-center">
@@ -64,21 +66,21 @@ const labs = livingLabsData?.map((lab) => ({
       title="Shared Urban Mobility"
       subtitle="The SUM Open Data Platform collects and delivers data and analytical tools to monitor, evaluate, and optimize the seamless integration of new shared mobility services with public transport across European Living Labs."
       stats={[
-        { id: 1, name: "Living labs", value: "9" },
+        { id: 1, name: "Living labs", value: labs?.length.toString() ?? "0" },
         {
           id: 2,
-          name: "Measures implemented for New Shared Modes integration",
-          value: "16",
+          name: "Measures implemented for Seamless Urban Shared Mobility",
+          value: measures?.length.toString() ?? "0",
         },
         {
           id: 3,
-          name: "Different Shared Mobility integrated in Living Labs",
-          value: "10",
+          name: "Shared Mobility integrated in Living Labs",
+          value: transportModes?.length.toString() ?? "0",
         },
         {
           id: 4,
-          name: "Average increase for New Share Modes use (since 2023)",
-          value: "+5%",
+          name: "Key Performance Indicators (KPIs) monitored",
+          value: kpis?.length.toString() ?? "0",
         },
       ]}
     />
@@ -103,16 +105,15 @@ const labs = livingLabsData?.map((lab) => ({
 
     <CTASection
       title="Monitoring measures around New Shared Mobility"
-      description="From pre-implementation surveys to real-world impact analysis, here's how data flows through the SUM project."
+      description="From pre-implementation surveys to data driven impact analysis, here's how data flows through the SUM project."
       order="center"
-      linkText="Add your city"
-      linkHref="#"
     >
       <ODPTimeline />
     </CTASection>
   </div>
 
-  <CTASection
+  <!-- TODO: enable when features become available, only one section for tools -->
+  <!-- <CTASection
     title="Push and pull measures impact assessment tool"
     description="Discover how push and pull measures impacted Living Labs Key Performance Indicators (KPI). The impact assessment tool provides : "
     imageSrc={impactImage.src}
@@ -142,5 +143,135 @@ const labs = livingLabsData?.map((lab) => ({
     ]}
     linkText="Try the decision tool"
     linkHref="#"
-  />
+  /> -->
+
+  <!-- Section to display research subjects -->
+
+  <CTASection
+    title="Coming soon ! \nTools and features to explore SUM data"
+    description="We continue building the SUM Open Data Platform together. Share your feedback or ideas in the link bellow. Some of the upcoming features are :"
+    order="center"
+    linkText="Contribute feedback or request features"
+    linkHref="https://fider-webapp.inocs-sum.lille.inria.fr"
+    className="border-t border-gray-200 py-10"
+  >
+    <div class="my-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <!-- Feature 1 -->
+      <article
+        class="bg-white rounded-lg shadow-sm border border-gray-100 p-5 flex flex-col"
+      >
+        <div
+          class="flex items-center justify-center h-12 w-12 rounded-md bg-blue-50 text-primary"
+        >
+          <!-- data/dashboard icon -->
+          <svg
+            class="h-6 w-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 3h7v7H3V3zM14 3h7v4h-7V3zM14 12h7v9h-7v-9zM3 11h7v11H3V11z"
+            ></path>
+          </svg>
+        </div>
+        <h4>Interactive data dashboard</h4>
+        <p class="mt-2 text-sm text-gray-600 flex-1">
+          Filter and explore SUM data (Living Labs, KPIs, measures) with
+          customizable views and charts.
+        </p>
+      </article>
+
+      <!-- Feature 2 -->
+      <article
+        class="bg-white rounded-lg shadow-sm border border-gray-100 p-5 flex flex-col"
+      >
+        <div
+          class="flex items-center justify-center h-12 w-12 rounded-md bg-green-50 text-green-600"
+        >
+          <!-- analysis icon -->
+          <svg
+            class="h-6 w-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M11 3v8H3m18 0h-8v8m0-8l-4 4m4-4l4 4"></path>
+          </svg>
+        </div>
+        <h4>Measures impact analysis</h4>
+        <p class="mt-2 text-sm text-gray-600 flex-1">
+          Data-driven tools to estimate and visualise the impact level of push &
+          pull measures on KPIs across Living Labs.
+        </p>
+      </article>
+
+      <!-- Feature 3 -->
+      <article
+        class="bg-white rounded-lg shadow-sm border border-gray-100 p-5 flex flex-col"
+      >
+        <div
+          class="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-50 text-indigo-600"
+        >
+          <!-- decision tool icon -->
+          <svg
+            class="h-6 w-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+        </div>
+        <h4>Business activity decision tool</h4>
+        <p class="mt-2 text-sm text-gray-600 flex-1">
+          A multi-criteria analysis tool to compare and prioritise NSM business
+          activities for your city or project.
+        </p>
+      </article>
+
+      <!-- Feature 4 -->
+      <article
+        class="bg-white rounded-lg shadow-sm border border-gray-100 p-5 flex flex-col"
+      >
+        <div
+          class="flex items-center justify-center h-12 w-12 rounded-md bg-yellow-50 text-yellow-600"
+        >
+          <!-- resources icon -->
+          <svg
+            class="h-6 w-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 20l9-5-9-5-9 5 9 5zM12 12l9-5-9-5-9 5 9 5z"></path>
+          </svg>
+        </div>
+        <h4>Resources & tools</h4>
+        <p class="mt-2 text-sm text-gray-600 flex-1">
+          Models, optimisation tools and software to plan integrated New Shared
+          Mobility and Public Transport systems.
+        </p>
+      </article>
+    </div>
+  </CTASection>
 </Layout>

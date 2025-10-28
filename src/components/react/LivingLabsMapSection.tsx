@@ -57,12 +57,12 @@ export function LivingLabsMapSection({ labs }: Props) {
   }));
 
   return (
-    <section className="py-12 px-4 sm:px-8">
+    <section id="labs-section" className="py-12 px-4 sm:px-8" >
       <div className="max-w-7xl mx-auto">
         {/* Section Title */}
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-dark mb-2">
-            Living Labs Across Europe
+            Living Labs across Europe
           </h2>
           <p className="text-dark text-lg">
             Explore where shared mobility innovation is happening with the SUM
@@ -95,7 +95,7 @@ export function LivingLabsMapSection({ labs }: Props) {
               <div className=" lg:mr-80 bg-white rounded-lg p-3 shadow border border-primary sticky bottom-0 left-0 z-50">
                 <div className="flex justify-between items-center mb-4">
                   <h4 className="font-bold text-primary">
-                    {selectedLab.name} – Living Lab Overview
+                    {selectedLab.name} Living Lab overview
                   </h4>
                   <button
                     onClick={() => setSelectedLab(null)}
@@ -105,10 +105,10 @@ export function LivingLabsMapSection({ labs }: Props) {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-1 text-sm">
+                <div className="grid grid-cols-2 gap-1 text-sm">
                   <div>
                     <div className="text-dark font-semibold">
-                      Total Measures
+                      Total measures
                     </div>
                     <div className="text-gray-700">
                       {selectedLab.totalMeasures}
@@ -116,7 +116,7 @@ export function LivingLabsMapSection({ labs }: Props) {
                   </div>
                   <div>
                     <div className="text-dark font-semibold">
-                      Transport Modes
+                      New Shared Mobility modes
                     </div>
                     <div className="text-gray-700">
                       {selectedLab.transportModes}
@@ -132,14 +132,14 @@ export function LivingLabsMapSection({ labs }: Props) {
                     <div className="text-dark font-semibold">KPIs (After)</div>
                     <div className="text-gray-700">{selectedLab.kpisAfter}</div>
                   </div>
-                  <div>
+                  {/* <div>
                     <div className="text-dark font-semibold">
-                      Sustainable Modal Split
+                      Sustainable modal split
                     </div>
                     <div className="text-success font-medium">
                       {selectedLab.sustainablePercentage * 100}%
                     </div>
-                  </div>
+                  </div> */}
                 </div>
 
                 <div className="mt-2 flex flex-wrap gap-1 justify-center">
@@ -167,7 +167,7 @@ export function LivingLabsMapSection({ labs }: Props) {
                 <h5 className="font-semibold text-primary">{lab.name}</h5>
                 <p>
                   {lab.totalMeasures} Measures <br />
-                  {lab.transportModes} Modes
+                  {lab.transportModes} NSM Modes
                 </p>
               </div>
             ))}
