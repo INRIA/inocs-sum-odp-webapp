@@ -89,12 +89,13 @@ export default function LoginForm() {
 
       <div className="text-center mt-6">
         <p className="text-sm text-gray-600">
-          Don't have an account?{" "}
+          Don't have an account?
           <a
-            href={getUrl("/lab-admin/signup")}
+            // href={getUrl("/lab-admin/signup")}
+            href={"#"}
             className="text-blue-600 hover:text-blue-800 underline"
           >
-            Create a new account
+            Create a new account (coming soon)
           </a>
         </p>
       </div>
