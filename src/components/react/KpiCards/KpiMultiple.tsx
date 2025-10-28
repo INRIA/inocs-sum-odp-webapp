@@ -1,4 +1,4 @@
-import type { IIKpiResultBeforeAfter } from "../../../types/KPIs";
+import type { IIKpiResultBeforeAfter, IKpi } from "../../../types/KPIs";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -32,13 +32,12 @@ ChartJS.register(
 );
 
 type Props = {
+  parentKpi: IKpi;
+  kpis: IKpi[];
   results: IIKpiResultBeforeAfter[];
-  title?: string;
-  subtitle?: string;
-  kpiNumber?: string;
 };
 
-export function KpiMultiple({ results, title, subtitle, kpiNumber }: Props) {
+export function KpiMultiple({ parentKpi, kpis, results }: Props) {
   // Prepare chart data
   const chartLabels: string[] = [];
   const chartDatasets: any[] = [];
@@ -53,16 +52,20 @@ export function KpiMultiple({ results, title, subtitle, kpiNumber }: Props) {
   chartLabels.push(...sortedDates.map((date) => formatMonthYear(date)));
 
   // Create dataset for each KPI
-  results.forEach((kpi, index) => {
+  results.forEach((kpiRes, index) => {
+    const kpiData = kpis.find((item) => item.id === kpiRes.kpidefinition_id);
     const data: (number | null)[] = sortedDates.map((date) => {
       if (
-        kpi.result_before?.date === date &&
-        kpi.result_before?.value !== null
+        kpiRes.result_before?.date === date &&
+        kpiRes.result_before?.value !== null
       ) {
-        return formatValue(kpi.result_before.value, kpi.metric);
+        return formatValue(kpiRes.result_before.value, kpiData?.metric);
       }
-      if (kpi.result_after?.date === date && kpi.result_after?.value !== null) {
-        return formatValue(kpi.result_after.value, kpi.metric);
+      if (
+        kpiRes.result_after?.date === date &&
+        kpiRes.result_after?.value !== null
+      ) {
+        return formatValue(kpiRes.result_after.value, kpiData?.metric);
       }
       return null;
     });
@@ -71,7 +74,7 @@ export function KpiMultiple({ results, title, subtitle, kpiNumber }: Props) {
     const color = colors[index % colors.length];
 
     chartDatasets.push({
-      label: kpi.name,
+      label: kpiData?.name,
       data,
       borderColor: color,
       backgroundColor: color,
@@ -104,27 +107,39 @@ export function KpiMultiple({ results, title, subtitle, kpiNumber }: Props) {
       <div className="p-2 relative rounded-2xl border-primary-light border ">
         <div className="absolute -top-1 right-0">
           <Badge size="sm" color="light" className="rounded-2xl">
-            KPI {kpiNumber}
+            KPI {parentKpi.kpi_number}
             <Tooltip
-              content={subtitle}
+              content={parentKpi.description}
               placement="left"
               iconClassName="h-3 w-3 text-primary"
             />
           </Badge>
         </div>
 
-        <h6 className="text-center text-black  mt-1 mb-2">{title ?? "KPI"}</h6>
+        <h6 className="text-center text-black  mt-1 mb-2">
+          {parentKpi?.name ?? "KPI"}
+        </h6>
+
+        {parentKpi?.metric_description ? (
+          <div className="text-sm text-muted mt-2 max-w-xl mx-auto text-center">
+            {parentKpi?.metric_description}
+          </div>
+        ) : null}
         <div className="flex flex-row flex-wrap items-stretch gap-0 mx-auto">
-          {results.map((kpi, index) => {
-            const before = kpi.result_before ?? null;
-            const after = kpi.result_after ?? null;
+          {results.map((kpiRes, index) => {
+            const kpiData = kpis.find(
+              (item) => item.id === kpiRes.kpidefinition_id
+            );
+
+            const before = kpiRes.result_before ?? null;
+            const after = kpiRes.result_after ?? null;
 
             const currentValue = formatValue(
               after?.value ?? before?.value ?? null,
-              kpi.metric
+              kpiData?.metric
             );
             const beforeValue = before?.value
-              ? formatValue(before?.value, kpi.metric)
+              ? formatValue(before?.value, kpiData?.metric)
               : null;
             const displayDate = formatMonthYear(
               after?.date ?? before?.date,
@@ -134,8 +149,8 @@ export function KpiMultiple({ results, title, subtitle, kpiNumber }: Props) {
             const change = getChange(
               before?.value ?? null,
               after?.value ?? null,
-              kpi.metric,
-              kpi.progression_target
+              kpiData?.metric,
+              kpiData?.progression_target
             );
 
             return (
@@ -143,11 +158,11 @@ export function KpiMultiple({ results, title, subtitle, kpiNumber }: Props) {
                 key={index}
                 className="flex flex-col w-1/2  p-1 min-w-1/3 max-w-1/2 md:max-w-1/4 md:p-2"
               >
-                <p className="leading-none">{kpi.name}</p>
+                <p className="leading-none">{kpiData?.name}</p>
                 <div className="mt-6 flex flex-row items-end justify-between gap-1">
                   <div className="flex flex-col items-start justify-end w-1/2">
                     <p className="text-4xl font-extrabold text-primary dark:text-white leading-none">
-                      {getFormattedValueString(currentValue, kpi.metric)}
+                      {getFormattedValueString(currentValue, kpiData?.metric)}
                     </p>
                     <small className="mt-2 text-lg text-muted">
                       {displayDate}
@@ -157,7 +172,7 @@ export function KpiMultiple({ results, title, subtitle, kpiNumber }: Props) {
                   {change?.length > 0 && (
                     <div className="flex flex-col items-end justify-end w-1/2">
                       <small className="font-semibold">
-                        {getFormattedValueString(beforeValue, kpi.metric)}
+                        {getFormattedValueString(beforeValue, kpiData?.metric)}
                       </small>
                       <span
                         className={`text-[8px] italic items-end justify-end text-right ${

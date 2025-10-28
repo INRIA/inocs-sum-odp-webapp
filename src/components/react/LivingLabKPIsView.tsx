@@ -29,10 +29,9 @@ export function LivingLabKPIsView({ categories = [], kpis }: Props) {
       return (
         <KpiMultiple
           key={parentKpi.id}
+          parentKpi={parentKpi}
+          kpis={kpis ?? []}
           results={resultKpis}
-          title={parentKpi?.name}
-          subtitle={parentKpi?.description}
-          kpiNumber={parentKpi?.kpi_number}
         />
       );
     }
