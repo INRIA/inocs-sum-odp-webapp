@@ -1,4 +1,7 @@
-import type { IIKpiResultBeforeAfter } from "../../../types/KPIs";
+import type {
+  EnumKpiMetricType,
+  IIKpiResultBeforeAfter,
+} from "../../../types/KPIs";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -36,26 +39,32 @@ ChartJS.register(
 
 type Props = {
   kpiResults: IIKpiResultBeforeAfter;
+  metricType: EnumKpiMetricType;
+  progressionTarget: number;
 };
 
-export function KpiDefault({ kpiResults }: Props) {
+export function KpiDefault({
+  kpiResults,
+  metricType,
+  progressionTarget,
+}: Props) {
   const before = kpiResults?.result_before ?? null;
   const after = kpiResults?.result_after ?? null;
 
   const currentValue = formatValue(
     after?.value ?? before?.value ?? null,
-    kpiResults.metric
+    metricType
   );
   const beforeValue = before?.value
-    ? formatValue(before?.value, kpiResults.metric)
+    ? formatValue(before?.value, metricType)
     : null;
   const displayDate = formatMonthYear(after?.date ?? before?.date);
 
   const change = getChange(
     before?.value ?? null,
     after?.value ?? null,
-    kpiResults.metric,
-    kpiResults.progression_target
+    metricType,
+    progressionTarget
   );
 
   //Chartjs data
@@ -106,7 +115,7 @@ export function KpiDefault({ kpiResults }: Props) {
       <div className="mt-6 flex flex-col md:flex-row md:items-end md:justify-between gap-1 md:gap-2">
         <div className="flex flex-col items-start justify-end">
           <h3 className="text-4xl font-extrabold text-gray-900 dark:text-white leading-none">
-            {getFormattedValueString(currentValue, kpiResults.metric)}
+            {getFormattedValueString(currentValue, metricType)}
           </h3>
           <p className="mt-2 text-lg text-muted">{displayDate}</p>
         </div>
@@ -114,7 +123,7 @@ export function KpiDefault({ kpiResults }: Props) {
         {change?.length > 0 && (
           <div className="flex flex-col items-end justify-end mb-1">
             <p className="font-semibold">
-              {getFormattedValueString(beforeValue, kpiResults.metric)}
+              {getFormattedValueString(beforeValue, metricType)}
             </p>
             <small
               className={`italic ${

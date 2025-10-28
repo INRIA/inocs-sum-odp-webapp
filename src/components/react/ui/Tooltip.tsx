@@ -55,7 +55,7 @@ export function Tooltip({
             : "left-full top-1/2 -translate-y-1/2 ml-2"
         }`}
       >
-        <small>{content}</small>
+        <small className="whitespace-pre-wrap">{content}</small>
       </div>
     </div>
   );

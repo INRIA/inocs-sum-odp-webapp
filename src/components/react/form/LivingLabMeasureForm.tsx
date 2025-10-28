@@ -16,10 +16,11 @@ import { PencilSquareIcon, CalendarIcon } from "@heroicons/react/20/solid";
 const api = new ApiClient();
 
 type Props = {
+  living_lab_id?: string;
   livingLabId: string;
   measure: IProject;
   value?: Partial<LivingLabProjectsImplementationInput>;
-  disabled?: boolean;
+  isEditable?: boolean;
   className?: string;
 };
 
@@ -27,7 +28,7 @@ export function LivingLabMeasureForm({
   livingLabId,
   measure,
   value,
-  disabled = true,
+  isEditable = false,
   className = "",
 }: Props) {
   const [checked, setChecked] = useState<boolean>(
@@ -43,8 +44,7 @@ export function LivingLabMeasureForm({
   const [showSubform, setShowSubform] = useState<boolean>(false);
 
   async function toggle(e?: React.MouseEvent) {
-    // Prevent double handlers if coming from checkbox change
-    if (disabled || isSaving) return;
+    if (!isEditable || isSaving) return;
     if (!showSubform) {
       setChecked(true);
       setShowSubform(true);
@@ -52,7 +52,7 @@ export function LivingLabMeasureForm({
   }
 
   async function handleSave() {
-    if (isSaving) return;
+    if (isSaving || !isEditable) return;
     try {
       setIsSaving(true);
       const payload: LivingLabProjectsImplementationInput = {
@@ -77,7 +77,7 @@ export function LivingLabMeasureForm({
   }
 
   async function handleRemove() {
-    if (isSaving) return;
+    if (isSaving || !isEditable) return;
     try {
       setIsSaving(true);
       const response = await api.deleteLivingLabMeasure({
@@ -98,7 +98,7 @@ export function LivingLabMeasureForm({
   }
 
   async function handleClose() {
-    if (isSaving) return;
+    if (isSaving || !isEditable) return;
     try {
       setChecked(value?.project_id === measure.id);
       setStartAt(value?.start_at?.toString() || "");
@@ -120,25 +120,32 @@ export function LivingLabMeasureForm({
       aria-label={measure.name}
     >
       <div
-        className="relative flex flex-col items-center px-2 py-2 w-full cursor-pointer"
+        className={`relative flex flex-col items-center px-2 py-2 w-full ${
+          isEditable ? "cursor-pointer" : ""
+        }`}
         aria-label={measure.name}
         onClick={toggle}
       >
-        <div className="absolute top-1 right-1 flex flex-col">
+        <div
+          className={
+            "absolute top-1 right-1 flex flex-col" +
+            (isEditable ? " cursor-pointer" : " hidden")
+          }
+        >
           <input
             type="checkbox"
             checked={checked}
-            disabled={disabled || isSaving}
+            disabled={!isEditable || isSaving}
             aria-label={`select-${measure.id}`}
             readOnly
           />
-          {checked && !showSubform && (
+          {checked && !showSubform && isEditable && (
             <PencilSquareIcon className="h-4 w-4 text-primary" />
           )}
         </div>
 
         <div
-          className={` flex flex-col items-center space-x-2${bgClass} ${className}`}
+          className={` flex flex-col items-center space-x-2 ${bgClass} ${className}`}
         >
           <div className="shrink-0">
             {measure.image_url ? (
@@ -155,7 +162,7 @@ export function LivingLabMeasureForm({
             <span className="font-semibold text-sm">{measure.name}</span>
             <br />
             {measure.description ? (
-              <small className="mt-0 leading-0">{measure.description}</small>
+              <small className="mt-0 leading-0 ">{measure.description}</small>
             ) : null}
           </div>
         </div>
@@ -183,7 +190,7 @@ export function LivingLabMeasureForm({
             </Field>
 
             <Field className="md:col-span-2">
-              <Label>What is the measure about?</Label>
+              <Label>Provide a summary of the activities</Label>
               <Textarea
                 id={`desc-${measure.id}`}
                 value={description}
@@ -224,12 +231,13 @@ export function LivingLabMeasureForm({
             </div>
           </form>
         ) : checked ? (
-          <div className="flex flex-row gap-1 text-left p-5 text-primary justify-center items-start">
-            <CalendarIcon className="h-5 w-5" />
-            <small>
-              {startAt ? formatDateToMonthYear(startAt) : "Unknown"}
-            </small>
-            <span className="mx-1 border-l border-dark h-4 self-start" />
+          <div className="flex flex-col gap-1 text-left p-5 text-primary justify-center items-start">
+            <div className="flex flex-row">
+              <CalendarIcon className="h-5 w-5" />
+              <small>
+                {startAt ? formatDateToMonthYear(startAt) : "Unknown"}
+              </small>
+            </div>
             <small style={{ whiteSpace: "pre-line" }}>{description}</small>
           </div>
         ) : null}

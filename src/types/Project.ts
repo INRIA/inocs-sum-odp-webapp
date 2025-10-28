@@ -25,9 +25,9 @@ export interface LivingLabProjectsImplementation {
   living_lab_id: string;
   description?: string | null;
   user_id?: string;
-  created_at?: Date | null;
-  updated_at?: Date | null;
-  start_at?: Date | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  start_at?: string | null;
   project?: IProject;
   lab?: ILivingLab;
 }

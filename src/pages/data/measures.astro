@@ -1,0 +1,38 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { CTASection, MobilityMeasures } from "../../components/react";
+import ApiClient from "../../lib/api-client/ApiClient";
+
+const api = new ApiClient(Astro.request);
+const measures = await api.getMeasures();
+---
+
+<Layout role="visitor">
+  <div class="mx-auto max-w-2xl lg:max-w-none flex flex-col gap-4">
+    <div class="text-center md:mx-10 flex flex-col gap-4">
+      <h1>
+        <span class="text-secondary">Measures </span>
+        implemented for
+        <span class="text-secondary">SEAMLESS </span>
+        Shared Urban Mobility
+      </h1>
+    </div>
+    <CTASection
+      title=""
+      description="Measures are policy actions, infrastructure changes, service rollouts, or regulatory shifts implemented by cities to impact how people move through urban spaces. Each measure falls under one of two strategic categories: push and pull measures."
+      order="center"
+    >
+      <p class="text-center">
+        You will find below the full list of measures, and the Living Labs
+        implementing them.
+      </p>
+      <MobilityMeasures
+        pullMeasures={measures?.filter((m) => m.type === "PULL") ?? []}
+        pushMeasures={measures?.filter((m) => m.type === "PUSH") ?? []}
+        hideDescription={false}
+        cols={4}
+        client:load
+      />
+    </CTASection>
+  </div>
+</Layout>

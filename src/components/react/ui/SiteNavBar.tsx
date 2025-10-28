@@ -63,7 +63,7 @@ export function SiteNavBar({
       label: "Data",
       subItems: [
         { href: "#", label: "KPIs" },
-        { href: "#", label: "Measures" },
+        { href: "/data/measures", label: "Measures" },
         { href: "#", label: "Modal split" },
       ],
     },

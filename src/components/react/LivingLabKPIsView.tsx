@@ -17,7 +17,13 @@ export function LivingLabKPIsView({ categories = [], kpis }: Props) {
     resultKpis: IIKpiResultBeforeAfter[] = []
   ) => {
     if (resultKpis.length === 1) {
-      return <KpiCard key={parentKpi.id} kpiResults={resultKpis[0]} />;
+      return (
+        <KpiCard
+          kpi={parentKpi}
+          key={parentKpi.id}
+          kpiResults={resultKpis[0]}
+        />
+      );
     }
     if (resultKpis.length > 1) {
       return (

@@ -23,6 +23,7 @@ export interface BadgeProps {
   tooltip?: string;
   displayTooltipIcon?: boolean;
   inline?: boolean;
+  onClick?: () => void;
 }
 
 const COLOR_CLASSES: Record<BadgeColor, string> = {
@@ -63,6 +64,7 @@ export function Badge({
   displayTooltipIcon = true,
   "aria-label": ariaLabel,
   inline = true,
+  onClick,
 }: BadgeProps) {
   const colorClass = COLOR_CLASSES[color] ?? COLOR_CLASSES.secondary;
   const sizeClass = SIZE_CLASSES[size] ?? SIZE_CLASSES.md;
@@ -71,7 +73,10 @@ export function Badge({
 
   const [displayTooltip, setDisplayTooltip] = React.useState(false);
   return (
-    <div className="">
+    <button
+      className={onClick !== undefined ? "cursor-pointer" : ""}
+      onClick={onClick}
+    >
       <span
         className={`items-center gap-2 rounded-full font-medium ${colorClass} ${sizeClass} ${className} ${displayStyle} border`}
         role={role}
@@ -89,6 +94,6 @@ export function Badge({
           <Tooltip content={tooltip} open={displayTooltip} />
         ) : null}
       </span>
-    </div>
+    </button>
   );
 }

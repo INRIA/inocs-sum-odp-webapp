@@ -75,3 +75,8 @@ label {
   color: var(--color-dark);
   opacity: 0.9;
 }
+
+html {
+  scroll-behavior: smooth;
+  line-height: normal;
+}

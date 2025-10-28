@@ -1,7 +1,9 @@
-import { getUrl } from "../../lib/helpers";
+import { formatDateToMonthYear, getUrl } from "../../lib/helpers";
 import type { IProject } from "../../types";
 import { Tooltip } from "./ui";
 import { InfoCard } from "./ui/InfoCard";
+import { Badge } from "./ui/Badge";
+import { useState } from "react";
 
 type MobilityMeasuresProps = {
   pushMeasures?: IProject[];
@@ -22,6 +24,125 @@ type MeasuresSectionProps = {
   style?: "card" | "list";
 };
 
+function MeasureItem({
+  m,
+  style,
+  hideDescription,
+}: {
+  m: IProject;
+  style: "card" | "list";
+  hideDescription?: boolean;
+}) {
+  const labsColors = ["primary", "secondary", "tertiary"];
+  const [labDetails, setLabDetails] = useState<{
+    key: string;
+    startDate?: string;
+    description?: string;
+  }>();
+  const labs =
+    m.living_lab_projects_implementation
+      ?.map((impl) => ({
+        key: `${m.id}-lab-${impl.lab?.name}`,
+        labName: impl?.lab?.name,
+        startDate: impl.start_at
+          ? `Started by ${formatDateToMonthYear(impl.start_at)}`
+          : undefined,
+        description: impl.description,
+      }))
+      .filter((n) => n?.labName) ?? [];
+
+  if (style === "list") {
+    return (
+      <div key={m.name} className="flex items-center space-x-2">
+        {m.image_url ? (
+          <img
+            alt={m.name}
+            src={getUrl(m.image_url)}
+            className="h-6 w-6 flex-none rounded-full "
+          />
+        ) : null}
+
+        <div>
+          <div className="flex items-center ">
+            {hideDescription && m.description ? (
+              <Tooltip content={m.description} placement="top">
+                <p>{m.name}</p>
+              </Tooltip>
+            ) : (
+              <p>{m.name}</p>
+            )}
+          </div>
+          {!hideDescription && m.description ? (
+            <small className="mt-0 leading-0">{m.description}</small>
+          ) : null}
+        </div>
+      </div>
+    );
+  } else {
+    return (
+      <div className="flex flex-col">
+        <InfoCard
+          key={m.name}
+          title={m.name}
+          description={m.description ?? undefined}
+          hideDescription={hideDescription}
+          imageUrl={getUrl(m.image_url)}
+        ></InfoCard>
+        {labs.length > 0 && (
+          <div
+            className={`flex flex-col py-2 items-center space-x-2 rounded-lg border border-gray-300 bg-light shadow-xs cursor-pointer `}
+          >
+            <small className="text-center font-bold">
+              Living Labs implementing
+            </small>
+            <div className={`flex flex-wrap gap-2`}>
+              {labs.map(({ key, labName, description, startDate }, idx) => (
+                <Badge
+                  key={key}
+                  size="sm"
+                  color={
+                    !hideDescription && labDetails?.key === key
+                      ? "secondary"
+                      : "primary"
+                  }
+                  className="border !px-2"
+                  inline={true}
+                  onClick={() => {
+                    !hideDescription &&
+                      setLabDetails((prev) => {
+                        const isOpen = prev?.key === key;
+                        if (isOpen) {
+                          return {};
+                        } else {
+                          return {
+                            key,
+                            startDate,
+                            description,
+                          };
+                        }
+                      });
+                  }}
+                >
+                  {labName} ⓘ
+                </Badge>
+              ))}
+            </div>
+            <div>
+              {labDetails?.key && (
+                <p>
+                  {labDetails?.startDate}
+                  <br></br>
+                  {labDetails?.description}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+}
+
 export function MeasuresSection({
   heading,
   smallText,
@@ -37,48 +158,6 @@ export function MeasuresSection({
     4: "grid grid-cols-2 lg:grid-cols-4 mx-1 lg:mx-4 gap-4",
   };
 
-  const getRenderItem = (m: IProject) => {
-    if (style === "list") {
-      return (
-        <div key={m.name} className="flex items-center space-x-2">
-          {m.image_url ? (
-            <img
-              alt={m.name}
-              src={getUrl(m.image_url)}
-              className="h-6 w-6 flex-none rounded-full "
-            />
-          ) : null}
-
-          <div>
-            <div className="flex items-center ">
-              {hideDescription && m.description ? (
-                <Tooltip content={m.description} placement="top">
-                  <p>{m.name}</p>
-                </Tooltip>
-              ) : (
-                <p>{m.name}</p>
-              )}
-            </div>
-            {!hideDescription && m.description ? (
-              <small className="mt-0 leading-0">{m.description}</small>
-            ) : null}
-          </div>
-        </div>
-      );
-    } else {
-      return (
-        <InfoCard
-          key={m.name}
-          title={m.name}
-          description={hideDescription ? undefined : m.description}
-          tooltip={hideDescription ? m.description : undefined}
-          imageUrl={getUrl(m.image_url)}
-          href="#"
-        />
-      );
-    }
-  };
-
   return (
     <div className="flex-1 grid grid-cols-1 gap-4">
       {heading && <h3 className="text-center">{heading}</h3>}
@@ -89,7 +168,14 @@ export function MeasuresSection({
       )}
       {paragraph && <p className="text-center">{paragraph}</p>}
       <div className={GRID_CLASS[cols]}>
-        {measures.map((m) => getRenderItem(m))}
+        {measures.map((m) => (
+          <MeasureItem
+            key={m.name}
+            m={m}
+            style={style}
+            hideDescription={hideDescription}
+          />
+        ))}
       </div>
     </div>
   );

@@ -50,6 +50,7 @@ const livinglab = await api.getLivingLab(labId, ["projects"]);
       measures={measures?.filter((m) => m.type === "PUSH")}
       title="Select the PUSH Measures to be implemented in your living lab"
       implementedMeasures={livinglab?.living_lab_projects_implementation ?? []}
+      isEditable={true}
       client:load
     />
 
@@ -69,6 +70,7 @@ const livinglab = await api.getLivingLab(labId, ["projects"]);
       measures={measures?.filter((m) => m.type === "PULL")}
       title="Select the PULL Measures to be implemented in your living lab"
       implementedMeasures={livinglab?.living_lab_projects_implementation ?? []}
+      isEditable={true}
       client:load
     />
   </div>

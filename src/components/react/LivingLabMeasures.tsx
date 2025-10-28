@@ -10,6 +10,7 @@ type LivingLabMeasuresProps = {
   measures?: IProject[];
   implementedMeasures?: LivingLabProjectsImplementationInput[];
   className?: string;
+  isEditable?: boolean;
 };
 
 export function LivingLabMeasures({
@@ -18,6 +19,7 @@ export function LivingLabMeasures({
   implementedMeasures = [],
   title = "Measures",
   className = "",
+  isEditable = false,
 }: LivingLabMeasuresProps) {
   return (
     <div
@@ -31,7 +33,7 @@ export function LivingLabMeasures({
               livingLabId={livingLabId}
               key={m.name}
               measure={m}
-              disabled={false}
+              isEditable={isEditable}
               value={implementedMeasures.find(
                 (imp) =>
                   imp.project_id === m.id && imp.living_lab_id === livingLabId

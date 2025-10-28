@@ -82,6 +82,23 @@ const labs = livingLabsData?.map((lab) => ({
         },
       ]}
     />
+
+    <CTASection
+      title="Measures for Seamless Shared Urban Mobility"
+      description="Measures are policy actions, infrastructure changes, service rollouts, or regulatory shifts implemented by cities to impact how people move through urban spaces. Each measure falls under one of two strategic categories: "
+      order="center"
+      linkText="Know more about the measures"
+      linkHref={getUrl("/data/measures")}
+    >
+      <MobilityMeasures
+        pullMeasures={measures?.filter((m) => m.type === "PULL") ?? []}
+        pushMeasures={measures?.filter((m) => m.type === "PUSH") ?? []}
+        hideDescription={true}
+        cols={4}
+        client:load
+      />
+    </CTASection>
+
     <LivingLabsMapSection labs={labs} client:only="react" />
 
     <CTASection
@@ -92,21 +109,6 @@ const labs = livingLabsData?.map((lab) => ({
       linkHref="#"
     >
       <ODPTimeline />
-    </CTASection>
-
-    <CTASection
-      title="Measures for Seamless Shared Urban Mobility"
-      description="Measures are policy actions, infrastructure changes, service rollouts, or regulatory shifts implemented by cities to impact how people move through urban spaces. Each measure falls under one of two strategic categories: "
-      order="center"
-      linkText="Know more about the measures"
-      linkHref="#"
-    >
-      <MobilityMeasures
-        pullMeasures={measures.filter((m) => m.type === "PULL")}
-        pushMeasures={measures.filter((m) => m.type === "PUSH")}
-        hideDescription={true}
-        cols={4}
-      />
     </CTASection>
   </div>
 

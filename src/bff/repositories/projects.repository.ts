@@ -10,6 +10,9 @@ export class ProjectRepository {
       const projects = await prisma.projects.findMany({
         // If your schema has timestamps, you can keep this ordering.
         // orderBy: { created_at: "desc" },
+        include: {
+          living_lab_projects_implementation: { include: { lab: true } },
+        },
       });
       return projects.map(this.mapPrismaProjectToProject);
     } catch (error) {

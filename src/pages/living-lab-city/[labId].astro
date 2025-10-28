@@ -11,7 +11,11 @@ import {
   prepareModalSplitData,
   createMapMarker,
 } from "../../lib/helpers/living-lab";
-import { DataDisplayCard, LivingLabKPIsView } from "../../components/react";
+import {
+  DataDisplayCard,
+  LivingLabKPIsView,
+  LivingLabMeasures,
+} from "../../components/react";
 
 const api = new ApiClient(Astro.request);
 
@@ -49,7 +53,6 @@ const kpiResultsByCategory = categories.map((category) => ({
     category.kpis?.some((kpi) => kpi.id === kpiResult.kpidefinition_id)
   ),
 }));
-
 ---
 
 <Layout>
@@ -117,27 +120,30 @@ const kpiResultsByCategory = categories.map((category) => ({
       {
         (pushMeasures.length > 0 || pullMeasures.length > 0) && (
           <section class="flex flex-col md:flex-row gap-8 items-start">
-            <MeasuresSection
-              heading="🔴 Push measures"
-              smallText={``}
-              paragraph={``}
-              measures={pushMeasures}
-              hideDescription={true}
-              cols={1}
-              style="list"
-              client:load
-            />
-
-            <MeasuresSection
-              heading="🟢 Pull measures"
-              smallText={``}
-              paragraph={``}
-              measures={pullMeasures}
-              hideDescription={true}
-              cols={1}
-              style="list"
-              client:load
-            />
+            <div class="flex-1 grid grid-cols-1 gap-2">
+              <h3 class="text-center">🔴 Push measures</h3>
+              <LivingLabMeasures
+                livingLabId={labId}
+                measures={pushMeasures}
+                isEditable={false}
+                title=""
+                implementedMeasures={
+                  livingLabData?.living_lab_projects_implementation ?? []
+                }
+              />
+            </div>
+            <div class="flex-1 grid grid-cols-1 gap-2">
+              <h3 class="text-center">🟢 Pull measures</h3>
+              <LivingLabMeasures
+                livingLabId={labId}
+                measures={pullMeasures}
+                isEditable={false}
+                title=""
+                implementedMeasures={
+                  livingLabData?.living_lab_projects_implementation ?? []
+                }
+              />
+            </div>
           </section>
         )
       }
