@@ -50,7 +50,11 @@ const valueAfterDate = modalSplitResults?.reduce(
   <div class="mx-auto px-4 py-8 flex flex-col gap-8">
     <h2 class="text-2xl font-bold mb-4">Modal split KPI</h2>
 
-    <InfoAlert title="" icon="question" variant="info">
+    <InfoAlert
+      title="Why are transport modes status important?"
+      icon="question"
+      variant="info"
+    >
       <small
         >This page collects modal split for all transport modes.<br />
         The status of the transport mode provides insights about the scheduled changes
@@ -58,25 +62,52 @@ const valueAfterDate = modalSplitResults?.reduce(
         <i
           >If there is a New Shared Mobility Service introduced, please record
           with 0% at the before implementation phase.</i
-        ><br />
+        >
       </small>
     </InfoAlert>
 
     <InfoAlert
-      title=""
+      title="How to calculate Modal Split KPI values?"
       icon="question"
       variant="success"
       actionText="Modal Split KPI template"
       actionHref={"/files/SIEF_Modal_Split_KPI-template.xlsx"}
     >
-      <small>
-        <strong>Tip:</strong> the Modal Split KPI values can be identified with the
-        <strong
-          ><a href="/files/SIEF_Modal_Split_KPI-template.xlsx"
-            >Modal Split template spreadsheet</a
-          ></strong
-        >, which will guide you to calculate the values.
-      </small>
+      <div class="text-sm text-gray-700 space-y-4">
+        <p class="font-medium">
+          Your contribution is essential to identify the impacts of New Shared
+          Mobility measures across Europe.
+        </p>
+
+        <ol class="list-decimal list-inside space-y-2">
+          <li>
+            <strong>Review the SIEF (Deliverable D1.2)</strong> — identify the data
+            you need and define a data collection plan for your city. <a
+              href="/files/SUM_D1.2_KPI Review_V1.0_FINAL.pdf"
+              class="text-blue-800 hover:underline"
+              >Download SUM_D1.2_KPI Review_V1.0_FINAL.pdf</a
+            >.
+          </li>
+          <li>
+            <strong>Compute KPI values from your data</strong> — use the Modal Split
+            KPI template spreadsheet to calculate the values. <a
+              href="/files/SIEF_Modal_Split_KPI-template.xlsx"
+              class="text-blue-800 hover:underline"
+              >Download SIEF_Modal_Split_KPI-template</a
+            >.
+          </li>
+          <li>
+            <strong>Submit your KPI values</strong> — add the computed KPI values
+            to the SUM Open Data Platform so they can feed analyses and comparisons.
+          </li>
+        </ol>
+
+        <small>
+          If a New Shared Mobility service was introduced after the baseline
+          period, record it as <strong>0%</strong>
+          for the "before" measurement.
+        </small>
+      </div>
     </InfoAlert>
   </div>
 

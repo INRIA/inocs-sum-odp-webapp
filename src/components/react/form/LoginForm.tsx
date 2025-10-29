@@ -93,7 +93,7 @@ export default function LoginForm() {
           <a
             // href={getUrl("/lab-admin/signup")}
             href={"#"}
-            className="text-blue-600 hover:text-blue-800 underline"
+            className="text-blue-800 hover:text-blue-800 underline"
           >
             Create a new account (coming soon)
           </a>

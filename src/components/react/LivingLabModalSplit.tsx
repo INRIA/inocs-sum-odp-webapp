@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "../react-catalyst-ui-kit";
-import { Badge, Tabs } from "./ui";
+import { Tabs, Tooltip } from "./ui";
 import { getKpiValueByMetricType, getYearFromDate } from "../../lib/helpers";
 import ModalSplitChart, { type SplitItem } from "./KpiCards/ModalSplitChart";
 
@@ -251,11 +251,11 @@ export function LivingLabModalSplit({
           <tbody className="bg-white divide-y divide-gray-100 content-start">
             {modes.map((m) => (
               <TableRow key={m.id}>
-                <TableCell className="max-w-52 content-start items-start">
-                  <label className="whitespace-normal break-words  flex flex-row">
+                <TableCell className="max-w-52 content-start items-start flex gap-1">
+                  <Tooltip content={m.description}>
                     {m.name}
-                    <Badge color="light" size="sm" tooltip={m.description} />
-                  </label>
+                    {m.description && <> ⓘ</>}
+                  </Tooltip>
                   {m.type === "NSM" && <TransportTypeBadge type={m.type} />}
                 </TableCell>
                 <TableCell className="content-start">

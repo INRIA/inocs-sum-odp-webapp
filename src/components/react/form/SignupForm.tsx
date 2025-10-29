@@ -114,7 +114,7 @@ export default function SignupForm() {
           Already have an account?{" "}
           <a
             href={getUrl("/lab-admin/login")}
-            className="text-blue-600 hover:text-blue-800 underline"
+            className="text-blue-800 hover:text-blue-800 underline"
           >
             Sign in to your account
           </a>

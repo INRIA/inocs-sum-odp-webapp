@@ -76,7 +76,7 @@ export function BeforeAndAfterDates({
     <div className="mb-4 flex flex-col md:flex-row items-center justify-center gap-8">
       <Field>
         <Label>Collection date BEFORE Implementation</Label>
-        <small>This date will be set for all KPIs.</small>
+        <small>This date will be set for all KPI values.</small>
         <div className="flex flex-row my-auto items-center gap-2">
           {!isEditingBefore ? (
             <>
@@ -111,7 +111,7 @@ export function BeforeAndAfterDates({
       </Field>
       <Field>
         <Label>Collection date AFTER Implementation</Label>
-        <small>This date will be for all new KPIs.</small>
+        <small>This date will be set for all KPI values.</small>
         <div className="flex flex-row my-auto items-center gap-2">
           {!isEditingAfter ? (
             <>

@@ -44,7 +44,9 @@ export function Tooltip({
       <div
         role="tooltip"
         className={`w-52 absolute z-50 inline-block p-2 text-xs text-primary transition-opacity duration-300 bg-light rounded-lg shadow-xs tooltip ${
-          displayTooltip ? "visible opacity-100" : "invisible opacity-0"
+          content && displayTooltip
+            ? "visible opacity-100"
+            : "invisible opacity-0"
         } ${
           placement === "top"
             ? "bottom-full left-1/2 -translate-x-1/2 mb-2"
