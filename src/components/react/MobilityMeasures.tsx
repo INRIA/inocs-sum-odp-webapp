@@ -33,7 +33,6 @@ function MeasureItem({
   style: "card" | "list";
   hideDescription?: boolean;
 }) {
-  const labsColors = ["primary", "secondary", "tertiary"];
   const [labDetails, setLabDetails] = useState<{
     key: string;
     startDate?: string;
@@ -90,10 +89,10 @@ function MeasureItem({
         ></InfoCard>
         {labs.length > 0 && (
           <div
-            className={`flex flex-col py-2 items-center space-x-2 rounded-lg border border-gray-300 bg-light shadow-xs cursor-pointer `}
+            className={`flex flex-col py-2 items-center space-x-2 rounded-lg border border-gray-300 bg-light shadow-xs cursor-pointer`}
           >
             <small className="text-center">Living Labs implementing</small>
-            <div className={`flex flex-wrap gap-2`}>
+            <div className={`flex flex-wrap gap-1 m-auto justify-center`}>
               {labs.map(({ key, labName, description, startDate }, idx) => (
                 <Badge
                   key={key}
@@ -107,6 +106,7 @@ function MeasureItem({
                   inline={true}
                   onClick={() => {
                     !hideDescription &&
+                      (description || startDate) &&
                       setLabDetails((prev) => {
                         const isOpen = prev?.key === key;
                         if (isOpen) {
@@ -121,18 +121,20 @@ function MeasureItem({
                       });
                   }}
                 >
-                  {labName} ⓘ
+                  {labName}{" "}
+                  {!hideDescription && (description || startDate) ? "ⓘ" : null}
                 </Badge>
               ))}
             </div>
             <div>
-              {labDetails?.key && (
-                <p>
-                  {labDetails?.startDate}
-                  <br></br>
-                  {labDetails?.description}
-                </p>
-              )}
+              {labDetails?.key &&
+                (labDetails?.startDate || labDetails?.description) && (
+                  <p className="m-2">
+                    {labDetails?.startDate}
+                    <br></br>
+                    {labDetails?.description}
+                  </p>
+                )}
             </div>
           </div>
         )}
