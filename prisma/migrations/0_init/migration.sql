@@ -226,7 +226,7 @@ CREATE TABLE `users` (
     `role_id` BIGINT UNSIGNED NOT NULL,
     `email_verified_at` TIMESTAMP(0) NULL,
     `password` VARCHAR(255) NOT NULL,
-    `status` VARCHAR(100) NOT NULL,
+    `status` VARCHAR(100) NOT NULL DEFAULT 'signup',
     `picture` VARCHAR(255) NULL,
     `location` VARCHAR(255) NULL,
     `phone` VARCHAR(255) NULL,

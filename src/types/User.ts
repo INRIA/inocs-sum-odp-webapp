@@ -5,7 +5,7 @@ export interface Role {
 }
 
 export interface UserDto {
-  id: number;
+  id: string;
   email: string;
   name: string;
   old_password?: string | null;
@@ -14,10 +14,16 @@ export interface UserDto {
   phone?: string | null;
   picture?: string | null;
   role_id: number;
-  //status: "signup" | "active" | "disabled";
+  status: "signup" | "active" | "disabled";
   created_at: Date;
   role?: Role; // Populated role object
+  living_lab_user_relation?: LivingLabUserRelation[];
   getSafeUser?: () => User; // Method to get safe user object without sensitive info
+}
+
+export interface LivingLabUserRelation {
+  user_id: bigint;
+  living_lab_id: bigint;
 }
 
 export interface User
@@ -26,6 +32,11 @@ export interface User
     "password" | "old_password" | "password_confirmation"
   > {}
 
+export enum UserStatus {
+  SIGNUP = "signup",
+  ACTIVE = "active",
+  DISABLED = "disabled",
+}
 export interface CreateUserInput {
   email: string;
   name: string;
@@ -47,4 +58,12 @@ export interface UpdateUserInput {
   picture?: string;
   role_id?: number;
   status?: "signup" | "active" | "disabled";
+  living_lab_id?: string;
+}
+
+export interface SignupLabEditorInput {
+  email: string;
+  name: string;
+  password: string;
+  living_lab_id?: string;
 }

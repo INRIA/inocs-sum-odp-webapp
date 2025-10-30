@@ -1,10 +1,12 @@
-import { UserRepository } from "../repositories/user.repository";
-import type {
-  User,
-  CreateUserInput,
-  UpdateUserInput,
-  UserDto,
+import {
+  type User,
+  type CreateUserInput,
+  type UpdateUserInput,
+  type UserDto,
+  type SignupLabEditorInput,
+  UserStatus,
 } from "../../types";
+import { UserRepository } from "../repositories";
 
 export class UserService {
   private userRepository: UserRepository;
@@ -258,6 +260,126 @@ export class UserService {
       throw new Error("Failed to retrieve active users");
     }
   }
+
+  /**
+   * Create a new user by calling the external admin API.
+   * Uses env vars: ODP_ADMIN_APP_HOST and USER_CREATION_API_KEY.
+   * Performs the same input validation as local create (no password hashing here).
+   */
+  async createUserLabEditor(userData: SignupLabEditorInput): Promise<any> {
+    try {
+      const host = process.env.ODP_ADMIN_APP_HOST;
+      const apiKey = process.env.USER_CREATION_API_KEY;
+      const roleId = process.env.SIGNUP_LAB_EDITOR_ROLE_ID ?? "2";
+      const autoActivate = process.env.SIGNUP_AUTO_ACTIVATE === "true";
+      if (!host) {
+        throw new Error("ODP_ADMIN_APP_HOST is not configured");
+      }
+
+      if (!apiKey) {
+        throw new Error("USER_CREATION_API_KEY is not configured");
+      }
+
+      const base = host.replace(/\/+$/, "");
+      const url = `${base}/api/users`;
+
+      const payload: any = {
+        name: userData.name?.trim(),
+        email: userData.email?.toLowerCase().trim(),
+        password: userData.password,
+        role_id: Number(roleId),
+      };
+
+      this.validateCreateUserInput(payload);
+
+      const options: RequestInit = {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "X-User-Creation-Key": apiKey,
+        },
+        body: JSON.stringify(payload),
+      };
+
+      const res = await fetch(url, options as any);
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(`Admin API error (${res.status}): ${text}`);
+      }
+      const contentType = res.headers.get("content-type") || "";
+      if (contentType.includes("application/json")) {
+        const user = (await res.json()) as User;
+        if (userData.living_lab_id) {
+          await this.userRepository.setUserLivingLab(
+            String(user.id),
+            userData.living_lab_id
+          );
+        }
+
+        if (autoActivate) {
+          const updatedUser = await this.autoValidateIfNoOtherEditors(
+            roleId,
+            String(user.id),
+            userData.living_lab_id!
+          );
+          if (updatedUser) {
+            return updatedUser;
+          }
+        }
+        return user;
+      }
+
+      // If not JSON, return raw text
+      return await res.text();
+    } catch (error) {
+      console.error(
+        "Error in createUserViaAdminApi service:",
+        // Don't log userData.password
+        error instanceof Error ? error.message : error
+      );
+      if (error instanceof Error) throw error;
+      throw new Error("Failed to create user via admin API");
+    }
+  }
+
+  private autoValidateIfNoOtherEditors = async (
+    roleId: string,
+    userId: string,
+    labId: string
+  ): Promise<User | null> => {
+    const otherEditors = await this.findUserByRoleIdAndLabIdAndStatus(
+      roleId,
+      labId,
+      UserStatus.ACTIVE
+    );
+    if (!otherEditors || otherEditors.length === 0) {
+      return this.userRepository.update(userId, {
+        status: UserStatus.ACTIVE,
+      });
+    }
+    return null;
+  };
+
+  private findUserByRoleIdAndLabIdAndStatus = async (
+    roleId: string,
+    labId: string,
+    status: UserStatus
+  ): Promise<User[]> => {
+    try {
+      const users = await this.userRepository.findByRoleIdAndLabIdAndStatus(
+        roleId,
+        labId,
+        status
+      );
+      return users && users?.length > 0 ? users : [];
+    } catch (error) {
+      console.error(
+        `Error fetching users with role ID ${roleId} and lab ID ${labId}:`,
+        error
+      );
+      throw new Error("Failed to fetch users");
+    }
+  };
 
   /**
    * Validate create user input

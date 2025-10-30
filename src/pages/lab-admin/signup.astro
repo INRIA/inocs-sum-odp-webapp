@@ -1,6 +1,18 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import SignupForm from "../../components/react/form/SignupForm";
+import ApiClient from "../../lib/api-client/ApiClient";
+
+const api = new ApiClient(Astro.request);
+const livingLabs = await api.getLivingLabs();
+
+const labs =
+  livingLabs
+    ?.map((lab) => ({
+      id: lab.id,
+      name: lab.name,
+    }))
+    ?.sort((a, b) => a.name.localeCompare(b.name)) || [];
 ---
 
 <Layout role="visitor">
@@ -10,7 +22,7 @@ import SignupForm from "../../components/react/form/SignupForm";
       <p class="text-warning italic mb-6">
         Please use official partner emails for security and moderation purposes.
       </p>
-      <SignupForm client:load />
+      <SignupForm livingLabs={labs} client:load />
     </section>
   </div>
 </Layout>

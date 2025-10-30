@@ -8,6 +8,8 @@ import type {
   ITransportModeLivingLabDelete,
   IKpiResultInput,
   LivingLabProjectsImplementationInput,
+  User,
+  SignupLabEditorInput,
 } from "../../types";
 import type { ICategory } from "../../types/Category";
 
@@ -195,6 +197,13 @@ export default class ApiClient {
   async deleteLivingLabTransportModes(data: ITransportModeLivingLabDelete) {
     return this.request<void>(`/labs-transport-modes`, {
       method: "DELETE",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async signupLabEditor(data: SignupLabEditorInput): Promise<User | null> {
+    return this.request<User | null>(`/signup-editor`, {
+      method: "POST",
       body: JSON.stringify(data),
     });
   }

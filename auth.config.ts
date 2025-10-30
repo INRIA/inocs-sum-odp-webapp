@@ -27,6 +27,10 @@ export default defineConfig({
           throw new Error("Invalid credentials.");
         }
 
+        if (result.user.status !== "active") {
+          throw new Error(`pending-validation`);
+        }
+
         // Return user data in the format expected by auth-astro
         return result.user;
       },

@@ -3,6 +3,7 @@ import { Input } from "../../react-catalyst-ui-kit/typescript/input";
 import { RButton } from "../ui/RButton";
 import { getUrl } from "../../../lib/helpers";
 import { signIn } from "auth-astro/client";
+import { InfoAlert } from "../ui";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -24,7 +25,9 @@ export default function LoginForm() {
       });
 
       if (result) {
-        setError("Unable to sign in.");
+        setError(
+          "Unable to sign in. Invalid credentials or account status is pending validation."
+        );
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -37,9 +40,9 @@ export default function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <p className="text-red-800 text-sm">{error}</p>
-        </div>
+        <InfoAlert variant="danger" title="Error">
+          {error}
+        </InfoAlert>
       )}
 
       <div>
@@ -90,12 +93,12 @@ export default function LoginForm() {
       <div className="text-center mt-6">
         <p className="text-sm text-gray-600">
           Don't have an account?
+          <br></br>
           <a
-            // href={getUrl("/lab-admin/signup")}
-            href={"#"}
+            href={getUrl("/lab-admin/signup")}
             className="text-blue-800 hover:text-blue-800 underline"
           >
-            Create a new account (coming soon)
+            Create a new account
           </a>
         </p>
       </div>

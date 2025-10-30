@@ -4,6 +4,7 @@ import type {
   CreateUserInput,
   UpdateUserInput,
   UserDto,
+  UserStatus,
 } from "../../types";
 
 export class UserRepository {
@@ -115,10 +116,10 @@ export class UserRepository {
   /**
    * Update an existing user
    */
-  async update(id: number, userData: UpdateUserInput): Promise<User | null> {
+  async update(id: string, userData: UpdateUserInput): Promise<User | null> {
     try {
       const user = await prisma.users.update({
-        where: { id },
+        where: { id: BigInt(id) },
         data: userData as unknown as any,
         include: {
           role: true,
@@ -199,6 +200,61 @@ export class UserRepository {
     } catch (error) {
       console.error(`Error fetching users with role_id ${roleId}:`, error);
       throw new Error("Failed to fetch users by role");
+    }
+  }
+
+  async findByRoleIdAndLabIdAndStatus(
+    roleId: string,
+    labId: string,
+    status: UserStatus
+  ): Promise<User[] | null> {
+    try {
+      const users = await prisma.users.findMany({
+        where: {
+          role_id: BigInt(roleId),
+          status: status,
+          living_lab_user_relation: {
+            some: {
+              living_lab_id: BigInt(labId),
+            },
+          },
+        },
+        include: {
+          role: true,
+          living_lab_user_relation: {
+            include: { lab: true },
+          },
+        } as unknown as any,
+        orderBy: {
+          created_at: "desc",
+        },
+      });
+
+      return users.map(this.mapPrismaUserToUser);
+    } catch (error) {
+      console.error(
+        `Error fetching users with role_id ${roleId} and lab_id ${labId}:`,
+        error
+      );
+      throw new Error("Failed to fetch users by role and lab");
+    }
+  }
+
+  async setUserLivingLab(userId: string, labId: string): Promise<User | null> {
+    try {
+      const userLabRelation = await prisma.living_lab_user_relation.create({
+        data: {
+          user_id: BigInt(userId),
+          living_lab_id: BigInt(labId),
+        },
+      });
+      return this.findById(String(userId));
+    } catch (error) {
+      console.error(
+        `Error setting user living lab for user ID ${userId}:`,
+        error
+      );
+      throw new Error("Failed to set user living lab");
     }
   }
 
