@@ -53,7 +53,7 @@ export function SiteNavBar({
   let navbarItems: MenuItem[] = menuItems ?? [];
   if (userInfo) {
     const userMenu: MenuItem = {
-      label: userInfo?.name,
+      label: "Manage Labs",
       icon: <UserCircleIcon />,
       subItems: [
         {

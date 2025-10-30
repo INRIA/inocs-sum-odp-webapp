@@ -10,6 +10,7 @@ type LivingLabMeasuresProps = {
   measures?: IProject[];
   implementedMeasures?: LivingLabProjectsImplementationInput[];
   className?: string;
+  measuresGrids?: number;
   isEditable?: boolean;
 };
 
@@ -19,6 +20,7 @@ export function LivingLabMeasures({
   implementedMeasures = [],
   title = "Measures",
   className = "",
+  measuresGrids = 2,
   isEditable = false,
 }: LivingLabMeasuresProps) {
   return (
@@ -27,7 +29,7 @@ export function LivingLabMeasures({
     >
       <div className="flex-1 grid grid-cols-1 gap-4">
         <h4 className="text-center">{title}</h4>
-        <div className="grid grid-cols-1 lg:grid-cols-2 mx-1 lg:mx-4 gap-4">
+        <div className={`grid grid-cols-${measuresGrids} mx-1 lg:mx-4 gap-4`}>
           {measures.map((m) => (
             <LivingLabMeasureForm
               livingLabId={livingLabId}

@@ -121,12 +121,12 @@ const DEFAULT_USER_MENU_ITEMS = [
 
 export function SidebarMenu({ children, userInfo, currentLivingLab }: Props) {
   const labItem = {
-    label: currentLivingLab?.name ?? "My Living Lab",
+    label: "Manage " + (currentLivingLab?.name ?? "My Living Lab"),
     icon: <MapPinIcon />,
   };
   const labMenu: MenuItem[] = [
     {
-      label: "Edit",
+      label: "Edit Lab details",
       icon: <Cog8ToothIcon />,
       href: getUrl("/lab-admin/edit"),
     },
@@ -140,7 +140,7 @@ export function SidebarMenu({ children, userInfo, currentLivingLab }: Props) {
 
   const navbarItems: MenuItem[] = [
     {
-      label: "Home",
+      label: userInfo ? "Go to ODP website" : "Home",
       icon: <HomeIcon />,
       href: getUrl("/"),
       className: "max-md:hidden",
@@ -155,11 +155,11 @@ export function SidebarMenu({ children, userInfo, currentLivingLab }: Props) {
   ];
   if (currentLivingLab) {
     if (
-      currentLivingLab?.authorizedLabs?.length &&
+      currentLivingLab?.authorizedLabs &&
       currentLivingLab?.authorizedLabs?.length > 1
     ) {
       navbarItems.push({
-        label: "Labs",
+        label: "My Labs",
         icon: <GlobeEuropeAfricaIcon />,
         subItems: currentLivingLab?.authorizedLabs?.map((item) => ({
           label: item.name,
@@ -177,7 +177,7 @@ export function SidebarMenu({ children, userInfo, currentLivingLab }: Props) {
 
   if (userInfo)
     navbarItems.push({
-      label: userInfo?.name,
+      label: "My account",
       icon: <UserCircleIcon />,
       subItems: DEFAULT_USER_MENU_ITEMS,
       className: "max-md:hidden",

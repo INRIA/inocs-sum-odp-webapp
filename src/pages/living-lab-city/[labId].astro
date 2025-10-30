@@ -3,12 +3,10 @@ import Layout from "../../layouts/Layout.astro";
 import ApiClient from "../../lib/api-client/ApiClient";
 import { MapViewer } from "../../components/react/MapViewer";
 import { TransportBadge } from "../../components/react/TransportBadge";
-import ModalSplitChart from "../../components/react/KpiCards/ModalSplitChart";
-import { MeasuresSection } from "../../components/react/MobilityMeasures";
 import {
   getNSMTransportModes,
   separateMeasures,
-  prepareModalSplitData,
+  getModalSplitKpiResults,
   createMapMarker,
 } from "../../lib/helpers/living-lab";
 import {
@@ -40,10 +38,11 @@ const nsmTransportModes = getNSMTransportModes(
 const { pushMeasures, pullMeasures } = separateMeasures(
   livingLabData?.projects ?? []
 );
-const { before, after } = prepareModalSplitData(
-  livingLabData,
+
+const modalSplitKpis = getModalSplitKpiResults(
+  allKpis,
   allTransportModes,
-  allKpis
+  livingLabData?.kpi_results ?? []
 );
 
 const mapMarker = createMapMarker(livingLabData);
@@ -119,65 +118,61 @@ const kpiResultsByCategory = categories.map((category) => ({
       <!-- Push & Pull Measures Section -->
       {
         (pushMeasures.length > 0 || pullMeasures.length > 0) && (
-          <section class="flex flex-col md:flex-row gap-8 items-start">
-            <div class="flex-1 grid grid-cols-1 gap-2">
-              <h3 class="text-center">🔴 Push measures</h3>
-              <LivingLabMeasures
-                livingLabId={labId}
-                measures={pushMeasures}
-                isEditable={false}
-                title=""
-                implementedMeasures={
-                  livingLabData?.living_lab_projects_implementation ?? []
-                }
-              />
-            </div>
-            <div class="flex-1 grid grid-cols-1 gap-2">
-              <h3 class="text-center">🟢 Pull measures</h3>
-              <LivingLabMeasures
-                livingLabId={labId}
-                measures={pullMeasures}
-                isEditable={false}
-                title=""
-                implementedMeasures={
-                  livingLabData?.living_lab_projects_implementation ?? []
-                }
-              />
-            </div>
+          <section class="flex flex-col gap-8 items-start">
+            {pushMeasures.length > 0 && (
+              <div class="flex-1 grid grid-cols-1 gap-2">
+                <h3 class="text-center">🔴 Push measures</h3>
+                <LivingLabMeasures
+                  livingLabId={labId}
+                  measures={pushMeasures}
+                  isEditable={false}
+                  title=""
+                  implementedMeasures={
+                    livingLabData?.living_lab_projects_implementation ?? []
+                  }
+                  measuresGrids={2}
+                />
+              </div>
+            )}
+            {pullMeasures.length > 0 && (
+              <div class="flex-1 grid grid-cols-1 gap-2">
+                <h3 class="text-center">🟢 Pull measures</h3>
+                <LivingLabMeasures
+                  livingLabId={labId}
+                  measures={pullMeasures}
+                  isEditable={false}
+                  title=""
+                  implementedMeasures={
+                    livingLabData?.living_lab_projects_implementation ?? []
+                  }
+                  measuresGrids={2}
+                />
+              </div>
+            )}
           </section>
         )
       }
     </div>
 
-    <!-- Modal Split Section -->
+    <!-- KPIs Section -->
     {
-      (before?.data?.length > 0 || after?.data?.length > 0) && (
+      livingLabData?.kpi_results && livingLabData?.kpi_results?.length > 0 ? (
         <section class="flex flex-col gap-4">
-          <h3 class="text-center">Modal Split</h3>
-          <p>
-            Distribution of transport modes usage before and after measures:
-          </p>
-          <div class="bg-white p-6 rounded-lg shadow-md">
-            <ModalSplitChart data={[before, after]} client:load />
+          <h3 class="text-center">Key Performance Indicators (KPIs)</h3>
+
+          <div class="flex flex-wrap gap-0">
+            <LivingLabKPIsView modalSplitKpis={modalSplitKpis} client:load />
+          </div>
+
+          <div class="flex flex-wrap gap-0">
+            <LivingLabKPIsView
+              categories={kpiResultsByCategory ?? []}
+              kpis={allKpis}
+              client:load
+            />
           </div>
         </section>
-      )
+      ) : null
     }
-
-    <!-- KPIs Section -->
-    <section class="flex flex-col gap-4">
-      <h3 class="text-center">Key Performance Indicators (KPIs)</h3>
-      <p>
-        Explore living lab metrics and track progress of the impact of
-        shared-mobility integration.
-      </p>
-      <div class="flex flex-wrap gap-0">
-        <LivingLabKPIsView
-          categories={kpiResultsByCategory ?? []}
-          kpis={allKpis}
-          client:load
-        />
-      </div>
-    </section>
   </div>
 </Layout>

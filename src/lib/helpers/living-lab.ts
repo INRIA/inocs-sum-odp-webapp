@@ -3,6 +3,7 @@ import type {
   ITransportMode,
   IProject,
   IKpi,
+  IIKpiResultBeforeAfter,
 } from "../../types";
 import type { SplitItem } from "../../components/react/KpiCards/ModalSplitChart";
 import type { MarkerData } from "../../components/react/MapViewer";
@@ -43,34 +44,51 @@ export function separateMeasures(measures: IProject[]): {
  * Prepare modal split chart data from KPI results
  * KPI 15.a represents modal split per transport mode
  */
-export function prepareModalSplitData(
-  livingLab: ILivingLabPopulated,
+export function getModalSplitKpiResults(
+  kpiDefinitions: IKpi[],
   allTransportModes: ITransportMode[],
-  kpidefinitions: IKpi[]
+  kpiResults: IIKpiResultBeforeAfter[]
 ): {
+  kpiName: string;
+  before: { label: string; data: SplitItem[] };
+  after: { label: string; data: SplitItem[] };
+}[] {
+  if (!kpiDefinitions || !allTransportModes || !kpiResults.length) {
+    return [];
+  }
+  return (
+    kpiDefinitions
+      ?.filter((kpi) => ["15.a", "15.b", "15.c"].includes(kpi.kpi_number))
+      .map((kpi) => {
+        const modalSplitKpiResults = kpiResults.filter(
+          (result) => result.kpidefinition_id === kpi.id
+        );
+
+        return prepareModalSplitData(
+          modalSplitKpiResults,
+          allTransportModes,
+          kpi
+        );
+      }) || []
+  );
+}
+
+function prepareModalSplitData(
+  kpiResults: IIKpiResultBeforeAfter[],
+  allTransportModes: ITransportMode[],
+  parentKpiDefinition?: IKpi
+): {
+  kpiName: string;
   before: { label: string; data: SplitItem[] };
   after: { label: string; data: SplitItem[] };
 } {
   if (
-    !livingLab.kpi_results ||
+    kpiResults?.length === 0 ||
     !allTransportModes ||
     allTransportModes.length === 0
   ) {
     return {
-      before: { label: "Before", data: [] },
-      after: { label: "After", data: [] },
-    };
-  }
-
-  // Find KPI 15.a results (modal split)
-  const modalSplitKpis = livingLab.kpi_results?.filter(
-    (kpi) =>
-      kpidefinitions?.find((def) => def.id === kpi.kpidefinition_id)
-        ?.kpi_number === "15.a"
-  );
-
-  if (modalSplitKpis.length === 0) {
-    return {
+      kpiName: "Modal Split",
       before: { label: "Before", data: [] },
       after: { label: "After", data: [] },
     };
@@ -78,14 +96,14 @@ export function prepareModalSplitData(
 
   const beforeData: SplitItem[] = [];
   const afterData: SplitItem[] = [];
-  const beforeLabelWithMinYear = modalSplitKpis[0].result_before?.date
-    ? `Before (${new Date(modalSplitKpis[0].result_before.date).getFullYear()})`
+  const beforeLabelWithMinYear = kpiResults[0].result_before?.date
+    ? `Before (${new Date(kpiResults[0].result_before.date).getFullYear()})`
     : "Before";
-  const afterLabelWithMinYear = modalSplitKpis[0].result_after?.date
-    ? `After (${new Date(modalSplitKpis[0].result_after.date).getFullYear()})`
+  const afterLabelWithMinYear = kpiResults[0].result_after?.date
+    ? `After (${new Date(kpiResults[0].result_after.date).getFullYear()})`
     : "After";
 
-  modalSplitKpis.forEach((kpi) => {
+  kpiResults.forEach((kpi) => {
     // Find the transport mode for this KPI result
     const transportMode = allTransportModes.find(
       (tm) => tm.id === kpi.result_before?.transport_mode_id
@@ -111,6 +129,7 @@ export function prepareModalSplitData(
   });
 
   return {
+    kpiName: parentKpiDefinition?.name || "Modal Split",
     before: { label: beforeLabelWithMinYear, data: beforeData },
     after: { label: afterLabelWithMinYear, data: afterData },
   };

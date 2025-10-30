@@ -230,14 +230,14 @@ export function LivingLabMeasureForm({
               </RButton>
             </div>
           </form>
-        ) : checked ? (
+        ) : checked && (startAt || description) ? (
           <div className="flex flex-col gap-1 text-left p-5 text-primary justify-center items-start">
-            <div className="flex flex-row">
-              <CalendarIcon className="h-5 w-5" />
-              <small>
-                {startAt ? formatDateToMonthYear(startAt) : "Unknown"}
-              </small>
-            </div>
+            {startAt ? (
+              <div className="flex flex-row justify-center items-center gap-1">
+                <CalendarIcon className="h-5 w-5" />
+                <small>{formatDateToMonthYear(startAt)}</small>
+              </div>
+            ) : null}
             <small style={{ whiteSpace: "pre-line" }}>{description}</small>
           </div>
         ) : null}

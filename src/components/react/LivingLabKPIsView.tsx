@@ -2,16 +2,27 @@ import type { IKpi, IIKpiResultBeforeAfter } from "../../types";
 import { Badge, ExpansionPanel } from "./ui";
 import type { ICategory } from "../../types/Category";
 import { KpiCard, KpiMultiple } from "./KpiCards";
+import ModalSplitChart, { type SplitItem } from "./KpiCards/ModalSplitChart";
 
 interface IKpiResultsByCategory extends ICategory {
   kpiResults: IIKpiResultBeforeAfter[];
 }
 type Props = {
   kpis?: IKpi[];
-  categories: IKpiResultsByCategory[];
+  categories?: IKpiResultsByCategory[];
+
+  modalSplitKpis?: {
+    kpiName: string;
+    before: { label: string; data: SplitItem[] };
+    after: { label: string; data: SplitItem[] };
+  }[];
 };
 
-export function LivingLabKPIsView({ categories = [], kpis }: Props) {
+export function LivingLabKPIsView({
+  categories = [],
+  kpis,
+  modalSplitKpis,
+}: Props) {
   const getKpiSection = (
     parentKpi: IKpi,
     resultKpis: IIKpiResultBeforeAfter[] = []
@@ -65,6 +76,7 @@ export function LivingLabKPIsView({ categories = [], kpis }: Props) {
           .map(([key, parentKpi]) => (
             // <div className="break-inside-avoid">
             <div
+              key={key}
               className={`break-inside-avoid ${
                 (kpiResultsMap.get(key) ?? [])?.length > 1
                   ? "md:col-span-2"
@@ -77,6 +89,41 @@ export function LivingLabKPIsView({ categories = [], kpis }: Props) {
       </div>
     );
   };
+
+  if (modalSplitKpis && modalSplitKpis?.length > 0) {
+    return (
+      <ExpansionPanel
+        header={
+          <div className="flex flex-row justify-center items-center gap-2 rounded-2xl border-info bg-info px-1 py-1">
+            <h5 className="text-center">Modal Split</h5>
+            <Badge
+              color="light"
+              size="sm"
+              tooltip="Number of KPIs in this category"
+              displayTooltipIcon={false}
+            >
+              {modalSplitKpis?.length || 0}
+            </Badge>
+          </div>
+        }
+        content={
+          <>
+            {modalSplitKpis?.length > 0 &&
+              modalSplitKpis.map(({ kpiName, before, after }) => (
+                <div className="flex flex-col gap-4">
+                  <h5 className="text-center  mt-4">{kpiName}</h5>
+                  <div className="bg-white p-6 rounded-lg shadow-md">
+                    <ModalSplitChart data={[before, after]} />
+                  </div>
+                </div>
+              ))}
+          </>
+        }
+        arrow
+        open={true}
+      />
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4 mx-auto w-full">

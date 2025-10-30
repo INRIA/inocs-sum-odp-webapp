@@ -18,23 +18,45 @@ const api = new ApiClient(Astro.request);
 
 const livingLabsData = (await api.getLivingLabs()) as ILivingLabPopulated[];
 const measures = await api.getMeasures();
-const kpis = (await api.getKPIs())?.filter((kpi) => !kpi.parent_kpi_id);
+const allKPIs = await api.getKPIs();
+const parentKpis = allKPIs?.filter((kpi) => !kpi.parent_kpi_id);
 const transportModes = (await api.getTransportModes())?.filter(
   (tm) => tm.type === "NSM"
 );
 
-const labs = livingLabsData?.map((lab) => ({
-  id: lab.id,
-  name: lab.name,
-  coordinates: { lat: lab.lat, lng: lab.lng },
-  radius: lab.radius ?? 50,
-  // status: lab.status,
-  totalMeasures: lab.projects?.length,
-  kpisBefore: lab.kpi_results?.filter((kpi) => kpi.result_before).length,
-  kpisAfter: lab.kpi_results?.filter((kpi) => kpi.result_after).length,
-  transportModes: lab.transport_modes?.filter((tm) => tm.type === "NSM").length,
-  sustainablePercentage: 0.4,
-}));
+const labs = livingLabsData?.map((lab) => {
+  const kpisBeforeIds = lab.kpi_results
+    ?.filter((kpi) => kpi.result_before)
+    ?.map((kpiresult) => {
+      const kpiDefinition = allKPIs?.find(
+        (pk) => pk.id === kpiresult.kpidefinition_id
+      );
+      return kpiDefinition?.parent_kpi_id ?? kpiDefinition?.id;
+    });
+
+  const kpisAfterIds = lab.kpi_results
+    ?.filter((kpi) => kpi.result_after)
+    ?.map((kpiresult) => {
+      const kpiDefinition = allKPIs?.find(
+        (pk) => pk.id === kpiresult.kpidefinition_id
+      );
+      return kpiDefinition?.parent_kpi_id ?? kpiDefinition?.id;
+    });
+
+  return {
+    id: lab.id,
+    name: lab.name,
+    coordinates: { lat: lab.lat, lng: lab.lng },
+    radius: lab.radius ?? 50,
+    // status: lab.status,
+    totalMeasures: lab.projects?.length,
+    kpisBefore: [...new Set(kpisBeforeIds)]?.length,
+    kpisAfter: [...new Set(kpisAfterIds)]?.length,
+    transportModes: lab.transport_modes?.filter((tm) => tm.type === "NSM")
+      .length,
+    sustainablePercentage: 0.4,
+  };
+});
 ---
 
 <Layout role="visitor">
@@ -80,7 +102,7 @@ const labs = livingLabsData?.map((lab) => ({
         {
           id: 4,
           name: "Key Performance Indicators (KPIs) monitored",
-          value: kpis?.length.toString() ?? "0",
+          value: parentKpis?.length.toString() ?? "0",
         },
       ]}
     />
