@@ -1,16 +1,64 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import LoginForm from "../../components/react/form/LoginForm";
+import { InfoAlert } from "../../components/react";
 ---
 
 <Layout role="visitor">
   <div class="px-6 py-12">
-    <section class="max-w-3xl mx-auto">
-      <h2>Sign in to your account</h2>
-      <p class="text-warning italic mb-6">
-        Access your lab management dashboard with your credentials.
+    <section class="max-w-3xl mx-auto gap-2 flex flex-col">
+      <h2>Sign in as Living Lab editor</h2>
+      <p class="text-primary italic mb-6">
+        Access your living lab management dashboard with your credentials.
       </p>
       <LoginForm client:load />
+
+      <div class="gap-4 flex flex-col mt-8">
+        <h4>Need help ?</h4>
+        <InfoAlert
+          variant="question"
+          title="Are you a SUM Living Lab ?"
+          actionHref="/lab-admin/signup"
+          actionText="Sign up"
+          hideIcon
+          client:load
+        >
+          <small>
+            If this is your first time accessing the platform, create a new
+            account and select your Living Lab from the list.
+          </small>
+        </InfoAlert>
+
+        <InfoAlert
+          variant="question"
+          title="Are you a SUM project partner ?"
+          hideIcon
+          client:load
+        >
+          <small>
+            For administrator access, please contact the administrator at
+            <a class="underline" href="mailto:odp@sum-project.eu"
+              >odp@sum-project.eu</a
+            > to request special access to the platform.
+          </small>
+        </InfoAlert>
+
+        <InfoAlert
+          variant="question"
+          title="Do you want to create a new Living Lab?"
+          hideIcon
+          client:load
+        >
+          <small>
+            Thank you for your interest in contributing to the SUM project! The
+            feature is currently under construction. Please reach out to the
+            platform administrator at <a
+              class="underline"
+              href="mailto:odp@sum-project.eu">odp@sum-project.eu</a
+            > for more information.
+          </small>
+        </InfoAlert>
+      </div>
     </section>
   </div>
 </Layout>

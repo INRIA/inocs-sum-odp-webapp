@@ -46,10 +46,11 @@ export default function ModalSplitChart({ data }: Props) {
     },
   };
 
-  const getChartDataAndOptions = (dataset: Dataset) => {
-    const labels = dataset.data.map((d) => d.label);
-    const values = normalizePercentages(dataset.data);
-    const backgroundColor = dataset.data.map((d) => d.color);
+  const getChartDataAndOptions = (dataset: ModalSplitChartDataset) => {
+    const sortedData = [...dataset.data].sort((a, b) => b.value - a.value);
+    const labels = sortedData.map((d) => d.label);
+    const values = normalizePercentages(sortedData);
+    const backgroundColor = sortedData.map((d) => d.color);
 
     const chartData = {
       labels,
@@ -74,26 +75,23 @@ export default function ModalSplitChart({ data }: Props) {
             <Doughnut data={chartData} options={options} />
           </div>
           <div className="w-1/2 flex flex-col h-60 gap-0">
-            {[...dataset.data]
-              .map((item, i) => ({ ...item, percent: values[i] }))
-              .sort((a, b) => b.percent - a.percent)
-              .map((item, i) => (
-                <li
-                  key={item.label}
-                  className="flex items-center gap-1 justify-between text-sm"
-                >
-                  <span
-                    className="inline-block rounded-[3px] flex-shrink-0 w-3 h-3"
-                    style={{
-                      background: item.color ?? "#ccc",
-                    }}
-                  />
-                  <small className="flex-1">{item.label}</small>
-                  <strong className="lg:min-w-[48px] text-right">
-                    {values[i]}%
-                  </strong>
-                </li>
-              ))}
+            {sortedData.map(({ label, value, color }, i) => (
+              <li
+                key={label}
+                className="flex items-center gap-1 justify-between text-sm"
+              >
+                <span
+                  className="inline-block rounded-[3px] flex-shrink-0 w-3 h-3"
+                  style={{
+                    background: color ?? "#ccc",
+                  }}
+                />
+                <small className="flex-1">{label}</small>
+                <strong className="lg:min-w-[48px] text-right">
+                  {values[i]}%
+                </strong>
+              </li>
+            ))}
           </div>
         </div>
       </div>

@@ -77,17 +77,7 @@ export default function LoginForm() {
           disabled={isLoading}
         />
 
-        <RButton
-          type="button"
-          variant="secondary"
-          text="Cancel"
-          disabled={isLoading}
-          onClick={() => {
-            setEmail("");
-            setPassword("");
-            setError("");
-          }}
-        />
+        <RButton variant="secondary" text="Go back" href={getUrl("/")} />
       </div>
 
       <div className="text-center mt-6">

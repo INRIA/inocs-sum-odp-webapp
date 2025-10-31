@@ -7,6 +7,7 @@ import {
 } from "@heroicons/react/20/solid";
 import { RButton } from "./RButton";
 export type AlertVariant =
+  | "question"
   | "success"
   | "warning"
   | "danger"
@@ -28,12 +29,19 @@ export type InfoAlertProps = {
   actionHref?: string;
   onAction?: () => void;
   className?: string;
+  hideIcon?: boolean;
 };
 
 const variantClasses: Record<
   AlertVariant,
   { bg: string; border: string; text: string; buttonBg: string }
 > = {
+  question: {
+    bg: "bg-info/50",
+    border: "border-sky-200",
+    text: "text-primary",
+    buttonBg: "border-primary hover:border-primary/90 text-primary",
+  },
   success: {
     bg: "bg-success/50",
     border: "border-green-200",
@@ -67,12 +75,12 @@ const variantClasses: Record<
 };
 
 const heroIconsVariants = {
-  info: <InformationCircleIcon className="h-10 w-10" />,
-  question: <QuestionMarkCircleIcon className="h-10 w-10" />,
-  success: <CheckCircleIcon className="h-10 w-10" />,
-  warning: <ExclamationTriangleIcon className="h-10 w-10" />,
-  danger: <ExclamationTriangleIcon className="h-10 w-10" />,
-  neutral: <InformationCircleIcon className="h-10 w-10" />,
+  info: <InformationCircleIcon className="h-8 w-8" />,
+  question: <QuestionMarkCircleIcon className="h-8 w-8" />,
+  success: <CheckCircleIcon className="h-8 w-8" />,
+  warning: <ExclamationTriangleIcon className="h-8 w-8" />,
+  danger: <ExclamationTriangleIcon className="h-8 w-8" />,
+  neutral: <InformationCircleIcon className="h-8 w-8" />,
 };
 
 export function InfoAlert({
@@ -84,6 +92,7 @@ export function InfoAlert({
   actionHref,
   onAction,
   className = "",
+  hideIcon = false,
 }: InfoAlertProps) {
   const v = variantClasses[variant];
 
@@ -94,10 +103,14 @@ export function InfoAlert({
       aria-live="polite"
     >
       <div className="flex items-start gap-2">
-        <div className={`${v.text}`}>{heroIconsVariants[icon ?? variant]}</div>
+        {!hideIcon && (
+          <div className={`${v.text}`}>
+            {heroIconsVariants[icon ?? variant]}
+          </div>
+        )}
 
         <div className="flex-1 gap-0">
-          {title && <h5 className={`${v.text}`}>{title}</h5>}
+          {title && <h6 className={`${v.text}`}>{title}</h6>}
           <p className={`${v.text}`}>{children}</p>
         </div>
 
