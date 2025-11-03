@@ -2,6 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import SignupForm from "../../components/react/form/SignupForm";
 import ApiClient from "../../lib/api-client/ApiClient";
+import FAQ from "../../components/FAQ.astro";
 
 const api = new ApiClient(Astro.request);
 const livingLabs = await api.getLivingLabs();
@@ -23,6 +24,8 @@ const labs =
         Please use official partner emails for security and moderation purposes.
       </p>
       <SignupForm livingLabs={labs} client:load />
+
+      <FAQ />
     </section>
   </div>
 </Layout>

@@ -1,0 +1,49 @@
+---
+import { InfoAlert } from "./react";
+---
+
+<div class="gap-4 flex flex-col mt-8">
+  <h4>Need help ?</h4>
+  <InfoAlert
+    variant="question"
+    title="Are you a SUM Living Lab ?"
+    actionHref="/lab-admin/signup"
+    actionText="Sign up"
+    hideIcon
+    client:load
+  >
+    <small>
+      If this is your first time accessing the platform, create a new account
+      and select your Living Lab from the list.
+    </small>
+  </InfoAlert>
+
+  <InfoAlert
+    variant="question"
+    title="Are you a SUM project partner ?"
+    hideIcon
+    client:load
+  >
+    <small>
+      For administrator access, please contact the administrator at
+      <a class="underline" href="mailto:odp@sum-project.eu"
+        >odp@sum-project.eu</a
+      > to request special access to the platform.
+    </small>
+  </InfoAlert>
+
+  <InfoAlert
+    variant="question"
+    title="Do you want to create a new Living Lab?"
+    hideIcon
+    client:load
+  >
+    <small>
+      Thank you for your interest in contributing to the SUM project! The
+      feature is currently under construction. Please reach out to the platform
+      administrator at <a class="underline" href="mailto:odp@sum-project.eu"
+        >odp@sum-project.eu</a
+      > for more information.
+    </small>
+  </InfoAlert>
+</div>

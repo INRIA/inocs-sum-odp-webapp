@@ -8,6 +8,7 @@ import {
   MobilityMeasures,
   ODPTimeline,
   LivingLabsMapSection,
+  RButton,
 } from "../components/react";
 import heroImage from "../assets/img/sum-hero.png";
 import ApiClient from "../lib/api-client/ApiClient";
@@ -57,6 +58,49 @@ const labs = livingLabsData?.map((lab) => {
     sustainablePercentage: 0.4,
   };
 });
+
+const steps = [
+  {
+    id: 1,
+    color: "primary",
+    icon: "👤",
+    title: "Create your account",
+    description:
+      "Sign up and join your existing Living Lab, or create a new one to start contributing.",
+  },
+  {
+    id: 2,
+    color: "secondary",
+    icon: "🏙️",
+    title: "Describe your Living Lab",
+    description:
+      "Provide key details: name, city, and zone or area of intervention for your Living Lab.",
+  },
+  {
+    id: 3,
+    color: "warning",
+    icon: "📊",
+    title: "Collect baseline data",
+    description:
+      "Input your first round of KPI values before implementing mobility measures.",
+  },
+  {
+    id: 4,
+    color: "info",
+    icon: "⚙️",
+    title: "Add your measures",
+    description:
+      "Document the mobility measures and policies implemented in your Living Lab.",
+  },
+  {
+    id: 5,
+    color: "primary",
+    icon: "📈",
+    title: "Collect post-data",
+    description:
+      "Measure KPIs again to assess the impact of measures and share results in the platform.",
+  },
+];
 ---
 
 <Layout role="visitor">
@@ -134,6 +178,92 @@ const labs = livingLabsData?.map((lab) => {
     </CTASection>
   </div>
 
+  <section class="bg-gray-50 py-16 px-4 sm:px-8 lg:px-16">
+    <div class="max-w-5xl mx-auto text-center mb-16">
+      <h2 class="text-3xl font-bold text-gray-900 mb-4">
+        How to Contribute to the SUM Open Data Platform
+      </h2>
+      <p class="text-lg text-gray-600">
+        Join the SUM Open Data Platform and help shape the future of sustainable
+        urban mobility. Living Labs contribute real-world data to evaluate and
+        improve New Shared Mobility measures across Europe.
+      </p>
+    </div>
+
+    <div class="relative max-w-5xl mx-auto mt-40">
+      {/* Vertical line: left on mobile, centered on md+ */}
+      <div
+        class="absolute left-4 md:left-1/2 transform md:-translate-x-1/2 w-1 bg-primary h-full rounded"
+      >
+      </div>
+
+      {
+        steps.map((step, index) => (
+          <div
+            key={step.id}
+            class={`mb-16 flex items-start w-full md:justify-between md:items-center  md:-mt-28 ${
+              index % 2 === 0 ? "md:flex-row-reverse" : ""
+            }`}
+          >
+            {/* Empty space on one side only for md+ (keeps centered layout on larger screens) */}
+            <div class="hidden md:block md:w-5/12" />
+
+            {/* Step marker + connector: circle and line adjacent (no extra spacing) */}
+            <div
+              class={`z-20 flex items-center ml-2 ${
+                index % 2 === 0
+                  ? "flex-row md:-ml-18"
+                  : "md:flex-row-reverse md:-mr-18"
+              }`}
+            >
+              <div
+                class={`flex items-center justify-center w-5 h-5 rounded-full bg-${step.color} border-2 border-${step.color} text-xs font-extralight text-light shadow`}
+              >
+                {step.id}
+              </div>
+
+              {/* Connector between marker and card (visible on md+) */}
+              <div class="hidden md:block md:w-14">
+                <div class="w-full h-0.5 bg-primary rounded" />
+              </div>
+            </div>
+
+            {/* Card: full width on mobile to the right of the line, constrained on md+ */}
+            <div
+              class={`relative w-full md:w-5/12 bg-white rounded-xl shadow-lg p-6  border-${step.color} ml-6 md:ml-0  ${
+                index % 2 === 0 ? "border-r-8" : "border-l-8"
+              }`}
+            >
+              <div class="flex items-center mb-2">
+                <span class="text-2xl mr-3">{step.icon}</span>
+                <h5 class="text-xl font-semibold text-gray-900">
+                  {step.title}
+                </h5>
+              </div>
+              <p class="text-gray-600">{step.description}</p>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    {/* CTA */}
+    <div
+      class="text-center mt-16 flex flex-col md:flex-row gap-4 mx-auto justify-center"
+    >
+      <RButton
+        href="/lab-admin/login"
+        variant="primary"
+        className="bg-warning text-light"
+      >
+        Login to your account →
+      </RButton>
+      <RButton href="/lab-admin/signup" variant="primary">
+        Join the Platform →
+      </RButton>
+    </div>
+  </section>
+
   <!-- TODO: enable when features become available, only one section for tools -->
   <!-- <CTASection
     title="Push and pull measures impact assessment tool"
@@ -175,7 +305,7 @@ const labs = livingLabsData?.map((lab) => {
     order="center"
     linkText="Contribute feedback or request features"
     linkHref="https://fider-webapp.inocs-sum.lille.inria.fr"
-    className="border-t border-gray-200 py-10"
+    class="border-t border-gray-200 py-10"
   >
     <div class="my-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
       <!-- Feature 1 -->

@@ -30,9 +30,37 @@ export default function SignupForm({ livingLabs }: Props) {
   const [error, setError] = useState("");
   const [progress, setProgress] = useState("");
 
+  const validateForm = () => {
+    if (!name || !email || !password) {
+      setError("Please fill in all required fields.");
+      return false;
+    }
+    const emailTrim = email.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailTrim)) {
+      setError("Please enter a valid email address.");
+      return false;
+    }
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return false;
+    }
+    if (mode === "join" && !livingLab) {
+      setError("Please select a Living Lab.");
+      return false;
+    }
+    return true;
+  };
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError("");
+    setProgress("");
 
+    if (!validateForm()) {
+      return;
+    }
     setIsLoading(true);
     try {
       const newUser = await api.signupLabEditor({
@@ -163,18 +191,7 @@ export default function SignupForm({ livingLabs }: Props) {
           onClick={handleSubmit}
         />
 
-        <RButton
-          type="button"
-          variant="secondary"
-          text="Cancel"
-          onClick={() => {
-            setName("");
-            setEmail("");
-            setPassword("");
-            setLivingLab("");
-            setMode("join");
-          }}
-        />
+        <RButton variant="secondary" text="Go back" href={getUrl("/")} />
       </div>
 
       <div className="text-center mt-6">
