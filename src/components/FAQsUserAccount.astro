@@ -1,0 +1,48 @@
+---
+import { FAQAccordion } from "../components/react/ui";
+
+const faqUserAccount = [
+  {
+    question: "Are you a SUM Living Lab ?",
+    answer:
+      "If this is your first time accessing the platform, create a new account and select your Living Lab from the list.",
+    ctaLabel: "Sign up",
+    ctaLink: "/lab-admin/signup",
+  },
+  {
+    question: "Are you a SUM project partner ?",
+    answer:
+      "For administrator access, please contact the administrator at odp@sum-project.eu to request special access to the platform.",
+    ctaLabel: "Contact ODP administrator",
+    ctaLink: "mailto:odp@sum-project.eu",
+  },
+  {
+    question: "Do you want to create a new Living Lab?",
+    answer:
+      "Thank you for your interest in contributing to the SUM project! The feature is currently under construction. Please reach out to the platform administrator at odp@sum-project.eu for more information.",
+    ctaLabel: "Contact ODP administrator",
+    ctaLink: "mailto:odp@sum-project.eu",
+  },
+  {
+    question: "I forgot my password, what should I do?",
+    answer:
+      "The 'Forgot Password' feature is currently under construction. Please reach out to the platform administrator at odp@sum-project.eu for assistance.",
+    ctaLabel: "Contact ODP administrator",
+    ctaLink: "mailto:odp@sum-project.eu",
+  },
+];
+---
+
+<div class="gap-4 flex flex-col mt-8">
+  <h4>Need help ?</h4>
+  <FAQAccordion questions={faqUserAccount} client:load />
+
+  <p>
+    For more questions, visit our <a
+      href="/faq"
+      class="underline text-blue-900"
+    >
+      FAQ page</a
+    >.
+  </p>
+</div>

@@ -299,6 +299,31 @@ const steps = [
 
   <!-- Section to display research subjects -->
 
+  <!-- FAQ intro section -->
+  <section
+    class="bg-white py-12 px-4 sm:px-8 lg:px-16 mt-12 border-t border-gray-100"
+  >
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-2xl font-bold text-gray-900 mb-3">
+        Have questions? Visit our FAQ
+      </h2>
+      <p class="text-gray-600 mb-6">
+        Find concise answers about data access, contributing Living Lab results,
+        measures, KPIs, and technical integration.
+      </p>
+
+      <div class="flex flex-col md:flex-row items-center gap-4 justify-center">
+        <RButton
+          href={getUrl("/faq")}
+          variant="primary"
+          className="bg-primary text-light"
+        >
+          Go to the FAQ →
+        </RButton>
+      </div>
+    </div>
+  </section>
+
   <CTASection
     title="Coming soon ! \nTools and features to explore SUM data"
     description="We continue building the SUM Open Data Platform together. Share your feedback or ideas in the link bellow. Some of the upcoming features are :"

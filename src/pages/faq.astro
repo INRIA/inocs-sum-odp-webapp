@@ -1,0 +1,126 @@
+---
+import { FAQAccordion } from "../components/react/ui";
+import Layout from "../layouts/Layout.astro";
+
+const faqLivingLabAccount = [
+  {
+    question: "Who can register as a Living Lab in the platform?",
+    answer:
+      "Any city willing to contribute KPI values and measures scheduled to be implemented related to New Shared Mobility and its integration with public transport.",
+    ctaLabel: "Register",
+    ctaLink: "/lab-admin/signup",
+  },
+  {
+    question: "What information is required when I register my Living Lab?",
+    answer:
+      "Lab name, country, location and radius (area), and an estimated population.",
+  },
+  {
+    question: "What is the workflow for data input?",
+    answer:
+      "1) Collect baseline data to calculate KPIs; 2) Input 'before' KPI results in the platform; 3) Identify scheduled policy measures; 4) After implementation starts, collect 'after' data; 5) Input 'after' KPI results.",
+  },
+  {
+    question: "Can I update or correct data entries after submission?",
+    answer:
+      "Yes — lab administrators may update information as necessary. Living labs are responsible for the accuracy of the data.",
+    ctaLabel: "Contact ODP administrator",
+    ctaLink: "mailto:odp@sum-project.eu",
+  },
+  {
+    question:
+      "Are there templates or guidance documents for data collection and measurement?",
+    answer:
+      "Yes, templates and guidance are provided to help calculate KPI values. Resources are available in the Living Lab admin space after registration.",
+  },
+
+  {
+    question: "Are you a SUM Living Lab ?",
+    answer:
+      "If this is your first time accessing the platform, create a new account and select your Living Lab from the list.",
+    ctaLabel: "Sign up",
+    ctaLink: "/lab-admin/signup",
+  },
+  {
+    question: "Are you a SUM project partner ?",
+    answer:
+      "For administrator access, please contact the administrator at odp@sum-project.eu to request special access to the platform.",
+    ctaLabel: "Contact ODP administrator",
+    ctaLink: "mailto:odp@sum-project.eu",
+  },
+  {
+    question: "Do you want to create a new Living Lab?",
+    answer:
+      "Thank you for your interest in contributing to the SUM project! The feature is currently under construction. Please reach out to the platform administrator at odp@sum-project.eu for more information.",
+    ctaLabel: "Contact ODP administrator",
+    ctaLink: "mailto:odp@sum-project.eu",
+  },
+  {
+    question: "I forgot my password, what should I do?",
+    answer:
+      "The 'Forgot Password' feature is currently under construction. Please reach out to the platform administrator at odp@sum-project.eu for assistance.",
+    ctaLabel: "Contact ODP administrator",
+    ctaLink: "mailto:odp@sum-project.eu",
+  },
+];
+
+const faqGeneral = [
+  {
+    question: "What is the ODP and what is its purpose?",
+    answer:
+      "The SUM Open Data Platform tracks and monitors policy measures and KPIs related to Seamless Urban Mobility and its integration with public transport to report implementation and impacts.",
+  },
+  {
+    question: "What data are available through the ODP and in what format?",
+    answer:
+      "Living labs, list of measures, list of KPIs and final KPI values per living lab.",
+    ctaLabel: "View data",
+    ctaLink: "/data",
+  },
+  {
+    question: "How can I access the data?",
+    answer:
+      "Browse the website to view dynamic real life data submitted by living labs. Survey datasets will be added soon. For specific requests contact odp@sum-project.eu.",
+    ctaLabel: "Contact ODP administrator",
+    ctaLink: "mailto:odp@sum-project.eu",
+  },
+  {
+    question:
+      "Are the datasets anonymised and aggregated, or are raw data available?",
+    answer:
+      "Only aggregated KPI values are publicly available. Full datasets can be shared on request.",
+    ctaLabel: "Request data",
+    ctaLink: "mailto:odp@sum-project.eu",
+  },
+  {
+    question:
+      "Can I compare across different living labs, measures or countries using the platform?",
+    answer:
+      "This feature is under construction and expected to be available by 2026 for the impact assessment reporting period.",
+  },
+  {
+    question: "Who can I contact for further questions or support?",
+    answer: "For support contact odp@sum-project.eu.",
+    ctaLabel: "Contact ODP administrator",
+    ctaLink: "mailto:odp@sum-project.eu",
+  },
+];
+---
+
+<Layout>
+  <section class="max-w-3xl mx-auto my-16 px-4">
+    <h1 class="text-4xl font-bold mb-8">Frequently Asked Questions</h1>
+    <div class="space-y-6 mt-12">
+      <h5 class="text-primary border-b-2 border-primary/60">
+        Living Lab space
+      </h5>
+      <FAQAccordion questions={faqLivingLabAccount} client:load />
+    </div>
+    <div class="space-y-6 mt-12">
+      <h5 class="text-primary border-b-2 border-primary/60">
+        General questions
+      </h5>
+      <FAQAccordion questions={faqGeneral} client:load />
+    </div>
+  </section>
+</Layout>

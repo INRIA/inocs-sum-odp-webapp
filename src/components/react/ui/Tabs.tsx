@@ -10,7 +10,7 @@ type TabAlign = "left" | "center" | "right";
 
 type Props = {
   tabs: Tab[];
-  defaultTabId?: string;
+  defaultTabId?: string | null; // null = start with no active tab
   onChange?: (id: string) => void;
   align?: TabAlign; // new prop
 };
@@ -31,18 +31,21 @@ export function Tabs({
   onChange,
   align = "left",
 }: Props) {
-  const defaultIndex = defaultTabId
-    ? Math.max(
-        0,
-        tabs.findIndex((t) => t.id === defaultTabId)
-      )
-    : 0;
+  // defaultTabId === null  -> no tab active initially (closed)
+  // defaultTabId === undefined -> keep previous behavior: default to 0
+  const defaultIndex =
+    defaultTabId === null
+      ? -1
+      : defaultTabId
+      ? Math.max(0, tabs.findIndex((t) => t.id === defaultTabId))
+      : 0;
 
+  const maxIndex = Math.max(-1, tabs.length - 1);
   const [activeIndex, setActiveIndex] = useState<number>(
-    Math.min(Math.max(defaultIndex, 0), Math.max(0, tabs.length - 1))
+    Math.min(Math.max(defaultIndex, -1), maxIndex)
   );
 
-  const activeTab = tabs[activeIndex] || tabs[0];
+  const activeTab = activeIndex >= 0 ? tabs[activeIndex] : undefined;
 
   function selectByIndex(i: number) {
     if (i < 0 || i >= tabs.length) return;

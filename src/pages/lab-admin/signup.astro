@@ -2,7 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import SignupForm from "../../components/react/form/SignupForm";
 import ApiClient from "../../lib/api-client/ApiClient";
-import FAQ from "../../components/FAQ.astro";
+import FAQsUserAccount from "../../components/FAQsUserAccount.astro";
 
 const api = new ApiClient(Astro.request);
 const livingLabs = await api.getLivingLabs();
@@ -25,7 +25,7 @@ const labs =
       </p>
       <SignupForm livingLabs={labs} client:load />
 
-      <FAQ />
+      <FAQsUserAccount />
     </section>
   </div>
 </Layout>
