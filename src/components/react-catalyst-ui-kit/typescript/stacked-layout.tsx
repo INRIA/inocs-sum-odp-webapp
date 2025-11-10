@@ -52,20 +52,16 @@ export function StackedLayout({
   navbar,
   sidebar,
   children,
-  sidebarOnly = false,
+  sidebarAndNavbarInLargeScreens = false,
 }: React.PropsWithChildren<{
   navbar: React.ReactNode;
   sidebar: React.ReactNode;
-  sidebarOnly?: Boolean;
+  sidebarAndNavbarInLargeScreens?: boolean;
 }>) {
   let [showSidebar, setShowSidebar] = useState(false);
-  const containerClassname = sidebarOnly ? "lg:flex-row items-start" : "";
-  const navbarClassname = sidebarOnly ? "hidden lg:flex" : "";
 
   return (
-    <div
-      className={`relative isolate flex min-h-svh w-full flex-col bg-white ${containerClassname}`}
-    >
+    <div className={`relative isolate flex min-h-svh w-full flex-col bg-white`}>
       {/* Sidebar on mobile */}
       <MobileSidebar open={showSidebar} close={() => setShowSidebar(false)}>
         {sidebar}
@@ -73,11 +69,7 @@ export function StackedLayout({
 
       {/* Navbar */}
       <header className="flex items-center px-4 bg-white justify-between">
-        <div
-          className={`min-w-0 flex-1 items-center ${navbarClassname} `}
-        >
-          {navbar}
-        </div>
+        <div className={`min-w-0 flex-1 items-center `}>{navbar}</div>
         <div className="py-2.5 lg:hidden">
           <NavbarItem
             onClick={() => setShowSidebar(true)}
@@ -89,7 +81,17 @@ export function StackedLayout({
       </header>
 
       {/* Content */}
-      <main className="flex flex-1 flex-col pb-2 lg:px-2 ">
+      <main
+        className={`flex flex-1 flex-col pb-2 lg:px-2 ${
+          sidebarAndNavbarInLargeScreens ? "lg:flex-row lg:gap-4" : ""
+        }`}
+      >
+        {/* Desktop sidebar (visible on large screens only when enabled) */}
+        {sidebarAndNavbarInLargeScreens ? (
+          <aside className="hidden lg:block lg:sticky lg:top-0 lg:self-start max-w-80 shrink-0 lg:max-h-svh lg:overflow-y-auto">
+            {sidebar}
+          </aside>
+        ) : null}
         <div className="grow lg:rounded-lg ">
           <div className="mx-auto max-w-6xl">{children}</div>
         </div>

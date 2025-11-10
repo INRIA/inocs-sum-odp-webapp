@@ -4,6 +4,7 @@ import type {
   IProject,
   IKpi,
   IIKpiResultBeforeAfter,
+  IKpiResult,
 } from "../../types";
 import type { SplitItem } from "../../components/react/KpiCards/ModalSplitChart";
 import type { MarkerData } from "../../components/react/MapViewer";
@@ -147,5 +148,146 @@ export function createMapMarker(livingLab: ILivingLabPopulated): MarkerData {
       lng: parseFloat(livingLab.lng || "0"),
     },
     radius: livingLab.radius ? livingLab.radius * 1000 : undefined, // Convert km to meters
+  };
+}
+
+export function getLivingLabInfoProgress(
+  livingLab?: ILivingLabPopulated | null
+): {
+  value: number;
+  progress: number;
+  details: { label: string; value: string }[];
+} {
+  if (!livingLab) return { value: 0, progress: 0, details: [] };
+  const itemsToCheck = [
+    livingLab.description,
+    livingLab.area,
+    livingLab.radius,
+    livingLab.population,
+    livingLab.country,
+    livingLab.lat,
+    livingLab.lng,
+  ];
+
+  const filledItems = itemsToCheck.filter(
+    (item) => item !== null && item !== undefined && item !== ""
+  ).length;
+
+  const missingItems = itemsToCheck.length - filledItems;
+
+  const details = [{ label: "Missing information", value: `${missingItems}` }];
+
+  return {
+    value: filledItems,
+    progress: Math.round((filledItems / itemsToCheck.length) * 100 * 100) / 100,
+    details,
+  };
+}
+
+export function getKpiResultsProgress(
+  kpis: IKpi[],
+  kpiResults: IKpiResult[]
+): {
+  value: number;
+  progress: number;
+  details: { label: string; value: string }[];
+} {
+  const globalKpiIds = kpis
+    .filter((kpi) => kpi.type === "GLOBAL")
+    .map((kpi) => kpi.parent_kpi_id ?? kpi.id);
+  const uniqueGlobalIds = Array.from(new Set(globalKpiIds));
+  const localKpiIds = kpis
+    .filter((kpi) => kpi.type === "LOCAL")
+    .map((kpi) => kpi.parent_kpi_id ?? kpi.id);
+  const uniqueLocalIds = Array.from(new Set(localKpiIds));
+
+  const uniqueIds = kpiResults?.map((kpiresult) => {
+    const kpiDefinition = kpis?.find(
+      (pk) => pk.id === kpiresult.kpidefinition_id
+    );
+    return kpiDefinition?.parent_kpi_id ?? kpiDefinition?.id;
+  });
+
+  const uniqueCompletedKpis = Array.from(new Set(uniqueIds));
+
+  if (kpis.length === 0) return { value: 0, progress: 0, details: [] };
+  return {
+    value: uniqueCompletedKpis.length,
+    progress: Math.round(uniqueCompletedKpis.length / kpis.length) * 100,
+    details: [
+      {
+        label: "Global KPIs",
+        value: `${
+          uniqueCompletedKpis.filter((id) => uniqueGlobalIds.includes(id || ""))
+            .length
+        } / ${uniqueGlobalIds.length}`,
+      },
+      {
+        label: "Local KPIs",
+        value: `${
+          uniqueCompletedKpis.filter((id) => uniqueLocalIds.includes(id || ""))
+            .length
+        } / ${uniqueLocalIds.length}`,
+      },
+    ],
+  };
+}
+
+export function getKpiResultsModalSplitProgress(
+  kpis: IKpi[],
+  kpiResults: IKpiResult[]
+): {
+  value: string;
+  progress: number;
+  details: { label: string; value: string }[];
+} {
+  const totalByKpi = new Map<string, number>();
+  let valueTotal = 0;
+
+  kpiResults.forEach((kpiResult) => {
+    if (kpiResult.value) {
+      const currentTotal = totalByKpi.get(kpiResult.kpidefinition_id) || 0;
+      totalByKpi.set(
+        kpiResult.kpidefinition_id,
+        currentTotal + kpiResult.value
+      );
+      valueTotal += kpiResult.value;
+    }
+  });
+  if (valueTotal === 0) return { value: "0", progress: 0, details: [] };
+
+  valueTotal = Math.round(valueTotal / totalByKpi.size) * 100;
+  return {
+    value: `${totalByKpi.size} KPIs`,
+    progress: valueTotal,
+    details: Array.from(totalByKpi.entries()).map(([kpiId, total]) => {
+      const kpiDef = kpis.find((kpi) => kpi.id === kpiId);
+      return {
+        label: kpiDef ? kpiDef.name : "Unknown KPI",
+        value: `${Math.round(total) * 100}%`,
+      };
+    }),
+  };
+}
+
+export function getMeasuresProgress(measures: IProject[]): {
+  value: string;
+  progress?: number;
+  details: { label: string; value: string }[];
+} {
+  if (measures.length === 0) return { value: "0", progress: 0, details: [] };
+
+  return {
+    value: `${measures.length} Measures`,
+    details: [
+      {
+        label: "Push meaasures",
+        value: `${measures?.filter((m) => m.type === "PUSH").length}`,
+      },
+      {
+        label: "Pull measures",
+        value: `${measures?.filter((m) => m.type === "PULL").length}`,
+      },
+    ],
   };
 }

@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Dropdown,
   DropdownButton,
   DropdownDivider,
@@ -14,12 +13,12 @@ import {
   NavbarSpacer,
   Sidebar,
   SidebarBody,
+  SidebarDivider,
   SidebarFooter,
   SidebarHeader,
   SidebarItem,
   SidebarLabel,
   SidebarSection,
-  SidebarSpacer,
   StackedLayout,
 } from "../../react-catalyst-ui-kit";
 import {
@@ -27,6 +26,8 @@ import {
   ChevronUpIcon,
   Cog8ToothIcon,
   ArrowRightStartOnRectangleIcon,
+  QuestionMarkCircleIcon,
+  EnvelopeIcon,
 } from "@heroicons/react/16/solid";
 import {
   GlobeEuropeAfricaIcon,
@@ -38,8 +39,8 @@ import {
   PresentationChartLineIcon,
   UserCircleIcon,
   EyeIcon,
+  DocumentChartBarIcon,
 } from "@heroicons/react/20/solid";
-import { UserIcon } from "@heroicons/react/24/solid";
 import { getUrl } from "../../../lib/helpers";
 import React from "react";
 import type { SessionLivingLabCookie } from "../../../types";
@@ -61,10 +62,12 @@ interface MenuItem {
   separator?: Boolean;
   className?: string;
   subItems?: MenuItem[];
+  dropdown?: Boolean;
+  navbar?: Boolean;
 }
 
 const HOME_ITEM = {
-  label: "Go to ODP website",
+  label: "Go back to ODP ⬅️",
   icon: <HomeIcon />,
   href: getUrl("/"),
 };
@@ -74,7 +77,6 @@ const DEFAULT_MENU_ITEMS = [
     label: "Data Overview",
     icon: <PresentationChartLineIcon />,
     href: getUrl("/lab-admin"),
-    separator: true,
   },
   {
     label: "Modal Split",
@@ -99,16 +101,16 @@ const HELP_MENU_ITEMS = [
   //   icon: <BookOpenIcon />,
   //   href: getUrl("#"),
   // },
-  // {
-  //   label: "FAQ",
-  //   icon: <QuestionMarkCircleIcon />,
-  //   href: getUrl("#"),
-  // },
-  // {
-  //   label: "Contact SUM team",
-  //   icon: <EnvelopeIcon />,
-  //   href: getUrl("#"),
-  // },
+  {
+    label: "FAQ",
+    icon: <QuestionMarkCircleIcon />,
+    href: getUrl("/faq"),
+  },
+  {
+    label: "Contact\nodp@sum-project.eu",
+    icon: <EnvelopeIcon />,
+    href: "mailto:odp@sum-project.eu",
+  },
 ];
 
 const DEFAULT_USER_MENU_ITEMS = [
@@ -120,39 +122,18 @@ const DEFAULT_USER_MENU_ITEMS = [
 ];
 
 export function SidebarMenu({ children, userInfo, currentLivingLab }: Props) {
-  const labItem = {
-    label: "Manage " + (currentLivingLab?.name ?? "My Living Lab"),
-    icon: <MapPinIcon />,
-  };
-  const labMenu: MenuItem[] = [
-    {
-      label: "Edit Lab details",
-      icon: <Cog8ToothIcon />,
-      href: getUrl("/lab-admin/edit"),
-    },
-    {
-      label: "View public dashboard",
-      icon: <EyeIcon />,
-      href: getUrl("/living-lab-city/" + currentLivingLab?.id),
-      separator: true,
-    },
-  ];
-
   const navbarItems: MenuItem[] = [
     {
-      label: userInfo ? "Go to ODP website" : "Home",
+      label: userInfo ? HOME_ITEM.label : "Home",
       icon: <HomeIcon />,
       href: getUrl("/"),
       className: "max-md:hidden",
       separator: true,
+      dropdown: false,
+      navbar: true,
     },
-    // {
-    //   icon: <QuestionMarkCircleIcon />,
-    //   subItems: HELP_MENU_ITEMS,
-    //   className: "max-md:hidden",
-    //   separator: true,
-    // },
   ];
+
   if (currentLivingLab) {
     if (
       currentLivingLab?.authorizedLabs &&
@@ -165,165 +146,172 @@ export function SidebarMenu({ children, userInfo, currentLivingLab }: Props) {
           label: item.name,
           href: getUrl("/lab-admin/set-lab?id=" + item.id),
         })),
+        dropdown: true,
+        navbar: false,
       });
     }
     navbarItems.push({
-      ...labItem,
-      subItems: [...labMenu, ...DEFAULT_MENU_ITEMS],
+      label: "Manage " + (currentLivingLab?.name ?? "My Living Lab"),
+      icon: <MapPinIcon />,
+      subItems: [
+        {
+          label: "Edit Lab information",
+          icon: <Cog8ToothIcon />,
+          href: getUrl("/lab-admin/edit"),
+        },
+        {
+          label: "View lab dashboard",
+          icon: <EyeIcon />,
+          href: getUrl("/living-lab-city/" + currentLivingLab?.id),
+        },
+      ],
       separator: true,
       className: "bg-warning/50 rounded-lg",
+      dropdown: true,
+      navbar: true,
+    });
+
+    navbarItems.push({
+      label: `Manage ${currentLivingLab?.name ?? "my Living Lab"} data`,
+      icon: <DocumentChartBarIcon />,
+      subItems: [...DEFAULT_MENU_ITEMS],
+      separator: true,
+      className: "bg-warning/50 rounded-lg",
+      dropdown: false,
     });
   }
+
+  navbarItems.push({
+    icon: <QuestionMarkCircleIcon />,
+    subItems: HELP_MENU_ITEMS,
+    className: "max-md:hidden",
+  });
 
   if (userInfo)
     navbarItems.push({
       label: "My account",
       icon: <UserCircleIcon />,
-      subItems: DEFAULT_USER_MENU_ITEMS,
+      subItems: [
+        {
+          label: `${userInfo.name}\n${userInfo.email}`,
+          separator: true,
+        },
+        ...DEFAULT_USER_MENU_ITEMS,
+      ],
       className: "max-md:hidden",
+      dropdown: true,
+      navbar: true,
     });
+
+  const sidebarHeader = navbarItems[0];
+  const sidebarBodyItems = navbarItems.slice(1, navbarItems.length - 1);
+  const sidebarFooter = navbarItems[navbarItems.length - 1];
+
+  const getDropdownSection = (
+    item: MenuItem,
+    anchor: "bottom start" | "top start" = "bottom start"
+  ) => {
+    return (
+      <Dropdown>
+        <DropdownButton as={SidebarItem}>
+          {item.icon}
+          <SidebarLabel>{item.label}</SidebarLabel>
+          {anchor.startsWith("bottom") ? (
+            <ChevronDownIcon />
+          ) : (
+            <ChevronUpIcon />
+          )}
+        </DropdownButton>
+        {item.subItems?.length && item.subItems?.length > 0 && (
+          <DropdownMenu className="min-w-64" anchor={anchor}>
+            {item.subItems.map((subItem) => (
+              <>
+                <DropdownItem key={subItem.label} href={subItem.href}>
+                  {subItem.icon}
+                  <DropdownLabel className="whitespace-pre-line">
+                    {subItem.label}
+                  </DropdownLabel>
+                </DropdownItem>
+                {subItem?.separator && <DropdownDivider />}
+              </>
+            ))}
+          </DropdownMenu>
+        )}
+      </Dropdown>
+    );
+  };
+
+  const getSidebarItem = (item: MenuItem) => {
+    return (
+      <SidebarItem key={item.label} href={item.href}>
+        {item.icon}
+        <SidebarLabel>{item.label}</SidebarLabel>
+      </SidebarItem>
+    );
+  };
 
   const sidebarContent = (
     <Sidebar>
       <SidebarHeader>
-        <img
-          src={getUrl("/sum_logo.jpg")}
-          alt="SUM Logo"
-          className="w-40 my-4"
-        />
-        {labItem && (
-          <Dropdown>
-            <DropdownButton as={SidebarItem} className="mb-2.5">
-              {labItem.icon ? labItem.icon : <Avatar src="/sum_logo.svg" />}
-              <SidebarLabel>{labItem.label}</SidebarLabel>
-              <ChevronDownIcon />
-            </DropdownButton>
-            {labMenu?.length && labMenu?.length > 0 && (
-              <DropdownMenu className="min-w-64" anchor="bottom start">
-                {labMenu.map((item) => (
-                  <DropdownItem key={item.label} href={item.href}>
-                    {item.icon}
-                    <DropdownLabel>{item.label}</DropdownLabel>
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            )}
-          </Dropdown>
-        )}
-        <SidebarItem key={HOME_ITEM.label} href={HOME_ITEM.href}>
-          {HOME_ITEM.icon}
-          <SidebarLabel>{HOME_ITEM.label}</SidebarLabel>
-        </SidebarItem>
+        {sidebarHeader?.dropdown
+          ? getDropdownSection(sidebarHeader)
+          : getSidebarItem(sidebarHeader)}
       </SidebarHeader>
       <SidebarBody>
-        {DEFAULT_MENU_ITEMS?.length && DEFAULT_MENU_ITEMS?.length > 0 && (
-          <SidebarSection>
-            {DEFAULT_MENU_ITEMS.map((item) => (
-              <SidebarItem key={item.label} href={item.href}>
-                {item.icon}
-                <SidebarLabel>{item.label}</SidebarLabel>
-              </SidebarItem>
+        <SidebarSection>
+          {sidebarBodyItems?.length &&
+            sidebarBodyItems?.length > 0 &&
+            sidebarBodyItems.map((item) => (
+              <>
+                {item.dropdown ? (
+                  getDropdownSection(item)
+                ) : item.subItems?.length !== undefined ? (
+                  item.subItems.map((sub) => (
+                    <>
+                      <SidebarItem key={sub.label} href={sub.href}>
+                        {sub.icon}
+                        <SidebarLabel className="whitespace-pre-line">
+                          {sub.label}
+                        </SidebarLabel>
+                      </SidebarItem>
+                      {sub.separator && <SidebarDivider />}
+                    </>
+                  ))
+                ) : (
+                  <SidebarItem key={item.label} href={item.href}>
+                    {item.icon}
+                    <SidebarLabel>{item.label}</SidebarLabel>
+                  </SidebarItem>
+                )}
+                {item.separator && <SidebarDivider />}
+              </>
             ))}
-          </SidebarSection>
-        )}
-        <SidebarSpacer />
+        </SidebarSection>
       </SidebarBody>
 
       <SidebarFooter>
-        {HELP_MENU_ITEMS?.length > 0 && (
-          <SidebarSection>
-            {HELP_MENU_ITEMS.map((item) => (
-              <SidebarItem key={item.label} href={item.href}>
-                {item.icon}
-                <SidebarLabel>{item.label}</SidebarLabel>
-              </SidebarItem>
-            ))}
-          </SidebarSection>
-        )}
-        <SidebarSpacer />
-
-        {userInfo && (
-          <Dropdown>
-            <DropdownButton as={SidebarItem}>
-              <span className="flex min-w-0 items-center gap-3">
-                {userInfo.avatar ? (
-                  <Avatar
-                    src={userInfo.avatar}
-                    className="size-8"
-                    square
-                    alt=""
-                  />
-                ) : (
-                  <UserIcon className="size-8" />
-                )}
-                <span className="max-w-32 flex flex-col">
-                  <span className="text-sm/5 font-medium text-zinc-950 dark:text-white">
-                    {userInfo.name}
-                  </span>
-                  <small className="text-dark">{userInfo.email}</small>
-                </span>
-              </span>
-              <ChevronUpIcon />
-            </DropdownButton>
-            {DEFAULT_USER_MENU_ITEMS?.length &&
-              DEFAULT_USER_MENU_ITEMS?.length > 0 && (
-                <DropdownMenu className="min-w-64" anchor="top start">
-                  {DEFAULT_USER_MENU_ITEMS.map((item) => (
-                    <DropdownItem key={item.label} href={item.href}>
-                      {item.icon}
-                      <DropdownLabel>{item.label}</DropdownLabel>
-                    </DropdownItem>
-                  ))}
-                </DropdownMenu>
-              )}
-          </Dropdown>
-        )}
+        {sidebarFooter?.dropdown
+          ? getDropdownSection(sidebarFooter, "top start")
+          : getSidebarItem(sidebarFooter)}
       </SidebarFooter>
     </Sidebar>
   );
 
-  return (
-    <StackedLayout
-      navbar={
-        <Navbar className="flex flex-row gap-x-0">
-          <img
-            src={getUrl("/sum_logo.jpg")}
-            alt="SUM Logo"
-            className="w-40 mx-4 max-sm:w-20"
-          />
+  const navBarContent = (
+    <Navbar className="flex flex-row gap-x-0">
+      <img
+        src={getUrl("/sum_logo.jpg")}
+        alt="SUM Logo"
+        className="w-40 mx-4 max-sm:w-20"
+      />
 
-          <NavbarSpacer />
+      <NavbarSpacer />
 
-          {navbarItems.map((item) => (
+      {navbarItems.map(
+        (item) =>
+          item.navbar === true && (
             <NavbarSection className={item.className ?? ""} key={item.label}>
-              {item.subItems?.length !== undefined && (
-                <Dropdown>
-                  <DropdownButton
-                    as={NavbarItem}
-                    aria-label={`${item.label} menu`}
-                  >
-                    {item.label && (
-                      <NavbarLabel className="text-primary">
-                        {item.label}
-                      </NavbarLabel>
-                    )}
-                    {item.icon ? item.icon : <ChevronDownIcon />}
-                  </DropdownButton>
-
-                  <DropdownMenu anchor="bottom start">
-                    {item?.subItems?.length > 0 &&
-                      item.subItems?.map((sub) => (
-                        <React.Fragment key={sub.label}>
-                          <DropdownItem href={sub.href}>
-                            {sub.icon}
-                            <DropdownLabel>{sub.label}</DropdownLabel>
-                          </DropdownItem>
-                          {sub?.separator && <DropdownDivider />}
-                        </React.Fragment>
-                      ))}
-                  </DropdownMenu>
-                </Dropdown>
-              )}
+              {item.subItems?.length !== undefined && getDropdownSection(item)}
               {item?.href && (
                 <NavbarItem href={item.href}>
                   <NavbarLabel className="text-primary">
@@ -333,11 +321,16 @@ export function SidebarMenu({ children, userInfo, currentLivingLab }: Props) {
               )}
               {item.separator && <NavbarDivider />}
             </NavbarSection>
-          ))}
-        </Navbar>
-      }
+          )
+      )}
+    </Navbar>
+  );
+
+  return (
+    <StackedLayout
+      navbar={navBarContent}
       sidebar={sidebarContent}
-      sidebarOnly={false}
+      sidebarAndNavbarInLargeScreens={true}
     >
       {children}
     </StackedLayout>

@@ -1,8 +1,15 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import { CTACard, LabDashboardTabs } from "../../components/react";
+import { TaskCard } from "../../components/react";
 import ApiClient from "../../lib/api-client/ApiClient.ts";
-import { getUrl } from "../../lib/helpers";
+import {
+  getUrl,
+  getLivingLabInfoProgress,
+  getKpiResultsProgress,
+  getKpiResultsModalSplitProgress,
+  getMeasuresProgress,
+} from "../../lib/helpers";
+import type { IKpiResult } from "../../types";
 
 const labId = Astro.locals.livingLab?.id;
 if (!labId) {
@@ -13,158 +20,107 @@ const api = new ApiClient(Astro.request);
 
 const kpis = await api.getKPIs({});
 const livingLab = await api.getLivingLab(labId);
+const modalSplitKpi = kpis?.find((kpi) => kpi.kpi_number === "15");
+const modalSplitKpis =
+  kpis?.filter((kpi) =>
+    [kpi.id, kpi.parent_kpi_id].includes(modalSplitKpi?.id)
+  ) ?? [];
 
-const counters = {
-  kpisBefore: {
-    total:
-      livingLab?.kpi_results?.filter((kpi) => kpi.result_before)?.length || 0,
-    global:
-      livingLab?.kpi_results?.filter(
-        (kpi) => kpi.result_before && kpi.type === "GLOBAL"
-      ).length || 0,
-    local:
-      livingLab?.kpi_results?.filter(
-        (kpi) => kpi.result_before && kpi.type === "LOCAL"
-      ).length || 0,
-  },
-  kpisAfter: {
-    total:
-      livingLab?.kpi_results?.filter((kpi) => kpi.result_after)?.length || 0,
-    global:
-      livingLab?.kpi_results?.filter(
-        (kpi) => kpi.result_after && kpi.type === "GLOBAL"
-      ).length || 0,
-    local:
-      livingLab?.kpi_results?.filter(
-        (kpi) => kpi.result_after && kpi.type === "LOCAL"
-      ).length || 0,
-  },
-  measures: {
-    total: livingLab?.projects?.length || 0,
-    push:
-      livingLab?.projects?.filter((measure) => measure.type === "PUSH")
-        .length || 0,
-    pull:
-      livingLab?.projects?.filter((measure) => measure.type === "PULL")
-        .length || 0,
-  },
-  transport: {
-    total: livingLab?.transport_modes?.length || 0,
-    nsm:
-      livingLab?.transport_modes?.filter(
-        (mode) => mode?.type?.toLowerCase() === "nsm"
-      ).length || 0,
-    other:
-      livingLab?.transport_modes?.filter(
-        (mode) => mode?.type?.toLowerCase() !== "nsm"
-      ).length || 0,
-  },
-};
-const countersKpiBefore = counters.kpisBefore;
-const countersKpiAfter = counters.kpisAfter;
-const countersMeasures = counters.measures;
-const transportCounter = counters.transport;
-
-const progressItems = [
+const labInfoProgress = getLivingLabInfoProgress(livingLab);
+const modalSplitBeforeProgress = getKpiResultsModalSplitProgress(
+  modalSplitKpis,
+  livingLab?.kpi_results
+    ?.filter(
+      (r) =>
+        r.result_before &&
+        modalSplitKpis.find((k) => k.id === r?.kpidefinition_id)
+    )
+    ?.map((r) => r.result_before as IKpiResult) ?? []
+);
+const modalSplitAfterProgress = getKpiResultsModalSplitProgress(
+  modalSplitKpis,
+  livingLab?.kpi_results
+    ?.filter(
+      (r) =>
+        r.result_after &&
+        modalSplitKpis.find((k) => k.id === r?.kpidefinition_id)
+    )
+    ?.map((r) => r.result_after as IKpiResult) ?? []
+);
+const kpisBeforeProgress = getKpiResultsProgress(
+  kpis ?? [],
+  livingLab?.kpi_results
+    ?.filter((r) => r.result_before)
+    ?.map((r) => r.result_before as IKpiResult) ?? []
+);
+const kpisAfterProgress = getKpiResultsProgress(
+  kpis ?? [],
+  livingLab?.kpi_results
+    ?.filter((r) => r.result_after)
+    ?.map((r) => r.result_after as IKpiResult) ?? []
+);
+const measuresProgress = getMeasuresProgress(livingLab?.projects ?? []);
+const stepsCTA = [
   {
-    title: "KPIs before",
-    subtitle: `${countersKpiBefore?.total || 0}/${kpis.length} entries`,
-    info1: `${countersKpiBefore?.local || 0} local`,
-    info2: `${countersKpiBefore?.global || 0} global`,
-    className: "border-info bg-info/60",
+    id: "lab-info",
+    title: "Lab information",
+    description: "",
+    ctaLabel: "Update living lab",
+    ctaLink: getUrl("/lab-admin/edit"),
+    progress: labInfoProgress.progress,
+    value: labInfoProgress.value,
+    details: labInfoProgress.details,
   },
-  {
-    title: "KPIs after",
-    subtitle: `${countersKpiAfter?.total || 0}/${kpis.length} entries`,
-    info1: `${countersKpiAfter?.local || 0} local`,
-    info2: `${countersKpiAfter?.global || 0} global`,
-    className: "border-info/60 bg-info/20",
-  },
-  {
-    title: "Measures",
-    subtitle: `${countersMeasures?.total || 0} entries`,
-    info1: `${countersMeasures?.push || 0} push`,
-    info2: `${countersMeasures?.pull || 0} pull`,
-    className: "border-dark/60 bg-light/20",
-  },
-  {
-    title: "Transport",
-    subtitle: `${transportCounter?.total || 0} modes`,
-    info1: `${transportCounter?.nsm || 0} NSM`,
-    info2: `${transportCounter?.other || 0} other`,
-    className: "border-dark bg-light/50",
-  },
-];
-
-const alertItem = {
-  title: "Alers",
-  variant: "warning",
-  actionText: "Learn more",
-  children: "alerts",
-};
-
-const alerts = [];
-if (countersKpiAfter.total === 0) {
-  alerts.push({
-    title: "Missing KPIs (after)",
-    variant: "danger",
-    actionText: "Add KPIs",
-    children:
-      "No KPIs have been submitted for the 'after' period. Please add them to proceed.",
-  });
-}
-if (countersMeasures.total === 0) {
-  alerts.push({
-    title: "Missing Measures (after)",
-    variant: "danger",
-    actionText: "Add Measures",
-    children:
-      "No measures have been submitted for the 'after' period. Please add them to proceed.",
-  });
-}
-//add alerts for missing transport modes
-if (transportCounter.total === 0) {
-  alerts.push({
-    title: "Missing Transport Modes (after)",
-    variant: "danger",
-    actionText: "Add Transport Modes",
-    children:
-      "No transport modes have been submitted for the 'after' period. Please add them to proceed.",
-  });
-}
-
-const steps = [
   {
     id: "modal-split-before",
-    title: "1. Modal split KPI",
-    description:
-      "Enter the modal share (cars, bikes, PT, walking, etc.) before any measures were implemented. \nAfter the measures have been implemented, update the modal share values.",
-    completed:
-      kpis?.length === countersKpiBefore?.total && countersKpiBefore?.total > 0,
-    inProgress: kpis?.length > 0 && kpis?.length < countersKpiBefore?.total,
-    cta: "Edit modal split",
-    href: getUrl("/lab-admin/modal-split"),
+    title: "Modal split (before)",
+    description: "",
+    ctaLabel: "Edit modal split",
+    ctaLink: getUrl("/lab-admin/modal-split"),
+    progress: modalSplitBeforeProgress.progress,
+    value: modalSplitBeforeProgress.value,
+    details: modalSplitBeforeProgress.details,
   },
   {
     id: "kpis-before",
-    title: "2. KPIs",
-    description:
-      "Complete the KPI survey and submit KPIs collected before the implementation period.\nAfter the measures have been implemented, run a new survey and collect new KPIs for comparison.",
-    completed:
-      kpis?.length === countersKpiBefore?.total && countersKpiBefore?.total > 0,
-    inProgress:
-      countersKpiBefore?.total > 0 && countersKpiBefore?.total < kpis?.length,
-    cta: "Edit KPIs",
-    href: getUrl("/lab-admin/kpis"),
+    title: "Baseline KPIs (before)",
+    description: "",
+    ctaLabel: "Edit KPIs",
+    ctaLink: getUrl("/lab-admin/kpis"),
+    progress: kpisBeforeProgress.progress,
+    value: kpisBeforeProgress.value,
+    details: kpisBeforeProgress.details,
   },
+
   {
     id: "measures",
-    title: "3. Measures",
-    description:
-      "Select or add the push and pull measures your city is implementing.",
-    completed: countersMeasures?.total > 0,
-    cta: "Edit measures",
-    href: getUrl("/lab-admin/measures"),
+    title: "Measures implemented",
+    description: "",
+    ctaLabel: "Edit measures",
+    ctaLink: getUrl("/lab-admin/measures"),
+    progress: measuresProgress.progress,
+    value: measuresProgress.value,
+    details: measuresProgress.details,
+  },
+  {
+    id: "modal-split-after",
+    title: "Modal split (after)",
+    description: "",
+    ctaLabel: "Edit modal split",
+    ctaLink: getUrl("/lab-admin/modal-split"),
+    progress: modalSplitAfterProgress.progress,
+    value: modalSplitAfterProgress.value,
+    details: modalSplitAfterProgress.details,
+  },
+  {
+    id: "kpis-before",
+    title: "KPIs (after)",
+    description: "",
+    ctaLabel: "Edit KPIs",
+    ctaLink: getUrl("/lab-admin/kpis"),
+    progress: kpisAfterProgress.progress,
+    value: kpisAfterProgress.value,
+    details: kpisAfterProgress.details,
   },
 ];
 ---
@@ -175,11 +131,10 @@ const steps = [
       class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8 flex flex-col gap-10 lg:gap-18"
     >
       <div class="flex flex-col gap-4">
-        <h2>Welcome {user.name}</h2>
+        <h2>Welcome {user?.name}</h2>
         <h3>
-          You are managing data for the <strong class="text-success"
-            >Living Lab {livingLab.name}</strong
-          >
+          You are managing data for the<br />
+          <strong class="text-success">Living Lab {livingLab?.name}</strong>
         </h3>
         <p>
           Help us improve urban mobility by contributing your city’s data to the
@@ -187,23 +142,23 @@ const steps = [
         </p>
       </div>
 
-      <LabDashboardTabs client:load progress={progressItems} alerts={alerts} />
+      <!-- <LabDashboardTabs client:load progress={progressItems} alerts={alerts} /> -->
 
       <div class="grid gap-10 grid-cols-1">
         <h3 class="text-center">Manage living lab data</h3>
-        <div class="grid gap-1 lg:gap-10 sm:grid-cols-2 lg:grid-cols-2">
+        <div
+          class="grid gap-2 lg:gap-10 grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
+        >
           {
-            steps.map((step, index) => (
-              <CTACard
-                id={step.id}
+            stepsCTA.map((step, i) => (
+              <TaskCard
                 title={step.title}
                 description={step.description}
-                completed={step.completed}
-                inProgress={step.inProgress}
-                locked={false}
-                cta={step.cta}
-                href={step.href}
-                className={index === 2 ? "col-span-2" : ""}
+                ctaLabel={step.ctaLabel}
+                ctaLink={step.ctaLink}
+                progress={step.progress}
+                value={step.value}
+                details={step.details}
                 client:load
               />
             ))

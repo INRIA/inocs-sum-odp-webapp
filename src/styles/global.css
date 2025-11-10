@@ -55,11 +55,11 @@ small {
 }
 
 ul {
-  @apply text-base ;
+  @apply text-base;
 }
 
 li {
-  @apply relative pl-4;
+  @apply relative;
 }
 
 body {

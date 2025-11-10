@@ -14,3 +14,4 @@ export * from "./ExpansionPanel";
 export * from "./DataDisplayCard";
 export * from "./Tooltip";
 export * from "./FAQAccordion";
+export * from "./TaskCard";

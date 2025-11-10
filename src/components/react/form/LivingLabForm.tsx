@@ -23,7 +23,6 @@ export default function LivingLabForm({ livingLab }: Props) {
 
   const [mapMarker, setMapMarker] = useState<MarkerData | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>([50, 10]);
-  const [mapZoom, setMapZoom] = useState<number>(4);
 
   // derive a key from center so MapViewer remounts whenever center changes
   const mapKey = mapCenter ? `${mapCenter[0]},${mapCenter[1]}` : "no-center";
@@ -56,7 +55,6 @@ export default function LivingLabForm({ livingLab }: Props) {
         radius: radius ? parseFloat(radius) * 1000 : undefined, // convert km to meters
       });
       setMapCenter([parseFloat(latitude), parseFloat(longitude)]);
-      setMapZoom(8);
     }
   }, [latitude, longitude, radius]);
 
@@ -136,30 +134,22 @@ export default function LivingLabForm({ livingLab }: Props) {
           key={mapKey}
           markers={mapMarker ? [mapMarker] : []}
           center={mapCenter}
-          zoom={mapZoom ?? 8}
+          zoom={9}
           className="h-full w-full z-0"
         />
       </div>
 
       <div className="flex gap-4">
         <RButton
-          type="submit"
-          variant="primary"
-          text="Save Living Lab"
+          variant="secondary"
+          text="Cancel"
           href={getUrl("/lab-admin")}
         />
         <RButton
-          type="button"
-          variant="secondary"
-          text="Cancel"
-          onClick={() => {
-            setName("");
-            setLatitude("");
-            setLongitude("");
-            setRadius("");
-            setArea("");
-            setPopulation("");
-          }}
+          type="submit"
+          variant="primary"
+          text="Save Living Lab"
+          href="#"
         />
       </div>
     </form>
