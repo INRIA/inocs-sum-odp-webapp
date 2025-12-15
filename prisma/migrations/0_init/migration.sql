@@ -296,6 +296,23 @@ CREATE TABLE `messages` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `job_runs` (
+    `id` VARCHAR(36) NOT NULL,
+    `job_name` VARCHAR(100) NOT NULL,
+    `status` VARCHAR(20) NOT NULL,
+    `message` TEXT NULL,
+    `created_at` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+    `started_at` TIMESTAMP(0) NULL,
+    `completed_at` TIMESTAMP(0) NULL,
+    `input_data` JSON NULL,
+    `output_data` JSON NULL,
+
+    INDEX `job_runs_job_name_index`(`job_name`),
+    INDEX `job_runs_status_index`(`status`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `item_tag` ADD CONSTRAINT `item_tag_item_id_foreign` FOREIGN KEY (`item_id`) REFERENCES `items`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 

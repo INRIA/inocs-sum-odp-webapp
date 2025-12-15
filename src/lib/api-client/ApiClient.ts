@@ -10,6 +10,7 @@ import type {
   LivingLabProjectsImplementationInput,
   User,
   SignupLabEditorInput,
+  IJobRun,
 } from "../../types";
 import type { ICategory } from "../../types/Category";
 
@@ -206,5 +207,20 @@ export default class ApiClient {
       method: "POST",
       body: JSON.stringify(data),
     });
+  }
+
+  async getLatestJobRun(jobName: string): Promise<IJobRun | null> {
+    const params = new URLSearchParams({ job_name: jobName });
+    return this.request<IJobRun>(`/job-runs?${params.toString()}`);
+  }
+
+  async getJobRunById(id: string): Promise<IJobRun | null> {
+    const params = new URLSearchParams({ id });
+    return this.request<IJobRun>(`/job-runs?${params.toString()}`);
+  }
+
+  async getAllJobRuns(status?: string): Promise<IJobRun[] | null> {
+    const params = status ? new URLSearchParams({ status }) : "";
+    return this.request<IJobRun[]>(`/job-runs${params ? `?${params}` : ""}`);
   }
 }

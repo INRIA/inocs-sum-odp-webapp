@@ -6,3 +6,4 @@ export * from "./Constants";
 export * from "./User";
 export * from "./SessionLivingLabCookie";
 export * from "./ApiResponse";
+export * from "./JobRun";

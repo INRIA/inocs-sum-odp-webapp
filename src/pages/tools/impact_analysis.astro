@@ -1,0 +1,577 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { ImpactAnalysisDashboard } from "../../components/react/ImpactAnalysis";
+import ApiClient from "../../lib/api-client/ApiClient";
+import type { IJobRun, IKpiGroup } from "../../types";
+
+const api = new ApiClient(Astro.request);
+
+// Fetch the latest successful job run for kpi_measures_analysis
+let jobRun: IJobRun | null = null;
+let kpiGroups: IKpiGroup[] = [];
+let errorMessage: string | null = null;
+
+try {
+  const response = await api.getLatestJobRun("kpi_measures_analysis");
+  if (response) {
+    jobRun = response;
+
+    // Extract kpi_groups from input_data
+    if (jobRun?.input_data?.kpi_groups) {
+      kpiGroups = jobRun.input_data.kpi_groups;
+    }
+  } else {
+    errorMessage = "No successful job run found for KPI measures analysis.";
+  }
+} catch (error) {
+  console.error("Error fetching job run data:", error);
+  errorMessage = "Failed to load impact analysis data. Please try again later.";
+}
+---
+
+<Layout role="visitor">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Header Section - Enhanced with Badge -->
+      <div class="mb-12">
+        <div
+          class="inline-flex items-center gap-2 px-3 py-1 bg-info/10 text-info rounded-full text-sm font-medium mb-4"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="w-4 h-4"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 16a9.065 9.065 0 0 1-6.23-.693L5 15.3m14.8 0 .384 1.917M5 15.3l-.384 1.917m0 0A9.065 9.065 0 0 0 12 18c2.11 0 4.08-.722 5.634-1.917M4.616 17.217A9.065 9.065 0 0 0 12 21m-7.384-3.783L5 15.3m14.384 1.917L19.8 15.3M12 21c2.11 0 4.08-.722 5.634-1.917"
+            ></path>
+          </svg>
+          Analysis Tool
+        </div>
+        <h1 class="text-4xl font-bold text-gray-900 mb-4 tracking-tight">
+          Impact Analysis Dashboard
+        </h1>
+        <p class="text-lg text-gray-600 max-w-4xl leading-relaxed">
+          Quantifying the effectiveness of mobility measures across Living Labs.
+          This tool uses regression analysis to correlate the implementation of
+          push/pull measures with changes in Key Performance Indicators (KPIs).
+        </p>
+      </div>
+
+      <!-- Features Grid - Enhanced Cards -->
+      <div class="grid md:grid-cols-3 gap-6 mb-12">
+        <!-- Feature 1 -->
+        <div
+          class="group relative bg-white rounded-xl p-6 shadow-sm border-l-4 border-warning/30 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+        >
+          <div class="flex items-start gap-4 mb-3">
+            <div
+              class="p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg text-warning group-hover:scale-110 transition-transform duration-300"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-6 h-6"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6Z"></path>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5Z"></path>
+              </svg>
+            </div>
+            <h3 class="font-semibold text-gray-900 text-lg pt-2">
+              Domain-Specific Analysis
+            </h3>
+          </div>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Filter impact data by specific domains such as Sustainability,
+            Traffic Efficiency, or User Acceptance to isolate relevant trends.
+          </p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div
+          class="group relative bg-white rounded-xl p-6 shadow-sm border-l-4 border-warning/50 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+        >
+          <div class="flex items-start gap-4 mb-3">
+            <div
+              class="p-3 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg text-warning group-hover:scale-110 transition-transform duration-300"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-6 h-6"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"
+                ></path>
+              </svg>
+            </div>
+            <h3 class="font-semibold text-gray-900 text-lg pt-2">
+              Measure Attribution
+            </h3>
+          </div>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Identify which specific policies (e.g., "New Bike Lanes", "Parking
+            Restrictions") correlate most strongly with positive or negative KPI
+            shifts.
+          </p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div
+          class="group relative bg-white rounded-xl p-6 shadow-sm border-l-4 border-warning hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+        >
+          <div class="flex items-start gap-4 mb-3">
+            <div
+              class="p-3 bg-gradient-to-br from-violet-50 to-violet-100 rounded-lg text-warning group-hover:scale-110 transition-transform duration-300"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-6 h-6"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418"
+                ></path>
+              </svg>
+            </div>
+            <h3 class="font-semibold text-gray-900 text-lg pt-2">
+              Cross-Lab Comparison
+            </h3>
+          </div>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Aggregated data from all participating cities provides a robust
+            dataset for understanding the global impact of NSM adoption
+            measures.
+          </p>
+        </div>
+      </div>
+
+      <!-- How to Use Guide - Collapsible Accordion -->
+      <details class="group mb-12">
+        <summary
+          class="cursor-pointer bg-gradient-to-br from-slate-50 to-blue-50 rounded-xl p-6 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 list-none"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div
+                class="p-2 bg-light rounded-lg text-dark group-open:text-white group-open:bg-info transition-colors"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="w-6 h-6"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold text-gray-900">
+                  How to Use This Dashboard
+                </h3>
+                <p class="text-sm text-gray-500">
+                  3 simple steps to get started
+                </p>
+              </div>
+            </div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke="currentColor"
+              class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform duration-200"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
+            </svg>
+          </div>
+        </summary>
+
+        <div
+          class="bg-white rounded-b-xl p-8 border-x border-b border-gray-200 mt-2"
+        >
+          <div class="grid md:grid-cols-3 gap-8 relative">
+            <!-- Connection Line (hidden on mobile) -->
+            <div
+              class="hidden md:block absolute top-8 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-200 via-indigo-200 to-violet-200"
+              style="margin: 0 12%;"
+            >
+            </div>
+
+            <!-- Step 1 -->
+            <div class="relative">
+              <div class="flex flex-col items-center md:items-start">
+                <div
+                  class="relative z-10 flex items-center justify-center w-16 h-16 bg-primary/90 text-white rounded-2xl font-bold text-xl shadow-lg mb-4"
+                >
+                  1
+                </div>
+                <h4
+                  class="font-semibold text-gray-900 mb-2 text-center md:text-left"
+                >
+                  Select a KPI Domain
+                </h4>
+                <p
+                  class="text-sm text-gray-600 text-center md:text-left leading-relaxed"
+                >
+                  Choose from the dropdown below (e.g., "Sustainability") to
+                  filter results by your area of interest.
+                </p>
+              </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="relative">
+              <div class="flex flex-col items-center md:items-start">
+                <div
+                  class="relative z-10 flex items-center justify-center w-16 h-16 bg-primary/90 text-white rounded-2xl font-bold text-xl shadow-lg mb-4"
+                >
+                  2
+                </div>
+                <h4
+                  class="font-semibold text-gray-900 mb-2 text-center md:text-left"
+                >
+                  View Ranked Measures
+                </h4>
+                <p
+                  class="text-sm text-gray-600 text-center md:text-left leading-relaxed"
+                >
+                  See which policies had the most significant positive or
+                  negative impact on the selected domain.
+                </p>
+              </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="relative">
+              <div class="flex flex-col items-center md:items-start">
+                <div
+                  class="relative z-10 flex items-center justify-center w-16 h-16 bg-primary/90 text-white rounded-2xl font-bold text-xl shadow-lg mb-4"
+                >
+                  3
+                </div>
+                <h4
+                  class="font-semibold text-gray-900 mb-2 text-center md:text-left"
+                >
+                  Analyze Coefficients
+                </h4>
+                <p
+                  class="text-sm text-gray-600 text-center md:text-left leading-relaxed"
+                >
+                  Understand the magnitude and direction of each measure's
+                  impact through detailed regression coefficients.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <!-- Methodology - Collapsible Accordion -->
+      <details class="group mb-12">
+        <summary
+          class="cursor-pointer bg-white rounded-xl p-6 border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-200 list-none"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div
+                class="p-2 bg-light rounded-lg text-dark group-open:text-white group-open:bg-info transition-colors"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="w-5 h-5"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 16a9.065 9.065 0 0 1-6.23-.693L5 15.3m14.8 0 .384 1.917M5 15.3l-.384 1.917m0 0A9.065 9.065 0 0 0 12 18c2.11 0 4.08-.722 5.634-1.917M4.616 17.217A9.065 9.065 0 0 0 12 21m-7.384-3.783L5 15.3m14.384 1.917L19.8 15.3M12 21c2.11 0 4.08-.722 5.634-1.917"
+                  ></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-900">
+                  Methodology & Technical Details
+                </h3>
+                <p class="text-sm text-gray-500">
+                  Regression analysis approach
+                </p>
+              </div>
+            </div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke="currentColor"
+              class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform duration-200"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
+            </svg>
+          </div>
+        </summary>
+
+        <div
+          class="bg-gray-50 rounded-b-xl p-6 border-x border-b border-gray-200 mt-2"
+        >
+          <p class="text-sm text-gray-700 leading-relaxed mb-3">
+            This analysis employs <strong>regression modeling</strong> to estimate
+            the contribution of individual measures to KPI changes. By comparing pre-
+            and post-implementation data, we calculate coefficients that represent
+            the magnitude and direction of each measure's impact.
+          </p>
+          <p class="text-sm text-gray-700 leading-relaxed">
+            The coefficients shown are derived from a multiple regression
+            analysis where each measure is treated as an independent variable,
+            and the KPI change is the dependent variable. Positive coefficients
+            indicate measures that contributed to KPI improvement, while
+            negative values suggest adverse effects or areas requiring
+            attention.
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <div class="hidden">
+      <!-- Header Section -->
+      <div class="mb-10 border-b border-gray-200 pb-8">
+        <h1 class="text-3xl font-bold text-gray-900 sm:text-4xl mb-3">
+          Impact Analysis Dashboard
+        </h1>
+        <p class="text-lg text-gray-600 max-w-4xl">
+          Quantifying the effectiveness of mobility measures across Living Labs.
+          This tool uses regression analysis to correlate the implementation of
+          push/pull measures with changes in Key Performance Indicators (KPIs).
+        </p>
+      </div>
+
+      <!-- Features Grid -->
+      <div class="grid md:grid-cols-3 gap-8 mb-12">
+        <!-- Feature 1 -->
+        <div class="flex flex-col">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="p-2 bg-blue-50 rounded-lg text-blue-700">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-6 h-6"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6Z"></path>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5Z"></path>
+              </svg>
+            </div>
+            <h3 class="font-semibold text-gray-900">
+              Domain-Specific Analysis
+            </h3>
+          </div>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Filter impact data by specific domains such as Sustainability,
+            Traffic Efficiency, or User Acceptance to isolate relevant trends.
+          </p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="flex flex-col">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="p-2 bg-blue-50 rounded-lg text-blue-700">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-6 h-6"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"
+                ></path>
+              </svg>
+            </div>
+            <h3 class="font-semibold text-gray-900">Measure Attribution</h3>
+          </div>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Identify which specific policies (e.g., "New Bike Lanes", "Parking
+            Restrictions") correlate most strongly with positive or negative KPI
+            shifts.
+          </p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="flex flex-col">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="p-2 bg-blue-50 rounded-lg text-blue-700">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-6 h-6"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418"
+                ></path>
+              </svg>
+            </div>
+            <h3 class="font-semibold text-gray-900">Cross-Lab Comparison</h3>
+          </div>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Aggregated data from all participating cities provides a robust
+            dataset for understanding the global impact of NSM adoption
+            measures.
+          </p>
+        </div>
+      </div>
+
+      <!-- How to Use Guide -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6 mb-10">
+        <h3
+          class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="w-5 h-5 text-blue-700"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+          How to Use This Dashboard
+        </h3>
+
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="flex gap-3">
+            <span
+              class="flex-shrink-0 w-6 h-6 bg-blue-50 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold border border-blue-100"
+              >1</span
+            >
+            <p class="text-sm text-gray-600">
+              <strong>Select a KPI domain</strong> from the dropdown below (e.g.,
+              "Sustainability") to filter the results.
+            </p>
+          </div>
+          <div class="flex gap-3">
+            <span
+              class="flex-shrink-0 w-6 h-6 bg-blue-50 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold border border-blue-100"
+              >2</span
+            >
+            <p class="text-sm text-gray-600">
+              <strong>View ranked measures</strong> to see which policies had the
+              most significant impact on the selected domain.
+            </p>
+          </div>
+          <div class="flex gap-3">
+            <span
+              class="flex-shrink-0 w-6 h-6 bg-blue-50 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold border border-blue-100"
+              >3</span
+            >
+            <p class="text-sm text-gray-600">
+              <strong>Analyze coefficients</strong> to understand the magnitude and
+              direction of the impact.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Methodology Note -->
+      <div class="bg-gray-50 rounded-lg p-5 mb-10 border border-gray-200">
+        <div class="flex gap-3">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
+            ></path>
+          </svg>
+          <div class="text-sm text-gray-700">
+            <span class="font-semibold text-gray-900">Methodology:</span>
+            This analysis employs regression modeling to estimate the contribution
+            of individual measures to KPI changes. By comparing pre- and post-implementation
+            data, we calculate coefficients that represent the magnitude and direction
+            of each measure's impact.
+          </div>
+        </div>
+      </div>
+    </div>
+    {
+      errorMessage || !kpiGroups || kpiGroups.length === 0 ? (
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
+          <div class="text-6xl mb-4">⚠️</div>
+          <h2 class="text-2xl font-bold text-gray-900 mb-3">
+            No Data Available
+          </h2>
+          <p class="text-gray-700 text-lg mb-2">
+            {errorMessage || "No KPI groups data found in the latest job run."}
+          </p>
+        </div>
+      ) : (
+        <ImpactAnalysisDashboard kpiGroups={kpiGroups} client:load />
+      )
+    }
+  </div>
+</Layout>

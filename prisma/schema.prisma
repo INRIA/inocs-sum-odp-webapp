@@ -312,3 +312,18 @@ model messages {
   kpiresult   kpiresults? @relation(fields: [kpiresult_id], references: [id])
   living_lab_project_implementation living_lab_projects_implementation? @relation(fields: [living_lab_project_implementation_id], references: [id])
 }
+
+model job_runs {
+  id           String    @id @default(uuid()) @db.VarChar(36)
+  job_name     String    @db.VarChar(100)
+  status       String    @db.VarChar(20)
+  message      String?   @db.Text
+  created_at   DateTime  @default(now()) @db.Timestamp(0)
+  started_at   DateTime? @db.Timestamp(0)
+  completed_at DateTime? @db.Timestamp(0)
+  input_data   Json?
+  output_data  Json?
+
+  @@index([job_name], map: "job_runs_job_name_index")
+  @@index([status], map: "job_runs_status_index")
+}

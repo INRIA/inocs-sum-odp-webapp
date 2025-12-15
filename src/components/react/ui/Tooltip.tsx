@@ -7,6 +7,7 @@ export function Tooltip({
   open = false,
   className = "relative inline-block cursor-pointer",
   iconClassName = "h-4 w-4 text-warning",
+  tooltipClassName = "",
   children,
 }: {
   content: React.ReactNode;
@@ -14,6 +15,7 @@ export function Tooltip({
   open?: boolean;
   className?: string;
   iconClassName?: string;
+  tooltipClassName?: string;
   children?: React.ReactNode;
 }) {
   const [displayTooltip, setDisplayTooltip] = useState(false);
@@ -43,7 +45,7 @@ export function Tooltip({
       )}
       <div
         role="tooltip"
-        className={`w-52 absolute z-50 inline-block p-2 text-xs text-primary transition-opacity duration-300 bg-light rounded-lg shadow-xs tooltip ${
+        className={`${tooltipClassName} min-w-52 absolute z-50 inline-block p-2 text-xs text-primary transition-opacity duration-300 bg-light rounded-lg shadow-xs tooltip ${
           content && displayTooltip
             ? "visible opacity-100"
             : "invisible opacity-0"
