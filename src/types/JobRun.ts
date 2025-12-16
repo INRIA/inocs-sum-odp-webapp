@@ -16,6 +16,70 @@ export interface IJobRunInputData {
 }
 
 export interface IJobRunOutputData {
+  success?: IJobRunSuccess[];
+  errors?: IJobRunError[];
+  timestamp?: string;
+  [key: string]: any;
+}
+
+export interface IJobRunSuccess {
+  group_id: string;
+  group_name: string;
+  results: IGroupAnalysisResult;
+}
+
+export interface IJobRunError {
+  group_id: string;
+  group_name: string;
+  error: string;
+}
+
+export interface IGroupAnalysisResult {
+  id: string;
+  name: string;
+  kpi_ids: string[];
+  kpis: any;
+  msqe: number;
+  variation_under_no_measures: number;
+  measure_coefficients: IMeasureCoefficient[];
+  living_labs_analysis: ILivingLabAnalysis[];
+}
+
+export interface IMeasureCoefficient {
+  id: string;
+  name: string;
+  coefficient: number;
+  kpi_group_id: string;
+}
+
+export interface ILivingLabAnalysis {
+  id: string;
+  name: string;
+  kpis: IKpiResultData[];
+  measures: ILivingLabMeasure[];
+}
+
+export interface IKpiResultData {
+  id: string;
+  name: string;
+  value_before: number | null;
+  value_after: number | null;
+  abs_variation: number | null;
+  ratio_variation: number | null;
+  living_lab_id: string;
+  transport_mode_id?: string | null;
+  transport_mode_name?: string | null;
+  value_type: string;
+  value_min: number | null;
+  value_max: number | null;
+  progression_target: number;
+}
+
+export interface ILivingLabMeasure {
+  measure_id: string;
+  measure_name: string;
+  status?: string;
+  implementation_date?: string | null;
   [key: string]: any;
 }
 

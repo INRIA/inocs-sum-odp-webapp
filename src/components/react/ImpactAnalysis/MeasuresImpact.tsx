@@ -1,14 +1,78 @@
 import React from "react";
-import type { IKpiGroup } from "../../../types";
+import type { IKpiGroup, IGroupAnalysisResult } from "../../../types";
 import { AnalysisSectionDivider } from "../AnalysisSectionDivider";
+import { MeasureImpactCard } from "./MeasureImpactCard";
+import { D3HorizontalBarChart } from "./D3HorizontalBarChart";
+import {
+  getTopMeasures,
+  getBottomMeasures,
+  sortMeasuresByCoefficient,
+  formatCoefficient,
+  calculateStatistics,
+} from "../../../lib/helpers/chartUtils";
 
 interface MeasuresImpactProps {
   selectedGroup: IKpiGroup | null;
+  analysisResult: IGroupAnalysisResult | null;
 }
 
 export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
   selectedGroup,
+  analysisResult,
 }) => {
+  // No group selected
+  if (!selectedGroup) {
+    return (
+      <div>
+        <AnalysisSectionDivider
+          step={2}
+          title="Measures Impact"
+          subtitle="Analyse how implemented measures contributed to the KPIs variations"
+          description="Estimation of the level of contribution for each measure"
+        />
+        <p className="text-gray-600 mt-4">
+          Please select a KPI group above to view the analysis.
+        </p>
+      </div>
+    );
+  }
+
+  // Group selected but no analysis data
+  if (
+    !analysisResult ||
+    !analysisResult.measure_coefficients ||
+    analysisResult.measure_coefficients.length === 0
+  ) {
+    return (
+      <div>
+        <AnalysisSectionDivider
+          step={2}
+          title="Measures Impact"
+          subtitle="Analyse how implemented measures contributed to the KPIs variations"
+          description="Estimation of the level of contribution for each measure"
+        />
+        <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+          <div className="text-4xl mb-3">📊</div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            No Analysis Data Available
+          </h3>
+          <p className="text-gray-600">
+            Analysis results for{" "}
+            <span className="font-semibold">{selectedGroup.name}</span> are not
+            available yet.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const measures = analysisResult.measure_coefficients;
+  const livingLabsAnalysis = analysisResult.living_labs_analysis || [];
+  const topMeasures = getTopMeasures(measures, 3);
+  const bottomMeasures = getBottomMeasures(measures, 3);
+  const sortedMeasures = sortMeasuresByCoefficient(measures);
+  const stats = calculateStatistics(measures);
+
   return (
     <div>
       <AnalysisSectionDivider
@@ -17,65 +81,164 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
         subtitle="Analyse how implemented measures contributed to the KPIs variations"
         description="Estimation of the level of contribution for each measure"
       />
-      {selectedGroup ? (
-        <div className="mt-6 bg-white rounded-lg p-6 shadow-sm ">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">
-            Selected KPI Group:{" "}
-            <span className="text-secondary">{selectedGroup.name}</span>
-          </h3>
 
-          {selectedGroup.kpis && selectedGroup.kpis.length > 0 ? (
-            <div>
-              <h4 className="text-lg font-semibold text-gray-800 mb-3">
-                KPIs in this group ({selectedGroup.kpis.length})
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {selectedGroup.kpis.map((kpi) => (
-                  <div
-                    key={kpi.id}
-                    className="bg-light border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-8 h-8 bg-secondary rounded-full flex items-center justify-center text-primary font-bold text-sm">
-                        {String(kpi.id).substring(0, 2)}
-                      </div>
-                      <div className="flex-1">
-                        <h5 className="font-semibold text-gray-900 text-sm mb-1">
-                          {kpi.name}
-                        </h5>
-                        {kpi.description && (
-                          <p className="text-xs text-gray-600 line-clamp-2">
-                            {kpi.description}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-              <p className="text-gray-600 text-sm">
-                No KPIs available in this group.
-              </p>
-            </div>
-          )}
-
-          <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-gray-700">
-              <span className="font-semibold">Note:</span> Detailed impact
-              analysis for measures will be displayed here. This section will
-              show the most and least impactful measures based on the analysis
-              results.
-            </p>
+      {/* Statistics Summary */}
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <div className="text-sm text-gray-600 mb-1">Total Measures</div>
+          <div className="text-2xl font-bold text-gray-900">
+            {measures.length}
           </div>
         </div>
-      ) : (
-        <p className="text-gray-600">
-          Please select a KPI group above to view the analysis.
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <div className="text-sm text-gray-600 mb-1">Model Quality (MSQE)</div>
+          <div className="text-2xl font-bold text-gray-900">
+            {analysisResult.msqe.toExponential(2)}
+          </div>
+        </div>
+        <div className="bg-secondary/10 border border-secondary/40 rounded-lg p-4">
+          <div className="text-sm text-gray-600 mb-1">
+            Measures with positive Impact
+          </div>
+          <div className="text-2xl font-bold text-secondary">
+            {stats.positiveCount}
+          </div>
+        </div>
+        <div className="bg-danger/10 border border-danger/40 rounded-lg p-4">
+          <div className="text-sm text-gray-600 mb-1">
+            Measures with negative Impact
+          </div>
+          <div className="text-2xl font-bold text-danger">
+            {stats.negativeCount}
+          </div>
+        </div>
+      </div>
+
+      {/* Top Impactful Measures */}
+      <div className="mt-8">
+        <div className="flex items-center gap-3 mb-4">
+          <svg
+            className="w-8 h-8 text-secondary"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fillRule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <h3 className="text-2xl font-bold text-gray-900">
+            MOST Impactful Measures
+          </h3>
+        </div>
+        <p className="text-dark mb-4">
+          Top {topMeasures.length} measures estimated to have contributed the
+          most positively to KPI improvements
         </p>
-      )}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {topMeasures.map((measure, index) => (
+            <MeasureImpactCard
+              key={measure.id}
+              measure={measure}
+              rank={index + 1}
+              size="large"
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Bottom Impactful Measures */}
+      <div className="mt-8">
+        <div className="flex items-center gap-3 mb-4">
+          <svg
+            className="w-8 h-8 text-danger"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fillRule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <h3 className="text-2xl font-bold text-dark">
+            LEAST Impactful Measures
+          </h3>
+        </div>
+        <p className="text-dark mb-4">
+          Bottom {bottomMeasures.length} measures estimated to have contributed
+          negatively or had adverse effects
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {bottomMeasures.map((measure, index) => (
+            <MeasureImpactCard
+              key={measure.id}
+              measure={measure}
+              rank={measures.length - bottomMeasures.length + index + 1}
+              size="small"
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Horizontal Bar Chart */}
+      <div className="mt-12">
+        <h3 className="text-2xl font-bold text-dark mb-2">
+          Complete Measures Analysis
+        </h3>
+        <p className="text-dark mb-6">
+          Comprehensive view of all {measures.length} measures ranked by their
+          contribution coefficient. Hover over bars to see detailed information
+          and implementing cities.
+        </p>
+        <D3HorizontalBarChart
+          measures={sortedMeasures}
+          livingLabsAnalysis={livingLabsAnalysis}
+          height={Math.max(600, measures.length * 50)}
+        />
+      </div>
+
+      {/* Additional Info */}
+      <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <div className="flex gap-3">
+          <svg
+            className="w-6 h-6 text-primary flex-shrink-0"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <div className="text-sm text-dark">
+            <p className="font-semibold mb-2">About these results:</p>
+            <ul className="list-disc list-inside space-y-1">
+              <li>
+                Coefficients represent the estimated contribution of each
+                measure to KPI changes
+              </li>
+              <li>Positive values indicate measures that improved KPIs</li>
+              <li>
+                Negative values may indicate measures needing refinement or
+                context-specific challenges
+              </li>
+              <li>
+                Variation under no measures:{" "}
+                <span className="font-mono font-semibold">
+                  {formatCoefficient(
+                    analysisResult.variation_under_no_measures
+                  )}
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
