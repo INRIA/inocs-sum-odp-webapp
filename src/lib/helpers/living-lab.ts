@@ -160,26 +160,47 @@ export function getLivingLabInfoProgress(
 } {
   if (!livingLab) return { value: 0, progress: 0, details: [] };
   const itemsToCheck = [
-    livingLab.description,
     livingLab.area,
     livingLab.radius,
     livingLab.population,
-    livingLab.country,
     livingLab.lat,
     livingLab.lng,
   ];
 
   const filledItems = itemsToCheck.filter(
-    (item) => item !== null && item !== undefined && item !== ""
-  ).length;
+    (item) => item !== null && item !== undefined && item !== "" && item !== 0
+  );
 
-  const missingItems = itemsToCheck.length - filledItems;
+  const missingItems = itemsToCheck.length - filledItems.length;
 
-  const details = [{ label: "Missing information", value: `${missingItems}` }];
+  const missingFields = itemsToCheck
+    .filter(
+      (item) => item === null || item === undefined || item === "" || item === 0
+    )
+    .map((item) => {
+      if (item === livingLab.area) return "Area";
+      if (item === livingLab.radius) return "Radius";
+      if (item === livingLab.population) return "Population";
+      if (item === livingLab.lat) return "Latitude";
+      if (item === livingLab.lng) return "Longitude";
+      return "";
+    });
+
+  const details =
+    missingItems > 0
+      ? [
+          { label: "Missing information", value: `${missingItems}` },
+          {
+            label: "Missing fields",
+            value: missingFields.join(", "),
+          },
+        ]
+      : [];
 
   return {
-    value: filledItems,
-    progress: Math.round((filledItems / itemsToCheck.length) * 100 * 100) / 100,
+    value: filledItems.length,
+    progress:
+      Math.round((filledItems.length / itemsToCheck.length) * 100 * 100) / 100,
     details,
   };
 }
@@ -213,7 +234,11 @@ export function getKpiResultsProgress(
   if (kpis.length === 0) return { value: 0, progress: 0, details: [] };
   return {
     value: uniqueCompletedKpis.length,
-    progress: Math.round(uniqueCompletedKpis.length / kpis.length) * 100,
+    progress: Math.round(
+      (uniqueCompletedKpis.length /
+        (uniqueGlobalIds.length + uniqueLocalIds.length)) *
+        100
+    ),
     details: [
       {
         label: "Global KPIs",
@@ -279,6 +304,7 @@ export function getMeasuresProgress(measures: IProject[]): {
 
   return {
     value: `${measures.length} Measures`,
+    progress: 100,
     details: [
       {
         label: "Push meaasures",
