@@ -109,29 +109,29 @@ INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) V
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('48','2','0.0708','2023-09-01');
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('49','2','0.98','2023-09-01');
 
-INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('52','2','1','0.17021','2023-09-30');
-INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('53','2','1','0.22857','2023-09-30');
-INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('54','2','1','0.30475','2023-09-30');
+INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('52','2','1','0.07113','2023-09-30');
+INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('53','2','1','0.09892','2023-09-30');
+INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('54','2','1','0.14175000000000001','2023-09-30');
 INSERT INTO `transport_mode_living_lab_implementation`(`living_lab_id`,`transport_mode_id`, `status`) VALUES ('2','1','IN_SERVICE');
-INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('52','2','10','0.31383','2023-09-30');
-INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('53','2','10','0.21885000000000002','2023-09-30');
-INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('54','2','10','0.0007000000000000001','2023-09-30');
+INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('52','2','10','0.40021','2023-09-30');
+INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('53','2','10','0.46604','2023-09-30');
+INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('54','2','10','0.12695','2023-09-30');
 INSERT INTO `transport_mode_living_lab_implementation`(`living_lab_id`,`transport_mode_id`, `status`) VALUES ('2','10','IN_SERVICE');
-INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('52','2','4','0.08510999999999999','2023-09-30');
-INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('53','2','4','0.04335','2023-09-30');
-INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('54','2','4','0.06937','2023-09-30');
+INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('52','2','4','0.33439','2023-09-30');
+INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('53','2','4','0.29998','2023-09-30');
+INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('54','2','4','0.53732','2023-09-30');
 INSERT INTO `transport_mode_living_lab_implementation`(`living_lab_id`,`transport_mode_id`, `status`) VALUES ('2','4','IN_SERVICE');
-INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('52','2','6','0.07713','2023-09-30');
-INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('53','2','6','0.032869999999999996','2023-09-30');
-INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('54','2','6','0.052590000000000005','2023-09-30');
+INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('52','2','6','0.16136','2023-09-30');
+INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('53','2','6','0.08094','2023-09-30');
+INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('54','2','6','0.14498','2023-09-30');
 INSERT INTO `transport_mode_living_lab_implementation`(`living_lab_id`,`transport_mode_id`, `status`) VALUES ('2','6','IN_SERVICE');
-INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('52','2','3','0.03191','2023-09-30');
-INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('53','2','3','0.04761','2023-09-30');
-INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('54','2','3','0.03809','2023-09-30');
+INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('52','2','3','0.03079','2023-09-30');
+INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('53','2','3','0.053520000000000005','2023-09-30');
+INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('54','2','3','0.04793','2023-09-30');
 INSERT INTO `transport_mode_living_lab_implementation`(`living_lab_id`,`transport_mode_id`, `status`) VALUES ('2','3','IN_SERVICE');
-INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('52','2','7','0.04521','2023-09-30');
-INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('53','2','7','0.05144','2023-09-30');
-INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('54','2','7','0.0823','2023-09-30');
+INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('52','2','7','0.00212','2023-09-30');
+INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('53','2','7','0.0006','2023-09-30');
+INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('54','2','7','0.00107','2023-09-30');
 INSERT INTO `transport_mode_living_lab_implementation`(`living_lab_id`,`transport_mode_id`, `status`) VALUES ('2','7','IN_SERVICE');
 
 --Jerusalem
