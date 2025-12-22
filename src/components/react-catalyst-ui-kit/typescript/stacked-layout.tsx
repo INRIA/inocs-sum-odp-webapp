@@ -93,7 +93,7 @@ export function StackedLayout({
           </aside>
         ) : null}
         <div className="grow lg:rounded-lg ">
-          <div className="mx-auto max-w-6xl">{children}</div>
+          <div className="mx-auto max-w-7xl">{children}</div>
         </div>
       </main>
     </div>

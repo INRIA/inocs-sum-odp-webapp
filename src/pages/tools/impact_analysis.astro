@@ -30,7 +30,10 @@ try {
           const variationData = calculateKpiVariationsData(successItem.results);
           kpiVariationsDataMap.set(String(successItem.group_id), variationData);
         } catch (err) {
-          console.error(`Error calculating variations for group ${successItem.group_id}:`, err);
+          console.error(
+            `Error calculating variations for group ${successItem.group_id}:`,
+            err
+          );
         }
       });
     }
@@ -47,8 +50,8 @@ const kpiVariationsData = Object.fromEntries(kpiVariationsDataMap);
 ---
 
 <Layout role="visitor">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mx-auto px-1 py-8">
+    <div class="mx-auto px-1 py-8">
       <!-- Header Section - Enhanced with Badge -->
       <div class="mb-12">
         <div
@@ -505,7 +508,7 @@ const kpiVariationsData = Object.fromEntries(kpiVariationsDataMap);
               d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             ></path>
           </svg>
-          How to Use This Dashboard
+          How to use this dashboard
         </h3>
 
         <div class="grid md:grid-cols-3 gap-6">

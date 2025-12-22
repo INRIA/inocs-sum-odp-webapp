@@ -1,9 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import type { IKpiGroup, IKpiVariationData } from "../../../types";
 import { AnalysisSectionDivider } from "../AnalysisSectionDivider";
-import { KpiVariationCard } from "./KpiVariationCard";
 import { KpiGroupVariationCard } from "./KpiGroupVariationCard";
-import { KpiVariationsTable } from "./KpiVariationsTable";
+import { KpiGroupVariationCharts } from "./KpiGroupVariationCharts";
 
 interface KpiVariationsProps {
   selectedGroup: IKpiGroup | null;
@@ -14,6 +13,8 @@ export const KpiVariations: React.FC<KpiVariationsProps> = ({
   selectedGroup,
   variationsData,
 }) => {
+  const [viewMode, setViewMode] = useState<"data" | "chart">("data");
+
   // No group selected
   if (!selectedGroup) {
     return (
@@ -60,17 +61,54 @@ export const KpiVariations: React.FC<KpiVariationsProps> = ({
       />
 
       <div className="mt-6 space-y-6">
+        {/* View mode segmented control */}
+        <div className="inline-flex rounded-lg border border-gray-200 p-1 bg-gray-50">
+          <button
+            onClick={() => setViewMode("data")}
+            className={`px-3 py-1.5 text-sm rounded-md ${
+              viewMode === "data"
+                ? "bg-white shadow-sm text-gray-900"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+            aria-pressed={viewMode === "data"}
+          >
+            Data
+          </button>
+          <button
+            onClick={() => setViewMode("chart")}
+            className={`px-3 py-1.5 text-sm rounded-md ${
+              viewMode === "chart"
+                ? "bg-white shadow-sm text-gray-900"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+            aria-pressed={viewMode === "chart"}
+          >
+            Chart
+          </button>
+        </div>
         {/* Living Labs Variations with Global Data */}
         <div>
-          <KpiGroupVariationCard
-            livingLabVariations={variationsData.livingLabVariations}
-            groupName={variationsData.groupName}
-            globalTotalVariation={variationsData.totalVariation}
-            globalTotalVariationPercentage={
-              variationsData.totalVariationPercentage
-            }
-            globalKpiVariations={variationsData.allKpiVariations}
-          />
+          {viewMode === "data" ? (
+            <KpiGroupVariationCard
+              livingLabVariations={variationsData.livingLabVariations}
+              groupName={variationsData.groupName}
+              globalTotalVariation={variationsData.totalVariation}
+              globalTotalVariationPercentage={
+                variationsData.totalVariationPercentage
+              }
+              globalKpiVariations={variationsData.allKpiVariations}
+            />
+          ) : (
+            <KpiGroupVariationCharts
+              groupName={variationsData.groupName}
+              livingLabVariations={variationsData.livingLabVariations}
+              globalTotalVariation={variationsData.totalVariation}
+              globalTotalVariationPercentage={
+                variationsData.totalVariationPercentage
+              }
+              globalKpiVariations={variationsData.allKpiVariations}
+            />
+          )}
         </div>
       </div>
     </div>

@@ -35,8 +35,10 @@ export const KpiGroupVariationCard: React.FC<KpiGroupVariationCardProps> = ({
 
   // Get data based on selection
   const isGlobalView = selectedLabIndex === null;
-  const selectedLab = isGlobalView ? null : livingLabVariations[selectedLabIndex];
-  
+  const selectedLab = isGlobalView
+    ? null
+    : livingLabVariations[selectedLabIndex];
+
   const displayData = isGlobalView
     ? {
         name: "All Living Labs",
@@ -48,7 +50,8 @@ export const KpiGroupVariationCard: React.FC<KpiGroupVariationCardProps> = ({
     : {
         name: selectedLab?.labName ?? "",
         totalVariation: selectedLab?.totalVariation ?? null,
-        totalVariationPercentage: selectedLab?.totalVariationPercentage ?? "N/A",
+        totalVariationPercentage:
+          selectedLab?.totalVariationPercentage ?? "N/A",
         kpis: selectedLab?.kpis ?? [],
         labCount: 1,
       };
@@ -57,17 +60,18 @@ export const KpiGroupVariationCard: React.FC<KpiGroupVariationCardProps> = ({
     <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
       {/* Header with Living Lab Selection */}
       <div className="border-b border-gray-200 p-6">
-        <h4 className="text-lg font-bold text-gray-900 mb-4">
-          {groupName} KPIs variations
-        </h4>
-        <p className="text-sm text-gray-600 mb-4">
-          Observe how key indicators changed across each Living Lab for{" "}
-          {livingLabVariations[0]?.kpis.length || 0} metrics collected.
-        </p>
+        <div className="flex flex-col items-start justify-between gap-4">
+          <h4>{groupName}</h4>
+          <h5>KPIs variations - Data Overview</h5>
+          <p>
+            Observe how key indicators changed across each Living Lab for{" "}
+            {livingLabVariations[0]?.kpis.length || 0} metrics collected.
+          </p>
+        </div>
 
         {/* Living Lab Selector */}
         {(livingLabVariations.length > 1 || hasGlobalData) && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 mt-4">
             {/* All Living Labs button (Global) */}
             {hasGlobalData && (
               <button
@@ -100,7 +104,7 @@ export const KpiGroupVariationCard: React.FC<KpiGroupVariationCardProps> = ({
 
         {/* Selected Lab Summary */}
         {livingLabVariations.length === 1 && !hasGlobalData && (
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-lg">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-lg mt-4">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -134,7 +138,11 @@ export const KpiGroupVariationCard: React.FC<KpiGroupVariationCardProps> = ({
             value={displayData.totalVariationPercentage}
             description={
               isGlobalView
-                ? `Average percentage change across all ${displayData.kpis.length} metrics collected across ${displayData.labCount} living lab${displayData.labCount > 1 ? "s" : ""}`
+                ? `Average percentage change across all ${
+                    displayData.kpis.length
+                  } metrics collected across ${
+                    displayData.labCount
+                  } living lab${displayData.labCount > 1 ? "s" : ""}`
                 : `Average percentage change across all ${displayData.kpis.length} metrics collected in this Living Lab`
             }
             size="medium"
