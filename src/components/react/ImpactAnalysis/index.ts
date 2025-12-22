@@ -3,3 +3,7 @@ export { MeasuresImpact } from "./MeasuresImpact";
 export { ImpactAnalysisDashboard } from "./ImpactAnalysisDashboard";
 export { MeasureImpactCard } from "./MeasureImpactCard";
 export { D3HorizontalBarChart } from "./D3HorizontalBarChart";
+export { KpiVariations } from "./KpiVariations";
+export { KpiVariationCard } from "./KpiVariationCard";
+export { KpiGroupVariationCard } from "./KpiGroupVariationCard";
+export { KpiVariationsTable } from "./KpiVariationsTable";

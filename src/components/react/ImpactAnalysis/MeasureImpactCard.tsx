@@ -1,6 +1,6 @@
 import React from "react";
 import type { IMeasureCoefficient } from "../../../types";
-import { coefficientToPercentage } from "../../../lib/helpers/chartUtils";
+import { coefficientToPercentage } from "../../../lib/helpers/impact-analysis-format";
 
 interface MeasureImpactCardProps {
   measure: IMeasureCoefficient;

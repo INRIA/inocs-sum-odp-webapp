@@ -2,13 +2,15 @@
 import Layout from "../../layouts/Layout.astro";
 import { ImpactAnalysisDashboard } from "../../components/react/ImpactAnalysis";
 import ApiClient from "../../lib/api-client/ApiClient";
-import type { IJobRun, IKpiGroup } from "../../types";
+import type { IJobRun, IKpiGroup, IKpiVariationData } from "../../types";
+import { calculateKpiVariationsData } from "../../lib/helpers/impact-analysis-format";
 
 const api = new ApiClient(Astro.request);
 
 // Fetch the latest successful job run for kpi_measures_analysis
 let jobRun: IJobRun | null = null;
 let kpiGroups: IKpiGroup[] = [];
+let kpiVariationsDataMap: Map<string, IKpiVariationData> = new Map();
 let errorMessage: string | null = null;
 
 try {
@@ -20,6 +22,18 @@ try {
     if (jobRun?.input_data?.kpi_groups) {
       kpiGroups = jobRun.input_data.kpi_groups;
     }
+
+    // Pre-compute KPI variations for each group (server-side)
+    if (jobRun?.output_data?.success) {
+      jobRun.output_data.success.forEach((successItem) => {
+        try {
+          const variationData = calculateKpiVariationsData(successItem.results);
+          kpiVariationsDataMap.set(String(successItem.group_id), variationData);
+        } catch (err) {
+          console.error(`Error calculating variations for group ${successItem.group_id}:`, err);
+        }
+      });
+    }
   } else {
     errorMessage = "No successful job run found for KPI measures analysis.";
   }
@@ -27,6 +41,9 @@ try {
   console.error("Error fetching job run data:", error);
   errorMessage = "Failed to load impact analysis data. Please try again later.";
 }
+
+// Convert Map to plain object for JSON serialization
+const kpiVariationsData = Object.fromEntries(kpiVariationsDataMap);
 ---
 
 <Layout role="visitor">
@@ -567,6 +584,7 @@ try {
         <ImpactAnalysisDashboard
           kpiGroups={kpiGroups}
           jobRun={jobRun}
+          kpiVariationsData={kpiVariationsData}
           client:load
         />
       )

@@ -5,7 +5,7 @@ import {
   coefficientToPercentage,
   formatCoefficient,
   findImplementingLabs,
-} from "../../../lib/helpers/chartUtils";
+} from "../../../lib/helpers/impact-analysis-format";
 import {
   BLUE_COLOR,
   GRAY_COLOR,

@@ -9,7 +9,7 @@ import {
   sortMeasuresByCoefficient,
   formatCoefficient,
   calculateStatistics,
-} from "../../../lib/helpers/chartUtils";
+} from "../../../lib/helpers/impact-analysis-format";
 
 interface MeasuresImpactProps {
   selectedGroup: IKpiGroup | null;

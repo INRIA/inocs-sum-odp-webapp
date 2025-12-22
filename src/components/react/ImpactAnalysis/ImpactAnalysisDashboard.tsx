@@ -1,16 +1,23 @@
 import React, { useState, useMemo } from "react";
 import { AnalysisConditionsFilter } from "./AnalysisConditionsFilter";
 import { MeasuresImpact } from "./MeasuresImpact";
-import type { IKpiGroup, IJobRun, IGroupAnalysisResult } from "../../../types";
+import { KpiVariations } from ".";
+import type {
+  IKpiGroup,
+  IJobRun,
+  IGroupAnalysisResult,
+  IKpiVariationData,
+} from "../../../types";
 
 interface ImpactAnalysisDashboardProps {
   kpiGroups: IKpiGroup[];
   jobRun: IJobRun | null;
+  kpiVariationsData: Record<string, IKpiVariationData>;
 }
 
 export const ImpactAnalysisDashboard: React.FC<
   ImpactAnalysisDashboardProps
-> = ({ kpiGroups, jobRun }) => {
+> = ({ kpiGroups, jobRun, kpiVariationsData }) => {
   const [selectedGroupId, setSelectedGroupId] = useState<
     string | number | null
   >(null);
@@ -39,6 +46,12 @@ export const ImpactAnalysisDashboard: React.FC<
     return match?.results || null;
   }, [selectedGroupId, jobRun]);
 
+  // Get variations data for selected group
+  const selectedVariationsData: IKpiVariationData | null = useMemo(() => {
+    if (!selectedGroupId) return null;
+    return kpiVariationsData[String(selectedGroupId)] || null;
+  }, [selectedGroupId, kpiVariationsData]);
+
   return (
     <div className="flex flex-col gap-6">
       <AnalysisConditionsFilter
@@ -50,6 +63,11 @@ export const ImpactAnalysisDashboard: React.FC<
       <MeasuresImpact
         selectedGroup={selectedGroup}
         analysisResult={analysisResult}
+      />
+
+      <KpiVariations
+        selectedGroup={selectedGroup}
+        variationsData={selectedVariationsData}
       />
     </div>
   );
