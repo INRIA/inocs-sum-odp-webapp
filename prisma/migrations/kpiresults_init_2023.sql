@@ -1,4 +1,4 @@
---Munich
+-- Munich
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('2','1','0','2023-09-01');
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('6','1','5','2023-09-01');
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('7','1','0.5','2023-09-01');
@@ -80,7 +80,7 @@ INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('54','1','8','0.04383','2024-01-31');
 INSERT INTO `transport_mode_living_lab_implementation`(`living_lab_id`,`transport_mode_id`, `status`) VALUES ('1','8','IN_SERVICE');
  
---Geneva
+-- Geneva
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('1','2','0.3614','2023-09-01');
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('2','2','4','2023-09-01');
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('4','2','4.71','2023-09-01');
@@ -134,7 +134,7 @@ INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('54','2','7','0.00107','2023-09-30');
 INSERT INTO `transport_mode_living_lab_implementation`(`living_lab_id`,`transport_mode_id`, `status`) VALUES ('2','7','IN_SERVICE');
 
---Jerusalem
+-- Jerusalem
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('2','3','4','2023-09-01');
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('5','3','0.69','2023-09-01');
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('6','3','4','2023-09-01');
@@ -196,7 +196,7 @@ INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('54','3','6','0.049','2017-12-31');
 INSERT INTO `transport_mode_living_lab_implementation`(`living_lab_id`,`transport_mode_id`, `status`) VALUES ('3','6','IN_SERVICE');
 
---Αthens (Penteli)
+-- Αthens (Penteli)
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('1','4','0.3182','2023-09-01');
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('2','4','1','2023-09-01');
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('4','4','1.43','2023-09-01');
@@ -268,7 +268,7 @@ INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id
 INSERT INTO `transport_mode_living_lab_implementation`(`living_lab_id`,`transport_mode_id`, `status`) VALUES ('4','3','IN_SERVICE');
 
 
---Rotterdam
+-- Rotterdam
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('6','5','3','2023-09-01');
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('7','5','0.5','2023-09-01');
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('9','5','0.05','2023-09-01');
@@ -337,7 +337,7 @@ INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id
 INSERT INTO `transport_mode_living_lab_implementation`(`living_lab_id`,`transport_mode_id`, `status`) VALUES ('5','3','IN_SERVICE');
 
 
---Κrakow
+-- Κrakow
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('1','6','0.0367','2023-09-01');
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('4','6','1','2023-09-01');
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('6','6','2','2023-09-01');
@@ -410,7 +410,7 @@ INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id
 INSERT INTO `transport_mode_living_lab_implementation`(`living_lab_id`,`transport_mode_id`, `status`) VALUES ('6','8','IN_SERVICE');
 
 
---Larnaca
+-- Larnaca
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('1','8','0.2','2023-09-01');
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('2','8','0','2023-09-01');
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('6','8','1','2023-09-01');
@@ -469,7 +469,7 @@ INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `transport_mode_id`, `value`, `date`) VALUES ('54','8','3','0.00116','2023-12-31');
 INSERT INTO `transport_mode_living_lab_implementation`(`living_lab_id`,`transport_mode_id`, `status`) VALUES ('8','3','IN_SERVICE');
 
---Coimbra
+-- Coimbra
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('1','9','0.333','2023-09-01');
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('2','9','6','2023-09-01');
 INSERT INTO `kpiresults`(`kpidefinition_id`, `living_lab_id`, `value`, `date`) VALUES ('4','9','4.71','2023-09-01');
