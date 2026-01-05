@@ -12,8 +12,8 @@ model categories {
   name                        String                    @unique(map: "categories_name_unique") @db.VarChar(255)
   description                 String?                   @db.Text
   type                        String                    @db.VarChar(50)
-  created_at                  DateTime?                 @db.Timestamp(0)
-  updated_at                  DateTime?                 @db.Timestamp(0)
+  created_at                  DateTime?                 @db.Timestamp(0) @default(now())
+  updated_at                  DateTime?                 @db.Timestamp(0) @default(now())
 
   kpidefinitions_category     kpidefinitions_category[]
 }
@@ -40,27 +40,32 @@ model item_tag {
 }
 
 model items {
-  id          BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
-  url         String?    @db.VarChar(512)
-  name        String     @unique(map: "items_name_unique") @db.VarChar(255)
-  orgname     String     @db.VarChar(400)
-  picture     String?    @db.VarChar(255)
-  file        String?    @db.VarChar(255)
-  fileorgname String     @db.VarChar(255)
-  project_id  BigInt     @db.UnsignedBigInt
-  category_id BigInt     @db.UnsignedBigInt
-  description String?    @db.Text
-  status      String?    @db.VarChar(255)
-  homepage    Boolean    @default(false)
-  options     String?    @db.Text
-  date        DateTime?  @db.Date
-  created_at  DateTime?  @db.Timestamp(0)
-  updated_at  DateTime?  @db.Timestamp(0)
-  user_id     Int?
-  visible     Int?       @db.TinyInt
-  item_tag    item_tag[]
+  id                  BigInt            @id @default(autoincrement()) @db.UnsignedBigInt
+  url                 String?           @db.VarChar(512)
+  name                String            @unique(map: "items_name_unique") @db.VarChar(255)
+  orgname             String            @db.VarChar(400)
+  picture             String?           @db.VarChar(255)
+  file                String?           @db.VarChar(255)
+  fileorgname         String            @db.VarChar(255)
+  project_id          BigInt?           @db.UnsignedBigInt
+  category_id         BigInt            @db.UnsignedBigInt
+  description         String?           @db.Text
+  status              String?           @db.VarChar(255)
+  homepage            Boolean           @default(false)
+  options             String?           @db.Text
+  date                DateTime?         @db.Date
+  created_at          DateTime?         @db.Timestamp(0) @default(now())
+  updated_at          DateTime?         @db.Timestamp(0) @default(now())
+  user_id             Int?        
+  visible             Int?              @db.TinyInt
+  item_tag            item_tag[]
+  living_lab_id       BigInt?           @db.UnsignedBigInt
+  kpidefinition_id    BigInt?           @db.UnsignedBigInt
 
-  messages    messages[]
+  messages            messages[]
+  living_lab          labs?             @relation(fields: [living_lab_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  kpidefinition       kpidefinitions?   @relation(fields: [kpidefinition_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  project             projects?         @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model kpidefinitions {
@@ -81,10 +86,11 @@ model kpidefinitions {
 
   kpiresults                  kpiresults[]
   kpidefinitions_category     kpidefinitions_category[]
+  items                       items[]
   children_kpis               kpidefinitions[]    @relation("kpi_parent_child")
 
   parent_kpi                  kpidefinitions?      @relation("kpi_parent_child", fields: [parent_kpi_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "kpidefinitions_parent_kpi_id_index")
-  
+
   @@index([parent_kpi_id], map: "kpidefinitions_parent_kpi_id_index")
   @@index([kpi_number], map: "kpidefinitions_kpi_number_index")
 }
@@ -146,6 +152,7 @@ model labs {
   kpiresults                                kpiresults[]
   living_lab_user_relation                  living_lab_user_relation[]
   messages                                  messages[]
+  items                                     items[]
 
   @@index([validated_by_user_id], map: "labs_validated_by_user_id_foreign")
   @@index([user_id], map: "labs_user_id_foreign")
@@ -184,6 +191,7 @@ model projects {
   type                               String                               @db.VarChar(255)
   image_url                          String?                              @db.Text
   living_lab_projects_implementation living_lab_projects_implementation[]
+  items                              items[]
 }
 
 model living_lab_projects_implementation {
@@ -191,8 +199,8 @@ model living_lab_projects_implementation {
   project_id    BigInt    @db.UnsignedBigInt
   living_lab_id BigInt    @db.UnsignedBigInt
   user_id       String?   @db.VarChar(255)
-  created_at    DateTime? @db.Timestamp(0)
-  updated_at    DateTime? @db.Timestamp(0)
+  created_at    DateTime  @default(now()) @db.Timestamp(0)
+  updated_at    DateTime  @default(now()) @db.Timestamp(0)
   start_at      DateTime? @db.Timestamp(0)
   description   String?   @db.Text
 
@@ -271,7 +279,8 @@ model transport_mode {
   description String?            @db.Text
   type        String?            @db.VarChar(100)
   color       String?            @db.VarChar(10)
-  created_at  DateTime?          @db.Timestamp(0)
+  created_at  DateTime?          @db.Timestamp(0) @default(now())
+  updated_at  DateTime?          @db.Timestamp(0) @default(now())
 
   transport_mode_living_lab_implementation transport_mode_living_lab_implementation[]
   kpiresults            kpiresults[]
@@ -282,6 +291,8 @@ model transport_mode_living_lab_implementation {
   transport_mode_id     BigInt          @db.UnsignedBigInt
   living_lab_id         BigInt          @db.UnsignedBigInt
   status                String          @db.VarChar(255)
+  created_at            DateTime?       @db.Timestamp(0) @default(now())
+  updated_at            DateTime?       @db.Timestamp(0) @default(now())
 
   transport_mode        transport_mode  @relation(fields: [transport_mode_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "tmlli_transport_mode_id_foreign")
   lab                   labs            @relation(fields: [living_lab_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "tmlli_living_lab_id_foreign")
@@ -295,12 +306,13 @@ model messages {
   id                                   BigInt       @id @default(autoincrement()) @db.UnsignedBigInt
   from_user_id                         BigInt       @db.UnsignedBigInt
   from_email                           String       @db.VarChar(255)
-  to_user_id                           BigInt       @db.UnsignedBigInt
+  to_user_id                           BigInt?      @db.UnsignedBigInt
   to_email                             String       @db.VarChar(255)
   message                              String       @db.Text
   sent_at                              DateTime     @db.Timestamp(0) @default(now())
   living_lab_id                        BigInt?      @db.UnsignedBigInt
   created_at                           DateTime     @db.Timestamp(0)
+  updated_at                           DateTime     @db.Timestamp(0)
   item_id                              BigInt?      @db.UnsignedBigInt
   kpiresult_id                         BigInt?      @db.UnsignedBigInt
   living_lab_project_implementation_id BigInt?      @db.UnsignedBigInt

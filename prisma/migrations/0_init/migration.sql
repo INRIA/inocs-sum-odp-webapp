@@ -4,8 +4,8 @@ CREATE TABLE `categories` (
     `name` VARCHAR(255) NOT NULL,
     `description` TEXT NULL,
     `type` VARCHAR(50) NOT NULL,
-    `created_at` TIMESTAMP(0) NULL,
-    `updated_at` TIMESTAMP(0) NULL,
+    `created_at` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
+    `updated_at` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
 
     UNIQUE INDEX `categories_name_unique`(`name`),
     PRIMARY KEY (`id`)
@@ -45,17 +45,19 @@ CREATE TABLE `items` (
     `picture` VARCHAR(255) NULL,
     `file` VARCHAR(255) NULL,
     `fileorgname` VARCHAR(255) NOT NULL,
-    `project_id` BIGINT UNSIGNED NOT NULL,
+    `project_id` BIGINT UNSIGNED NULL,
     `category_id` BIGINT UNSIGNED NOT NULL,
     `description` TEXT NULL,
     `status` VARCHAR(255) NULL,
     `homepage` BOOLEAN NOT NULL DEFAULT false,
     `options` TEXT NULL,
     `date` DATE NULL,
-    `created_at` TIMESTAMP(0) NULL,
-    `updated_at` TIMESTAMP(0) NULL,
+    `created_at` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
+    `updated_at` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
     `user_id` INTEGER NULL,
     `visible` TINYINT NULL,
+    `living_lab_id` BIGINT UNSIGNED NULL,
+    `kpidefinition_id` BIGINT UNSIGNED NULL,
 
     UNIQUE INDEX `items_name_unique`(`name`),
     PRIMARY KEY (`id`)
@@ -182,8 +184,8 @@ CREATE TABLE `living_lab_projects_implementation` (
     `project_id` BIGINT UNSIGNED NOT NULL,
     `living_lab_id` BIGINT UNSIGNED NOT NULL,
     `user_id` VARCHAR(255) NULL,
-    `created_at` TIMESTAMP(0) NULL,
-    `updated_at` TIMESTAMP(0) NULL,
+    `created_at` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+    `updated_at` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `start_at` TIMESTAMP(0) NULL,
     `description` TEXT NULL,
 
@@ -260,7 +262,8 @@ CREATE TABLE `transport_mode` (
     `description` TEXT NULL,
     `type` VARCHAR(100) NULL,
     `color` VARCHAR(10) NULL,
-    `created_at` TIMESTAMP(0) NULL,
+    `created_at` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
+    `updated_at` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -271,6 +274,8 @@ CREATE TABLE `transport_mode_living_lab_implementation` (
     `transport_mode_id` BIGINT UNSIGNED NOT NULL,
     `living_lab_id` BIGINT UNSIGNED NOT NULL,
     `status` VARCHAR(255) NOT NULL,
+    `created_at` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
+    `updated_at` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
 
     INDEX `tmlli_transport_mode_id_foreign`(`transport_mode_id`),
     INDEX `tmlli_living_lab_id_foreign`(`living_lab_id`),
@@ -283,12 +288,13 @@ CREATE TABLE `messages` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `from_user_id` BIGINT UNSIGNED NOT NULL,
     `from_email` VARCHAR(255) NOT NULL,
-    `to_user_id` BIGINT UNSIGNED NOT NULL,
+    `to_user_id` BIGINT UNSIGNED NULL,
     `to_email` VARCHAR(255) NOT NULL,
     `message` TEXT NOT NULL,
     `sent_at` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `living_lab_id` BIGINT UNSIGNED NULL,
     `created_at` TIMESTAMP(0) NOT NULL,
+    `updated_at` TIMESTAMP(0) NOT NULL,
     `item_id` BIGINT UNSIGNED NULL,
     `kpiresult_id` BIGINT UNSIGNED NULL,
     `living_lab_project_implementation_id` BIGINT UNSIGNED NULL,
@@ -318,6 +324,15 @@ ALTER TABLE `item_tag` ADD CONSTRAINT `item_tag_item_id_foreign` FOREIGN KEY (`i
 
 -- AddForeignKey
 ALTER TABLE `item_tag` ADD CONSTRAINT `item_tag_tag_id_foreign` FOREIGN KEY (`tag_id`) REFERENCES `tags`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE `items` ADD CONSTRAINT `items_living_lab_id_fkey` FOREIGN KEY (`living_lab_id`) REFERENCES `labs`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE `items` ADD CONSTRAINT `items_kpidefinition_id_fkey` FOREIGN KEY (`kpidefinition_id`) REFERENCES `kpidefinitions`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE `items` ADD CONSTRAINT `items_project_id_fkey` FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE `kpidefinitions` ADD CONSTRAINT `kpidefinitions_parent_kpi_id_index` FOREIGN KEY (`parent_kpi_id`) REFERENCES `kpidefinitions`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
@@ -371,7 +386,7 @@ ALTER TABLE `transport_mode_living_lab_implementation` ADD CONSTRAINT `tmlli_liv
 ALTER TABLE `messages` ADD CONSTRAINT `messages_from_user_id_fkey` FOREIGN KEY (`from_user_id`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `messages` ADD CONSTRAINT `messages_to_user_id_fkey` FOREIGN KEY (`to_user_id`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `messages` ADD CONSTRAINT `messages_to_user_id_fkey` FOREIGN KEY (`to_user_id`) REFERENCES `users`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `messages` ADD CONSTRAINT `messages_living_lab_id_fkey` FOREIGN KEY (`living_lab_id`) REFERENCES `labs`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
