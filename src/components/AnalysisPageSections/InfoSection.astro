@@ -1,0 +1,37 @@
+---
+interface Props {
+  badgeIcon: string;
+  badgeText: string;
+  title: string;
+  description: string;
+  descriptionClass?: string;
+}
+
+const {
+  badgeIcon,
+  badgeText,
+  title,
+  description,
+  descriptionClass = "text-lg text-gray-600 max-w-4xl leading-relaxed",
+} = Astro.props;
+---
+
+<div class="mb-12">
+  <div
+    class="inline-flex items-center gap-2 px-3 py-1 bg-info/10 text-info rounded-full text-sm font-medium mb-4"
+  >
+    <Fragment set:html={badgeIcon} />
+    {badgeText}
+  </div>
+  <h1 class="text-4xl font-bold text-gray-900 mb-4 tracking-tight">
+    {title}
+  </h1>
+  <p
+    class:list={[
+      "text-lg text-gray-600 max-w-4xl leading-relaxed",
+      descriptionClass,
+    ]}
+  >
+    {description}
+  </p>
+</div>

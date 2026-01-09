@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import type { IKpiGroup, IKpiVariationData } from "../../../types";
-import { AnalysisSectionDivider } from "../AnalysisSectionDivider";
+import { AnalysisSectionDivider } from "../ui/AnalysisSectionDivider";
 import { KpiGroupVariationCard } from "./KpiGroupVariationCard";
 import { KpiGroupVariationCharts } from "./KpiGroupVariationCharts";
 
@@ -15,16 +15,20 @@ export const KpiVariations: React.FC<KpiVariationsProps> = ({
 }) => {
   const [viewMode, setViewMode] = useState<"data" | "chart">("data");
 
+  const divider = (
+    <AnalysisSectionDivider
+      step={3}
+      title="KPI Variations"
+      subtitle="Observe and compare KPI variations among living labs"
+      description="Only Living Labs with enough data collected are included"
+    />
+  );
+
   // No group selected
   if (!selectedGroup) {
     return (
       <div>
-        <AnalysisSectionDivider
-          step={3}
-          title="KPI Variations"
-          subtitle="Observe and compare KPI variations among living labs"
-          description="Only Living Labs with enough data collected are included"
-        />
+        {divider}
         <p className="text-gray-600 mt-4">
           Please select a KPI group above to view variations.
         </p>
@@ -36,12 +40,7 @@ export const KpiVariations: React.FC<KpiVariationsProps> = ({
   if (!variationsData || variationsData.livingLabVariations.length === 0) {
     return (
       <div>
-        <AnalysisSectionDivider
-          step={3}
-          title="KPI Variations"
-          subtitle="Observe and compare KPI variations among living labs"
-          description="Only Living Labs with enough data collected are included"
-        />
+        {divider}
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center mt-4">
           <p className="text-gray-700">
             No variations data available for this KPI group.
@@ -53,12 +52,7 @@ export const KpiVariations: React.FC<KpiVariationsProps> = ({
 
   return (
     <div>
-      <AnalysisSectionDivider
-        step={3}
-        title="KPI Variations"
-        subtitle="Observe and compare KPI variations among living labs"
-        description="Only Living Labs with enough data collected are included"
-      />
+      {divider}
 
       <div className="mt-6 space-y-6">
         {/* View mode segmented control */}

@@ -14,6 +14,7 @@ export interface IJobRun {
 
 export interface IJobRunInputData {
   kpi_groups?: IKpiGroup[];
+  goals?: MCDAGoal[];
   [key: string]: any;
 }
 
@@ -21,6 +22,7 @@ export interface IJobRunOutputData {
   success?: IJobRunImpactAnalysisSuccess[];
   errors?: IJobRunError[];
   timestamp?: string;
+  mcda_results?: McdaResults;
   [key: string]: any;
 }
 
@@ -36,6 +38,22 @@ export interface IJobRunError {
   error: string;
 }
 
+export interface MCDAGoal {
+  name: string;
+  weight: number;
+}
+export interface McdaResults {
+  net_flows?: { [key: string]: number };
+  alternative_labels?: { [key: string]: string };
+  negative_flows?: { [key: string]: number };
+  positive_flows?: { [key: string]: number };
+  criteria_labels?: { [key: string]: string };
+  gaia_criteria?: { key: string; x: number; y: number }[];
+  gaia_alternatives?: { key: string; x: number; y: number }[];
+  gaia_decision_stick?: [number, number];
+  ranking?: string[];
+  [key: string]: any;
+}
 export enum JobStatus {
   PENDING = "PENDING",
   STARTED = "STARTED",

@@ -80,3 +80,43 @@ html {
   scroll-behavior: smooth;
   line-height: normal;
 }
+
+/* Range slider styles for MCDA goal weights */
+input[type="range"].range-slider {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input[type="range"].range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #1f2937;
+  cursor: pointer;
+  border: 3px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+input[type="range"].range-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #1f2937;
+  cursor: pointer;
+  border: 3px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+input[type="range"].range-slider:focus {
+  outline: none;
+}
+
+input[type="range"].range-slider:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+}
+
+input[type="range"].range-slider:focus::-moz-range-thumb {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+}

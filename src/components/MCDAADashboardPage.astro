@@ -1,0 +1,159 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { MCDADashboard } from "./react/MCDAAnalysis";
+import {
+  InfoSection,
+  FeaturesGrid,
+  HowToUseAccordion,
+  MethodologyAccordion,
+} from "./AnalysisPageSections";
+import ApiClient from "../lib/api-client/ApiClient";
+import type { IJobRun, IKpiGroup, MCDAGoal, McdaResults } from "../types";
+
+const { perspective } = Astro.props;
+const api = new ApiClient(Astro.request);
+
+// Fetch the latest successful job run for mcda_analysis
+let jobRun: IJobRun | null = null;
+let kpiGroups: IKpiGroup[] = [];
+let errorMessage: string | null = null;
+
+let goals: MCDAGoal[] = [];
+let mcdaResults: McdaResults | undefined = undefined;
+const perspectives = {
+  regulatory: "Regulatory Authorities",
+  pto: "Public Transport Operators",
+  nsm_providers: "New Shared Mobility Providers",
+  citizens_users: "Citizens and Users",
+};
+
+if (perspective) {
+  try {
+    const response = await api.getLatestJobRun(`mcda_analysis_${perspective}`);
+    if (response) {
+      jobRun = response;
+      goals = jobRun.input_data?.goals || [];
+      mcdaResults = jobRun.output_data?.mcda_results;
+
+      // Extract kpi_groups (stakeholder perspectives) from input_data
+      if (jobRun?.input_data?.kpi_groups) {
+        kpiGroups = jobRun.input_data.kpi_groups;
+      }
+    } else {
+      errorMessage = "No successful job run found for MCDA analysis.";
+    }
+  } catch (error) {
+    console.error("Error fetching job run data:", error);
+    errorMessage = "Failed to load MCDA analysis data. Please try again later.";
+  }
+}
+// Define badge icon SVG
+const badgeIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8.25v-4.5m0 0a2.25 2.25 0 100 4.5m0-4.5a2.25 2.25 0 110 4.5m-9 6h18m-3-12.75h.008v.008h-.008v-.008zm0 0h.008v.008h-.008v-.008zm0 0h.008v.008h-.008v-.008zm0 6h.008v.008h-.008v-.008zm0 0h.008v.008h-.008v-.008zm0 0h.008v.008h-.008v-.008zm0 6h.008v.008h-.008v-.008zm0 0h.008v.008h-.008v-.008zm0 0h.008v.008h-.008v-.008z"></path>
+</svg>`;
+
+// Define features for MCDA grid
+const mcdaFeatures = [
+  {
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"></path>
+    </svg>`,
+    title: "Multi-Stakeholder Analysis",
+    description:
+      "Aggregate and compare preferences from different stakeholder groups including municipalities, finance providers, NSM providers, and data operators.",
+  },
+  {
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>`,
+    title: "Weighted Preference Scoring",
+    description:
+      "Apply stakeholder-defined weights to normalize and aggregate pairwise preference values, computing net preference scores for each business activity.",
+  },
+  {
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.047 11.047 0 015.814.836l2.904-2.904a9 9 0 00-5.814-2.236l-2.405-2.405C13.064 7.224 12.172 4.5 9.75 4.5c-2.668 0-4.834 2.166-4.834 4.834 0 2.668 2.166 4.834 4.834 4.834l2.16-2.16"></path>
+    </svg>`,
+    title: "GAIA-PROMETHEE Visualization",
+    description:
+      "Visualize decision space using the GAIA plane with weight-stability assessment to evaluate robustness of top recommendations.",
+  },
+];
+
+// Define how-to-use steps for MCDA
+const howToUseSteps = [
+  {
+    number: 1,
+    title: "Select a stakeholder perspective",
+    description:
+      'Choose the stakeholder group (e.g., "Municipality", "Finance") whose viewpoint you want the ranking to reflect. You can also customize weights for a tailored analysis.',
+  },
+  {
+    number: 2,
+    title: "Review or define analysis parameters",
+    description:
+      "Set criteria weights and thresholds to customize the multi-criteria analysis according to priorities and constraints.",
+  },
+  {
+    number: 3,
+    title: "Review rankings & visualization",
+    description:
+      "Examine the PROMETHEE scores, rankings, and GAIA plane visualization to understand trade-offs and recommendations.",
+  },
+];
+
+// Define methodology content for MCDA
+const methodologyContent = `
+  <p class="text-sm text-gray-700 leading-relaxed mb-3">
+    This analysis employs the <strong>PROMETHEE-GAIA multi-criteria decision analysis (MCDA) framework</strong> to rank sustainable mobility strategies based on multi-stakeholder preferences. The workflow begins by encoding each Living Lab's implemented measures and corresponding KPI changes.
+  </p>
+  <p class="text-sm text-gray-700 leading-relaxed mb-3">
+    Stakeholder-defined weights are applied to normalize and aggregate pairwise preference values via the PROMETHEE method, yielding positive, negative, and net outranking flows for each business activity. Results are ranked by PROMETHEE I/II scores and visualized in the GAIA plane with weight-stability assessment.
+  </p>
+  <p class="text-sm text-gray-700 leading-relaxed">
+    The resulting rankings should be interpreted as <strong>input-based suggestions</strong> to guide decision-making, not definitive prescriptions. The robustness of top recommendations is assessed through sensitivity analysis to ensure stability across varying weight configurations.
+  </p>
+`;
+---
+
+<Layout role="visitor">
+  <div class="mx-auto px-1 py-8">
+    <div class="mx-auto px-1 py-8">
+      <!-- Info Section -->
+      <InfoSection
+        badgeIcon={badgeIcon}
+        badgeText="Decision Support Tool"
+        title="Stakeholder-Driven Business Activity Analysis"
+        description="Enabling evidence-based decision-making across diverse stakeholder priorities in New Shared Mobility initiatives. This tool uses PROMETHEE-GAIA multi-criteria analysis to rank sustainable mobility strategies based on observed KPI changes and stakeholder-weighted preferences."
+      />
+
+      <!-- Features Grid -->
+      <FeaturesGrid features={mcdaFeatures} />
+
+      <!-- How to Use Guide -->
+      <HowToUseAccordion
+        title="How to Use This Tool"
+        subtitle="3 simple steps to get started"
+        steps={howToUseSteps}
+      />
+
+      <!-- Methodology -->
+      <MethodologyAccordion
+        title="Methodology & PROMETHEE-GAIA Framework"
+        subtitle="Multi-criteria decision analysis approach"
+        content={methodologyContent}
+      />
+    </div>
+
+    <!-- Dashboard Section -->
+    <div class="mx-auto px-1 py-8 border-t border-gray-200 mt-12">
+      <MCDADashboard
+        perspectives={perspectives}
+        selectedPerspective={perspective}
+        goals={goals}
+        mcdaResults={mcdaResults}
+        client:load
+      />
+    </div>
+  </div>
+</Layout>

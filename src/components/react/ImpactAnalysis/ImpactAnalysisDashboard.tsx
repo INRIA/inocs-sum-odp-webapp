@@ -18,9 +18,7 @@ interface ImpactAnalysisDashboardProps {
 export const ImpactAnalysisDashboard: React.FC<
   ImpactAnalysisDashboardProps
 > = ({ kpiGroups, jobRun, kpiVariationsData }) => {
-  const [selectedGroupId, setSelectedGroupId] = useState<
-    string | number | null
-  >(null);
+  const [selectedGroupId, setSelectedGroupId] = useState<string | number>();
 
   const handleGroupSelect = (groupId: string | number) => {
     setSelectedGroupId(groupId);

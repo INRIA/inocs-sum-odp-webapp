@@ -1,6 +1,6 @@
 import React from "react";
 import type { IKpiGroup, IGroupAnalysisResult } from "../../../types";
-import { AnalysisSectionDivider } from "../AnalysisSectionDivider";
+import { AnalysisSectionDivider } from "../ui/AnalysisSectionDivider";
 import { MeasureImpactCard } from "./MeasureImpactCard";
 import { D3HorizontalBarChart } from "./D3HorizontalBarChart";
 import {
@@ -20,16 +20,20 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
   selectedGroup,
   analysisResult,
 }) => {
+  const divider = (
+    <AnalysisSectionDivider
+      step={2}
+      title="Measures Impact"
+      subtitle="Analyse how implemented measures contributed to the KPIs variations"
+      description="Estimation of the level of contribution for each measure"
+    />
+  );
+
   // No group selected
   if (!selectedGroup) {
     return (
       <div>
-        <AnalysisSectionDivider
-          step={2}
-          title="Measures Impact"
-          subtitle="Analyse how implemented measures contributed to the KPIs variations"
-          description="Estimation of the level of contribution for each measure"
-        />
+        {divider}
         <p className="text-gray-600 mt-4">
           Please select a KPI group above to view the analysis.
         </p>
@@ -45,12 +49,7 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
   ) {
     return (
       <div>
-        <AnalysisSectionDivider
-          step={2}
-          title="Measures Impact"
-          subtitle="Analyse how implemented measures contributed to the KPIs variations"
-          description="Estimation of the level of contribution for each measure"
-        />
+        {divider}
         <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
           <div className="text-4xl mb-3">📊</div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -75,12 +74,7 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
 
   return (
     <div>
-      <AnalysisSectionDivider
-        step={2}
-        title="Measures Impact"
-        subtitle="Analyse how implemented measures contributed to the KPIs variations"
-        description="Estimation of the level of contribution for each measure"
-      />
+      {divider}
 
       {/* Statistics Summary */}
       <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">

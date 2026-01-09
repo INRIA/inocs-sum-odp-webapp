@@ -17,7 +17,7 @@ export function AnalysisSectionDivider({
           {step}
         </div>
         <div className="flex flex-col md:flex-row gap-4">
-          <h2 className="md:w-1/3 text-2xl font-bold text-gray-900">{title}</h2>
+          <h2 className="md:w-1/3 text-2xl font-bold text-gray-900 content-center">{title}</h2>
           <p className="md:w-2/3 justify-center content-center">
             <strong>{subtitle}</strong>
             <br />
