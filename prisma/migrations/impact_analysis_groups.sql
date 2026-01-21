@@ -4,10 +4,22 @@ INSERT INTO categories (name, type ) VALUES ("Improve Public Transport", "MCDA_G
 INSERT INTO categories (name, type) VALUES ("Improve Accessibility", "MCDA_GOALS");
 
 INSERT INTO kpidefinitions_category (category_id, kpidefinition_id )
-select 8, k.id from kpidefinitions k where k.kpi_number IN ( "12.1.1", "12.1.2", "12.1.3", "12.2.1", "12.2.2", "12.2.3", "13");
+SELECT c.id, k.id 
+FROM categories c
+CROSS JOIN kpidefinitions k
+WHERE c.name = "Improve Safety" 
+  AND c.type = "MCDA_GOALS"
+  AND k.kpi_number IN ( "12.1.1", "12.1.2", "12.1.3", "12.2.1", "12.2.2", "12.2.3", "13");
+
+
 
 INSERT INTO kpidefinitions_category (category_id, kpidefinition_id )
-select 9, k.id from kpidefinitions k where k.kpi_number IN (
+SELECT c.id, k.id 
+FROM categories c
+CROSS JOIN kpidefinitions k
+WHERE c.name = "Improve Public Transport"
+  AND c.type = "MCDA_GOALS"
+  AND k.kpi_number IN (
 "7.1",
 "7.2",
 "7.3",
@@ -24,7 +36,12 @@ select 9, k.id from kpidefinitions k where k.kpi_number IN (
 "14");
 
 INSERT INTO kpidefinitions_category (category_id, kpidefinition_id )
-select 10, k.id from kpidefinitions k where k.kpi_number IN ("1", "5", "6.1", "6.2", "6.3", "20");
+SELECT c.id, k.id 
+FROM categories c
+CROSS JOIN kpidefinitions k
+WHERE c.name = "Improve Accessibility"
+  AND c.type = "MCDA_GOALS"
+  AND k.kpi_number IN ("1", "5", "6.1", "6.2", "6.3", "20");
 
 
 
