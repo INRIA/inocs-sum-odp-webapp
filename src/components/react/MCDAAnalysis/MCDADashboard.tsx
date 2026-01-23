@@ -1,9 +1,9 @@
 import React from "react";
-import type { IJobRun, IKpiGroup, MCDAGoal, McdaResults } from "../../../types";
-import { AnalysisConditionsFilter } from "../ImpactAnalysis/AnalysisConditionsFilter";
+import type { IKpiGroup, MCDAGoal, McdaResults } from "../../../types";
 import { ResultsSection } from "./ResultsSection";
 import { GoalsSection } from "./GoalsSection";
 import { AnalysisSectionDivider, CardFilter } from "../ui";
+import { PageNavigation } from "../ui/PageNavigation";
 
 interface MCDADashboardProps {
   perspectives?: { [key: string]: string };
@@ -29,7 +29,7 @@ export const MCDADashboard: React.FC<MCDADashboardProps> = ({
     : [];
 
   const selectedGroup = perspectivesGroups.find(
-    (group) => group.id === selectedPerspective
+    (group) => group.id === selectedPerspective,
   );
 
   const onGroupSelectRedirectToPerspective = (groupId: string | number) => {
@@ -39,6 +39,11 @@ export const MCDADashboard: React.FC<MCDADashboardProps> = ({
     window.location.href = newUrl;
   };
 
+  const navigationSections = [
+    { id: "who", label: "Who" },
+    { id: "how", label: "What" },
+    { id: "results", label: "Results" },
+  ];
   return (
     <div className="space-y-12">
       {/* Step 1: Who - Select Stakeholder Perspective */}
@@ -89,6 +94,11 @@ export const MCDADashboard: React.FC<MCDADashboardProps> = ({
           />
         )}
       </section>
+
+      <PageNavigation
+        sections={navigationSections}
+        disclaimer="Analysis results are based on the selected KPI group and living lab conditions"
+      />
     </div>
   );
 };

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { AnalysisConditionsFilter } from "./AnalysisConditionsFilter";
 import { MeasuresImpact } from "./MeasuresImpact";
 import { KpiVariations } from ".";
+import { PageNavigation } from "../ui/PageNavigation";
 import type {
   IKpiGroup,
   IJobRun,
@@ -54,23 +55,38 @@ export const ImpactAnalysisDashboard: React.FC<
     return kpiVariationsData[String(selectedGroupId)] || null;
   }, [selectedGroupId, kpiVariationsData]);
 
+  // Navigation sections configuration
+  const navigationSections = [
+    { id: "analysis-conditions-filter", label: "Conditions" },
+    { id: "measures-impact", label: "Measures" },
+    { id: "kpi-variations", label: "KPI Variations" },
+  ];
+
   return (
     <div className="flex flex-col gap-6">
+      <section id="analysis-conditions-filter"></section>
       <AnalysisConditionsFilter
         kpiGroups={kpiGroups}
         selectedGroupId={selectedGroupId}
         onGroupSelect={handleGroupSelect}
       />
 
+      <section id="measures-impact"></section>
       <MeasuresImpact
         selectedGroup={selectedGroup}
         analysisResult={analysisResult}
         kpiCount={selectedVariationsData?.allKpiVariations.length || 0}
       />
 
+      <section id="kpi-variations"></section>
       <KpiVariations
         selectedGroup={selectedGroup}
         variationsData={selectedVariationsData}
+      />
+
+      <PageNavigation
+        sections={navigationSections}
+        disclaimer="Analysis results are based on the selected KPI group and living lab conditions"
       />
     </div>
   );
