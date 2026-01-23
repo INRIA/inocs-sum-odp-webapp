@@ -15,9 +15,9 @@ const { features } = Astro.props;
 <div class="grid md:grid-cols-3 gap-6 mb-12">
   {
     features.map((feature) => (
-      <div class="group relative bg-white rounded-xl p-6 shadow-sm border-l-4 border-warning/30 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+      <div class="group relative bg-white rounded-xl p-6 shadow-sm border-l-4 border-warning/30 transition-all duration-300">
         <div class="flex items-start gap-4 mb-3">
-          <div class="p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg text-warning group-hover:scale-110 transition-transform duration-300">
+          <div class="p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg text-warning transition-transform duration-300">
             <Fragment set:html={feature.icon} />
           </div>
           <h6>{feature.title}</h6>

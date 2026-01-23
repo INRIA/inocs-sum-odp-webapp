@@ -67,8 +67,8 @@ const variantClasses: Record<
     buttonBg: "border-primary hover:border-primary/90 text-primary",
   },
   neutral: {
-    bg: "bg-dark/50",
-    border: "border-gray-200",
+    bg: "bg-light",
+    border: "border-light",
     text: "text-dark",
     buttonBg: "border-dark hover:border-dark/90 text-primary",
   },

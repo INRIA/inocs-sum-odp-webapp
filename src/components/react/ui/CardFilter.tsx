@@ -1,7 +1,11 @@
 import React from "react";
+import type { IKpiDefinition } from "../../../types";
+import { KpiCard } from "../KpiCards";
+import { getUniqueParentKpis } from "../../../lib/helpers";
+import { InfoAlert } from "./InfoAlert";
 
 interface CardFilterProps {
-  groups: { id: string | number; name: string }[];
+  groups: { id: string | number; name: string; kpis: IKpiDefinition[] }[];
   selectedGroupId?: string | number;
   onGroupSelect: (groupId: string | number) => void;
 }
@@ -11,23 +15,46 @@ export const CardFilter: React.FC<CardFilterProps> = ({
   selectedGroupId,
   onGroupSelect,
 }) => {
+  const selectedGroup = groups.find((g) => g.id === selectedGroupId);
+  const uniqueKpis = getUniqueParentKpis(selectedGroup?.kpis || []);
   return (
-    <div className="gap-2 lg:gap-4 flex justify-center mt-4 flex-row flex-wrap">
-      {groups.map((group) => (
-        <button
-          key={group.id}
-          onClick={() => onGroupSelect(group.id)}
-          className={`py-3 px-4 rounded-lg border-2 font-medium transition-all duration-200 text-center ${
-            selectedGroupId === group.id
-              ? "border-primary bg-primary/10 text-primary"
-              : "border-gray-200 bg-white text-gray-700 hover:border-primary/50 hover:bg-primary/5"
-          }`}
-        >
-          <div className="text-3xl mb-2">{getGroupIcon(group.name)}</div>
-
-          {group.name}
-        </button>
-      ))}
+    <div className="flex flex-col">
+      <div className="gap-0 md:gap-2 flex justify-center mt-4 flex-row flex-wrap">
+        {groups.map((group) => (
+          <button
+            key={group.id}
+            onClick={() => onGroupSelect(group.id)}
+            className={`w-1/2 md:w-1/4 lg:w-1/5 px-1 py-3 md:px-4 rounded-lg border-2 font-medium transition-all duration-200 text-center ${
+              selectedGroupId === group.id
+                ? "border-primary bg-primary/10 text-primary"
+                : "border-gray-200 bg-white text-gray-700 hover:border-primary/50 hover:bg-primary/5"
+            }`}
+          >
+            <span className="text-3xl mb-2">{getGroupIcon(group.name)}</span>
+            <br />
+            <span>{group.name}</span>
+          </button>
+        ))}
+      </div>
+      <section id="kpis-in-group"></section>
+      {selectedGroup && uniqueKpis.length > 0 && (
+        <div className="mt-10">
+          <InfoAlert
+            variant="neutral"
+            title={"KPIs considered for group " + selectedGroup.name}
+          >
+            <i>
+              We have collected data from the living labs from the following
+              KPIs in this group:{" "}
+            </i>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {uniqueKpis.map((kpi) => (
+                <KpiCard kpi={kpi} key={kpi.id} />
+              ))}
+            </div>
+          </InfoAlert>
+        </div>
+      )}
     </div>
   );
 };

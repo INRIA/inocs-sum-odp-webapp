@@ -7,3 +7,4 @@ export { KpiVariations } from "./KpiVariations";
 export { KpiVariationCard } from "./KpiVariationCard";
 export { KpiGroupVariationCard } from "./KpiGroupVariationCard";
 export { KpiVariationsTable } from "./KpiVariationsTable";
+export { KpiVariationChart } from "./KpiVariationChart";

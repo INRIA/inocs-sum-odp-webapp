@@ -1,3 +1,5 @@
+import type { IKpi } from "./KPIs";
+
 export interface IGroupAnalysisResult {
   id: string;
   name: string;
@@ -52,16 +54,13 @@ export interface IKpiGroup {
   [key: string]: any;
 }
 
-export interface IKpiDefinition {
-  id: string | number;
-  name: string;
-  progression_target: number; // 0: expected to go down, 1: expected to go up
+export interface IKpiDefinition extends IKpi {
   value_type: string; // Type of the values: percentage, ratio, custom_unit, score
   value_min?: number | null;
   value_max?: number | null;
-  description?: string;
   parent_kpi_id?: string | null;
   parent_kpi_name?: string | null;
+  parent_kpi_number?: string | null;
   [key: string]: any;
 }
 

@@ -1,4 +1,4 @@
-import { EnumKpiMetricType } from "../../types";
+import { EnumKpiMetricType, type IKpiDefinition } from "../../types";
 
 export function formatMonthYear(dateStr?: string | null, short?: boolean) {
   if (!dateStr) return "";
@@ -14,7 +14,7 @@ export function getChange(
   before?: number | null,
   after?: number | null,
   type?: EnumKpiMetricType,
-  progressionTarget?: number | null
+  progressionTarget?: number | null,
 ) {
   if (
     before === undefined ||
@@ -56,7 +56,7 @@ export function formatValue(value?: number | null, type?: EnumKpiMetricType) {
 
 export function getFormattedValueString(
   value?: number | null,
-  type?: EnumKpiMetricType
+  type?: EnumKpiMetricType,
 ) {
   if (value === undefined || value === null || Number.isNaN(value)) return "—";
   if (type === EnumKpiMetricType.PERCENTAGE) {
@@ -87,4 +87,17 @@ export function getRatioComparedToCar(value?: number | null) {
     highlight: `${sign}${absFlat}`,
     isLess: value < 1,
   };
+}
+
+export function getUniqueParentKpis(kpis: IKpiDefinition[]) {
+  return kpis
+    ?.map((kpi) => ({
+      ...kpi,
+      id: kpi.parent_kpi_id ?? kpi.id,
+      name: kpi.parent_kpi_name ?? kpi.name,
+      kpi_number: kpi.parent_kpi_number ?? kpi.kpi_number,
+    }))
+    .filter(
+      (kpi, index, self) => index === self.findIndex((t) => t.id === kpi.id),
+    );
 }

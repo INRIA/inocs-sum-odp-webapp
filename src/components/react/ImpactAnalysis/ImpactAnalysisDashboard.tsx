@@ -22,6 +22,10 @@ export const ImpactAnalysisDashboard: React.FC<
 
   const handleGroupSelect = (groupId: string | number) => {
     setSelectedGroupId(groupId);
+    const element = document.getElementById("kpis-in-group");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   const selectedGroup =
@@ -38,7 +42,7 @@ export const ImpactAnalysisDashboard: React.FC<
     const match = jobRun.output_data.success.find(
       (item) =>
         String(item.group_id) === String(selectedGroupId) ||
-        String(item.results.id) === String(selectedGroupId)
+        String(item.results.id) === String(selectedGroupId),
     );
 
     return match?.results || null;
@@ -61,6 +65,7 @@ export const ImpactAnalysisDashboard: React.FC<
       <MeasuresImpact
         selectedGroup={selectedGroup}
         analysisResult={analysisResult}
+        kpiCount={selectedVariationsData?.allKpiVariations.length || 0}
       />
 
       <KpiVariations

@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import * as d3 from "d3";
 import type { IMeasureCoefficient, ILivingLabAnalysis } from "../../../types";
+import { Badge } from "../ui";
 import {
   coefficientToPercentage,
   formatCoefficient,
@@ -37,6 +38,53 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
   const [tooltip, setTooltip] = useState<TooltipData | null>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height });
 
+  // Extract unique labs and initialize with all selected
+  const allLabs = useMemo(
+    () => livingLabsAnalysis.map((lab) => ({ id: lab.id, name: lab.name })),
+    [livingLabsAnalysis],
+  );
+
+  const [selectedLabIds, setSelectedLabIds] = useState<string[]>(
+    allLabs.map((lab) => lab.id),
+  );
+
+  // Update selected labs when livingLabsAnalysis changes
+  useEffect(() => {
+    setSelectedLabIds(allLabs.map((lab) => lab.id));
+  }, [allLabs]);
+
+  // Toggle lab selection (must keep at least one selected)
+  const toggleLab = (labId: string) => {
+    setSelectedLabIds((prev) => {
+      if (prev.includes(labId)) {
+        // Prevent deselecting if it's the last selected lab
+        if (prev.length === 1) return prev;
+        return prev.filter((id) => id !== labId);
+      }
+      return [...prev, labId];
+    });
+  };
+
+  // Filter measures based on selected labs
+  const filteredMeasures = useMemo(() => {
+    if (selectedLabIds.length === 0) return [];
+
+    return measures.filter((measure) => {
+      const implementingLabs = findImplementingLabs(
+        measure.id,
+        livingLabsAnalysis,
+      );
+      const implementingLabsData = livingLabsAnalysis.filter((lab) =>
+        implementingLabs.includes(lab.name),
+      );
+
+      // Show measure if ANY selected lab implements it
+      return implementingLabsData.some((lab) =>
+        selectedLabIds.includes(lab.id),
+      );
+    });
+  }, [measures, livingLabsAnalysis, selectedLabIds]);
+
   // Handle responsive sizing
   useEffect(() => {
     if (!containerRef.current) return;
@@ -55,12 +103,20 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
 
   // Render D3 chart
   useEffect(() => {
-    if (!svgRef.current || measures.length === 0) return;
+    if (!svgRef.current || filteredMeasures.length === 0) return;
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove(); // Clear previous render
 
-    const margin = { top: 20, right: 120, bottom: 50, left: 280 };
+    // Responsive margins based on screen width
+    const isMobile = dimensions.width < 640;
+    const isTablet = dimensions.width >= 640 && dimensions.width < 1024;
+    const margin = {
+      top: 20,
+      right: isMobile ? 10 : isTablet ? 40 : 80,
+      bottom: isMobile ? 40 : 50,
+      left: isMobile ? 10 : isTablet ? 100 : 180,
+    };
     const width = dimensions.width - margin.left - margin.right;
     const chartHeight = dimensions.height - margin.top - margin.bottom;
 
@@ -69,7 +125,7 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
     // Prepare data - convert coefficients to percentages
-    const data = measures.map((m) => ({
+    const data = filteredMeasures.map((m) => ({
       ...m,
       percentValue: coefficientToPercentage(m.coefficient),
     }));
@@ -100,14 +156,14 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
         d3
           .axisBottom(xScale)
           .tickSize(chartHeight)
-          .tickFormat(() => "")
+          .tickFormat(() => ""),
       )
       .call((g) => g.select(".domain").remove())
       .call((g) =>
         g
           .selectAll(".tick line")
           .attr("stroke", "#e5e7eb")
-          .attr("stroke-dasharray", "2,2")
+          .attr("stroke-dasharray", "2,2"),
       );
 
     // Add zero line
@@ -127,7 +183,7 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
       .append("rect")
       .attr("class", "bar")
       .attr("x", (d) =>
-        d.percentValue >= 0 ? xScale(0) : xScale(d.percentValue)
+        d.percentValue >= 0 ? xScale(0) : xScale(d.percentValue),
       )
       .attr("y", (d) => yScale(d.name) || 0)
       .attr("height", yScale.bandwidth())
@@ -151,7 +207,7 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
       })
       .on("mousemove", function (event) {
         setTooltip((prev) =>
-          prev ? { ...prev, x: event.clientX, y: event.clientY } : null
+          prev ? { ...prev, x: event.clientX, y: event.clientY } : null,
         );
       })
       .on("mouseleave", function () {
@@ -169,12 +225,18 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
     // Add X axis
     g.append("g")
       .attr("transform", `translate(0,${chartHeight})`)
-      .call(d3.axisBottom(xScale).tickFormat((d) => `${d}%`))
+      .call(d3.axisBottom(xScale).tickFormat((d) => `${d}`))
       .call((g) => g.select(".domain").attr("stroke", "#9ca3af"))
       .call((g) => g.selectAll(".tick text").attr("fill", "#6b7280"));
 
     // Add Y axis with custom labels
     const yAxis = g.append("g").attr("class", "y-axis");
+
+    // Responsive label truncation
+    const maxLabelLength = isMobile ? 10 : isTablet ? 20 : 30;
+    const labelFontSize = isMobile ? "10px" : "12px";
+    const labelXOffset = isMobile ? 0 : 10;
+    const labelAnchor = isMobile ? "start" : "end";
 
     // Add measure names with tooltip
     yAxis
@@ -183,16 +245,18 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
       .enter()
       .append("text")
       .attr("class", "measure-name")
-      .attr("x", -10)
+      .attr("x", labelXOffset)
       .attr("y", (d) => (yScale(d.name) || 0) + yScale.bandwidth() / 3)
-      .attr("text-anchor", "end")
+      .attr("text-anchor", labelAnchor)
       .attr("fill", GRAY_COLOR)
-      .attr("font-size", "12px")
+      .attr("font-size", labelFontSize)
       .attr("font-weight", "600")
       .attr("cursor", "pointer")
       .text((d) => {
         const text = d.name;
-        return text.length > 25 ? text.substring(0, 22) + "..." : text;
+        return text.length > maxLabelLength
+          ? text.substring(0, maxLabelLength - 3) + "..."
+          : text;
       })
       .on("mouseenter", function (event, d) {
         d3.select(this).attr("fill", LIGHT_BLUE_COLOR);
@@ -206,7 +270,7 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
       })
       .on("mousemove", function (event) {
         setTooltip((prev) =>
-          prev ? { ...prev, x: event.clientX, y: event.clientY } : null
+          prev ? { ...prev, x: event.clientX, y: event.clientY } : null,
         );
       })
       .on("mouseleave", function () {
@@ -222,6 +286,9 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
       .each(function (d) {
         const labs = findImplementingLabs(d.id, livingLabsAnalysis);
         const yPos = (yScale(d.name) || 0) + (yScale.bandwidth() * 2) / 3;
+
+        // Hide badges on mobile to save space
+        if (isMobile) return;
 
         if (labs.length === 0) {
           d3.select(this)
@@ -245,7 +312,7 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
             })
             .on("mousemove", function (event) {
               setTooltip((prev) =>
-                prev ? { ...prev, x: event.clientX, y: event.clientY } : null
+                prev ? { ...prev, x: event.clientX, y: event.clientY } : null,
               );
             })
             .on("mouseleave", function () {
@@ -307,7 +374,7 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
               })
               .on("mousemove", function (event) {
                 setTooltip((prev) =>
-                  prev ? { ...prev, x: event.clientX, y: event.clientY } : null
+                  prev ? { ...prev, x: event.clientX, y: event.clientY } : null,
                 );
               })
               .on("mouseleave", function () {
@@ -341,7 +408,7 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
               })
               .on("mousemove", function (event) {
                 setTooltip((prev) =>
-                  prev ? { ...prev, x: event.clientX, y: event.clientY } : null
+                  prev ? { ...prev, x: event.clientX, y: event.clientY } : null,
                 );
               })
               .on("mouseleave", function () {
@@ -353,6 +420,9 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
       });
 
     // Add value labels on bars
+    const valueLabelFontSize = isMobile ? "9px" : "11px";
+    const valueLabelOffset = isMobile ? 3 : 5;
+
     g.selectAll(".label")
       .data(data)
       .enter()
@@ -360,33 +430,34 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
       .attr("class", "label")
       .attr("x", (d) =>
         d.percentValue >= 0
-          ? xScale(d.percentValue) + 5
-          : xScale(d.percentValue) - 5
+          ? xScale(d.percentValue) + valueLabelOffset
+          : xScale(d.percentValue) - valueLabelOffset,
       )
       .attr("y", (d) => (yScale(d.name) || 0) + yScale.bandwidth() / 2)
       .attr("dy", "0.35em")
       .attr("text-anchor", (d) => (d.percentValue >= 0 ? "start" : "end"))
       .attr("fill", GRAY_COLOR)
-      .attr("font-size", "11px")
+      .attr("font-size", valueLabelFontSize)
       .attr("font-weight", "600")
       .attr("opacity", 0)
-      .text((d) => formatCoefficient(d.coefficient, 2))
+      .text((d) => formatCoefficient(d.coefficient, 2, ""))
       .transition()
       .duration(800)
       .delay(400)
       .attr("opacity", 1);
 
     // Add chart title
+    const titleFontSize = isMobile ? "12px" : "14px";
     svg
       .append("text")
       .attr("x", margin.left + width / 2)
       .attr("y", margin.top / 2)
       .attr("text-anchor", "middle")
       .attr("fill", GRAY_COLOR)
-      .attr("font-size", "14px")
+      .attr("font-size", titleFontSize)
       .attr("font-weight", "600")
-      .text("Measure Contribution Coefficients");
-  }, [measures, livingLabsAnalysis, dimensions]);
+      .text("Contribution levels by Policy measure");
+  }, [filteredMeasures, livingLabsAnalysis, dimensions]);
 
   if (measures.length === 0) {
     return (
@@ -398,48 +469,150 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
     );
   }
 
-  return (
-    <div ref={containerRef} className="relative w-full">
-      <svg
-        ref={svgRef}
-        width={dimensions.width}
-        height={dimensions.height}
-        className="bg-white rounded-lg shadow-sm border border-gray-200"
-      />
-
-      {/* Tooltip */}
-      {tooltip && (
-        <div
-          className="fixed z-50 bg-dark text-white px-4 py-3 rounded-lg shadow-xl text-sm max-w-xs pointer-events-none"
-          style={{
-            left: `${tooltip.x + 10}px`,
-            top: `${tooltip.y - 10}px`,
-            transform: "translateY(-100%)",
-          }}
-        >
-          <div className="font-bold mb-1">{tooltip.measure.name}</div>
-          <div className="text-warning font-semibold mb-2">
-            Impact: {formatCoefficient(tooltip.measure.coefficient, 3)}
-          </div>
-          {tooltip.labs.length > 0 ? (
-            <div>
-              <div className="text-gray-300 text-xs mb-1">Implemented by:</div>
-              <div className="flex flex-wrap gap-1">
-                {tooltip.labs.map((lab, idx) => (
-                  <span
-                    key={idx}
-                    className="bg-info px-2 py-0.5 rounded text-xs text-dark font-bold"
-                  >
-                    {lab}
-                  </span>
-                ))}
-              </div>
+  if (filteredMeasures.length === 0) {
+    return (
+      <div className="w-full">
+        {/* Living Lab Filters */}
+        <div className="mb-6 bg-white rounded-lg border border-gray-200 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-sm font-semibold text-gray-700">
+              Filter by Living Lab
+            </h4>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setSelectedLabIds(allLabs.map((l) => l.id))}
+                className="text-xs text-primary hover:underline font-medium"
+              >
+                Select All
+              </button>
+              <span className="text-xs text-gray-500 ml-2">
+                {selectedLabIds.length}/{allLabs.length} selected
+              </span>
             </div>
-          ) : (
-            <div className="text-gray-400 text-xs">No implementation data</div>
-          )}
+          </div>
+          <div className="flex justify-center flex-wrap gap-2">
+            {allLabs.map((lab) => {
+              const isSelected = selectedLabIds.includes(lab.id);
+              const displayName =
+                lab.name.length > 10
+                  ? lab.name.substring(0, 10) + "..."
+                  : lab.name;
+              return (
+                <Badge
+                  key={lab.id}
+                  size="sm"
+                  color={isSelected ? "primary" : "light"}
+                  className="cursor-pointer border transition-all hover:shadow-md"
+                  onClick={() => toggleLab(lab.id)}
+                  title={lab.name}
+                >
+                  {displayName}
+                </Badge>
+              );
+            })}
+          </div>
         </div>
-      )}
+
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+          <p className="text-gray-600">
+            No measures match the selected living labs. Try selecting different
+            labs.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full">
+      {/* Living Lab Filters */}
+      <div className="mb-6 bg-white rounded-lg border border-gray-200 p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-sm font-semibold text-gray-700">
+            Filter by Living Lab
+          </h4>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSelectedLabIds(allLabs.map((l) => l.id))}
+              className="text-xs text-primary hover:underline font-medium"
+            >
+              Select All
+            </button>
+            <span className="text-xs text-gray-500 ml-2">
+              {selectedLabIds.length}/{allLabs.length} selected
+            </span>
+          </div>
+        </div>
+        <div className="flex justify-center flex-wrap gap-2">
+          {allLabs.map((lab) => {
+            const isSelected = selectedLabIds.includes(lab.id);
+            const displayName =
+              lab.name.length > 10
+                ? lab.name.substring(0, 10) + "..."
+                : lab.name;
+            return (
+              <Badge
+                key={lab.id}
+                size="sm"
+                color={isSelected ? "primary" : "light"}
+                className="cursor-pointer border transition-all hover:shadow-md"
+                onClick={() => toggleLab(lab.id)}
+                title={lab.name}
+              >
+                {displayName}
+              </Badge>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Chart Container */}
+      <div ref={containerRef} className="relative w-full">
+        <svg
+          ref={svgRef}
+          width={dimensions.width}
+          height={dimensions.height}
+          className="bg-white rounded-lg shadow-sm border border-gray-200"
+        />
+
+        {/* Tooltip */}
+        {tooltip && (
+          <div
+            className="fixed z-50 bg-dark text-white px-4 py-3 rounded-lg shadow-xl text-sm max-w-xs pointer-events-none"
+            style={{
+              left: `${tooltip.x + 10}px`,
+              top: `${tooltip.y - 10}px`,
+              transform: "translateY(-100%)",
+            }}
+          >
+            <div className="font-bold mb-1">{tooltip.measure.name}</div>
+            <div className="text-warning font-semibold mb-2">
+              Level: {formatCoefficient(tooltip.measure.coefficient, 3, "")}
+            </div>
+            {tooltip.labs.length > 0 ? (
+              <div>
+                <div className="text-gray-300 text-xs mb-1">
+                  Implemented by:
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {tooltip.labs.map((lab, idx) => (
+                    <span
+                      key={idx}
+                      className="bg-info px-2 py-0.5 rounded text-xs text-dark font-bold"
+                    >
+                      {lab}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="text-gray-400 text-xs">
+                No implementation data
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

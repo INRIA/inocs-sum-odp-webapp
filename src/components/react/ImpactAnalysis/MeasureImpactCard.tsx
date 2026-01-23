@@ -30,8 +30,7 @@ export const MeasureImpactCard: React.FC<MeasureImpactCardProps> = ({
   const iconClasses = isPositive ? "text-secondary" : "text-danger";
 
   const cardSize = size === "large" ? "p-6" : "p-4";
-  const titleSize = size === "large" ? "text-lg" : "text-base";
-  const coefficientSize = size === "large" ? "text-3xl" : "text-2xl";
+  const coefficientSize = size === "large" ? "text-xl" : "text-lg";
 
   return (
     <div
@@ -45,17 +44,15 @@ export const MeasureImpactCard: React.FC<MeasureImpactCardProps> = ({
       </div>
 
       {/* Measure Name */}
-      <h4 className={`${titleSize} font-bold mb-2 pr-10 leading-tight`}>
-        {measure.name}
-      </h4>
+      <h5 className={`font-bold mb-2 pr-5 leading-tight`}>{measure.name}</h5>
 
       {/* Coefficient Value */}
       <div className="flex items-baseline gap-2 mb-2">
         <span className={`${coefficientSize} font-extrabold ${iconClasses}`}>
-          {isPositive ? "+" : ""}
-          {absCoefficient}%
+          {isPositive ? "+" : "-"}
+          {absCoefficient}
         </span>
-        <span className="text-sm text-dark">impact</span>
+        <span className="text-sm text-dark">level of contribution to KPIs</span>
       </div>
 
       {/* Impact Direction Indicator */}

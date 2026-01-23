@@ -8,7 +8,12 @@ import {
   MethodologyAccordion,
 } from "../../components/AnalysisPageSections";
 import ApiClient from "../../lib/api-client/ApiClient";
-import type { IJobRun, IKpiGroup, IKpiVariationData } from "../../types";
+import type {
+  IJobRun,
+  IKpiDefinition,
+  IKpiGroup,
+  IKpiVariationData,
+} from "../../types";
 import { calculateKpiVariationsData } from "../../lib/helpers/impact-analysis-format";
 
 const api = new ApiClient(Astro.request);
@@ -16,6 +21,7 @@ const api = new ApiClient(Astro.request);
 // Fetch the latest successful job run for kpi_measures_analysis
 let jobRun: IJobRun | null = null;
 let kpiGroups: IKpiGroup[] = [];
+let kpiDefinitionsMap: Map<string, IKpiDefinition> = new Map();
 let kpiVariationsDataMap: Map<string, IKpiVariationData> = new Map();
 let errorMessage: string | null = null;
 
@@ -27,18 +33,26 @@ try {
     // Extract kpi_groups from input_data
     if (jobRun?.input_data?.kpi_groups) {
       kpiGroups = jobRun.input_data.kpi_groups;
+      kpiGroups?.forEach((_g) => {
+        _g?.kpis?.forEach((kpiDef) => {
+          kpiDefinitionsMap.set(String(kpiDef.id), kpiDef);
+        });
+      });
     }
 
     // Pre-compute KPI variations for each group (server-side)
     if (jobRun?.output_data?.success) {
       jobRun.output_data.success.forEach((successItem) => {
         try {
-          const variationData = calculateKpiVariationsData(successItem.results);
+          const variationData = calculateKpiVariationsData(
+            successItem.results,
+            kpiDefinitionsMap,
+          );
           kpiVariationsDataMap.set(String(successItem.group_id), variationData);
         } catch (err) {
           console.error(
             `Error calculating variations for group ${successItem.group_id}:`,
-            err
+            err,
           );
         }
       });

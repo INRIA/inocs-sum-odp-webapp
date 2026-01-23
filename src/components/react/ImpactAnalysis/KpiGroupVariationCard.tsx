@@ -65,7 +65,7 @@ export const KpiGroupVariationCard: React.FC<KpiGroupVariationCardProps> = ({
           <h5>KPIs variations - Data Overview</h5>
           <p>
             Observe how key indicators changed across each Living Lab for{" "}
-            {livingLabVariations[0]?.kpis.length || 0} metrics collected.
+            {displayData.kpis?.length ?? 0} metrics collected.
           </p>
         </div>
 
@@ -134,7 +134,7 @@ export const KpiGroupVariationCard: React.FC<KpiGroupVariationCardProps> = ({
         <div className="max-w-md">
           <KpiVariationCard
             title={displayData.name}
-            subtitle={`General variation for ${groupName}`}
+            subtitle={`General variation for ${groupName} KPIs`}
             value={displayData.totalVariationPercentage}
             description={
               isGlobalView

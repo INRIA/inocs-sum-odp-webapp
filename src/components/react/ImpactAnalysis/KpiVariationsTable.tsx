@@ -107,6 +107,7 @@ export const KpiVariationsTable: React.FC<KpiVariationsTableProps> = ({
           {/* Header */}
           <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
             <tr>
+              <th>#</th>
               <th
                 className="px-4 py-3 text-left font-semibold text-gray-700 cursor-pointer hover:bg-gray-100"
                 onClick={() => handleSort("name")}
@@ -129,16 +130,12 @@ export const KpiVariationsTable: React.FC<KpiVariationsTableProps> = ({
                 key={`${kpi.kpiId}-${idx}`}
                 className="bg-white hover:bg-gray-50"
               >
+                <td className="text-center">{idx + 1}</td>
                 {/* KPI Name with Parent and Transport Mode */}
                 <td className="px-4 py-3">
                   <div className="flex flex-col gap-0.5">
-                    {kpi.kpiParentName && (
-                      <div className="text-xs font-semibold text-gray-600">
-                        {kpi.kpiParentName}
-                      </div>
-                    )}
                     <div className="text-sm text-gray-800 font-medium">
-                      {kpi.kpiName}
+                      {kpi.kpiParentName ?? kpi.kpiName}
                       {kpi.transportModeName && (
                         <span className="text-gray-500 font-normal">
                           {" "}
@@ -146,6 +143,11 @@ export const KpiVariationsTable: React.FC<KpiVariationsTableProps> = ({
                         </span>
                       )}
                     </div>
+                    {kpi.kpiParentName && (
+                      <div className="text-xs font-semibold text-gray-600">
+                        {kpi.kpiName}
+                      </div>
+                    )}
                   </div>
                 </td>
 

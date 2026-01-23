@@ -18,9 +18,17 @@ export const KpiVariations: React.FC<KpiVariationsProps> = ({
   const divider = (
     <AnalysisSectionDivider
       step={3}
-      title="KPI Variations"
-      subtitle="Observe and compare KPI variations among living labs"
-      description="Only Living Labs with enough data collected are included"
+      title="KPI Variations percentage"
+      subtitle={
+        "Observe and compare " +
+        selectedGroup?.name +
+        " KPIs variations among living labs"
+      }
+      description={
+        "Only Living Labs with enough data collected are included, for KPIs in the scope of " +
+        selectedGroup?.name +
+        "."
+      }
     />
   );
 
@@ -54,7 +62,7 @@ export const KpiVariations: React.FC<KpiVariationsProps> = ({
     <div>
       {divider}
 
-      <div className="mt-6 space-y-6">
+      <div className="mt-6">
         {/* View mode segmented control */}
         <div className="inline-flex rounded-lg border border-gray-200 p-1 bg-gray-50">
           <button

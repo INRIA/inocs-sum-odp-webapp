@@ -1,6 +1,6 @@
 import React from "react";
 import type { IKpiGroup } from "../../../types";
-import { CardFilter, InfoAlert, InfoCard, Tooltip } from "../ui";
+import { CardFilter, Tooltip } from "../ui";
 import { AnalysisSectionDivider } from "../ui/AnalysisSectionDivider";
 import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 
@@ -46,6 +46,7 @@ export const AnalysisConditionsFilter: React.FC<
           groups={kpiGroups.map((group) => ({
             id: group.id,
             name: group.name,
+            kpis: group.kpis ?? [],
           }))}
           selectedGroupId={selectedGroupId}
           onGroupSelect={onGroupSelect}

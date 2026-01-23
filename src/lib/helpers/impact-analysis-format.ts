@@ -8,6 +8,7 @@ import {
   COLOR_SUCCESS,
   COLOR_DANGER,
   COLOR_GRAY,
+  type IKpiDefinition,
 } from "../../types";
 
 const PERCENTAGE_DECIMALS = 2;
@@ -17,11 +18,12 @@ const COEFFICIENT_MULTIPLIER = 100;
  */
 export function formatCoefficient(
   coefficient: number,
-  decimals: number = PERCENTAGE_DECIMALS
+  decimals: number = PERCENTAGE_DECIMALS,
+  suffix: string = "%",
 ): string {
   const percentage = (coefficient * COEFFICIENT_MULTIPLIER).toFixed(decimals);
   const sign = coefficient >= 0 ? "+" : "";
-  return `${sign}${percentage}%`;
+  return `${sign}${percentage}${suffix}`;
 }
 
 /**
@@ -29,7 +31,7 @@ export function formatCoefficient(
  */
 export function coefficientToPercentage(coefficient: number): number {
   return parseFloat(
-    (coefficient * COEFFICIENT_MULTIPLIER).toFixed(PERCENTAGE_DECIMALS)
+    (coefficient * COEFFICIENT_MULTIPLIER).toFixed(PERCENTAGE_DECIMALS),
   );
 }
 
@@ -50,7 +52,7 @@ export function getCoefficientColor(coefficient: number): string {
 export function getCoefficientGradientColor(
   coefficient: number,
   minCoeff: number,
-  maxCoeff: number
+  maxCoeff: number,
 ): string {
   // Normalize coefficient to 0-1 range
   const normalized = (coefficient - minCoeff) / (maxCoeff - minCoeff || 1);
@@ -75,13 +77,13 @@ export function getCoefficientGradientColor(
  */
 export function findImplementingLabs(
   measureId: string,
-  livingLabsAnalysis: ILivingLabAnalysis[]
+  livingLabsAnalysis: ILivingLabAnalysis[],
 ): string[] {
   const implementingLabs: string[] = [];
 
   livingLabsAnalysis.forEach((lab) => {
     const hasMeasure = lab.measures?.some(
-      (m) => String(m.id) === String(measureId)
+      (m) => String(m.id) === String(measureId),
     );
     if (hasMeasure) {
       implementingLabs.push(lab.name);
@@ -120,10 +122,10 @@ export function truncateText(text: string, maxLength: number): string {
  */
 export function sortMeasuresByCoefficient(
   measures: IMeasureCoefficient[],
-  ascending: boolean = false
+  ascending: boolean = false,
 ): IMeasureCoefficient[] {
   return [...measures].sort((a, b) =>
-    ascending ? a.coefficient - b.coefficient : b.coefficient - a.coefficient
+    ascending ? a.coefficient - b.coefficient : b.coefficient - a.coefficient,
   );
 }
 
@@ -132,7 +134,7 @@ export function sortMeasuresByCoefficient(
  */
 export function getTopMeasures(
   measures: IMeasureCoefficient[],
-  count: number = 3
+  count: number = 3,
 ): IMeasureCoefficient[] {
   return sortMeasuresByCoefficient(measures, false).slice(0, count);
 }
@@ -142,7 +144,7 @@ export function getTopMeasures(
  */
 export function getBottomMeasures(
   measures: IMeasureCoefficient[],
-  count: number = 3
+  count: number = 3,
 ): IMeasureCoefficient[] {
   return sortMeasuresByCoefficient(measures, true).slice(0, count);
 }
@@ -184,7 +186,7 @@ export function calculateStatistics(measures: IMeasureCoefficient[]): {
  */
 export function ratioToPercentage(
   ratio: number | null,
-  decimals: number = PERCENTAGE_DECIMALS
+  decimals: number = PERCENTAGE_DECIMALS,
 ): string {
   if (ratio === null || ratio === undefined) {
     return "N/A";
@@ -202,7 +204,7 @@ export function ratioToPercentageNumber(ratio: number | null): number | null {
     return null;
   }
   return parseFloat(
-    (ratio * COEFFICIENT_MULTIPLIER).toFixed(PERCENTAGE_DECIMALS)
+    (ratio * COEFFICIENT_MULTIPLIER).toFixed(PERCENTAGE_DECIMALS),
   );
 }
 
@@ -225,35 +227,40 @@ export function getVariationColor(ratio: number | null): string {
  * This should be called server-side to pre-compute all variation metrics
  */
 export function calculateKpiVariationsData(
-  analysisResult: IGroupAnalysisResult
+  analysisResult: IGroupAnalysisResult,
+  kpiDefinitionsMap: Map<string, IKpiDefinition>,
 ): IKpiVariationData {
   const livingLabVariations: ILivingLabVariation[] = [];
   const allKpiVariationsMap = new Map<string, IKpiVariation[]>();
-
   // Process each living lab
   analysisResult.living_labs_analysis.forEach((lab) => {
     const kpiVariations: IKpiVariation[] = [];
 
     lab.kpis.forEach((kpi) => {
+      if (analysisResult.kpi_ids.includes(kpi.id) === false) return;
+      const kpiDef = kpiDefinitionsMap.get(kpi.id) ?? kpi;
       const variation: IKpiVariation = {
-        kpiId: String(kpi.id),
-        kpiName: kpi.name,
-        kpiParentId: kpi.parent_kpi_id || null,
-        kpiParentName: kpi.parent_kpi_name || null,
+        kpiId: String(kpiDef.id),
+        kpiName: kpiDef.name,
+        kpiParentId: kpiDef.parent_kpi_id || null,
+        kpiParentName: kpiDef.parent_kpi_name || null,
+        transportModeName: kpiDef.transport_mode_name,
         ratioVariation: kpi.ratio_variation,
         ratioVariationPercentage: ratioToPercentage(kpi.ratio_variation),
         absVariation: kpi.abs_variation,
         valueBefore: kpi.value_before,
         valueAfter: kpi.value_after,
-        transportModeName: kpi.transport_mode_name,
       };
       kpiVariations.push(variation);
 
       // Track all variations per KPI for aggregation
-      if (!allKpiVariationsMap.has(String(kpi.id))) {
-        allKpiVariationsMap.set(String(kpi.id), []);
+      const kpiTransportKey =
+        String(kpi.id) +
+        (kpi.transport_mode_id ? `_${kpi.transport_mode_id}` : "");
+      if (!allKpiVariationsMap.has(String(kpiTransportKey))) {
+        allKpiVariationsMap.set(String(kpiTransportKey), []);
       }
-      allKpiVariationsMap.get(String(kpi.id))!.push(variation);
+      allKpiVariationsMap.get(String(kpiTransportKey))!.push(variation);
     });
 
     // Calculate average variation for this living lab
@@ -277,7 +284,7 @@ export function calculateKpiVariationsData(
 
   // Calculate total variation across all labs and KPIs
   const allRatios = livingLabVariations.flatMap((lab) =>
-    lab.kpis.map((k) => k.ratioVariation).filter((v) => v !== null)
+    lab.kpis.map((k) => k.ratioVariation).filter((v) => v !== null),
   ) as number[];
   const totalVariation =
     allRatios.length > 0
@@ -296,7 +303,7 @@ export function calculateKpiVariationsData(
         : null;
 
     allKpiVariations.push({
-      kpiId,
+      kpiId: variations[0].kpiId,
       kpiName: variations[0].kpiName,
       kpiParentId: variations[0].kpiParentId,
       kpiParentName: variations[0].kpiParentName,
@@ -421,7 +428,7 @@ export type SortColumn =
 export function sortKpiVariations(
   groupedKpis: IGroupedKpi[],
   column: SortColumn,
-  ascending: boolean = false
+  ascending: boolean = false,
 ): IGroupedKpi[] {
   if (groupedKpis.length === 0) return groupedKpis;
 
@@ -476,7 +483,7 @@ export function sortKpiVariations(
  */
 function getKpiSortValue(
   kpi: IKpiVariation,
-  column: SortColumn
+  column: SortColumn,
 ): string | number {
   switch (column) {
     case "name":

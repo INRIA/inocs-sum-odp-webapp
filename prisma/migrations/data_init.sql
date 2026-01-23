@@ -28,7 +28,7 @@ INSERT INTO `projects` (`name`, `description`, `type`, `image_url`, `created_at`
 ('Congestion charges', 'Fees imposed on vehicles entering designated city areas to reduce traffic congestion.', 'PUSH', '/icons/ticket.svg', NOW(), NOW()),
 ('Parking charges', 'Increased parking fees to discourage long-term car use and promote modal shift.', 'PUSH', '/icons/parking_sign.svg', NOW(), NOW()),
 ('Restricted parking', 'Reductions in available public parking to limit car access, especially in central zones.', 'PUSH', '/icons/no_cars.svg', NOW(), NOW()),
-('Limited traffic zone / Pedestrianisation of streets', 'Car-free or low-emission zones that prioritize pedestrians, cyclists, and shared mobility.', 'PUSH', '/icons/pedestrian.svg', NOW(), NOW()),
+('Limited traffic zone/Pedestrianisation of streets', 'Car-free or low-emission zones that prioritize pedestrians, cyclists, and shared mobility.', 'PUSH', '/icons/pedestrian.svg', NOW(), NOW()),
 ('Parking supply management', 'Policies that reduce or restructure parking supply to manage demand and encourage alternatives.', 'PUSH', '/icons/parking_sign.svg', NOW(), NOW()),
 ('Speed limits', 'Lowering vehicle speed limits to improve safety and promote non-motorized travel.', 'PUSH', '/icons/30sign.svg', NOW(), NOW()),
 ('Mobility hubs', 'Centralized locations where multiple transport modes (e.g., bikes, buses, taxis) are integrated.', 'PULL', '/icons/cityz_zones.svg', NOW(), NOW()),
