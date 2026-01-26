@@ -15,10 +15,8 @@ export const AlternativeCard: React.FC<AlternativeCardProps> = ({
 }) => {
   return (
     <div
-      className={`bg-white rounded-lg border-2 p-4 text-center space-y-3 transition-all ${
-        isTop
-          ? "border-success md:scale-105 shadow-lg"
-          : "border-gray-300 shadow-sm"
+      className={`bg-white rounded-lg border-2 p-4 text-center space-y-3 transition-all border-success ${
+        isTop ? "md:scale-105 shadow-lg" : " shadow-sm"
       }`}
     >
       <div>
@@ -31,7 +29,7 @@ export const AlternativeCard: React.FC<AlternativeCardProps> = ({
             {rank}
           </span>
         </div>
-        {isTop ? <h3>{label}</h3> : <h4>{label}</h4>}
+        {isTop ? <h4>{label}</h4> : <h4>{label}</h4>}
 
         {isTop && (
           <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">

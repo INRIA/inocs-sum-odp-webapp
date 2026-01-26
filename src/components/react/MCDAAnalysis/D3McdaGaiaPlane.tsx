@@ -1,13 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
-import { GRAY_COLOR } from "../../../styles/constants";
+import {
+  GRAY_COLOR,
+  GREEN_COLOR,
+  LIGHT_GRAY_COLOR,
+  BLUE_COLOR,
+  ORANGE_COLOR,
+  RED_COLOR,
+} from "../../../styles/constants";
 
 // GAIA colors
-const CRITERIA_COLOR = "#2563eb"; // blue
-const DECISION_STICK_COLOR = "#9333ea"; // purple
-const TOP_ALTERNATIVE_COLOR = "#10b981"; // green
-const GOOD_FLOW_COLOR = "#10b981"; // green
-const BAD_FLOW_COLOR = "#ef4444"; // red
+const CRITERIA_COLOR = BLUE_COLOR;
+const DECISION_STICK_COLOR = ORANGE_COLOR;
+const GOOD_FLOW_COLOR = GREEN_COLOR;
+const BAD_FLOW_COLOR = RED_COLOR;
 
 interface GAIAPoint {
   key: string;
@@ -50,21 +56,24 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const chartContainerRef = useRef<HTMLDivElement>(null);
   const [tooltip, setTooltip] = useState<TooltipData | null>(null);
   const [dimensions, setDimensions] = useState({ width: 900, height });
 
   // Handle responsive sizing
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!chartContainerRef.current) return;
 
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const { width } = entry.contentRect;
-        setDimensions({ width, height });
+        if (width > 0) {
+          setDimensions({ width, height });
+        }
       }
     });
 
-    resizeObserver.observe(containerRef.current);
+    resizeObserver.observe(chartContainerRef.current);
 
     return () => resizeObserver.disconnect();
   }, [height]);
@@ -130,14 +139,14 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
         d3
           .axisBottom(xScale)
           .tickSize(chartHeight)
-          .tickFormat(() => "")
+          .tickFormat(() => ""),
       )
       .call((g) => g.select(".domain").remove())
       .call((g) =>
         g
           .selectAll(".tick line")
           .attr("stroke", "#e5e7eb")
-          .attr("stroke-dasharray", "2,2")
+          .attr("stroke-dasharray", "2,2"),
       );
 
     g.append("g")
@@ -146,14 +155,14 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
         d3
           .axisLeft(yScale)
           .tickSize(-width)
-          .tickFormat(() => "")
+          .tickFormat(() => ""),
       )
       .call((g) => g.select(".domain").remove())
       .call((g) =>
         g
           .selectAll(".tick line")
           .attr("stroke", "#e5e7eb")
-          .attr("stroke-dasharray", "2,2")
+          .attr("stroke-dasharray", "2,2"),
       );
 
     // Add origin lines (x=0, y=0)
@@ -181,8 +190,8 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
       .attr("viewBox", "0 -5 10 10")
       .attr("refX", 8)
       .attr("refY", 0)
-      .attr("markerWidth", 6)
-      .attr("markerHeight", 6)
+      .attr("markerWidth", 4)
+      .attr("markerHeight", 4)
       .attr("orient", "auto");
 
     arrowMarker
@@ -222,7 +231,7 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
           setTooltip((prev) =>
             prev
               ? { ...prev, clientX: event.clientX, clientY: event.clientY }
-              : null
+              : null,
           );
         })
         .on("mouseleave", function () {
@@ -257,7 +266,7 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
           setTooltip((prev) =>
             prev
               ? { ...prev, clientX: event.clientX, clientY: event.clientY }
-              : null
+              : null,
           );
         })
         .on("mouseleave", function () {
@@ -314,7 +323,7 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
           setTooltip((prev) =>
             prev
               ? { ...prev, clientX: event.clientX, clientY: event.clientY }
-              : null
+              : null,
           );
         })
         .on("mouseleave", function () {
@@ -346,15 +355,12 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
       .attr("cx", (d) => xScale(d.x))
       .attr("cy", (d) => yScale(d.y))
       .attr("r", 0)
-      .attr("fill", (d) => colorScale(netFlows[d.key] || 0))
-      .attr("stroke", (d) => {
+      .attr("fill", (d) => {
         const rank = ranking.indexOf(d.key);
-        return rank >= 0 && rank < 3 ? "#1f2937" : "white";
+        return rank >= 0 && rank < 3 ? GREEN_COLOR : GRAY_COLOR;
       })
-      .attr("stroke-width", (d) => {
-        const rank = ranking.indexOf(d.key);
-        return rank >= 0 && rank < 3 ? 3 : 1.5;
-      })
+      .attr("stroke", LIGHT_GRAY_COLOR)
+      .attr("stroke-width", 2)
       .attr("opacity", 0.85)
       .style("cursor", "pointer")
       .on("mouseenter", function (event, d) {
@@ -375,7 +381,7 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
         setTooltip((prev) =>
           prev
             ? { ...prev, clientX: event.clientX, clientY: event.clientY }
-            : null
+            : null,
         );
       })
       .on("mouseleave", function (event, d) {
@@ -482,75 +488,125 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
 
   return (
     <div ref={containerRef} className="relative w-full">
-      <div className="flex flex-col gap-6">
-        {/* Alternatives Legend */}
-        <div className=" flex flex-col gap-4 rounded-lg shadow-sm border border-gray-200 p-4 self-start overflow-y-auto">
-          <h4> Alternatives Legend</h4>
-          <div className="space-y-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 ">
-            {gaiaAlternatives
-              .slice()
-              .sort((a, b) => {
-                const rankA = ranking.indexOf(a.key);
-                const rankB = ranking.indexOf(b.key);
-                return rankA - rankB;
-              })
-              .map((alt) => {
-                const rank = ranking.indexOf(alt.key);
-                const isTop3 = rank >= 0 && rank < 3;
-                const netFlow = netFlows[alt.key] || 0;
-                const flowColor =
-                  netFlow > 0
-                    ? "text-green-600"
-                    : netFlow < 0
-                    ? "text-red-600"
-                    : "text-gray-500";
+      <div className="flex flex-col gap-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="flex flex-col lg:flex-row-reverse">
+          {/* Alternatives Legend */}
+          <div className="w-full lg:w-1/4 flex flex-col p-1 self-start overflow-y-auto">
+            <h5> Alternatives Legend</h5>
+            <p>Sorted by ranking</p>
+            <div className="space-y-2 flex flex-col ">
+              {gaiaAlternatives
+                .slice()
+                .sort((a, b) => {
+                  const rankA = ranking.indexOf(a.key);
+                  const rankB = ranking.indexOf(b.key);
+                  return rankA - rankB;
+                })
+                .map((alt) => {
+                  const rank = ranking.indexOf(alt.key);
+                  const isTop3 = rank >= 0 && rank < 3;
+                  const netFlow = netFlows[alt.key] || 0;
+                  const flowColor =
+                    netFlow > 0
+                      ? "text-success"
+                      : netFlow < 0
+                        ? "text-danger"
+                        : "text-gray-500";
 
-                return (
-                  <div
-                    key={alt.key}
-                    className={`flex items-start gap-2 p-2 rounded text-xs transition-colors hover:bg-gray-50 ${
-                      isTop3 ? "bg-green-50 border border-green-200" : ""
-                    }`}
-                  >
-                    <span
-                      className={`inline-flex items-center justify-center min-w-[28px] h-5 px-1 rounded font-bold text-white ${
-                        isTop3 ? "bg-gray-900" : "bg-gray-500"
+                  return (
+                    <div
+                      key={alt.key}
+                      className={`flex items-start gap-2 p-2 rounded text-xs transition-colors hover:bg-gray-50 ${
+                        isTop3 ? "bg-success/5 border border-success" : ""
                       }`}
                     >
-                      {alt.key.toUpperCase()}
-                    </span>
-                    <div className="flex-1">
-                      <div className="font-medium text-gray-900">
-                        {alternativeLabels[alt.key] || alt.key}
-                      </div>
-                      {rank >= 0 && (
-                        <div className="text-xs text-gray-600 mt-0.5">
-                          Rank: #{rank + 1} • Net Flow:{" "}
-                          <span className={flowColor}>
-                            {netFlow.toFixed(3)}
-                          </span>
+                      <span
+                        className={`inline-flex items-center justify-center min-w-[28px] h-5 px-1 rounded font-bold text-white ${
+                          isTop3 ? "text-dark-light bg-success" : "bg-dark"
+                        }`}
+                      >
+                        {alt.key.toUpperCase()}
+                      </span>
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900">
+                          {alternativeLabels[alt.key] || alt.key}
                         </div>
-                      )}
+                        {rank >= 0 && (
+                          <div className="text-xs text-gray-600 mt-0.5">
+                            Rank: #{rank + 1} • Net Flow:{" "}
+                            <span className={flowColor}>
+                              {netFlow.toFixed(3)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+            </div>
+          </div>
+          <div ref={chartContainerRef} className="flex-1 w-full lg:w-3/4">
+            <svg
+              ref={svgRef}
+              width={dimensions.width}
+              height={dimensions.height}
+              className="bg-white"
+            />
           </div>
         </div>
-        <div className="flex-1">
-          <svg
-            ref={svgRef}
-            width={dimensions.width}
-            height={dimensions.height}
-            className="bg-white rounded-lg shadow-sm border border-gray-200"
-          />
+        {/* Legend */}
+        <div className=" bg-white p-4">
+          <h5>GAIA Plane Legend</h5>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs my-2">
+            <div className="flex items-center gap-2">
+              <div
+                className="w-4 h-4 rounded-full border-2"
+                style={{
+                  backgroundColor: GREEN_COLOR,
+                  borderColor: LIGHT_GRAY_COLOR,
+                }}
+              ></div>
+              <span className="text-gray-700">Top 3 alternatives</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div
+                className="w-4 h-4 rounded-full border-2"
+                style={{
+                  backgroundColor: GRAY_COLOR,
+                  borderColor: LIGHT_GRAY_COLOR,
+                }}
+              ></div>
+              <span className="text-gray-700">Other alternatives</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div
+                className="w-10 h-1.5 rounded"
+                style={{ backgroundColor: CRITERIA_COLOR }}
+              ></div>
+              <span className="text-gray-700">Goal vectors</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div
+                className="w-10 h-0 border-t-4 border-dashed"
+                style={{
+                  borderColor: DECISION_STICK_COLOR,
+                }}
+              ></div>
+              <span className="text-gray-700">Decision stick (π)</span>
+            </div>
+          </div>
+          <p className="text-xs text-gray-500 mt-3">
+            Alternatives closer to the decision stick represent better
+            compromise solutions. Goal vectors show the direction of improvement
+            for each criterion.
+          </p>
         </div>
       </div>
 
       {/* Tooltip */}
       {tooltip && (
         <div
-          className="fixed z-50 bg-gray-900 text-white px-4 py-3 rounded-lg shadow-xl text-sm max-w-xs pointer-events-none"
+          className="fixed z-50 bg-light text-dark px-4 py-3 rounded-lg shadow-xl text-sm max-w-xs pointer-events-none"
           style={{
             left: `${tooltip.clientX + 10}px`,
             top: `${tooltip.clientY - 10}px`,
@@ -561,72 +617,33 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
           {tooltip.type === "alternative" && (
             <>
               {tooltip.rank && (
-                <div className="text-yellow-300 text-xs mb-1">
+                <div className="text-warning text-xs mb-1">
                   Rank: #{tooltip.rank}
                 </div>
               )}
-              <div className="text-gray-200 text-xs mb-1">
+              <div className="text-dark text-xs mb-1">
                 Position: ({tooltip.x.toFixed(3)}, {tooltip.y.toFixed(3)})
               </div>
               {tooltip.netFlow !== undefined && (
-                <div className="text-gray-200 text-xs">
+                <div className="text-dark text-xs">
                   Net Flow: {tooltip.netFlow.toFixed(3)}
                 </div>
               )}
             </>
           )}
           {tooltip.type === "criterion" && (
-            <div className="text-gray-200 text-xs">
+            <div className="text-dark text-xs">
               Goal vector direction: ({tooltip.x.toFixed(3)},{" "}
               {tooltip.y.toFixed(3)})
             </div>
           )}
           {tooltip.type === "decision" && (
-            <div className="text-gray-200 text-xs">
+            <div className="text-dark text-xs">
               Optimal decision direction based on weighted criteria
             </div>
           )}
         </div>
       )}
-
-      {/* Legend */}
-      <div className="mt-4 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">
-          GAIA Plane Legend
-        </h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-green-500 border-2 border-gray-900"></div>
-            <span className="text-gray-700">Top 3 alternatives</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-gray-400"></div>
-            <span className="text-gray-700">Other alternatives</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div
-              className="w-8 h-0.5"
-              style={{ backgroundColor: CRITERIA_COLOR }}
-            ></div>
-            <span className="text-gray-700">Goal vectors</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div
-              className="w-8 h-0.5"
-              style={{
-                backgroundColor: DECISION_STICK_COLOR,
-                borderTop: "2px dashed",
-              }}
-            ></div>
-            <span className="text-gray-700">Decision stick (π)</span>
-          </div>
-        </div>
-        <p className="text-xs text-gray-500 mt-3">
-          Alternatives closer to the decision stick represent better compromise
-          solutions. Goal vectors show the direction of improvement for each
-          criterion.
-        </p>
-      </div>
     </div>
   );
 };

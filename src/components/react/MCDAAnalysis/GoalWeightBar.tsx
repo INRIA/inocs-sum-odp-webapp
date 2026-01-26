@@ -25,8 +25,8 @@ export const GoalWeightBar: React.FC<GoalWeightBarProps> = ({
   return (
     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-2">
       {/* Goal Name */}
-      <div className="flex-shrink-0 w-full sm:w-80 text-right">
-        <span className="text-lg font-medium text-gray-900">{goal.name}</span>
+      <div className="flex-shrink-0 w-full sm:w-80 text-left lg:text-right">
+        <span className="text-lg font-medium text-gray-900 ">{goal.name}</span>
       </div>
 
       {/* Weight Bar / Slider */}

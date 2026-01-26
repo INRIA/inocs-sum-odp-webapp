@@ -35,22 +35,22 @@ export const MCDADashboard: React.FC<MCDADashboardProps> = ({
   const onGroupSelectRedirectToPerspective = (groupId: string | number) => {
     const groupIdStr = String(groupId);
     // Redirect to the same page with the selected perspective
-    const newUrl = `/tools/mcda_analysis/${groupIdStr}#who`;
+    const newUrl = `/tools/mcda_analysis/${groupIdStr}#perspectives`;
     window.location.href = newUrl;
   };
 
   const navigationSections = [
-    { id: "who", label: "Who" },
-    { id: "how", label: "What" },
+    { id: "perspectives", label: "Perspectives" },
+    { id: "goals", label: "Goals" },
     { id: "results", label: "Results" },
   ];
   return (
     <div className="space-y-12">
-      {/* Step 1: Who - Select Stakeholder Perspective */}
-      <section id="who" className="space-y-6">
+      {/* Step 1: Perspectives - Select Stakeholder Perspective */}
+      <section id="perspectives" className="space-y-6">
         <AnalysisSectionDivider
           step={1}
-          title="Who ?"
+          title="Perspectives"
           subtitle="Select the stakeholder perspective"
           description="Choose which stakeholder's point of view you want the analysis to reflect"
         />
@@ -60,12 +60,11 @@ export const MCDADashboard: React.FC<MCDADashboardProps> = ({
           onGroupSelect={onGroupSelectRedirectToPerspective}
         />
       </section>
-
-      {/* Step 2: How - Define Analysis Parameters */}
-      <section id="how" className="space-y-6">
+      {/* Step 2: Goals - Define Analysis Parameters */}
+      <section id="goals" className="space-y-6">
         <AnalysisSectionDivider
           step={2}
-          title="What ?"
+          title="Goals"
           subtitle="Observe the goals and their priorities"
           description="See the list of project goals and how important each one is for your selected perspective"
         />
@@ -97,7 +96,7 @@ export const MCDADashboard: React.FC<MCDADashboardProps> = ({
 
       <PageNavigation
         sections={navigationSections}
-        disclaimer="Analysis results are based on the selected KPI group and living lab conditions"
+        disclaimer="These results are based on collected data and scientific comparison methods (PROMETHEE and GAIA) to help explore and understand policy options. They are not predictions or advice and do not reflect all real-world conditions, constraints, or uncertainties. Different data or priorities may lead to different results."
       />
     </div>
   );
