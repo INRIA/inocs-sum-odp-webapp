@@ -22,3 +22,9 @@ prisma/*.db
 # Local env files (provide via secrets at runtime)
 .env
 .env.*
+
+# Test files
+**/*.test.ts
+**/*.spec.ts
+vitest.config.ts
+vitest.setup.ts
