@@ -7,6 +7,10 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "db:init": "prisma migrate reset --force && prisma migrate dev --name 0_init",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
@@ -43,7 +47,15 @@
     "tailwindcss": "^4.1.12"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/leaflet": "^1.9.20",
-    "prisma": "^6.16.2"
+    "@vitejs/plugin-react": "^5.1.2",
+    "@vitest/ui": "^4.0.18",
+    "happy-dom": "^20.3.9",
+    "jsdom": "^27.4.0",
+    "prisma": "^6.16.2",
+    "vitest": "^4.0.18"
   }
 }
