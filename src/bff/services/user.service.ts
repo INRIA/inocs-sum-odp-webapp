@@ -277,17 +277,17 @@ export class UserService {
   }
   /**
    * Create a new user by calling the external admin API.
-   * Uses env vars: ODP_ADMIN_APP_HOST and USER_CREATION_API_KEY.
+   * Uses env vars: ODP_ADMIN_HOST_PRIVATE and USER_CREATION_API_KEY.
    * Performs the same input validation as local create (no password hashing here).
    */
   async createUserLabEditor(userData: SignupLabEditorInput): Promise<any> {
     try {
-      const host = process.env.ODP_ADMIN_APP_HOST;
+      const host = process.env.ODP_ADMIN_HOST_PRIVATE;
       const apiKey = process.env.USER_CREATION_API_KEY;
       const roleId = process.env.SIGNUP_LAB_EDITOR_ROLE_ID ?? "2";
       const autoActivate = process.env.SIGNUP_AUTO_ACTIVATE === "true";
       if (!host) {
-        throw new Error("ODP_ADMIN_APP_HOST is not configured");
+        throw new Error("ODP_ADMIN_HOST_PRIVATE is not configured");
       }
 
       if (!apiKey) {

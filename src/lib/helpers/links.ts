@@ -2,13 +2,17 @@ export function getUrl(path?: string) {
   if (path && path.startsWith("http")) {
     return path;
   }
-  if (import.meta.env.BASE_URL === "/") {
+  const baseURl = process.env.BASE_URL ?? import.meta.env.BASE_URL ?? "";
+  if (baseURl === "/") {
     return path ?? "#";
   }
-  return `${import.meta.env.BASE_URL}${path ?? "#"}`;
+  return `${baseURl}${path ?? "#"}`;
 }
 
 export function getUrlForAdminHost(path?: string) {
-  const adminHost = import.meta.env.ODP_ADMIN_APP_HOST;
+  const adminHost =
+    process.env.ODP_ADMIN_HOST_PUBLIC ??
+    import.meta.env.ODP_ADMIN_HOST_PUBLIC ??
+    "";
   return `${adminHost}${path ?? ""}`;
 }
