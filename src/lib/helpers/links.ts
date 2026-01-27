@@ -7,3 +7,8 @@ export function getUrl(path?: string) {
   }
   return `${import.meta.env.BASE_URL}${path ?? "#"}`;
 }
+
+export function getUrlForAdminHost(path?: string) {
+  const adminHost = import.meta.env.ODP_ADMIN_APP_HOST;
+  return `${adminHost}${path ?? ""}`;
+}

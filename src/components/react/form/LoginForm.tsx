@@ -26,7 +26,7 @@ export default function LoginForm() {
 
       if (result) {
         setError(
-          "Unable to sign in. Invalid credentials or account status is pending validation."
+          "Unable to sign in. Invalid credentials or account status is pending validation.",
         );
       }
     } catch (error) {
@@ -78,19 +78,6 @@ export default function LoginForm() {
         />
 
         <RButton variant="secondary" text="Go back" href={getUrl("/")} />
-      </div>
-
-      <div className="text-center mt-6">
-        <p className="text-sm text-gray-600">
-          Don't have an account?
-          <br></br>
-          <a
-            href={getUrl("/lab-admin/signup")}
-            className="text-blue-800 hover:text-blue-800 underline"
-          >
-            Create a new account
-          </a>
-        </p>
       </div>
     </form>
   );

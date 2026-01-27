@@ -2,6 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import LoginForm from "../../components/react/form/LoginForm";
 import FAQsUserAccount from "../../components/FAQsUserAccount.astro";
+import { getUrl, getUrlForAdminHost } from "../../lib/helpers";
 ---
 
 <Layout role="visitor">
@@ -12,7 +13,36 @@ import FAQsUserAccount from "../../components/FAQsUserAccount.astro";
         Access your living lab management dashboard with your credentials.
       </p>
       <LoginForm client:load />
-
+      <div
+        class="flex flex-col lg:flex-row items-center lg:justify-center mt-6"
+      >
+        <div class="text-center mt-6">
+          <p class="text-sm text-gray-600">
+            Don't have an account?
+            <br />
+          </p>
+          <a
+            href={getUrl("/lab-admin/signup")}
+            class="text-blue-800 hover:text-blue-800 underline"
+          >
+            Create a new account
+          </a>
+        </div>
+        <div class="hidden lg:block lg:mx-8 lg:h-16 lg:w-px lg:bg-gray-300">
+        </div>
+        <div class="text-center mt-6">
+          <p class="text-sm text-gray-600">
+            Forgot your password ?
+            <br />
+          </p>
+          <a
+            href={getUrlForAdminHost("/verify")}
+            class="text-blue-800 hover:text-blue-800 underline"
+          >
+            Password reset
+          </a>
+        </div>
+      </div>
       <FAQsUserAccount />
     </section>
   </div>
