@@ -1,6 +1,7 @@
 ---
 import { FAQAccordion } from "../components/react/ui";
 import { getUrlForAdminHost } from "../lib/helpers";
+const resetPasswordUrl = getUrlForAdminHost(Astro.locals, "/verify");
 
 const faqUserAccount = [
   {
@@ -29,7 +30,7 @@ const faqUserAccount = [
     answer:
       "Go to the password reset page and enter your email. You will receive a link to reset your password. If you encounter any issues, please contact the administrator at odp@sum-project.eu.",
     ctaLabel: "Password reset",
-    ctaLink: getUrlForAdminHost("/verify"),
+    ctaLink: resetPasswordUrl,
   },
 ];
 ---

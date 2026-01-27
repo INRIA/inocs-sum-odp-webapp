@@ -8,11 +8,3 @@ export function getUrl(path?: string) {
   }
   return `${baseURl}${path ?? "#"}`;
 }
-
-export function getUrlForAdminHost(path?: string) {
-  const adminHost =
-    process.env.ODP_ADMIN_HOST_PUBLIC ??
-    import.meta.env.ODP_ADMIN_HOST_PUBLIC ??
-    "";
-  return `${adminHost}${path ?? ""}`;
-}

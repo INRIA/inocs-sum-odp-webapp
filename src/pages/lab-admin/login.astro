@@ -3,6 +3,8 @@ import Layout from "../../layouts/Layout.astro";
 import LoginForm from "../../components/react/form/LoginForm";
 import FAQsUserAccount from "../../components/FAQsUserAccount.astro";
 import { getUrl, getUrlForAdminHost } from "../../lib/helpers";
+
+const resetPasswordUrl = getUrlForAdminHost(Astro.locals, "/verify");
 ---
 
 <Layout role="visitor">
@@ -36,7 +38,7 @@ import { getUrl, getUrlForAdminHost } from "../../lib/helpers";
             <br />
           </p>
           <a
-            href={getUrlForAdminHost("/verify")}
+            href={resetPasswordUrl}
             class="text-blue-800 hover:text-blue-800 underline"
           >
             Password reset

@@ -21,12 +21,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   // Check if the current route needs protection
   const isProtectedRoute = PROTECTED_ROUTES.some((route) =>
-    pathname.startsWith(route)
+    pathname.startsWith(route),
   );
 
   // Check if it's a route that should remain public
   const isPublicRoute = PUBLIC_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(route + "/")
+    (route) => pathname === route || pathname.startsWith(route + "/"),
   );
   // If it's a protected route but not public, check authentication
   if (isProtectedRoute && !isPublicRoute && !user) {
@@ -35,6 +35,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   // User is authenticated, add user info to context for use in pages
   context.locals.user = user;
+  context.locals.odpAdminHost =
+    import.meta.env.ODP_ADMIN_HOST_PUBLIC ??
+    process.env.ODP_ADMIN_HOST_PUBLIC ??
+    "";
   // Also attach current living lab from cookie if available
   const livingLab = getLivingLabCookie(context.cookies);
   if (livingLab) {
