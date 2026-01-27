@@ -27,7 +27,8 @@ export interface ILivingLab {
   kpiresults?: IKpiResult[];
 }
 
-export interface UpdateLabInput extends Partial<Omit<ILivingLab, "id">> {}
+export interface UpdateLabInput extends Partial<ILivingLab> {}
+export interface CreateLabInput extends Partial<Omit<ILivingLab, "id">> {}
 
 export interface ILivingLabPopulated extends ILivingLab {
   kpi_results?: IIKpiResultBeforeAfter[];

@@ -157,7 +157,7 @@ export function SidebarMenu({ children, userInfo, currentLivingLab }: Props) {
         {
           label: "Edit Lab information",
           icon: <Cog8ToothIcon />,
-          href: getUrl("/lab-admin/edit"),
+          href: getUrl("/lab-admin/lab/edit"),
         },
         {
           label: "View lab dashboard",

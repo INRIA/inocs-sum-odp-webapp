@@ -1,20 +1,17 @@
 import React, { useState } from "react";
 import { Input } from "../../react-catalyst-ui-kit/typescript/input";
-import {
-  Radio,
-  RadioField,
-  RadioGroup,
-} from "../../react-catalyst-ui-kit/typescript/radio";
-import { Label } from "../../react-catalyst-ui-kit/typescript/fieldset";
-import { Select } from "../../react-catalyst-ui-kit/typescript/select";
 import { RButton } from "../ui/RButton";
 import { getUrl } from "../../../lib/helpers";
 import ApiClient from "../../../lib/api-client/ApiClient";
 import { signIn } from "auth-astro/client";
 import { InfoAlert } from "../ui";
+import {
+  LivingLabModeOptions,
+  type LivingLabMode,
+} from "./LivingLabModeOptions";
 const api = new ApiClient();
 
-type Mode = "create" | "join";
+type Mode = "create" | "select";
 
 interface Props {
   livingLabs?: { id: string; name: string }[];
@@ -25,7 +22,7 @@ export default function SignupForm({ livingLabs }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [livingLab, setLivingLab] = useState("");
-  const [mode, setMode] = useState<Mode>("join");
+  const [mode, setMode] = useState<Mode>("select");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [progress, setProgress] = useState("");
@@ -46,7 +43,7 @@ export default function SignupForm({ livingLabs }: Props) {
       setError("Password must be at least 8 characters long.");
       return false;
     }
-    if (mode === "join" && !livingLab) {
+    if (mode === "select" && !livingLab) {
       setError("Please select a Living Lab.");
       return false;
     }
@@ -63,19 +60,20 @@ export default function SignupForm({ livingLabs }: Props) {
     }
     setIsLoading(true);
     try {
+      const living_lab_id = mode === "select" ? livingLab : undefined;
       const newUser = await api.signupLabEditor({
         name,
         email,
         password,
-        living_lab_id: livingLab,
+        living_lab_id,
       });
       if (newUser && newUser.id && newUser.status === "active") {
         setProgress("Signup successful! Signing you in...");
         const signinResult = await signIn("credentials", {
           email: email.trim().toLowerCase(),
           password,
-          redirect: false,
-          redirectTo: "/lab-admin",
+          redirect: living_lab_id ? false : true,
+          callbackUrl: living_lab_id ? "/lab-admin" : "/lab-admin/lab/new",
         });
 
         if (signinResult) {
@@ -83,7 +81,7 @@ export default function SignupForm({ livingLabs }: Props) {
         }
       } else if (newUser && newUser.id) {
         setProgress(
-          "Signup successful! Your account is pending activation by an administrator."
+          "Signup successful! Your account is pending activation by an administrator.",
         );
         window.location.href = getUrl("/pending-validation");
       } else {
@@ -144,43 +142,19 @@ export default function SignupForm({ livingLabs }: Props) {
         />
       </div>
 
-      <div className="text-sm">
-        <RadioGroup
-          name="labMode"
-          value={mode}
-          onChange={(v: any) => setMode(v)}
-          aria-label="Living lab mode"
-          disabled={isLoading}
-        >
-          {/* <RadioField>
-            <Radio value="create" />
-            <Label>Create new Living Lab</Label>
-          </RadioField> */}
-
-          <RadioField>
-            <Radio value="join" />
-            <Label>Manage existing Living Lab</Label>
-          </RadioField>
-        </RadioGroup>
-      </div>
-
-      {mode === "join" && (
-        <div>
-          <label>Living Lab</label>
-          <Select
-            value={livingLab}
-            onChange={(e: any) => setLivingLab(e.target.value)}
-            disabled={isLoading}
-          >
-            <option value="">Select a Living Lab</option>
-            {livingLabs?.map((lab) => (
-              <option key={lab.id} value={lab.id}>
-                {lab.name}
-              </option>
-            ))}
-          </Select>
-        </div>
-      )}
+      <LivingLabModeOptions
+        livingLabs={livingLabs || []}
+        mode={mode}
+        onModeChange={(newMode: LivingLabMode) => setMode(newMode)}
+        selectedLabId={livingLab}
+        onLabSelect={setLivingLab}
+        isLoading={isLoading}
+        labels={{
+          select: "Manage existing Living Lab",
+          create: "Create new Living Lab",
+          selectDropdown: "Living Lab",
+        }}
+      />
 
       <div className="flex gap-6">
         <RButton

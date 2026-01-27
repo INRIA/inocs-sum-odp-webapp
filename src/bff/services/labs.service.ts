@@ -72,11 +72,14 @@ export class LabService {
   async createLab(labData: UpdateLabInput): Promise<ILivingLab> {
     try {
       this.validateCreateLabInput(labData);
+      if (labData.id) {
+        throw new Error("New lab cannot already have an ID");
+      }
       return await this.labRepository.create(labData);
     } catch (error) {
       console.error("Error in createLab service:", error);
       if (error instanceof Error) throw error;
-      throw new Error("Failed to create lab");
+      throw new Error(error instanceof Error ? error.message : String(error));
     }
   }
 

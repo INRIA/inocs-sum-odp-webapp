@@ -14,7 +14,7 @@ import type { MarkerData } from "../../components/react/MapViewer";
  */
 export function getNSMTransportModes(
   livingLab: ILivingLabPopulated,
-  allTransportModes: ITransportMode[]
+  allTransportModes: ITransportMode[],
 ): ITransportMode[] {
   if (!livingLab.transport_modes || !allTransportModes) return [];
   // Get the transport mode IDs from the living lab
@@ -22,7 +22,7 @@ export function getNSMTransportModes(
 
   // Filter transport modes that are in the living lab and are NSM type
   return allTransportModes.filter(
-    (mode) => mode.type === "NSM" && labTransportModeIds.includes(mode.id)
+    (mode) => mode.type === "NSM" && labTransportModeIds.includes(mode.id),
   );
 }
 
@@ -48,7 +48,7 @@ export function separateMeasures(measures: IProject[]): {
 export function getModalSplitKpiResults(
   kpiDefinitions: IKpi[],
   allTransportModes: ITransportMode[],
-  kpiResults: IIKpiResultBeforeAfter[]
+  kpiResults: IIKpiResultBeforeAfter[],
 ): {
   kpiName: string;
   before: { label: string; data: SplitItem[] };
@@ -62,13 +62,13 @@ export function getModalSplitKpiResults(
       ?.filter((kpi) => ["15.a", "15.b", "15.c"].includes(kpi.kpi_number))
       .map((kpi) => {
         const modalSplitKpiResults = kpiResults.filter(
-          (result) => result.kpidefinition_id === kpi.id
+          (result) => result.kpidefinition_id === kpi.id,
         );
 
         return prepareModalSplitData(
           modalSplitKpiResults,
           allTransportModes,
-          kpi
+          kpi,
         );
       }) || []
   );
@@ -77,7 +77,7 @@ export function getModalSplitKpiResults(
 function prepareModalSplitData(
   kpiResults: IIKpiResultBeforeAfter[],
   allTransportModes: ITransportMode[],
-  parentKpiDefinition?: IKpi
+  parentKpiDefinition?: IKpi,
 ): {
   kpiName: string;
   before: { label: string; data: SplitItem[] };
@@ -107,7 +107,7 @@ function prepareModalSplitData(
   kpiResults.forEach((kpi) => {
     // Find the transport mode for this KPI result
     const transportMode = allTransportModes.find(
-      (tm) => tm.id === kpi.result_before?.transport_mode_id
+      (tm) => tm.id === kpi.result_before?.transport_mode_id,
     );
 
     if (transportMode) {
@@ -152,7 +152,7 @@ export function createMapMarker(livingLab: ILivingLabPopulated): MarkerData {
 }
 
 export function getLivingLabInfoProgress(
-  livingLab?: ILivingLabPopulated | null
+  livingLab?: ILivingLabPopulated | null,
 ): {
   value: number;
   progress: number;
@@ -160,31 +160,31 @@ export function getLivingLabInfoProgress(
 } {
   if (!livingLab) return { value: 0, progress: 0, details: [] };
   const itemsToCheck = [
+    livingLab.name,
     livingLab.area,
     livingLab.radius,
     livingLab.population,
     livingLab.lat,
     livingLab.lng,
   ];
-
-  const filledItems = itemsToCheck.filter(
-    (item) => item !== null && item !== undefined && item !== "" && item !== 0
-  );
-
-  const missingItems = itemsToCheck.length - filledItems.length;
+  const itemsLabels = [
+    "Name",
+    "Area",
+    "Radius",
+    "Population",
+    "Latitude",
+    "Longitude",
+  ];
 
   const missingFields = itemsToCheck
-    .filter(
-      (item) => item === null || item === undefined || item === "" || item === 0
-    )
-    .map((item) => {
-      if (item === livingLab.area) return "Area";
-      if (item === livingLab.radius) return "Radius";
-      if (item === livingLab.population) return "Population";
-      if (item === livingLab.lat) return "Latitude";
-      if (item === livingLab.lng) return "Longitude";
+    .map((item, i) => {
+      if (item === null || item === undefined || item === "" || item === 0)
+        return itemsLabels[i];
       return "";
-    });
+    })
+    .filter((label) => label !== "");
+  const missingItems = missingFields.length;
+  const filledItems = itemsToCheck.length - missingItems;
 
   const details =
     missingItems > 0
@@ -198,16 +198,15 @@ export function getLivingLabInfoProgress(
       : [];
 
   return {
-    value: filledItems.length,
-    progress:
-      Math.round((filledItems.length / itemsToCheck.length) * 100 * 100) / 100,
+    value: filledItems,
+    progress: Math.round((filledItems / itemsToCheck.length) * 100 * 100) / 100,
     details,
   };
 }
 
 export function getKpiResultsProgress(
   kpis: IKpi[],
-  kpiResults: IKpiResult[]
+  kpiResults: IKpiResult[],
 ): {
   value: number;
   progress: number;
@@ -224,7 +223,7 @@ export function getKpiResultsProgress(
 
   const uniqueIds = kpiResults?.map((kpiresult) => {
     const kpiDefinition = kpis?.find(
-      (pk) => pk.id === kpiresult.kpidefinition_id
+      (pk) => pk.id === kpiresult.kpidefinition_id,
     );
     return kpiDefinition?.parent_kpi_id ?? kpiDefinition?.id;
   });
@@ -237,7 +236,7 @@ export function getKpiResultsProgress(
     progress: Math.round(
       (uniqueCompletedKpis.length /
         (uniqueGlobalIds.length + uniqueLocalIds.length)) *
-        100
+        100,
     ),
     details: [
       {
@@ -260,7 +259,7 @@ export function getKpiResultsProgress(
 
 export function getKpiResultsModalSplitProgress(
   kpis: IKpi[],
-  kpiResults: IKpiResult[]
+  kpiResults: IKpiResult[],
 ): {
   value: string;
   progress: number;
@@ -274,7 +273,7 @@ export function getKpiResultsModalSplitProgress(
       const currentTotal = totalByKpi.get(kpiResult.kpidefinition_id) || 0;
       totalByKpi.set(
         kpiResult.kpidefinition_id,
-        currentTotal + kpiResult.value
+        currentTotal + kpiResult.value,
       );
       valueTotal += kpiResult.value;
     }

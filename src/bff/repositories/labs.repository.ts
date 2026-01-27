@@ -28,7 +28,7 @@ export class LabRepository {
    */
   async findById(
     id: string,
-    include?: Record<string, any>
+    include?: Record<string, any>,
   ): Promise<ILivingLab | null> {
     try {
       const lab = await prisma.labs.findUnique({
@@ -53,7 +53,7 @@ export class LabRepository {
       return this.mapPrismaLabToLab(lab);
     } catch (error) {
       console.error("Error creating lab:", error);
-      throw new Error("Failed to create lab");
+      throw error;
     }
   }
 
@@ -103,7 +103,7 @@ export class LabRepository {
               kr.kpidefinition_id === kpidefinition_id &&
               (transport_mode_id
                 ? kr.transport_mode_id === transport_mode_id
-                : !kr.transport_mode_id)
+                : !kr.transport_mode_id),
           ) || [];
         const minKpiResult = groupedResults?.[0];
         const maxKpiResult =
@@ -117,7 +117,7 @@ export class LabRepository {
           result_before: minKpiResult ?? null,
           result_after: maxKpiResult ?? null,
         };
-      }
+      },
     );
 
     return {
@@ -143,7 +143,7 @@ export class LabRepository {
   async upsertProjectImplementation(
     labId: string,
     projectId: string,
-    updateData: Record<string, any>
+    updateData: Record<string, any>,
   ): Promise<void> {
     try {
       return prisma.living_lab_projects_implementation.upsert({
@@ -167,7 +167,7 @@ export class LabRepository {
     } catch (error) {
       console.error(
         `Error upserting project implementation for lab ${labId} and project ${projectId}:`,
-        error
+        error,
       );
       throw new Error("Failed to upsert project implementation");
     }
@@ -178,7 +178,7 @@ export class LabRepository {
    */
   async deleteProjectImplementation(
     labId: string,
-    projectId: string
+    projectId: string,
   ): Promise<void> {
     try {
       await prisma.living_lab_projects_implementation.deleteMany({
@@ -190,7 +190,7 @@ export class LabRepository {
     } catch (error) {
       console.error(
         `Error deleting project implementation for lab ${labId} and project ${projectId}:`,
-        error
+        error,
       );
       throw new Error("Failed to delete project implementation");
     }
@@ -203,7 +203,7 @@ export class LabRepository {
   async upsertTransportModesImplementation(
     labId: string,
     transportModeId: string,
-    updateData: Record<string, any>
+    updateData: Record<string, any>,
   ): Promise<ITransportModeLivingLabImplementation> {
     try {
       // First, delete existing implementations for the lab
@@ -228,7 +228,7 @@ export class LabRepository {
     } catch (error) {
       console.error(
         `Error upserting transport mode implementation for lab ${labId} and transport mode ${transportModeId}:`,
-        error
+        error,
       );
       throw new Error("Failed to upsert transport mode implementation");
     }
@@ -239,7 +239,7 @@ export class LabRepository {
    */
   async deleteTransportModesImplementation(
     labId: string,
-    transportModeId: string
+    transportModeId: string,
   ): Promise<void> {
     try {
       await prisma.transport_mode_living_lab_implementation.deleteMany({
@@ -251,7 +251,7 @@ export class LabRepository {
     } catch (error) {
       console.error(
         `Error deleting transport mode implementation for lab ${labId} and transport mode ${transportModeId}:`,
-        error
+        error,
       );
       throw new Error("Failed to delete transport mode implementation");
     }

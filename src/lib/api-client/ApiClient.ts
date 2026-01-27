@@ -11,6 +11,7 @@ import type {
   User,
   SignupLabEditorInput,
   IJobRun,
+  CreateLabInput,
 } from "../../types";
 import type { ICategory } from "../../types/Category";
 
@@ -50,7 +51,7 @@ export default class ApiClient {
 
   // Extract JWT or session token from cookie string
   private extractTokenFromCookies(
-    cookieHeader?: string | null
+    cookieHeader?: string | null,
   ): string | undefined {
     if (!cookieHeader) return undefined;
 
@@ -61,7 +62,8 @@ export default class ApiClient {
 
   private async request<T>(
     path: string,
-    options?: RequestInit
+    options?: RequestInit,
+    throwOnError = false,
   ): Promise<T | null> {
     const url = `${this.baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
 
@@ -78,7 +80,7 @@ export default class ApiClient {
 
       if (!res.ok) {
         const text = await res.text();
-        throw new Error(`API Error (${res.status}): ${text}`);
+        throw new Error(`API Error (status=${res.status}): ${text}`);
       }
 
       // Auto-parse JSON if possible
@@ -88,13 +90,15 @@ export default class ApiClient {
       }
     } catch (error) {
       console.error(`Error during API request to ${url}:`, error);
+      if (throwOnError) {
+        throw new Error(error instanceof Error ? error.message : String(error));
+      }
+      return null;
     }
-
-    return null;
   }
 
   async getLivingLabs(
-    fields?: string[]
+    fields?: string[],
   ): Promise<(ILivingLab | ILivingLabPopulated)[] | null> {
     const defaultFields = ["projects", "kpiresults", "transport_modes"];
     const params = new URLSearchParams();
@@ -103,13 +107,24 @@ export default class ApiClient {
       params.set("fields", fieldsToUse.join(","));
     }
     return this.request<(ILivingLab | ILivingLabPopulated)[] | null>(
-      "/labs?" + params.toString()
+      "/labs?" + params.toString(),
+    );
+  }
+
+  async createLivingLab(data: CreateLabInput): Promise<ILivingLab | null> {
+    return this.request<ILivingLab | null>(
+      `/labs`,
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+      true,
     );
   }
 
   async getLivingLab(
     livingLabId: string,
-    fields?: string[]
+    fields?: string[],
   ): Promise<ILivingLabPopulated | null> {
     const defaultFields = ["projects", "kpiresults", "transport_modes"];
     const params = new URLSearchParams({ id: livingLabId });
@@ -118,7 +133,7 @@ export default class ApiClient {
       params.set("fields", fieldsToUse.join(","));
     }
     return this.request<ILivingLabPopulated | null>(
-      `/labs?${params.toString()}`
+      `/labs?${params.toString()}`,
     );
   }
 
@@ -150,7 +165,7 @@ export default class ApiClient {
   async getKPIs(data?: { kpi_number?: string }): Promise<IKpi[] | null> {
     const kpi_number = data?.kpi_number;
     return this.request<IKpi[]>(
-      "/kpidefinitions" + (kpi_number ? `?kpi_number=${kpi_number}` : "")
+      "/kpidefinitions" + (kpi_number ? `?kpi_number=${kpi_number}` : ""),
     );
   }
 
@@ -168,7 +183,7 @@ export default class ApiClient {
   }
 
   async upsertLivingLabKpiResults(
-    data: IKpiResultInput
+    data: IKpiResultInput,
   ): Promise<IKpiResultInput | null> {
     return this.request<IKpiResultInput>(`/kpiresults`, {
       method: "PUT",
@@ -177,10 +192,10 @@ export default class ApiClient {
   }
 
   async getCategories(
-    type: "KPI_SIEF" | "ITEM" | "KPI_IMPACT"
+    type: "KPI_SIEF" | "ITEM" | "KPI_IMPACT",
   ): Promise<ICategory[] | null> {
     return this.request<ICategory[]>(
-      `/categories?type=${encodeURIComponent(type)}`
+      `/categories?type=${encodeURIComponent(type)}`,
     );
   }
 

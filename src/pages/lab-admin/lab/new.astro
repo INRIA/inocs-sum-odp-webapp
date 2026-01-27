@@ -1,0 +1,17 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import LivingLabForm from "../../../components/react/form/LivingLabForm";
+---
+
+<Layout role="editor">
+  <div class="px-6 py-12">
+    <section class="max-w-3xl mx-auto">
+      <h2>Provide context about the Living Lab and city</h2>
+      <p class="text-warning italic mb-6">
+        Use the form to provide a name and approximate geolocation and activity
+        metrics for visualization purposes.
+      </p>
+      <LivingLabForm client:load />
+    </section>
+  </div>
+</Layout>

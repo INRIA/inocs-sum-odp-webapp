@@ -18,8 +18,9 @@ export default function LivingLabForm({ livingLab }: Props) {
   const [radius, setRadius] = useState(`${livingLab?.radius ?? ""}`);
   const [area, setArea] = useState(`${livingLab?.area ?? ""}`);
   const [population, setPopulation] = useState(
-    `${livingLab?.population ?? ""}`
+    `${livingLab?.population ?? ""}`,
   );
+  const [errorMessage, setErrorMessage] = useState("");
 
   const [mapMarker, setMapMarker] = useState<MarkerData | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>([50, 10]);
@@ -27,23 +28,37 @@ export default function LivingLabForm({ livingLab }: Props) {
   // derive a key from center so MapViewer remounts whenever center changes
   const mapKey = mapCenter ? `${mapCenter[0]},${mapCenter[1]}` : "no-center";
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!livingLab?.id) return;
-
+    setErrorMessage("");
     const payload = {
-      id: livingLab?.id,
       name,
       lat: latitude || "0",
       lng: longitude || "0",
       radius: radius ? parseFloat(radius) : 0,
-      area: area ? parseInt(area, 10) : undefined,
-      population: population ? parseInt(population, 10) : undefined,
+      area: area ? parseInt(area, 10) : null,
+      population: population ? parseInt(population, 10) : null,
     };
-    api.updateLivingLab(payload).then(() => {
-      // Handle successful update
+
+    try {
+      if (livingLab?.id) {
+        const data = { ...payload, id: livingLab.id };
+        await api.updateLivingLab(data);
+      } else {
+        await api.createLivingLab(payload);
+      }
       window.location.href = getUrl("/lab-admin");
-    });
+    } catch (error) {
+      const errorString =
+        error instanceof Error ? error.message : String(error);
+      if (errorString.includes("status=400")) {
+        setErrorMessage("Verify the values, only positive numbers are allowed");
+      } else if (errorString.includes("status=409")) {
+        setErrorMessage("Name already exists");
+      } else {
+        setErrorMessage("An error occurred while creating the living lab");
+      }
+    }
   }
 
   useEffect(() => {
@@ -138,7 +153,9 @@ export default function LivingLabForm({ livingLab }: Props) {
           className="h-full w-full z-0"
         />
       </div>
-
+      {errorMessage && (
+        <div className="text-red-600 text-sm font-medium">{errorMessage}</div>
+      )}
       <div className="flex gap-4">
         <RButton
           variant="secondary"

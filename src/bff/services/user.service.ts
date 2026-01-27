@@ -20,7 +20,7 @@ export class UserService {
    * Returns an array of minimal lab data for selection.
    */
   async getUserLabs(
-    userId: string
+    userId: string,
   ): Promise<Array<{ id: string; name: string }>> {
     try {
       const user = await this.userRepository.findById(userId);
@@ -28,7 +28,7 @@ export class UserService {
         throw new Error("User not found");
       }
       const labs = user.living_lab_user_relation?.map(
-        (relation) => relation.lab
+        (relation) => relation.lab,
       );
 
       return labs?.map((l: any) => ({ id: String(l.id), name: l.name })) || [];
@@ -151,7 +151,7 @@ export class UserService {
 
       // Check if user with email already exists
       const existingUser = await this.userRepository.findByEmail(
-        userData.email
+        userData.email,
       );
       if (existingUser) {
         throw new Error("User with this email already exists");
@@ -181,7 +181,7 @@ export class UserService {
    */
   async updateUser(
     id: string,
-    userData: UpdateUserInput
+    userData: UpdateUserInput,
   ): Promise<User | null> {
     try {
       if (!id || isNaN(parseInt(id, 10))) {
@@ -200,7 +200,7 @@ export class UserService {
       // If email is being updated, check for duplicates
       if (userData.email && userData.email !== existingUser.email) {
         const userWithEmail = await this.userRepository.findByEmail(
-          userData.email
+          userData.email,
         );
         if (userWithEmail && userWithEmail.id !== id) {
           throw new Error("User with this email already exists");
@@ -261,6 +261,20 @@ export class UserService {
     }
   }
 
+  async setUserLivingLab(userId: string, labId: string): Promise<User | null> {
+    try {
+      if (!userId || isNaN(parseInt(userId, 10))) {
+        throw new Error("Invalid user ID provided");
+      }
+      if (!labId || isNaN(parseInt(labId, 10))) {
+        throw new Error("Invalid lab ID provided");
+      }
+      return await this.userRepository.setUserLivingLab(userId, labId);
+    } catch (error) {
+      console.error("Error in setUserLivingLab service:", error);
+      throw new Error("Failed to set user's living lab");
+    }
+  }
   /**
    * Create a new user by calling the external admin API.
    * Uses env vars: ODP_ADMIN_APP_HOST and USER_CREATION_API_KEY.
@@ -304,23 +318,22 @@ export class UserService {
       const res = await fetch(url, options as any);
       if (!res.ok) {
         const text = await res.text().catch(() => "");
-        throw new Error(`Admin API error (${res.status}): ${text}`);
+        throw new Error(
+          `UNABLE TO REACH ODP ADMIN API, error (${res.status}): ${text}`,
+        );
       }
       const contentType = res.headers.get("content-type") || "";
       if (contentType.includes("application/json")) {
         const user = (await res.json()) as User;
         if (userData.living_lab_id) {
-          await this.userRepository.setUserLivingLab(
-            String(user.id),
-            userData.living_lab_id
-          );
+          await this.setUserLivingLab(String(user.id), userData.living_lab_id);
         }
 
         if (autoActivate) {
           const updatedUser = await this.autoValidateIfNoOtherEditors(
             roleId,
             String(user.id),
-            userData.living_lab_id!
+            userData.living_lab_id,
           );
           if (updatedUser) {
             return updatedUser;
@@ -334,8 +347,7 @@ export class UserService {
     } catch (error) {
       console.error(
         "Error in createUserViaAdminApi service:",
-        // Don't log userData.password
-        error instanceof Error ? error.message : error
+        error instanceof Error ? error.message : error,
       );
       if (error instanceof Error) throw error;
       throw new Error("Failed to create user via admin API");
@@ -345,13 +357,16 @@ export class UserService {
   private autoValidateIfNoOtherEditors = async (
     roleId: string,
     userId: string,
-    labId: string
+    labId?: string,
   ): Promise<User | null> => {
-    const otherEditors = await this.findUserByRoleIdAndLabIdAndStatus(
-      roleId,
-      labId,
-      UserStatus.ACTIVE
-    );
+    let otherEditors: User[] = [];
+    if (labId) {
+      otherEditors = await this.findUserByRoleIdAndLabIdAndStatus(
+        roleId,
+        labId,
+        UserStatus.ACTIVE,
+      );
+    }
     if (!otherEditors || otherEditors.length === 0) {
       return this.userRepository.update(userId, {
         status: UserStatus.ACTIVE,
@@ -363,19 +378,19 @@ export class UserService {
   private findUserByRoleIdAndLabIdAndStatus = async (
     roleId: string,
     labId: string,
-    status: UserStatus
+    status: UserStatus,
   ): Promise<User[]> => {
     try {
       const users = await this.userRepository.findByRoleIdAndLabIdAndStatus(
         roleId,
         labId,
-        status
+        status,
       );
       return users && users?.length > 0 ? users : [];
     } catch (error) {
       console.error(
         `Error fetching users with role ID ${roleId} and lab ID ${labId}:`,
-        error
+        error,
       );
       throw new Error("Failed to fetch users");
     }

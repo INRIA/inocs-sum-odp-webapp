@@ -1,7 +1,7 @@
 ---
-import Layout from "../../layouts/Layout.astro";
-import LivingLabForm from "../../components/react/form/LivingLabForm";
-import ApiClient from "../../lib/api-client/ApiClient";
+import Layout from "../../../layouts/Layout.astro";
+import LivingLabForm from "../../../components/react/form/LivingLabForm";
+import ApiClient from "../../../lib/api-client/ApiClient";
 
 const labId = Astro.locals.livingLab?.id;
 if (!labId) {

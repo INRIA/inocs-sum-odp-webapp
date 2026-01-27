@@ -63,7 +63,7 @@ export class UserRepository {
    */
   async findByEmail(
     email: string,
-    safe?: boolean
+    safe?: boolean,
   ): Promise<User | UserDto | null> {
     try {
       const _safe = safe !== undefined ? safe : true;
@@ -155,7 +155,7 @@ export class UserRepository {
    * Get users by status
    */
   async findByStatus(
-    status: "signup" | "active" | "disabled"
+    status: "signup" | "active" | "disabled",
   ): Promise<User[]> {
     try {
       const users = await prisma.users.findMany({
@@ -206,7 +206,7 @@ export class UserRepository {
   async findByRoleIdAndLabIdAndStatus(
     roleId: string,
     labId: string,
-    status: UserStatus
+    status: UserStatus,
   ): Promise<User[] | null> {
     try {
       const users = await prisma.users.findMany({
@@ -234,7 +234,7 @@ export class UserRepository {
     } catch (error) {
       console.error(
         `Error fetching users with role_id ${roleId} and lab_id ${labId}:`,
-        error
+        error,
       );
       throw new Error("Failed to fetch users by role and lab");
     }
@@ -252,7 +252,7 @@ export class UserRepository {
     } catch (error) {
       console.error(
         `Error setting user living lab for user ID ${userId}:`,
-        error
+        error,
       );
       throw new Error("Failed to set user living lab");
     }
@@ -272,6 +272,7 @@ export class UserRepository {
   private mapPrismaUserToUser(prismaUser: any): User {
     return {
       ...prismaUser,
+      password: undefined,
       id: prismaUser.id,
       email: prismaUser.email,
       name: prismaUser.name,
@@ -286,6 +287,6 @@ export class UserRepository {
             description: prismaUser.role.description,
           }
         : undefined,
-    };
+    } as User;
   }
 }
