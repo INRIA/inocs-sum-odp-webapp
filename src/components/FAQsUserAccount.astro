@@ -1,5 +1,6 @@
 ---
 import { FAQAccordion } from "../components/react/ui";
+import { getUrlForAdminHost } from "../lib/helpers";
 
 const faqUserAccount = [
   {
@@ -19,16 +20,16 @@ const faqUserAccount = [
   {
     question: "Do you want to create a new Living Lab?",
     answer:
-      "Thank you for your interest in contributing to the SUM project! The feature is currently under construction. Please reach out to the platform administrator at odp@sum-project.eu for more information.",
-    ctaLabel: "Contact ODP administrator",
-    ctaLink: "mailto:odp@sum-project.eu",
+      "Thank you for your interest in contributing to the SUM project! Go to the signup page and select 'Create a new Living Lab' to get started. If you have any questions, feel free to reach out to us at odp@sum-project.eu.",
+    ctaLabel: "Sign up",
+    ctaLink: "/lab-admin/signup",
   },
   {
     question: "I forgot my password, what should I do?",
     answer:
-      "The 'Forgot Password' feature is currently under construction. Please reach out to the platform administrator at odp@sum-project.eu for assistance.",
-    ctaLabel: "Contact ODP administrator",
-    ctaLink: "mailto:odp@sum-project.eu",
+      "Go to the password reset page and enter your email. You will receive a link to reset your password. If you encounter any issues, please contact the administrator at odp@sum-project.eu.",
+    ctaLabel: "Password reset",
+    ctaLink: getUrlForAdminHost("/verify"),
   },
 ];
 ---
