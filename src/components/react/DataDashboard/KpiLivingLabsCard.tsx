@@ -10,7 +10,7 @@ export const KpiLivingLabsCard: React.FC<KpiLivingLabsCardProps> = ({
   // Count total data points and unique labs
   const totalDataPoints = labTimelines.reduce(
     (sum, lab) => sum + lab.dataPoints.length,
-    0
+    0,
   );
   const labCount = labTimelines.length;
 

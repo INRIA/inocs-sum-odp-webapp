@@ -16,9 +16,6 @@ const allKpis = (await api.getKPIs()) ?? [];
 // Fetch all KPI categories
 const categories = (await api.getCategories("KPI_SIEF")) ?? [];
 
-// Filter to parent KPIs only (avoid duplicates from child KPIs)
-const parentKpis = allKpis.filter((kpi) => !kpi.parent_kpi_id);
-
 // Extract unique years from all KPI results for filtering
 const allYears = new Set<number>();
 livingLabsData.forEach((lab) => {
@@ -67,7 +64,7 @@ const livingLabsForDashboard = livingLabsData.map((lab) => ({
       ) : (
         <DataDashboard
           livingLabs={livingLabsForDashboard}
-          kpis={parentKpis}
+          kpis={allKpis}
           availableYears={sortedYears}
           categories={categories}
           client:load

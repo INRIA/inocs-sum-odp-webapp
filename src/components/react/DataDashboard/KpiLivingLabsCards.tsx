@@ -1,10 +1,9 @@
 import React, { useMemo } from "react";
-import type {
-  KpiLivingLabsCardsProps,
-  ILabKpiTimeline,
-  ITimelineDataPoint,
-} from "./types";
+import type { KpiLivingLabsCardsProps } from "./types";
 import { KpiLivingLabsCard } from "./KpiLivingLabsCard";
+import { KpiLivingLabsMultipleCard } from "./KpiLivingLabsMultipleCard";
+import { buildKpiDataMap, groupKpisByParentChild } from "./utils";
+import { COLOR_GRAY } from "../../../types/Constants";
 
 export const KpiLivingLabsCards: React.FC<KpiLivingLabsCardsProps> = ({
   livingLabs,
@@ -34,86 +33,49 @@ export const KpiLivingLabsCards: React.FC<KpiLivingLabsCardsProps> = ({
     return kpiIds;
   }, [categories, filter.selectedCategoryIds]);
 
-  // Filter KPIs by selected categories
+  // Filter KPIs by selected categories (filter by parent KPI only)
   const filteredKpis = useMemo(() => {
-    return kpis.filter((kpi) => kpiIdsInSelectedCategories.has(kpi.id));
+    return kpis.filter((kpi) => {
+      // For parent KPIs or single KPIs (no parent_kpi_id), check if they're in selected categories
+      if (!kpi.parent_kpi_id) {
+        return kpiIdsInSelectedCategories.has(kpi.id);
+      }
+      // For child KPIs, check if their parent is in selected categories
+      return kpiIdsInSelectedCategories.has(kpi.parent_kpi_id);
+    });
   }, [kpis, kpiIdsInSelectedCategories]);
 
-  // Process KPI data for each KPI across filtered living labs
+  // Group KPIs by parent-child relationships
+  const kpiGroups = useMemo(() => {
+    return groupKpisByParentChild(filteredKpis);
+  }, [filteredKpis]);
+
+  // Build timeline data for ALL KPIs (parents and children)
   const kpiDataMap = useMemo(() => {
-    const map = new Map<string, ILabKpiTimeline[]>();
+    return buildKpiDataMap(
+      filteredKpis,
+      livingLabs,
+      filter,
+      colorMap,
+      COLOR_GRAY,
+    );
+  }, [filteredKpis, livingLabs, filter, colorMap]);
 
-    filteredKpis.forEach((kpi) => {
-      const labTimelines: ILabKpiTimeline[] = [];
+  // Filter groups to only those with data
+  const groupsWithData = kpiGroups.filter((group) => {
+    if (group.type === "single") {
+      return kpiDataMap.has(group.kpi.id);
+    } else {
+      // For parent groups, check if parent or any child has data
+      const hasParentData = kpiDataMap.has(group.parentKpi.id);
+      const hasChildData = group.childKpis.some((child) =>
+        kpiDataMap.has(child.id)
+      );
+      return hasParentData || hasChildData;
+    }
+  });
 
-      livingLabs.forEach((lab) => {
-        // Skip if lab is not selected
-        if (!filter.selectedLabIds.includes(lab.id)) return;
-
-        // Find KPI result for this lab and KPI
-        const kpiResult = lab.kpiResults.find(
-          (r) => r.kpidefinition_id === kpi.id,
-        );
-
-        if (!kpiResult) return;
-
-        const dataPoints: ITimelineDataPoint[] = [];
-
-        // Process before result
-        if (
-          kpiResult.result_before?.date &&
-          kpiResult.result_before?.value !== undefined
-        ) {
-          const beforeYear = new Date(
-            kpiResult.result_before.date,
-          ).getFullYear();
-          if (filter.selectedYears.includes(beforeYear)) {
-            dataPoints.push({
-              year: beforeYear,
-              value: kpiResult.result_before.value,
-              date: kpiResult.result_before.date,
-            });
-          }
-        }
-
-        // Process after result
-        if (
-          kpiResult.result_after?.date &&
-          kpiResult.result_after?.value !== undefined
-        ) {
-          const afterYear = new Date(kpiResult.result_after.date).getFullYear();
-          if (filter.selectedYears.includes(afterYear)) {
-            dataPoints.push({
-              year: afterYear,
-              value: kpiResult.result_after.value,
-              date: kpiResult.result_after.date,
-            });
-          }
-        }
-
-        // Only add if there are data points
-        if (dataPoints.length > 0) {
-          labTimelines.push({
-            labId: lab.id,
-            labName: lab.name,
-            color: colorMap.get(lab.id) || "#6b7280", // fallback gray
-            dataPoints,
-          });
-        }
-      });
-
-      if (labTimelines.length > 0) {
-        map.set(kpi.id, labTimelines);
-      }
-    });
-
-    return map;
-  }, [livingLabs, filteredKpis, filter, colorMap]);
-
-  // Filter KPIs to only those with data
-  const kpisWithData = filteredKpis.filter((kpi) => kpiDataMap.has(kpi.id));
-
-  if (kpisWithData.length === 0) {
+  if (groupsWithData.length === 0) {
     return (
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
         <div className="text-4xl mb-3">📊</div>
@@ -129,13 +91,26 @@ export const KpiLivingLabsCards: React.FC<KpiLivingLabsCardsProps> = ({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {kpisWithData.map((kpi) => (
-        <KpiLivingLabsCard
-          key={kpi.id}
-          kpi={kpi}
-          labTimelines={kpiDataMap.get(kpi.id) ?? []}
-        />
-      ))}
+      {groupsWithData.map((group) => {
+        if (group.type === "single") {
+          return (
+            <KpiLivingLabsCard
+              key={group.kpi.id}
+              kpi={group.kpi}
+              labTimelines={kpiDataMap.get(group.kpi.id) ?? []}
+            />
+          );
+        } else {
+          return (
+            <KpiLivingLabsMultipleCard
+              key={group.parentKpi.id}
+              parentKpi={group.parentKpi}
+              childKpis={group.childKpis}
+              kpiTimelineMap={kpiDataMap}
+            />
+          );
+        }
+      })}
     </div>
   );
 };

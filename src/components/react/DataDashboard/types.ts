@@ -48,6 +48,33 @@ export interface KpiLivingLabsCardsFilter {
 }
 
 /**
+ * Map of KPI IDs to their lab timelines
+ */
+export type IKpiTimelineMap = Map<string, ILabKpiTimeline[]>;
+
+/**
+ * Represents a single KPI (no parent-child relationship)
+ */
+export interface ISingleKpiGroup {
+  type: "single";
+  kpi: IKpi;
+}
+
+/**
+ * Represents a parent KPI with child KPIs
+ */
+export interface IParentKpiGroup {
+  type: "parent";
+  parentKpi: IKpi;
+  childKpis: IKpi[];
+}
+
+/**
+ * Union type for KPI groups (single or parent-child)
+ */
+export type IKpiGroup = ISingleKpiGroup | IParentKpiGroup;
+
+/**
  * Props for DataDashboard main component
  */
 export interface DataDashboardProps {
@@ -74,6 +101,15 @@ export interface KpiLivingLabsCardsProps {
 export interface KpiLivingLabsCardProps {
   kpi: IKpi;
   labTimelines: ILabKpiTimeline[];
+}
+
+/**
+ * Props for KpiLivingLabsMultipleCard component (parent with children)
+ */
+export interface KpiLivingLabsMultipleCardProps {
+  parentKpi: IKpi;
+  childKpis: IKpi[];
+  kpiTimelineMap: IKpiTimelineMap;
 }
 
 /**
