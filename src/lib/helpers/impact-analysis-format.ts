@@ -5,9 +5,10 @@ import {
   type ILivingLabVariation,
   type IKpiVariation,
   type IGroupAnalysisResult,
+  type ILivingLab,
   COLOR_SUCCESS,
   COLOR_DANGER,
-  COLOR_GRAY,
+  COLOR_WARNING,
   type IKpiDefinition,
 } from "../../types";
 
@@ -209,26 +210,35 @@ export function ratioToPercentageNumber(ratio: number | null): number | null {
 }
 
 /**
- * Get color class based on ratio variation value
+ * Get color based on ratio variation value
+ * - Positive: Green (COLOR_SUCCESS)
+ * - Negative: Red (COLOR_DANGER)
+ * - Zero or null: Orange (COLOR_WARNING)
  */
 export function getVariationColor(ratio: number | null): string {
   if (ratio === null || ratio === undefined) {
-    return COLOR_GRAY; // gray
+    return COLOR_WARNING; // null/undefined treated as neutral/unknown
   }
-  if (ratio >= 0) {
-    return COLOR_SUCCESS; // green
+  if (ratio > 0) {
+    return COLOR_SUCCESS; // green for positive
+  } else if (ratio < 0) {
+    return COLOR_DANGER; // red for negative
   } else {
-    return COLOR_DANGER; // red
+    return COLOR_WARNING; // orange for zero
   }
 }
 
 /**
  * Calculate KPI variations data from analysis result
  * This should be called server-side to pre-compute all variation metrics
+ * @param analysisResult - The analysis result containing living labs data
+ * @param kpiDefinitionsMap - Map of KPI definitions by ID
+ * @param livingLabsMap - Optional map of living labs by ID for geolocation data
  */
 export function calculateKpiVariationsData(
   analysisResult: IGroupAnalysisResult,
   kpiDefinitionsMap: Map<string, IKpiDefinition>,
+  livingLabsMap?: Map<string, ILivingLab>,
 ): IKpiVariationData {
   const livingLabVariations: ILivingLabVariation[] = [];
   const allKpiVariationsMap = new Map<string, IKpiVariation[]>();
@@ -273,12 +283,21 @@ export function calculateKpiVariationsData(
           validVariations.length
         : null;
 
+    // Get geolocation from living labs map if available
+    const livingLabData = livingLabsMap?.get(String(lab.id));
+    const lat = livingLabData?.lat ? parseFloat(livingLabData.lat) : null;
+    const lng = livingLabData?.lng ? parseFloat(livingLabData.lng) : null;
+    const radius = livingLabData?.radius ?? null;
+
     livingLabVariations.push({
       labId: String(lab.id),
       labName: lab.name,
       totalVariation: labAverage,
       totalVariationPercentage: ratioToPercentage(labAverage),
       kpis: kpiVariations,
+      lat: isNaN(lat as number) ? null : lat,
+      lng: isNaN(lng as number) ? null : lng,
+      radius,
     });
   });
 

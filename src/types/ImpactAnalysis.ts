@@ -80,6 +80,10 @@ export interface ILivingLabVariation {
   totalVariation: number | null; // Average ratio_variation for this lab
   totalVariationPercentage: string;
   kpis: IKpiVariation[];
+  // Geolocation fields for map display, maped by function calculateKpiVariationsData
+  lat?: number | null;
+  lng?: number | null;
+  radius?: number | null;
 }
 
 export interface IKpiVariation {

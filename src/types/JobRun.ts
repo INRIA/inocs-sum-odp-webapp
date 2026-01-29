@@ -1,4 +1,9 @@
-import type { IGroupAnalysisResult, IKpiGroup } from "./ImpactAnalysis";
+import type {
+  IGroupAnalysisResult,
+  IKpiDefinition,
+  IKpiGroup,
+} from "./ImpactAnalysis";
+import type { ILivingLab } from "./LivingLab";
 
 export interface IJobRun {
   id: string;
@@ -15,6 +20,8 @@ export interface IJobRun {
 export interface IJobRunInputData {
   kpi_groups?: IKpiGroup[];
   goals?: MCDAGoal[];
+  kpis: IKpiDefinition[];
+  living_labs: ILivingLab[];
   [key: string]: any;
 }
 

@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import type { IKpiGroup, IKpiVariationData } from "../../../types";
 import { AnalysisSectionDivider } from "../ui/AnalysisSectionDivider";
-import { KpiGroupVariationCard } from "./KpiGroupVariationCard";
-import { KpiGroupVariationCharts } from "./KpiGroupVariationCharts";
+import {
+  KpiGroupVariationDataTable,
+  KpiGroupVariationCharts,
+  KpiGroupVariationMap,
+} from "./";
 
 interface KpiVariationsProps {
   selectedGroup: IKpiGroup | null;
@@ -13,7 +16,7 @@ export const KpiVariations: React.FC<KpiVariationsProps> = ({
   selectedGroup,
   variationsData,
 }) => {
-  const [viewMode, setViewMode] = useState<"data" | "chart">("data");
+  const [viewMode, setViewMode] = useState<"data" | "chart" | "map">("data");
 
   const divider = (
     <AnalysisSectionDivider
@@ -67,31 +70,42 @@ export const KpiVariations: React.FC<KpiVariationsProps> = ({
         <div className="inline-flex rounded-lg border border-gray-200 p-1 bg-gray-50">
           <button
             onClick={() => setViewMode("data")}
-            className={`px-3 py-1.5 text-sm rounded-md ${
+            className={`px-3 py-1.5 text-lg font-bold rounded-md transition-transform hover:scale-105 ${
               viewMode === "data"
-                ? "bg-white shadow-sm text-gray-900"
-                : "text-gray-600 hover:text-gray-900"
+                ? "bg-info shadow-lg text-gray-900"
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
             }`}
             aria-pressed={viewMode === "data"}
           >
-            Data
+            Data view
           </button>
           <button
             onClick={() => setViewMode("chart")}
-            className={`px-3 py-1.5 text-sm rounded-md ${
+            className={`px-3 py-1.5 text-lg font-bold rounded-md transition-transform hover:scale-105 ${
               viewMode === "chart"
-                ? "bg-white shadow-sm text-gray-900"
-                : "text-gray-600 hover:text-gray-900"
+                ? "bg-info shadow-lg text-gray-900"
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
             }`}
             aria-pressed={viewMode === "chart"}
           >
-            Chart
+            Chart view
+          </button>
+          <button
+            onClick={() => setViewMode("map")}
+            className={`px-3 py-1.5 text-lg font-bold rounded-md transition-transform hover:scale-105 ${
+              viewMode === "map"
+                ? "bg-info shadow-lg text-gray-900"
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+            }`}
+            aria-pressed={viewMode === "map"}
+          >
+            Map view
           </button>
         </div>
         {/* Living Labs Variations with Global Data */}
         <div>
           {viewMode === "data" ? (
-            <KpiGroupVariationCard
+            <KpiGroupVariationDataTable
               livingLabVariations={variationsData.livingLabVariations}
               groupName={variationsData.groupName}
               globalTotalVariation={variationsData.totalVariation}
@@ -100,10 +114,20 @@ export const KpiVariations: React.FC<KpiVariationsProps> = ({
               }
               globalKpiVariations={variationsData.allKpiVariations}
             />
-          ) : (
+          ) : viewMode === "chart" ? (
             <KpiGroupVariationCharts
               groupName={variationsData.groupName}
               livingLabVariations={variationsData.livingLabVariations}
+              globalTotalVariation={variationsData.totalVariation}
+              globalTotalVariationPercentage={
+                variationsData.totalVariationPercentage
+              }
+              globalKpiVariations={variationsData.allKpiVariations}
+            />
+          ) : (
+            <KpiGroupVariationMap
+              livingLabVariations={variationsData.livingLabVariations}
+              groupName={variationsData.groupName}
               globalTotalVariation={variationsData.totalVariation}
               globalTotalVariationPercentage={
                 variationsData.totalVariationPercentage

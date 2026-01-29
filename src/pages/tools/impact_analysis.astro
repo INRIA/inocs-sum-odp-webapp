@@ -13,6 +13,7 @@ import type {
   IKpiDefinition,
   IKpiGroup,
   IKpiVariationData,
+  ILivingLab,
 } from "../../types";
 import { calculateKpiVariationsData } from "../../lib/helpers/impact-analysis-format";
 
@@ -22,11 +23,20 @@ const api = new ApiClient(Astro.request);
 let jobRun: IJobRun | null = null;
 let kpiGroups: IKpiGroup[] = [];
 let kpiDefinitionsMap: Map<string, IKpiDefinition> = new Map();
+let livingLabsMap: Map<string, ILivingLab> = new Map();
 let kpiVariationsDataMap: Map<string, IKpiVariationData> = new Map();
 let errorMessage: string | null = null;
 
 try {
   const response = await api.getLatestJobRun("kpi_measures_analysis");
+
+  const livingLabsResponse = await api.getLivingLabs();
+  // Build living labs map for geolocation data
+  if (livingLabsResponse) {
+    livingLabsResponse.forEach((lab: ILivingLab) => {
+      livingLabsMap.set(String(lab.id), lab);
+    });
+  }
   if (response) {
     jobRun = response;
 
@@ -47,6 +57,7 @@ try {
           const variationData = calculateKpiVariationsData(
             successItem.results,
             kpiDefinitionsMap,
+            livingLabsMap,
           );
           kpiVariationsDataMap.set(String(successItem.group_id), variationData);
         } catch (err) {

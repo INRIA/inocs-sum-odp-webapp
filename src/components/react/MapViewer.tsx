@@ -6,6 +6,7 @@ export type MarkerData = {
   name?: string;
   coordinates: { lat: number; lng: number };
   radius?: number;
+  color?: string; // Optional marker color, defaults to COLOR_PRIMARY
   // allow attaching any payload if needed
   meta?: Record<string, any>;
 };
@@ -69,14 +70,14 @@ export function MapViewer({
   const { MapContainer, TileLayer, Marker, Circle, Popup } =
     leafletComponents as any;
 
-  const myIcon = () =>
+  const createMarkerIcon = (color: string = COLOR_PRIMARY) =>
     leaflet.divIcon({
       html: `
                   <div style="
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    background: ${COLOR_PRIMARY};
+                    background: ${color};
                     font-size: 1rem;
                     width: 1rem;
                     height: 1rem;
@@ -106,7 +107,7 @@ export function MapViewer({
           <React.Fragment key={m.id}>
             <Marker
               position={[m.coordinates.lat, m.coordinates.lng]}
-              icon={myIcon()}
+              icon={createMarkerIcon(m.color)}
               eventHandlers={{
                 click: () => onMarkerClick && onMarkerClick(m),
               }}

@@ -46,7 +46,7 @@ export const KpiGroupVariationCharts: React.FC<
   );
 
   const chartsByName = new Map<string, KpiVariationChartData>();
-  chartsByName.set(`Variation per Lab for all KPIs in ${groupName}`, {
+  chartsByName.set(`Variation per Lab for all KPIs in ${groupName} group`, {
     labs,
     kpis: [
       {
@@ -187,7 +187,7 @@ export const KpiGroupVariationCharts: React.FC<
                 data={data}
                 selectedLabIds={selectedLabIds}
               />
-              <h3 className="text-center">Variations per KPI in {groupName}</h3>
+              <h3 className="text-center">Variations per KPI in {groupName} group</h3>
             </div>
           ) : (
             <KpiVariationChart

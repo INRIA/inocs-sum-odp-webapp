@@ -11,7 +11,9 @@ interface KpiGroupVariationCardProps {
   globalKpiVariations?: IKpiVariation[];
 }
 
-export const KpiGroupVariationCard: React.FC<KpiGroupVariationCardProps> = ({
+export const KpiGroupVariationDataTable: React.FC<
+  KpiGroupVariationCardProps
+> = ({
   livingLabVariations,
   groupName,
   globalTotalVariation,
