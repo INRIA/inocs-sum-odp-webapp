@@ -306,7 +306,7 @@ export function getMeasuresProgress(measures: IProject[]): {
     progress: 100,
     details: [
       {
-        label: "Push meaasures",
+        label: "Push measures",
         value: `${measures?.filter((m) => m.type === "PUSH").length}`,
       },
       {
