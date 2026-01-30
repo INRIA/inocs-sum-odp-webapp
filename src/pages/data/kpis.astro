@@ -18,7 +18,11 @@ const categories = (await api.getCategories("KPI_SIEF")) ?? [];
 
 // Extract unique years from all KPI results for filtering
 const allYears = new Set<number>();
-livingLabsData.forEach((lab) => {
+const filteredLivingLabs = livingLabsData.filter(
+  (lab) => lab.kpi_results && lab.kpi_results.length > 0,
+);
+
+filteredLivingLabs.forEach((lab) => {
   lab.kpi_results?.forEach((result) => {
     if (result.result_before?.date) {
       allYears.add(new Date(result.result_before.date).getFullYear());
@@ -31,7 +35,7 @@ livingLabsData.forEach((lab) => {
 const sortedYears = Array.from(allYears).sort((a, b) => a - b);
 
 // Prepare living labs data for the dashboard
-const livingLabsForDashboard = livingLabsData.map((lab) => ({
+const livingLabsForDashboard = filteredLivingLabs.map((lab) => ({
   id: lab.id,
   name: lab.name,
   kpiResults: lab.kpi_results ?? [],
@@ -39,7 +43,7 @@ const livingLabsForDashboard = livingLabsData.map((lab) => ({
 ---
 
 <Layout role="visitor">
-  <div class="mx-auto px-4 py-8">
+  <div class="mx-auto px-1 py-8" id="data-dashboard-top">
     <!-- Page Header -->
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">KPI Data Dashboard</h1>

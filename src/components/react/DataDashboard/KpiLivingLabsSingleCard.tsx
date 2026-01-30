@@ -3,7 +3,7 @@ import type { KpiLivingLabsCardProps } from "./types";
 import { Badge, Tooltip } from "../ui";
 import { D3TimelineChart } from "./D3TimelineChart";
 
-export const KpiLivingLabsCard: React.FC<KpiLivingLabsCardProps> = ({
+export const KpiLivingLabsSingleCard: React.FC<KpiLivingLabsCardProps> = ({
   kpi,
   labTimelines,
 }) => {
@@ -35,7 +35,7 @@ export const KpiLivingLabsCard: React.FC<KpiLivingLabsCardProps> = ({
         </div>
 
         {/* KPI Title */}
-        <div className="flex flex-col text-center my-2 mb-4 pr-16">
+        <div className="flex flex-col text-center my-2 mb-4">
           <h6 className="text-center text-black font-semibold">
             {kpi?.name ?? "KPI"}
           </h6>
@@ -52,11 +52,12 @@ export const KpiLivingLabsCard: React.FC<KpiLivingLabsCardProps> = ({
             data={labTimelines}
             metricType={kpi.metric}
             height={280}
+            showLegend={false}
           />
         </div>
 
         {/* Summary footer */}
-        <div className="mt-4 pt-3 border-t border-gray-100 text-center">
+        <div className="mt-2 pt-2 border-t border-gray-100 text-center">
           <span className="text-sm text-gray-500">
             {labCount} living lab{labCount !== 1 ? "s" : ""} • {totalDataPoints}{" "}
             data point{totalDataPoints !== 1 ? "s" : ""}

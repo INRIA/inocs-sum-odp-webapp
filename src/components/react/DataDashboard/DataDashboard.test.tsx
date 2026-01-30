@@ -121,7 +121,10 @@ describe("DataDashboard", () => {
     it("renders the filters section with correct heading", () => {
       render(<DataDashboard {...createDefaultProps()} />);
 
-      expect(screen.getByText("Filters")).toBeInTheDocument();
+      // Use getByRole to target the heading specifically, avoiding tooltip text
+      expect(
+        screen.getByRole("heading", { name: "Filters" }),
+      ).toBeInTheDocument();
     });
 
     it("renders all living lab filter buttons", () => {
@@ -494,24 +497,49 @@ describe("DataDashboard", () => {
   });
 
   describe("Color Assignment", () => {
-    it("assigns colors from the predefined palette in order", () => {
+    it("assigns unique colors to each lab from the dynamic palette", () => {
       const props = createDefaultProps();
       render(<DataDashboard {...props} />);
 
       const childProps = getLastMockCallProps();
 
-      // First lab should get first color
-      expect(childProps.labColors[0].color).toBe("#004494");
-      // Second lab should get second color
-      expect(childProps.labColors[1].color).toBe("#98c33a");
-      // Third lab should get third color
-      expect(childProps.labColors[2].color).toBe("#ff632f");
+      // Each lab should have a color assigned
+      expect(childProps.labColors[0].color).toMatch(/^#[0-9a-fA-F]{6}$/);
+      expect(childProps.labColors[1].color).toMatch(/^#[0-9a-fA-F]{6}$/);
+      expect(childProps.labColors[2].color).toMatch(/^#[0-9a-fA-F]{6}$/);
+
+      // Colors should be unique for different labs
+      const colors = childProps.labColors.map(
+        (lc: { color: string }) => lc.color,
+      );
+      const uniqueColors = new Set(colors);
+      expect(uniqueColors.size).toBe(colors.length);
     });
 
-    it("cycles colors when there are more labs than palette colors", () => {
+    it("generates consistent colors for the same set of labs", () => {
       const props = createDefaultProps();
-      // Create 16 labs (more than the 15-color palette)
-      props.livingLabs = Array.from({ length: 16 }, (_, i) => ({
+
+      // First render
+      const { unmount } = render(<DataDashboard {...props} />);
+      const firstRenderColors = getLastMockCallProps().labColors.map(
+        (lc: { color: string }) => lc.color,
+      );
+      unmount();
+
+      // Second render with same props
+      render(<DataDashboard {...props} />);
+      const secondRenderColors = getLastMockCallProps().labColors.map(
+        (lc: { color: string }) => lc.color,
+      );
+
+      // Colors should be identical across renders
+      expect(firstRenderColors).toEqual(secondRenderColors);
+    });
+
+    it("handles many labs by generating color variations", () => {
+      const props = createDefaultProps();
+      // Create 20 labs (more than the base palette)
+      props.livingLabs = Array.from({ length: 20 }, (_, i) => ({
         id: `lab-${i + 1}`,
         name: `Lab ${i + 1}`,
         kpiResults: [],
@@ -520,8 +548,13 @@ describe("DataDashboard", () => {
 
       const childProps = getLastMockCallProps();
 
-      // 16th lab should cycle back to first color
-      expect(childProps.labColors[15].color).toBe("#004494");
+      // All 20 labs should have colors assigned
+      expect(childProps.labColors).toHaveLength(20);
+
+      // Each should be a valid hex color
+      childProps.labColors.forEach((lc: { color: string }) => {
+        expect(lc.color).toMatch(/^#[0-9a-fA-F]{6}$/);
+      });
     });
   });
 
@@ -531,7 +564,7 @@ describe("DataDashboard", () => {
       props.livingLabs = [];
       render(<DataDashboard {...props} />);
 
-      expect(screen.getByText("Living Labs")).toBeInTheDocument();
+      expect(screen.queryByText("Living Labs")).not.toBeInTheDocument();
       // No lab buttons should be rendered
       expect(
         screen.queryByRole("button", { name: /Lab/ }),

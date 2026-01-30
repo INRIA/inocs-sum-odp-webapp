@@ -1,11 +1,12 @@
-import React from "react";
-import type { KpiLivingLabsMultipleCardProps } from "./types";
+import React, { useMemo } from "react";
+import type { KpiLivingLabsMultipleCardProps, IFacetData } from "./types";
 import { Badge, Tooltip } from "../ui";
 import { D3TimelineChart } from "./D3TimelineChart";
+import { D3FacetedTimelineChart } from "./D3FacetedTimelineChart";
 
 export const KpiLivingLabsMultipleCard: React.FC<
   KpiLivingLabsMultipleCardProps
-> = ({ parentKpi, childKpis, kpiTimelineMap }) => {
+> = ({ parentKpi, childKpis, kpiTimelineMap, className }) => {
   // Get parent KPI timelines if data exists
   const parentTimelines = kpiTimelineMap.get(parentKpi.id) || [];
   const hasParentData = parentTimelines.length > 0;
@@ -15,6 +16,15 @@ export const KpiLivingLabsMultipleCard: React.FC<
     (child) =>
       kpiTimelineMap.has(child.id) && kpiTimelineMap.get(child.id)!.length > 0,
   );
+
+  // Build facets for the faceted chart
+  const facets: IFacetData[] = useMemo(() => {
+    return childKpisWithData.map((child) => ({
+      kpiId: child.id,
+      kpiName: child.name,
+      labTimelines: kpiTimelineMap.get(child.id) || [],
+    }));
+  }, [childKpisWithData, kpiTimelineMap]);
 
   // Count total data points and unique labs across all KPIs
   const allTimelines = [
@@ -30,13 +40,11 @@ export const KpiLivingLabsMultipleCard: React.FC<
   const uniqueLabIds = new Set(allTimelines.map((lab) => lab.labId));
   const labCount = uniqueLabIds.size;
 
-  // Calculate dynamic height based on number of charts
-  const chartCount = (hasParentData ? 1 : 0) + childKpisWithData.length;
-  const baseHeight = 280;
-  const childHeight = 220;
+  // Parent chart height
+  const parentChartHeight = 250;
 
   return (
-    <div className="p-2">
+    <div className={`p-2 ${className ?? ""}`}>
       <div className="p-4 relative rounded-2xl border-primary-light border bg-white shadow-sm hover:shadow-md transition-shadow">
         {/* Parent KPI Badge - Same style as KpiCard */}
         <div className="absolute top-0 right-0">
@@ -56,7 +64,7 @@ export const KpiLivingLabsMultipleCard: React.FC<
         </div>
 
         {/* Parent KPI Title */}
-        <div className="flex flex-col text-center my-2 mb-4 pr-16">
+        <div className="flex flex-col text-center my-2 mb-4">
           <h6 className="text-center text-black font-semibold">
             {parentKpi?.name ?? "KPI"}
           </h6>
@@ -69,57 +77,37 @@ export const KpiLivingLabsMultipleCard: React.FC<
 
         {/* Parent KPI Chart (if data exists) */}
         {hasParentData && (
-          <div className="mt-4 mb-6">
+          <div className="mt-4">
             <div className="text-sm font-medium text-gray-700 mb-2 px-2">
               Overall: {parentKpi.name}
             </div>
             <D3TimelineChart
               data={parentTimelines}
               metricType={parentKpi.metric}
-              height={baseHeight}
+              height={parentChartHeight}
+              showLegend={false}
             />
           </div>
         )}
 
-        {/* Child KPI Charts */}
-        {childKpisWithData.length > 0 && (
-          <div className="space-y-6 mt-4">
-            {childKpisWithData.map((childKpi) => {
-              const childTimelines = kpiTimelineMap.get(childKpi.id) || [];
-
-              return (
-                <div key={childKpi.id}>
-                  <div className="text-sm font-medium text-gray-700 mb-2 px-2 flex items-center gap-2">
-                    <span className="text-primary">▸</span>
-                    <span>{childKpi.name}</span>
-                    {childKpi.metric_description && (
-                      <Tooltip
-                        content={childKpi.metric_description}
-                        placement="top"
-                        iconClassName="h-3 w-3 text-gray-400"
-                      >
-                        ⓘ
-                      </Tooltip>
-                    )}
-                  </div>
-                  <D3TimelineChart
-                    data={childTimelines}
-                    metricType={childKpi.metric}
-                    height={childHeight}
-                  />
-                </div>
-              );
-            })}
+        {/* Faceted Chart for Child KPIs - Side by side comparison */}
+        {facets.length > 0 && (
+          <div className="mt-4" data-testid="subindicators-chart">
+            <D3FacetedTimelineChart
+              facets={facets}
+              metricType={parentKpi.metric}
+              facetHeight={180}
+              showLegend={false}
+            />
           </div>
         )}
 
         {/* Summary footer */}
-        <div className="mt-4 pt-3 border-t border-gray-100 text-center">
+        <div className="mt-2 pt-2 border-t border-gray-100 text-center">
           <span className="text-sm text-gray-500">
-            {labCount} living lab{labCount !== 1 ? "s" : ""} • {chartCount}{" "}
-            chart
-            {chartCount !== 1 ? "s" : ""} • {totalDataPoints} data point
-            {totalDataPoints !== 1 ? "s" : ""}
+            {labCount} living lab{labCount !== 1 ? "s" : ""} • {facets.length}{" "}
+            sub-indicator{facets.length !== 1 ? "s" : ""} • {totalDataPoints}{" "}
+            data point{totalDataPoints !== 1 ? "s" : ""}
           </span>
         </div>
       </div>

@@ -8,6 +8,7 @@ export const D3TimelineChart: React.FC<D3TimelineChartProps> = ({
   data,
   metricType,
   height = 250,
+  showLegend = true,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -36,7 +37,12 @@ export const D3TimelineChart: React.FC<D3TimelineChartProps> = ({
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    const margin = { top: 20, right: 120, bottom: 40, left: 60 };
+    const margin = {
+      top: 20,
+      right: showLegend ? 120 : 20,
+      bottom: 40,
+      left: 60,
+    };
     const width = dimensions.width - margin.left - margin.right;
     const chartHeight = dimensions.height - margin.top - margin.bottom;
 
@@ -59,7 +65,14 @@ export const D3TimelineChart: React.FC<D3TimelineChartProps> = ({
 
     const minYear = Math.min(...allYears);
     const maxYear = Math.max(...allYears);
-    const maxValue = Math.max(...allValues, 0) * 1.1; // 10% padding
+    const minValue = Math.min(...allValues);
+    const maxValue = Math.max(...allValues);
+    // Add 10% padding on both ends
+    const range = maxValue - minValue;
+    const padding = range * 0.1 || 1; // Use 1 as fallback if range is 0
+    // If all values are positive, keep min at 0 for better visualization
+    const yMin = minValue >= 0 ? 0 : minValue - padding;
+    const yMax = maxValue + padding;
 
     // X scale (years)
     const x = d3
@@ -68,7 +81,7 @@ export const D3TimelineChart: React.FC<D3TimelineChartProps> = ({
       .range([0, width]);
 
     // Y scale (values)
-    const y = d3.scaleLinear().domain([0, maxValue]).range([chartHeight, 0]);
+    const y = d3.scaleLinear().domain([yMin, yMax]).range([chartHeight, 0]);
 
     // X axis
     g.append("g")
@@ -77,7 +90,7 @@ export const D3TimelineChart: React.FC<D3TimelineChartProps> = ({
         d3
           .axisBottom(x)
           .tickFormat((d) => d.toString())
-          .ticks(Math.min(maxYear - minYear + 1, 10))
+          .ticks(Math.min(maxYear - minYear + 1, 10)),
       )
       .selectAll("text")
       .style("font-size", "11px");
@@ -93,9 +106,14 @@ export const D3TimelineChart: React.FC<D3TimelineChartProps> = ({
     // Y axis
     g.append("g")
       .call(
-        d3.axisLeft(y).tickFormat((d) =>
-          getFormattedValueString(d as number, metricType as EnumKpiMetricType)
-        )
+        d3
+          .axisLeft(y)
+          .tickFormat((d) =>
+            getFormattedValueString(
+              d as number,
+              metricType as EnumKpiMetricType,
+            ),
+          ),
       )
       .selectAll("text")
       .style("font-size", "11px");
@@ -107,7 +125,7 @@ export const D3TimelineChart: React.FC<D3TimelineChartProps> = ({
         d3
           .axisLeft(y)
           .tickSize(-width)
-          .tickFormat(() => "")
+          .tickFormat(() => ""),
       )
       .selectAll("line")
       .attr("stroke", "#e5e7eb")
@@ -160,54 +178,60 @@ export const D3TimelineChart: React.FC<D3TimelineChartProps> = ({
         });
     });
 
-    // Legend
-    const legend = g
-      .append("g")
-      .attr("class", "legend")
-      .attr("transform", `translate(${width + 10}, 0)`);
-
-    data.forEach((lab, i) => {
-      const legendItem = legend
+    // Legend (only if showLegend is true)
+    if (showLegend) {
+      const legend = g
         .append("g")
-        .attr("transform", `translate(0, ${i * 20})`);
+        .attr("class", "legend")
+        .attr("transform", `translate(${width + 10}, 0)`);
 
-      legendItem
-        .append("line")
-        .attr("x1", 0)
-        .attr("x2", 20)
-        .attr("y1", 0)
-        .attr("y2", 0)
-        .attr("stroke", lab.color)
-        .attr("stroke-width", 2.5);
+      data.forEach((lab, i) => {
+        const legendItem = legend
+          .append("g")
+          .attr("transform", `translate(0, ${i * 20})`);
 
-      legendItem
-        .append("circle")
-        .attr("cx", 10)
-        .attr("cy", 0)
-        .attr("r", 4)
-        .attr("fill", lab.color);
+        legendItem
+          .append("line")
+          .attr("x1", 0)
+          .attr("x2", 20)
+          .attr("y1", 0)
+          .attr("y2", 0)
+          .attr("stroke", lab.color)
+          .attr("stroke-width", 2.5);
 
-      legendItem
-        .append("text")
-        .attr("x", 25)
-        .attr("y", 4)
-        .attr("class", "text-xs fill-gray-700")
-        .text(lab.labName.length > 10 ? lab.labName.slice(0, 10) + "..." : lab.labName)
-        .append("title")
-        .text(lab.labName);
-    });
+        legendItem
+          .append("circle")
+          .attr("cx", 10)
+          .attr("cy", 0)
+          .attr("r", 4)
+          .attr("fill", lab.color);
+
+        legendItem
+          .append("text")
+          .attr("x", 25)
+          .attr("y", 4)
+          .attr("class", "text-xs fill-gray-700")
+          .text(
+            lab.labName.length > 10
+              ? lab.labName.slice(0, 10) + "..."
+              : lab.labName,
+          )
+          .append("title")
+          .text(lab.labName);
+      });
+    }
 
     // Tooltip functions
     function showTooltip(
       event: MouseEvent,
       lab: ILabKpiTimeline,
-      point: { year: number; value: number; date: string }
+      point: { year: number; value: number; date: string },
     ) {
       if (!tooltipRef.current) return;
 
       const formattedValue = getFormattedValueString(
         point.value,
-        metricType as EnumKpiMetricType
+        metricType as EnumKpiMetricType,
       );
 
       tooltipRef.current.innerHTML = `

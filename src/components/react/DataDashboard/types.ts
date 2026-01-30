@@ -96,7 +96,7 @@ export interface KpiLivingLabsCardsProps {
 }
 
 /**
- * Props for KpiLivingLabsCard component
+ * Props for KpiLivingLabsSingleCard component
  */
 export interface KpiLivingLabsCardProps {
   kpi: IKpi;
@@ -110,6 +110,7 @@ export interface KpiLivingLabsMultipleCardProps {
   parentKpi: IKpi;
   childKpis: IKpi[];
   kpiTimelineMap: IKpiTimelineMap;
+  className?: string;
 }
 
 /**
@@ -119,4 +120,26 @@ export interface D3TimelineChartProps {
   data: ILabKpiTimeline[];
   metricType: string;
   height?: number;
+  showLegend?: boolean;
+}
+
+/**
+ * Facet data for D3FacetedTimelineChart
+ * Each facet represents a child KPI's timeline
+ */
+export interface IFacetData {
+  kpiId: string;
+  kpiName: string;
+  labTimelines: ILabKpiTimeline[];
+}
+
+/**
+ * Props for D3FacetedTimelineChart component
+ * Displays multiple facets in a unified chart with shared axis
+ */
+export interface D3FacetedTimelineChartProps {
+  facets: IFacetData[];
+  metricType: string;
+  facetHeight?: number;
+  showLegend?: boolean;
 }

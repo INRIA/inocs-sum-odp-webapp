@@ -1,9 +1,11 @@
 import React, { useMemo } from "react";
-import type { KpiLivingLabsCardsProps } from "./types";
-import { KpiLivingLabsCard } from "./KpiLivingLabsCard";
+import type { KpiLivingLabsCardsProps, IKpiGroup } from "./types";
+import { KpiLivingLabsSingleCard } from "./KpiLivingLabsSingleCard";
 import { KpiLivingLabsMultipleCard } from "./KpiLivingLabsMultipleCard";
 import { buildKpiDataMap, groupKpisByParentChild } from "./utils";
 import { COLOR_GRAY } from "../../../types/Constants";
+import { ExpansionPanel, Badge, TopStickyLegend } from "../ui";
+import type { IKpiTimelineMap } from "./types";
 
 export const KpiLivingLabsCards: React.FC<KpiLivingLabsCardsProps> = ({
   livingLabs,
@@ -69,11 +71,86 @@ export const KpiLivingLabsCards: React.FC<KpiLivingLabsCardsProps> = ({
       // For parent groups, check if parent or any child has data
       const hasParentData = kpiDataMap.has(group.parentKpi.id);
       const hasChildData = group.childKpis.some((child) =>
-        kpiDataMap.has(child.id)
+        kpiDataMap.has(child.id),
       );
       return hasParentData || hasChildData;
     }
   });
+
+  // Group KPIs by category for display
+  const groupsByCategory = useMemo(() => {
+    const categoryMap = new Map<
+      number,
+      { category: (typeof categories)[0]; groups: IKpiGroup[] }
+    >();
+
+    // Initialize with selected categories
+    categories
+      .filter((cat) => filter.selectedCategoryIds.includes(cat.id))
+      .forEach((category) => {
+        categoryMap.set(category.id, { category, groups: [] });
+      });
+
+    // Assign each group to its category
+    groupsWithData.forEach((group) => {
+      const kpiId = group.type === "single" ? group.kpi.id : group.parentKpi.id;
+
+      // Find which category this KPI belongs to
+      for (const category of categories) {
+        if (category.kpis?.some((kpi) => kpi.id === kpiId)) {
+          const entry = categoryMap.get(category.id);
+          if (entry) {
+            entry.groups.push(group);
+          }
+          break;
+        }
+      }
+    });
+
+    // Filter out categories with no groups
+    return Array.from(categoryMap.values()).filter(
+      (entry) => entry.groups.length > 0,
+    );
+  }, [categories, filter.selectedCategoryIds, groupsWithData]);
+
+  // Get selected labs with their colors for the legend
+  // IMPORTANT: This must be before any early returns to maintain consistent hook order
+  const legendItems = useMemo(() => {
+    return livingLabs
+      .filter((lab) => filter.selectedLabIds.includes(lab.id))
+      .map((lab) => ({
+        id: lab.id,
+        label: lab.name,
+        color: colorMap.get(lab.id) || COLOR_GRAY,
+      }));
+  }, [livingLabs, filter.selectedLabIds, colorMap]);
+
+  // Helper function to render a group of KPIs
+  const renderKpiGroup = (group: IKpiGroup, kpiDataMap: IKpiTimelineMap) => {
+    if (group.type === "single") {
+      return (
+        <div key={group.kpi.id} className="break-inside-avoid col-span-1">
+          <KpiLivingLabsSingleCard
+            kpi={group.kpi}
+            labTimelines={kpiDataMap.get(group.kpi.id) ?? []}
+          />
+        </div>
+      );
+    } else {
+      return (
+        <div
+          key={group.parentKpi.id}
+          className="break-inside-avoid md:col-span-2"
+        >
+          <KpiLivingLabsMultipleCard
+            parentKpi={group.parentKpi}
+            childKpis={group.childKpis}
+            kpiTimelineMap={kpiDataMap}
+          />
+        </div>
+      );
+    }
+  };
 
   if (groupsWithData.length === 0) {
     return (
@@ -90,27 +167,47 @@ export const KpiLivingLabsCards: React.FC<KpiLivingLabsCardsProps> = ({
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {groupsWithData.map((group) => {
-        if (group.type === "single") {
-          return (
-            <KpiLivingLabsCard
-              key={group.kpi.id}
-              kpi={group.kpi}
-              labTimelines={kpiDataMap.get(group.kpi.id) ?? []}
-            />
-          );
-        } else {
-          return (
-            <KpiLivingLabsMultipleCard
-              key={group.parentKpi.id}
-              parentKpi={group.parentKpi}
-              childKpis={group.childKpis}
-              kpiTimelineMap={kpiDataMap}
-            />
-          );
-        }
-      })}
+    <div className="flex flex-col gap-4 mx-auto w-full">
+      {/* Labs Legend - Sticky when scrolled to top */}
+      <TopStickyLegend
+        id="data-dashboard-legend"
+        title="Displayed Living Labs"
+        items={legendItems}
+      />
+      {groupsByCategory.map(({ category, groups }) => (
+        <ExpansionPanel
+          key={category.id}
+          header={
+            <div className="flex flex-row justify-center items-center gap-2 rounded-2xl border-info bg-info px-1 py-1">
+              <h5 className="text-center">{category.name}</h5>
+              <Badge
+                color="light"
+                size="sm"
+                tooltip="Number of KPIs in this category"
+                displayTooltipIcon={false}
+              >
+                {groups.length}
+              </Badge>
+            </div>
+          }
+          arrow
+          open={true}
+          content={
+            <div className="grid grid-flow-row-dense grid-cols-1 md:grid-cols-3 gap-0">
+              {groups
+                .sort((a, b) => {
+                  // Sort by number of children (parent groups first, then by size)
+                  const aSize =
+                    a.type === "parent" ? a.childKpis.length + 1 : 1;
+                  const bSize =
+                    b.type === "parent" ? b.childKpis.length + 1 : 1;
+                  return bSize - aSize;
+                })
+                .map((group) => renderKpiGroup(group, kpiDataMap))}
+            </div>
+          }
+        />
+      ))}
     </div>
   );
 };

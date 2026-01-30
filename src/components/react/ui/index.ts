@@ -17,3 +17,4 @@ export * from "./FAQAccordion";
 export * from "./TaskCard";
 export * from "./AnalysisSectionDivider";
 export * from "./CardFilter";
+export * from "./TopStickyLegend";
