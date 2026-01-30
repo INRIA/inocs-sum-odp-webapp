@@ -137,6 +137,120 @@ function prepareModalSplitData(
 }
 
 /**
+ * Modal split data for a single living lab
+ */
+export interface IModalSplitLabData {
+  labId: string;
+  labName: string;
+  before: { label: string; data: SplitItem[] };
+  after: { label: string; data: SplitItem[] };
+}
+
+/**
+ * Modal split data for a specific KPI across all living labs
+ */
+export interface IModalSplitKpiData {
+  kpiId: string;
+  kpiNumber: string;
+  kpiName: string;
+  labs: IModalSplitLabData[];
+}
+
+/**
+ * Prepare modal split data for the data dashboard
+ * Returns data grouped by KPI (15.a, 15.b, 15.c), each containing data for all living labs
+ */
+export function getModalSplitDataForDashboard(
+  kpiDefinitions: IKpi[],
+  allTransportModes: ITransportMode[],
+  livingLabs: {
+    id: string;
+    name: string;
+    kpiResults: IIKpiResultBeforeAfter[];
+  }[],
+): IModalSplitKpiData[] {
+  if (!kpiDefinitions || !allTransportModes || livingLabs.length === 0) {
+    return [];
+  }
+
+  // Filter to modal split KPIs only (15.a, 15.b, 15.c)
+  const modalSplitKpis = kpiDefinitions.filter((kpi) =>
+    ["15.a", "15.b", "15.c"].includes(kpi.kpi_number),
+  );
+
+  return modalSplitKpis.map((kpi) => {
+    // Process each living lab's data for this KPI
+    const labsData: IModalSplitLabData[] = livingLabs
+      .map((lab) => {
+        const labKpiResults = lab.kpiResults.filter(
+          (result) => result.kpidefinition_id === kpi.id,
+        );
+
+        if (labKpiResults.length === 0) {
+          return null;
+        }
+
+        const beforeData: SplitItem[] = [];
+        const afterData: SplitItem[] = [];
+
+        // Build label with year from first result
+        const beforeLabelWithYear = labKpiResults[0]?.result_before?.date
+          ? `${new Date(labKpiResults[0].result_before.date).getFullYear()}`
+          : "Before";
+        const afterLabelWithYear = labKpiResults[0]?.result_after?.date
+          ? `${new Date(labKpiResults[0].result_after.date).getFullYear()}`
+          : "After";
+
+        labKpiResults.forEach((kpiResult) => {
+          const transportMode = allTransportModes.find(
+            (tm) =>
+              tm.id === kpiResult.result_before?.transport_mode_id ||
+              tm.id === kpiResult.result_after?.transport_mode_id,
+          );
+
+          if (transportMode) {
+            if (kpiResult.result_before?.value) {
+              beforeData.push({
+                label: transportMode.name,
+                value: kpiResult.result_before.value,
+                color: transportMode.color || "#cccccc",
+              });
+            }
+
+            if (kpiResult.result_after?.value) {
+              afterData.push({
+                label: transportMode.name,
+                value: kpiResult.result_after.value,
+                color: transportMode.color || "#cccccc",
+              });
+            }
+          }
+        });
+
+        // Only include labs that have data
+        if (beforeData.length === 0 && afterData.length === 0) {
+          return null;
+        }
+
+        return {
+          labId: lab.id,
+          labName: lab.name,
+          before: { label: beforeLabelWithYear, data: beforeData },
+          after: { label: afterLabelWithYear, data: afterData },
+        };
+      })
+      .filter((lab): lab is IModalSplitLabData => lab !== null);
+
+    return {
+      kpiId: kpi.id,
+      kpiNumber: kpi.kpi_number,
+      kpiName: kpi.name,
+      labs: labsData,
+    };
+  });
+}
+
+/**
  * Create map marker data from living lab
  */
 export function createMapMarker(livingLab: ILivingLabPopulated): MarkerData {

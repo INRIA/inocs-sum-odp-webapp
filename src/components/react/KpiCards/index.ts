@@ -3,3 +3,4 @@ export * from "./KpiPercentage";
 export * from "./KpiRatio";
 export * from "./KpiDefault";
 export * from "./KpiMultiple";
+export * from "./ModalSplitStackedBarChart";

@@ -32,24 +32,24 @@ const categories = (await api.getCategories("KPI_SIEF")) ?? [];
 // Prepare data for components
 const nsmTransportModes = getNSMTransportModes(
   livingLabData,
-  allTransportModes
+  allTransportModes,
 );
 
 const { pushMeasures, pullMeasures } = separateMeasures(
-  livingLabData?.projects ?? []
+  livingLabData?.projects ?? [],
 );
 
 const modalSplitKpis = getModalSplitKpiResults(
   allKpis,
   allTransportModes,
-  livingLabData?.kpi_results ?? []
+  livingLabData?.kpi_results ?? [],
 );
 
 const mapMarker = createMapMarker(livingLabData);
 const kpiResultsByCategory = categories.map((category) => ({
   ...category,
   kpiResults: livingLabData?.kpi_results?.filter((kpiResult) =>
-    category.kpis?.some((kpi) => kpi.id === kpiResult.kpidefinition_id)
+    category.kpis?.some((kpi) => kpi.id === kpiResult.kpidefinition_id),
   ),
 }));
 ---

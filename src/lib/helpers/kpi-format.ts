@@ -60,13 +60,20 @@ export function getFormattedValueString(
 ) {
   if (value === undefined || value === null || Number.isNaN(value)) return "—";
   if (type === EnumKpiMetricType.PERCENTAGE) {
-    return `${(value * 100).toFixed(0)}%`;
+    return `${value.toFixed(0)}%`;
   }
   if (type === EnumKpiMetricType.RATIO) {
     return `${value.toFixed(1)}x`;
   }
 
   return `${value}`;
+}
+
+export function formatValueToString(
+  value?: number | null,
+  type?: EnumKpiMetricType,
+) {
+  return getFormattedValueString(formatValue(value, type), type);
 }
 
 // getRatioComparedToCar: returns an object with highlight text and whether it's less than cars (1)

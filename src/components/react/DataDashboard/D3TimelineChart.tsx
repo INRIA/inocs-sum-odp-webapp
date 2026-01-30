@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import type { D3TimelineChartProps, ILabKpiTimeline } from "./types";
-import { getFormattedValueString } from "../../../lib/helpers";
+import { formatValueToString } from "../../../lib/helpers";
 import type { EnumKpiMetricType } from "../../../types/KPIs";
 
 export const D3TimelineChart: React.FC<D3TimelineChartProps> = ({
@@ -109,10 +109,7 @@ export const D3TimelineChart: React.FC<D3TimelineChartProps> = ({
         d3
           .axisLeft(y)
           .tickFormat((d) =>
-            getFormattedValueString(
-              d as number,
-              metricType as EnumKpiMetricType,
-            ),
+            formatValueToString(d as number, metricType as EnumKpiMetricType),
           ),
       )
       .selectAll("text")
@@ -229,7 +226,7 @@ export const D3TimelineChart: React.FC<D3TimelineChartProps> = ({
     ) {
       if (!tooltipRef.current) return;
 
-      const formattedValue = getFormattedValueString(
+      const formattedValue = formatValueToString(
         point.value,
         metricType as EnumKpiMetricType,
       );

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import * as d3 from "d3";
 import type { D3FacetedTimelineChartProps, ILabKpiTimeline } from "./types";
-import { getFormattedValueString } from "../../../lib/helpers";
+import { formatValueToString } from "../../../lib/helpers";
 import type { EnumKpiMetricType } from "../../../types/KPIs";
 
 const MOBILE_BREAKPOINT = 768;
@@ -168,7 +168,7 @@ export const D3FacetedTimelineChart: React.FC<D3FacetedTimelineChartProps> = ({
             d3
               .axisLeft(yScale)
               .tickFormat((d) =>
-                getFormattedValueString(
+                formatValueToString(
                   d as number,
                   metricType as EnumKpiMetricType,
                 ),
@@ -355,7 +355,7 @@ export const D3FacetedTimelineChart: React.FC<D3FacetedTimelineChartProps> = ({
     ) {
       if (!tooltipRef.current) return;
 
-      const formattedValue = getFormattedValueString(
+      const formattedValue = formatValueToString(
         point.value,
         metricType as EnumKpiMetricType,
       );

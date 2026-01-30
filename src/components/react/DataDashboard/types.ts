@@ -1,4 +1,4 @@
-import type { IIKpiResultBeforeAfter, IKpi } from "../../../types";
+import type { IIKpiResultBeforeAfter, IKpi, ITransportMode } from "../../../types";
 import type { ICategory } from "../../../types/Category";
 
 /**
@@ -75,6 +75,26 @@ export interface IParentKpiGroup {
 export type IKpiGroup = ISingleKpiGroup | IParentKpiGroup;
 
 /**
+ * Modal split data for a single living lab (used by ModalSplitLivingLabsCard)
+ */
+export interface IModalSplitLabData {
+  labId: string;
+  labName: string;
+  before: { label: string; data: { label: string; value: number; color: string }[] };
+  after: { label: string; data: { label: string; value: number; color: string }[] };
+}
+
+/**
+ * Modal split data for a specific KPI across all living labs
+ */
+export interface IModalSplitKpiData {
+  kpiId: string;
+  kpiNumber: string;
+  kpiName: string;
+  labs: IModalSplitLabData[];
+}
+
+/**
  * Props for DataDashboard main component
  */
 export interface DataDashboardProps {
@@ -82,6 +102,8 @@ export interface DataDashboardProps {
   kpis: IKpi[];
   availableYears: number[];
   categories: ICategory[];
+  /** Pre-processed modal split data (computed on SSR for performance) */
+  modalSplitData?: IModalSplitKpiData[];
 }
 
 /**
@@ -142,4 +164,21 @@ export interface D3FacetedTimelineChartProps {
   metricType: string;
   facetHeight?: number;
   showLegend?: boolean;
+}
+
+/**
+ * Props for ModalSplitLivingLabsCard component
+ * Displays modal split data for a single KPI across all living labs
+ */
+export interface ModalSplitLivingLabsCardProps {
+  kpiId: string;
+  kpiNumber: string;
+  kpiName: string;
+  labs: {
+    labId: string;
+    labName: string;
+    before: { label: string; data: { label: string; value: number; color: string }[] };
+    after: { label: string; data: { label: string; value: number; color: string }[] };
+  }[];
+  filter: KpiLivingLabsCardsFilter;
 }

@@ -1,0 +1,119 @@
+import React from "react";
+import type { ModalSplitLivingLabsCardProps } from "./types";
+import { Badge, Tooltip } from "../ui";
+import { ModalSplitStackedBarChart } from "../KpiCards/ModalSplitStackedBarChart";
+import type { ModalSplitChartDataset } from "../KpiCards/ModalSplitChart";
+
+/**
+ * ModalSplitLivingLabsCard displays modal split data for a single KPI
+ * across all filtered living labs using horizontal stacked bar charts.
+ */
+export const ModalSplitLivingLabsCard: React.FC<
+  ModalSplitLivingLabsCardProps
+> = ({ kpiId, kpiNumber, kpiName, labs, filter }) => {
+  // Filter labs based on selected lab IDs
+  const filteredLabs = labs.filter((lab) =>
+    filter.selectedLabIds.includes(lab.labId),
+  );
+
+  // Filter by selected years
+  const labsWithFilteredYears = filteredLabs
+    .map((lab) => {
+      // Extract years from labels (e.g., "Before (2023)" -> 2023)
+      const beforeYear = lab.before.label;
+      const afterYear = lab.after.label;
+
+      const hasBeforeInRange =
+        beforeYear && filter.selectedYears.includes(parseInt(beforeYear, 10));
+      const hasAfterInRange =
+        afterYear && filter.selectedYears.includes(parseInt(afterYear, 10));
+
+      // Only include data that matches the year filter
+      return {
+        ...lab,
+        before: hasBeforeInRange ? lab.before : { ...lab.before, data: [] },
+        after: hasAfterInRange ? lab.after : { ...lab.after, data: [] },
+      };
+    })
+    .filter((lab) => lab.before.data.length > 0 || lab.after.data.length > 0);
+
+  if (labsWithFilteredYears.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="p-2">
+      <div className="p-4 relative rounded-2xl border-primary-light border bg-white shadow-sm hover:shadow-md transition-shadow">
+        {/* KPI Badge */}
+        <div className="absolute top-0 right-0">
+          <Badge
+            size="sm"
+            color="light"
+            className="rounded-tl-none rounded-bl-xl rounded-br-none rounded-tr-xl"
+          >
+            <Tooltip
+              content={`Modal Split KPI ${kpiNumber}`}
+              placement="left"
+              iconClassName="h-3 w-3 text-primary"
+            >
+              KPI {kpiNumber} ⓘ
+            </Tooltip>
+          </Badge>
+        </div>
+
+        {/* KPI Title */}
+        <div className="flex flex-col text-center my-2 mb-4">
+          <h6 className="text-center text-black font-semibold">{kpiName}</h6>
+          <div className="text-sm text-muted mt-1">
+            Modal split comparison across living labs
+          </div>
+        </div>
+
+        {/* Living Labs List - Each lab in a column */}
+        <div className="flex flex-col gap-6 mt-4">
+          {labsWithFilteredYears.map((lab) => {
+            // Prepare chart data: before and after as separate datasets
+            const chartData: ModalSplitChartDataset[] = [];
+
+            if (lab.before.data.length > 0) {
+              chartData.push(lab.before);
+            }
+            if (lab.after.data.length > 0) {
+              chartData.push(lab.after);
+            }
+
+            return (
+              <div
+                key={lab.labId}
+                className="border-b border-gray-100 pb-4 last:border-b-0 last:pb-0"
+              >
+                {/* Lab Name */}
+                <h6 className="text-sm font-medium text-gray-700 mb-2">
+                  {lab.labName}
+                </h6>
+
+                {/* Horizontal Stacked Bar Chart */}
+                <div className="w-full">
+                  <ModalSplitStackedBarChart
+                    data={chartData}
+                    orientation="horizontal"
+                    height={chartData.length * 60 + 60}
+                    viewLegend={false}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Summary footer */}
+        <div className="mt-4 pt-2 border-t border-gray-100 text-center">
+          <span className="text-sm text-gray-500">
+            {labsWithFilteredYears.length} living lab
+            {labsWithFilteredYears.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};

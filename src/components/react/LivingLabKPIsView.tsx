@@ -1,8 +1,13 @@
+import { useState } from "react";
 import type { IKpi, IIKpiResultBeforeAfter } from "../../types";
-import { Badge, ExpansionPanel } from "./ui";
+import { Badge, ExpansionPanel, Tabs } from "./ui";
 import type { ICategory } from "../../types/Category";
 import { KpiCard, KpiMultiple } from "./KpiCards";
-import ModalSplitChart, { type SplitItem } from "./KpiCards/ModalSplitChart";
+import ModalSplitChart, {
+  type SplitItem,
+  type ModalSplitChartView,
+} from "./KpiCards/ModalSplitChart";
+import { ChartPieIcon, ChartBarIcon } from "@heroicons/react/24/outline";
 
 interface IKpiResultsByCategory extends ICategory {
   kpiResults: IIKpiResultBeforeAfter[];
@@ -23,9 +28,11 @@ export function LivingLabKPIsView({
   kpis,
   modalSplitKpis,
 }: Props) {
+  const [chartView, setChartView] = useState<ModalSplitChartView>("doughnut");
+
   const getKpiSection = (
     parentKpi: IKpi,
-    resultKpis: IIKpiResultBeforeAfter[] = []
+    resultKpis: IIKpiResultBeforeAfter[] = [],
   ) => {
     if (resultKpis.length === 1) {
       return (
@@ -71,7 +78,7 @@ export function LivingLabKPIsView({
           .sort(
             ([a], [b]) =>
               (kpiResultsMap.get(b)?.length ?? 0) -
-              (kpiResultsMap.get(a)?.length ?? 0)
+              (kpiResultsMap.get(a)?.length ?? 0),
           )
           .map(([key, parentKpi]) => (
             // <div className="break-inside-avoid">
@@ -90,6 +97,48 @@ export function LivingLabKPIsView({
     );
   };
 
+  const renderModalSplitContent = () => (
+    <>
+      {modalSplitKpis &&
+        modalSplitKpis.length > 0 &&
+        modalSplitKpis.map(({ kpiName, before, after }) => (
+          <div key={kpiName} className="flex flex-col gap-4">
+            <h5 className="text-center mt-4">{kpiName}</h5>
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <ModalSplitChart
+                data={[before, after]}
+                view={chartView}
+                orientation="vertical"
+              />
+            </div>
+          </div>
+        ))}
+    </>
+  );
+
+  const chartViewTabs = [
+    {
+      id: "doughnut",
+      label: (
+        <span className="flex items-center gap-1">
+          <ChartPieIcon className="w-4 h-4" />
+          Pie Chart
+        </span>
+      ),
+      content: renderModalSplitContent(),
+    },
+    {
+      id: "stacked-bar",
+      label: (
+        <span className="flex items-center gap-1">
+          <ChartBarIcon className="w-4 h-4" />
+          Stacked Bar
+        </span>
+      ),
+      content: renderModalSplitContent(),
+    },
+  ];
+
   if (modalSplitKpis && modalSplitKpis?.length > 0) {
     return (
       <ExpansionPanel
@@ -107,17 +156,12 @@ export function LivingLabKPIsView({
           </div>
         }
         content={
-          <>
-            {modalSplitKpis?.length > 0 &&
-              modalSplitKpis.map(({ kpiName, before, after }) => (
-                <div className="flex flex-col gap-4">
-                  <h5 className="text-center  mt-4">{kpiName}</h5>
-                  <div className="bg-white p-6 rounded-lg shadow-md">
-                    <ModalSplitChart data={[before, after]} />
-                  </div>
-                </div>
-              ))}
-          </>
+          <Tabs
+            tabs={chartViewTabs}
+            defaultTabId="doughnut"
+            onChange={(id) => setChartView(id as ModalSplitChartView)}
+            align="right"
+          />
         }
         arrow
         open={true}
@@ -149,7 +193,7 @@ export function LivingLabKPIsView({
               open={true}
               content={getCategorySection(kpiResults)}
             />
-          )
+          ),
       )}
     </div>
   );

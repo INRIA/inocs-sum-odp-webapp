@@ -34,7 +34,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Filler,
-  Legend
+  Legend,
 );
 
 type Props = {
@@ -53,7 +53,7 @@ export function KpiDefault({
 
   const currentValue = formatValue(
     after?.value ?? before?.value ?? null,
-    metricType
+    metricType,
   );
   const beforeValue = before?.value
     ? formatValue(before?.value, metricType)
@@ -64,7 +64,7 @@ export function KpiDefault({
     before?.value ?? null,
     after?.value ?? null,
     metricType,
-    progressionTarget
+    progressionTarget,
   );
 
   //Chartjs data
@@ -123,7 +123,8 @@ export function KpiDefault({
         {change?.length > 0 && (
           <div className="flex flex-col items-end justify-end mb-1">
             <p className="font-semibold">
-              {getFormattedValueString(beforeValue, metricType)}
+              {getFormattedValueString(beforeValue, metricType)}{" "}
+              {before?.date ? `in ${new Date(before.date).getFullYear()}` : ""}
             </p>
             <small
               className={`italic ${
@@ -131,9 +132,6 @@ export function KpiDefault({
               }`}
             >
               {change === null ? "" : `${change}`}
-            </small>
-            <small className="italic">
-              {before?.date ? `in ${new Date(before.date).getFullYear()}` : ""}
             </small>
           </div>
         )}

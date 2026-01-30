@@ -1,5 +1,6 @@
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
+import { ModalSplitStackedBarChart } from "./ModalSplitStackedBarChart";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -14,9 +15,15 @@ export interface ModalSplitChartDataset {
   data: SplitItem[];
 }
 
+export type ModalSplitChartView = "doughnut" | "stacked-bar";
+
 interface Props {
   data: ModalSplitChartDataset[];
   colors?: string[];
+  /** Which chart view to display. Default is 'doughnut' */
+  view?: ModalSplitChartView;
+  /** Orientation for stacked bar chart. Default is 'vertical' */
+  orientation?: "horizontal" | "vertical";
 }
 
 function normalizePercentages(items: SplitItem[]) {
@@ -29,7 +36,11 @@ function normalizePercentages(items: SplitItem[]) {
   return items.map((it) => +((Number(it.value) || 0) * 100).toFixed(1));
 }
 
-export default function ModalSplitChart({ data }: Props) {
+export default function ModalSplitChart({
+  data,
+  view = "doughnut",
+  orientation = "vertical",
+}: Props) {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
@@ -71,10 +82,20 @@ export default function ModalSplitChart({ data }: Props) {
       <div className="flex flex-col gap-2 w-full">
         <h5>{dataset.label}</h5>
         <div className="flex flex-row gap-2">
-          <div className="h-60 w-1/2">
-            <Doughnut data={chartData} options={options} />
+          <div className="h-60 w-2/3">
+            {view === "doughnut" && (
+              <Doughnut data={chartData} options={options} />
+            )}
+            {view === "stacked-bar" && (
+              <ModalSplitStackedBarChart
+                data={[dataset]}
+                orientation={orientation}
+                height={260}
+                viewLegend={false}
+              />
+            )}
           </div>
-          <div className="w-1/2 flex flex-col h-60 gap-0">
+          <div className="w-1/3 flex flex-col h-60 gap-0">
             {sortedData.map(({ label, value, color }, i) => (
               <li
                 key={label}
@@ -98,6 +119,35 @@ export default function ModalSplitChart({ data }: Props) {
     );
   };
 
+  // Stacked bar view
+  // if (view === "stacked-bar") {
+  //   return (
+  //     <div className="flex flex-col lg:flex-row gap-8">
+  //       {data.map((dataset, i) => (
+  //         <div
+  //           key={i}
+  //           className={`flex-1 ${
+  //             i !== 0
+  //               ? "border-t pt-8 lg:border-t-0 lg:pt-0 lg:border-l lg:pl-8 border-gray-300"
+  //               : ""
+  //           }`}
+  //         >
+  //           <div className="flex flex-col gap-2 w-full">
+  //             <h5>{dataset.label}</h5>
+  //             <ModalSplitStackedBarChart
+  //               data={[dataset]}
+  //               // orientation={orientation}
+  //               orientation="horizontal"
+  //               height={260}
+  //             />
+  //           </div>
+  //         </div>
+  //       ))}
+  //     </div>
+  //   );
+  // }
+
+  // Doughnut view (default)
   return (
     <div className="flex flex-col lg:flex-row gap-8">
       {data.map((dataset, i) => (
