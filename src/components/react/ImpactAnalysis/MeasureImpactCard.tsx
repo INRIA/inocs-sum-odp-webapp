@@ -1,6 +1,6 @@
 import React from "react";
 import type { IMeasureCoefficient } from "../../../types";
-import { coefficientToPercentage } from "../../../lib/helpers/impact-analysis-format";
+import { formatCoefficient } from "../../../lib/helpers/impact-analysis-format";
 
 interface MeasureImpactCardProps {
   measure: IMeasureCoefficient;
@@ -15,8 +15,6 @@ export const MeasureImpactCard: React.FC<MeasureImpactCardProps> = ({
 }) => {
   const coefficient = measure.coefficient;
   const isPositive = coefficient >= 0;
-  const formattedCoefficient = (coefficient * 100).toFixed(2);
-  const absCoefficient = Math.abs(coefficientToPercentage(coefficient));
 
   // Determine colors based on impact
   const colorClasses = isPositive
@@ -49,8 +47,7 @@ export const MeasureImpactCard: React.FC<MeasureImpactCardProps> = ({
       {/* Coefficient Value */}
       <div className="flex items-baseline gap-2 mb-2">
         <span className={`${coefficientSize} font-extrabold ${iconClasses}`}>
-          {isPositive ? "+" : "-"}
-          {absCoefficient}
+          {formatCoefficient(coefficient)}
         </span>
         <span className="text-sm text-dark">level of contribution to KPIs</span>
       </div>

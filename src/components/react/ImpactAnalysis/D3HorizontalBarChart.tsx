@@ -587,7 +587,7 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
           >
             <div className="font-bold mb-1">{tooltip.measure.name}</div>
             <div className="text-warning font-semibold mb-2">
-              Level: {formatCoefficient(tooltip.measure.coefficient, 3, "")}
+              Level: {formatCoefficient(tooltip.measure.coefficient)}
             </div>
             {tooltip.labs.length > 0 ? (
               <div>

@@ -239,11 +239,7 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
             Level of contribution from external conditions (out from policy
             measures analysed):{" "}
             <span className="font-mono font-semibold">
-              {formatCoefficient(
-                analysisResult.variation_under_no_measures,
-                3,
-                "",
-              )}
+              {formatCoefficient(analysisResult.variation_under_no_measures)}
             </span>
           </li>
         </ul>

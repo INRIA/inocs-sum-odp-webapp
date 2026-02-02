@@ -13,14 +13,14 @@ import {
 } from "../../types";
 
 const PERCENTAGE_DECIMALS = 2;
-const COEFFICIENT_MULTIPLIER = 100;
+const COEFFICIENT_MULTIPLIER = 1;
 /**
  * Format coefficient as percentage with sign
  */
 export function formatCoefficient(
   coefficient: number,
   decimals: number = PERCENTAGE_DECIMALS,
-  suffix: string = "%",
+  suffix: string = "",
 ): string {
   const percentage = (coefficient * COEFFICIENT_MULTIPLIER).toFixed(decimals);
   const sign = coefficient >= 0 ? "+" : "";
