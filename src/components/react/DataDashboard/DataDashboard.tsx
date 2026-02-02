@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import type { DataDashboardProps, KpiLivingLabsCardsFilter } from "./types";
 import { KpiLivingLabsCards } from "./KpiLivingLabsCards";
-import { ModalSplitLivingLabsCard } from "./ModalSplitLivingLabsCard";
+import { ModalSplitLivingLabsCards } from "./ModalSplitLivingLabsCards";
 import { DataDashboardFilter } from "./DataDashboardFilter";
 import { generateLabColorsWithSeed } from "../../../lib/helpers/colorUtils";
 import { PageNavigation } from "../ui/PageNavigation";
@@ -18,6 +18,7 @@ export const DataDashboard: React.FC<DataDashboardProps> = ({
   availableYears,
   categories,
   modalSplitData = [],
+  transportModes = [],
 }) => {
   // State for sidebar collapse (desktop only)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -118,25 +119,11 @@ export const DataDashboard: React.FC<DataDashboardProps> = ({
         {/* KPI Cards Grid */}
         <section id="data-dashboard-kpis-start">
           {/* Modal Split Section - One card per KPI subtype (15.a, 15.b, 15.c) */}
-          {modalSplitData.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4 px-2">
-                Modal Split
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0">
-                {modalSplitData.map((kpiData) => (
-                  <ModalSplitLivingLabsCard
-                    key={kpiData.kpiId}
-                    kpiId={kpiData.kpiId}
-                    kpiNumber={kpiData.kpiNumber}
-                    kpiName={kpiData.kpiName}
-                    labs={kpiData.labs}
-                    filter={filter}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+          <ModalSplitLivingLabsCards
+            modalSplitData={modalSplitData}
+            filter={filter}
+            transportModes={transportModes}
+          />
 
           {/* Other KPI Cards */}
           <KpiLivingLabsCards

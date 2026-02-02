@@ -1,4 +1,8 @@
-import type { IIKpiResultBeforeAfter, IKpi, ITransportMode } from "../../../types";
+import type {
+  IIKpiResultBeforeAfter,
+  IKpi,
+  ITransportMode,
+} from "../../../types";
 import type { ICategory } from "../../../types/Category";
 
 /**
@@ -80,10 +84,15 @@ export type IKpiGroup = ISingleKpiGroup | IParentKpiGroup;
 export interface IModalSplitLabData {
   labId: string;
   labName: string;
-  before: { label: string; data: { label: string; value: number; color: string }[] };
-  after: { label: string; data: { label: string; value: number; color: string }[] };
+  before: {
+    label: string;
+    data: { label: string; value: number; color: string }[];
+  };
+  after: {
+    label: string;
+    data: { label: string; value: number; color: string }[];
+  };
 }
-
 /**
  * Modal split data for a specific KPI across all living labs
  */
@@ -104,6 +113,8 @@ export interface DataDashboardProps {
   categories: ICategory[];
   /** Pre-processed modal split data (computed on SSR for performance) */
   modalSplitData?: IModalSplitKpiData[];
+  /** Transport modes with labels and colors for modal split legend */
+  transportModes?: ITransportMode[];
 }
 
 /**
@@ -177,8 +188,25 @@ export interface ModalSplitLivingLabsCardProps {
   labs: {
     labId: string;
     labName: string;
-    before: { label: string; data: { label: string; value: number; color: string }[] };
-    after: { label: string; data: { label: string; value: number; color: string }[] };
+    before: {
+      label: string;
+      data: { label: string; value: number; color: string }[];
+    };
+    after: {
+      label: string;
+      data: { label: string; value: number; color: string }[];
+    };
   }[];
   filter: KpiLivingLabsCardsFilter;
+}
+
+/**
+ * Props for ModalSplitLivingLabsCards component
+ * Displays all modal split KPIs in a grid layout
+ */
+export interface ModalSplitLivingLabsCardsProps {
+  modalSplitData: IModalSplitKpiData[];
+  filter: KpiLivingLabsCardsFilter;
+  /** Transport modes with labels and colors for legend display */
+  transportModes: ITransportMode[];
 }

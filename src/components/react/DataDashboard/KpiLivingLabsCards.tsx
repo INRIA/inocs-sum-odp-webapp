@@ -167,12 +167,16 @@ export const KpiLivingLabsCards: React.FC<KpiLivingLabsCardsProps> = ({
   }
 
   return (
-    <div className="flex flex-col gap-4 mx-auto w-full">
+    <div
+      className="flex flex-col gap-4 mx-auto w-full"
+      id="kpi-living-labs-cards"
+    >
       {/* Labs Legend - Sticky when scrolled to top */}
       <TopStickyLegend
         id="data-dashboard-legend"
         title="Displayed Living Labs"
         items={legendItems}
+        boundaryElementId="kpi-living-labs-cards"
       />
       {groupsByCategory.map(({ category, groups }) => (
         <ExpansionPanel

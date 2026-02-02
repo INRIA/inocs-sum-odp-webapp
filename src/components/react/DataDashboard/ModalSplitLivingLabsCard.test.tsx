@@ -39,7 +39,7 @@ const createMockLabs = () => [
     labId: "lab-1",
     labName: "Geneva Lab",
     before: {
-      label: "Before (2023)",
+      label: "2023",
       data: [
         { label: "Car", value: 0.4, color: "#ff0000" },
         { label: "Public Transit", value: 0.3, color: "#00ff00" },
@@ -48,7 +48,7 @@ const createMockLabs = () => [
       ],
     },
     after: {
-      label: "After (2024)",
+      label: "2024",
       data: [
         { label: "Car", value: 0.3, color: "#ff0000" },
         { label: "Public Transit", value: 0.35, color: "#00ff00" },
@@ -61,7 +61,7 @@ const createMockLabs = () => [
     labId: "lab-2",
     labName: "Lyon Lab",
     before: {
-      label: "Before (2023)",
+      label: "2023",
       data: [
         { label: "Car", value: 0.5, color: "#ff0000" },
         { label: "Public Transit", value: 0.25, color: "#00ff00" },
@@ -70,7 +70,7 @@ const createMockLabs = () => [
       ],
     },
     after: {
-      label: "After (2024)",
+      label: "2024",
       data: [
         { label: "Car", value: 0.4, color: "#ff0000" },
         { label: "Public Transit", value: 0.3, color: "#00ff00" },

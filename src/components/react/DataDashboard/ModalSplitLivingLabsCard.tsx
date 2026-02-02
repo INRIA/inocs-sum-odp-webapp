@@ -19,7 +19,6 @@ export const ModalSplitLivingLabsCard: React.FC<
   // Filter by selected years
   const labsWithFilteredYears = filteredLabs
     .map((lab) => {
-      // Extract years from labels (e.g., "Before (2023)" -> 2023)
       const beforeYear = lab.before.label;
       const afterYear = lab.after.label;
 
@@ -63,14 +62,11 @@ export const ModalSplitLivingLabsCard: React.FC<
 
         {/* KPI Title */}
         <div className="flex flex-col text-center my-2 mb-4">
-          <h6 className="text-center text-black font-semibold">{kpiName}</h6>
-          <div className="text-sm text-muted mt-1">
-            Modal split comparison across living labs
-          </div>
+          <h5 className="text-center min-h-[64px]">{kpiName}</h5>
         </div>
 
         {/* Living Labs List - Each lab in a column */}
-        <div className="flex flex-col gap-6 mt-4">
+        <div className="flex flex-col gap-1 mt-4">
           {labsWithFilteredYears.map((lab) => {
             // Prepare chart data: before and after as separate datasets
             const chartData: ModalSplitChartDataset[] = [];
@@ -85,10 +81,10 @@ export const ModalSplitLivingLabsCard: React.FC<
             return (
               <div
                 key={lab.labId}
-                className="border-b border-gray-100 pb-4 last:border-b-0 last:pb-0"
+                className="border-b border-gray-100 last:border-b-0"
               >
                 {/* Lab Name */}
-                <h6 className="text-sm font-medium text-gray-700 mb-2">
+                <h6 className="text-sm font-medium text-gray-700">
                   {lab.labName}
                 </h6>
 

@@ -26,6 +26,8 @@ export interface TopStickyLegendProps {
   className?: string;
   /** Optional z-index for sticky positioning (default: 40) */
   stickyZIndex?: number;
+  /** Optional id of the boundary element - legend disappears when scrolled past this element */
+  boundaryElementId?: string;
 }
 
 /**
@@ -46,8 +48,10 @@ export const TopStickyLegend: React.FC<TopStickyLegendProps> = ({
   children,
   className = "",
   stickyZIndex = 40,
+  boundaryElementId,
 }) => {
   const [isSticky, setIsSticky] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const sectionRef = useRef<HTMLElement>(null);
   const placeholderRef = useRef<HTMLDivElement>(null);
 
@@ -60,6 +64,19 @@ export const TopStickyLegend: React.FC<TopStickyLegendProps> = ({
 
     const handleScroll = () => {
       const scrollY = window.scrollY;
+      const sectionHeight = section.offsetHeight;
+
+      // Check if we should hide based on boundary element
+      if (boundaryElementId) {
+        const boundaryElement = document.getElementById(boundaryElementId);
+        if (boundaryElement) {
+          const boundaryRect = boundaryElement.getBoundingClientRect();
+          const boundaryBottom = boundaryRect.bottom + window.scrollY;
+          // Hide when the bottom of the boundary element is above the viewport top + legend height
+          setIsVisible(scrollY + sectionHeight < boundaryBottom);
+        }
+      }
+
       // When scroll position passes the original top position, make it sticky
       setIsSticky(scrollY >= originalTop);
     };
@@ -69,10 +86,15 @@ export const TopStickyLegend: React.FC<TopStickyLegendProps> = ({
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [boundaryElementId]);
 
   // Get the height of the section for the placeholder
   const sectionHeight = sectionRef.current?.offsetHeight ?? 0;
+
+  // Don't render if not visible (scrolled past boundary)
+  if (!isVisible && isSticky) {
+    return null;
+  }
 
   return (
     <>

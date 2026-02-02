@@ -35,7 +35,7 @@ export const ModalSplitStackedBarChart: React.FC<
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const { width } = entry.contentRect;
-        setDimensions({ width: Math.max(width, 200), height });
+        setDimensions({ width: Math.max(width, 350), height });
       }
     });
 
