@@ -17,4 +17,4 @@ export * from "./MapViewer";
 export * from "./LivingLabMeasures";
 export * from "./KpiCards";
 export * from "./ImpactAnalysis";
-export * from "./DataDashboard";
+export * from "./KPIsDashboard";

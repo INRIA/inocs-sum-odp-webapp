@@ -104,9 +104,9 @@ export interface IModalSplitKpiData {
 }
 
 /**
- * Props for DataDashboard main component
+ * Props for KPIsDashboard main component
  */
-export interface DataDashboardProps {
+export interface KPIsDashboardProps {
   livingLabs: ILivingLabKpiData[];
   kpis: IKpi[];
   availableYears: number[];

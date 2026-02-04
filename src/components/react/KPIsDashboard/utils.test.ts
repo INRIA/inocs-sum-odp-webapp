@@ -9,7 +9,7 @@ import type { ILivingLabKpiData, KpiLivingLabsCardsFilter } from "./types";
 import type { IKpi } from "../../../types";
 import { COLOR_GRAY } from "../../../types/Constants";
 
-describe("DataDashboard Utils", () => {
+describe("KPIsDashboard Utils", () => {
   describe("processKpiResults", () => {
     it("returns empty array when no results provided", () => {
       const result = processKpiResults({}, [2023, 2024]);

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import type { DataDashboardProps, KpiLivingLabsCardsFilter } from "./types";
+import type { KPIsDashboardProps, KpiLivingLabsCardsFilter } from "./types";
 import { KpiLivingLabsCards } from "./KpiLivingLabsCards";
 import { ModalSplitLivingLabsCards } from "./ModalSplitLivingLabsCards";
 import { DataDashboardFilter } from "./DataDashboardFilter";
@@ -11,8 +11,9 @@ import {
   ArrowDownCircleIcon,
   PresentationChartLineIcon,
 } from "@heroicons/react/24/outline";
+import { RButton } from "../ui";
 
-export const DataDashboard: React.FC<DataDashboardProps> = ({
+export const KPIsDashboard: React.FC<KPIsDashboardProps> = ({
   livingLabs,
   kpis,
   availableYears,
@@ -105,14 +106,15 @@ export const DataDashboard: React.FC<DataDashboardProps> = ({
           </span>
           <div className="flex items-center gap-1 text-xs text-gray-500">
             {/* Toggle button visible on both mobile and desktop */}
-            <button
+            <RButton
+              variant="link"
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors"
               aria-label={isSidebarOpen ? "Hide filters" : "Show filters"}
             >
-              <FunnelIcon className="w-4 h-4 text-gray-500" />
-              <span>{"Show Filters"}</span>
-            </button>
+              <FunnelIcon className="w-5 h-5 text-gray-500" />
+              <p>{isSidebarOpen ? "Hide Filters" : "Show Filters"}</p>
+            </RButton>
           </div>
         </div>
 

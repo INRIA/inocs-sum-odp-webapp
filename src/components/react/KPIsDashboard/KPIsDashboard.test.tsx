@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { DataDashboard } from "./DataDashboard";
+import { KPIsDashboard } from "./KPIsDashboard";
 import type {
-  DataDashboardProps,
+  KPIsDashboardProps,
   ILivingLabKpiData,
   KpiLivingLabsCardsFilter,
   ILabColorAssignment,
@@ -86,7 +86,7 @@ const createMockCategories = (): ICategory[] => [
 
 const createMockYears = (): number[] => [2023, 2024, 2025];
 
-const createDefaultProps = (): DataDashboardProps => ({
+const createDefaultProps = (): KPIsDashboardProps => ({
   livingLabs: createMockLivingLabs(),
   kpis: createMockKpis(),
   availableYears: createMockYears(),
@@ -112,14 +112,14 @@ const getLastMockCallProps = () => {
 // Tests
 // ============================================================================
 
-describe("DataDashboard", () => {
+describe("KPIsDashboard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe("Initial Render", () => {
     it("renders the filters section with correct heading", () => {
-      render(<DataDashboard {...createDefaultProps()} />);
+      render(<KPIsDashboard {...createDefaultProps()} />);
 
       // Use getByRole to target the heading specifically, avoiding tooltip text
       expect(
@@ -129,7 +129,7 @@ describe("DataDashboard", () => {
 
     it("renders all living lab filter buttons", () => {
       const props = createDefaultProps();
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       props.livingLabs.forEach((lab) => {
         expect(
@@ -140,7 +140,7 @@ describe("DataDashboard", () => {
 
     it("renders all year filter buttons", () => {
       const props = createDefaultProps();
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       props.availableYears.forEach((year) => {
         expect(
@@ -151,7 +151,7 @@ describe("DataDashboard", () => {
 
     it("renders all category filter buttons", () => {
       const props = createDefaultProps();
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       props.categories.forEach((category) => {
         expect(
@@ -161,7 +161,7 @@ describe("DataDashboard", () => {
     });
 
     it("shows 'Deselect All' buttons when all items are selected initially", () => {
-      render(<DataDashboard {...createDefaultProps()} />);
+      render(<KPIsDashboard {...createDefaultProps()} />);
 
       // All three filter sections should show "Deselect All" initially
       const deselectButtons = screen.getAllByRole("button", {
@@ -172,7 +172,7 @@ describe("DataDashboard", () => {
 
     it("displays correct summary text with all items selected", () => {
       const props = createDefaultProps();
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       expect(
         screen.getByText(
@@ -183,7 +183,7 @@ describe("DataDashboard", () => {
 
     it("passes all labs, years, and categories as selected to child component", () => {
       const props = createDefaultProps();
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       const childProps = getLastMockCallProps();
 
@@ -198,7 +198,7 @@ describe("DataDashboard", () => {
 
     it("assigns consistent colors to living labs", () => {
       const props = createDefaultProps();
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       const childProps = getLastMockCallProps();
 
@@ -213,7 +213,7 @@ describe("DataDashboard", () => {
     it("does not render years section when no years available", () => {
       const props = createDefaultProps();
       props.availableYears = [];
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       expect(screen.queryByText("Years")).not.toBeInTheDocument();
     });
@@ -221,7 +221,7 @@ describe("DataDashboard", () => {
     it("does not render categories section when no categories available", () => {
       const props = createDefaultProps();
       props.categories = [];
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       expect(screen.queryByText("KPI Categories")).not.toBeInTheDocument();
     });
@@ -231,7 +231,7 @@ describe("DataDashboard", () => {
     it("deselects a lab when clicking on a selected lab button", async () => {
       const user = userEvent.setup();
       const props = createDefaultProps();
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       // Click on Geneva Lab to deselect it
       await user.click(screen.getByRole("button", { name: /Geneva Lab/ }));
@@ -245,7 +245,7 @@ describe("DataDashboard", () => {
     it("selects a lab when clicking on a deselected lab button", async () => {
       const user = userEvent.setup();
       const props = createDefaultProps();
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       // First deselect Geneva Lab
       await user.click(screen.getByRole("button", { name: /Geneva Lab/ }));
@@ -260,7 +260,7 @@ describe("DataDashboard", () => {
       const user = userEvent.setup();
       const props = createDefaultProps();
       props.livingLabs = [createMockLivingLabs()[0]]; // Only one lab
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       // Try to deselect the only lab
       await user.click(screen.getByRole("button", { name: /Geneva Lab/ }));
@@ -274,7 +274,7 @@ describe("DataDashboard", () => {
     it("toggles all labs when clicking 'Deselect All' button", async () => {
       const user = userEvent.setup();
       const props = createDefaultProps();
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       // Find the Living Labs section and click its Deselect All button
       const labsSection = screen
@@ -294,7 +294,7 @@ describe("DataDashboard", () => {
     it("selects all labs when clicking 'Select All' button", async () => {
       const user = userEvent.setup();
       const props = createDefaultProps();
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       // First deselect all
       const labsSection = screen
@@ -322,7 +322,7 @@ describe("DataDashboard", () => {
     it("deselects a year when clicking on a selected year button", async () => {
       const user = userEvent.setup();
       const props = createDefaultProps();
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       await user.click(screen.getByRole("button", { name: "2024" }));
 
@@ -335,7 +335,7 @@ describe("DataDashboard", () => {
     it("selects a year when clicking on a deselected year button", async () => {
       const user = userEvent.setup();
       const props = createDefaultProps();
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       // Deselect then re-select
       await user.click(screen.getByRole("button", { name: "2024" }));
@@ -349,7 +349,7 @@ describe("DataDashboard", () => {
       const user = userEvent.setup();
       const props = createDefaultProps();
       props.availableYears = [2024]; // Only one year
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       await user.click(screen.getByRole("button", { name: "2024" }));
 
@@ -361,7 +361,7 @@ describe("DataDashboard", () => {
     it("toggles all years when clicking 'Deselect All' button", async () => {
       const user = userEvent.setup();
       const props = createDefaultProps();
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       const yearsSection = screen
         .getByText("Years")
@@ -381,7 +381,7 @@ describe("DataDashboard", () => {
     it("deselects a category when clicking on a selected category button", async () => {
       const user = userEvent.setup();
       const props = createDefaultProps();
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       await user.click(screen.getByRole("button", { name: "Environment" }));
 
@@ -394,7 +394,7 @@ describe("DataDashboard", () => {
     it("selects a category when clicking on a deselected category button", async () => {
       const user = userEvent.setup();
       const props = createDefaultProps();
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       // Deselect then re-select
       await user.click(screen.getByRole("button", { name: "Environment" }));
@@ -408,7 +408,7 @@ describe("DataDashboard", () => {
       const user = userEvent.setup();
       const props = createDefaultProps();
       props.categories = [createMockCategories()[0]]; // Only one category
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       await user.click(screen.getByRole("button", { name: "Environment" }));
 
@@ -420,7 +420,7 @@ describe("DataDashboard", () => {
     it("toggles all categories when clicking 'Deselect All' button", async () => {
       const user = userEvent.setup();
       const props = createDefaultProps();
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       const categoriesSection = screen
         .getByText("KPI Categories")
@@ -440,7 +440,7 @@ describe("DataDashboard", () => {
     it("updates summary when labs are deselected", async () => {
       const user = userEvent.setup();
       const props = createDefaultProps();
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       await user.click(screen.getByRole("button", { name: /Geneva Lab/ }));
 
@@ -454,7 +454,7 @@ describe("DataDashboard", () => {
     it("updates summary when categories are deselected", async () => {
       const user = userEvent.setup();
       const props = createDefaultProps();
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       await user.click(screen.getByRole("button", { name: "Environment" }));
 
@@ -469,7 +469,7 @@ describe("DataDashboard", () => {
   describe("Props Propagation to Child Component", () => {
     it("passes all required props to KpiLivingLabsCards", () => {
       const props = createDefaultProps();
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       const childProps = getLastMockCallProps();
 
@@ -483,7 +483,7 @@ describe("DataDashboard", () => {
     it("updates child component filter when lab selection changes", async () => {
       const user = userEvent.setup();
       const props = createDefaultProps();
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       const initialCallCount = mockKpiLivingLabsCards.mock.calls.length;
 
@@ -499,7 +499,7 @@ describe("DataDashboard", () => {
   describe("Color Assignment", () => {
     it("assigns unique colors to each lab from the dynamic palette", () => {
       const props = createDefaultProps();
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       const childProps = getLastMockCallProps();
 
@@ -520,14 +520,14 @@ describe("DataDashboard", () => {
       const props = createDefaultProps();
 
       // First render
-      const { unmount } = render(<DataDashboard {...props} />);
+      const { unmount } = render(<KPIsDashboard {...props} />);
       const firstRenderColors = getLastMockCallProps().labColors.map(
         (lc: { color: string }) => lc.color,
       );
       unmount();
 
       // Second render with same props
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
       const secondRenderColors = getLastMockCallProps().labColors.map(
         (lc: { color: string }) => lc.color,
       );
@@ -544,7 +544,7 @@ describe("DataDashboard", () => {
         name: `Lab ${i + 1}`,
         kpiResults: [],
       }));
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       const childProps = getLastMockCallProps();
 
@@ -562,7 +562,7 @@ describe("DataDashboard", () => {
     it("handles empty living labs array", () => {
       const props = createDefaultProps();
       props.livingLabs = [];
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       expect(screen.queryByText("Living Labs")).not.toBeInTheDocument();
       // No lab buttons should be rendered
@@ -574,14 +574,14 @@ describe("DataDashboard", () => {
     it("handles empty kpis array", () => {
       const props = createDefaultProps();
       props.kpis = [];
-      render(<DataDashboard {...props} />);
+      render(<KPIsDashboard {...props} />);
 
       const childProps = getLastMockCallProps();
       expect(childProps.kpis).toEqual([]);
     });
 
     it("renders child component", () => {
-      render(<DataDashboard {...createDefaultProps()} />);
+      render(<KPIsDashboard {...createDefaultProps()} />);
 
       expect(screen.getByTestId("kpi-living-labs-cards")).toBeInTheDocument();
     });

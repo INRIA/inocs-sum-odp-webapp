@@ -1,4 +1,4 @@
-export { DataDashboard } from "./DataDashboard";
+export { KPIsDashboard } from "./KPIsDashboard";
 export { DataDashboardFilter } from "./DataDashboardFilter";
 export { KpiLivingLabsCards } from "./KpiLivingLabsCards";
 export { KpiLivingLabsSingleCard } from "./KpiLivingLabsSingleCard";
@@ -13,7 +13,7 @@ export type {
   ILabKpiTimeline,
   ILabColorAssignment,
   KpiLivingLabsCardsFilter,
-  DataDashboardProps,
+  KPIsDashboardProps,
   KpiLivingLabsCardsProps,
   KpiLivingLabsCardProps,
   KpiLivingLabsMultipleCardProps,

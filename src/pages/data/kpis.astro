@@ -1,7 +1,7 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import ApiClient from "../../lib/api-client/ApiClient";
-import { DataDashboard } from "../../components/react/DataDashboard";
+import { KPIsDashboard } from "../../components/react";
 import { getModalSplitDataForDashboard } from "../../lib/helpers/living-lab";
 import type { ILivingLabPopulated } from "../../types";
 
@@ -77,7 +77,7 @@ const modalSplitData = getModalSplitDataForDashboard(
           </p>
         </div>
       ) : (
-        <DataDashboard
+        <KPIsDashboard
           livingLabs={livingLabsForDashboard}
           kpis={allKpis}
           availableYears={sortedYears}
