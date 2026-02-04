@@ -1,8 +1,8 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import type { KPIsDashboardProps, KpiLivingLabsCardsFilter } from "./types";
 import { KpiLivingLabsCards } from "./KpiLivingLabsCards";
 import { ModalSplitLivingLabsCards } from "./ModalSplitLivingLabsCards";
-import { DataDashboardFilter } from "./DataDashboardFilter";
+import { DataDashboardFilter } from "../ui/DataDashboardFilter";
 import { generateLabColorsWithSeed } from "../../../lib/helpers/colorUtils";
 import { PageNavigation } from "../ui/PageNavigation";
 import {
@@ -11,7 +11,6 @@ import {
   ArrowDownCircleIcon,
   PresentationChartLineIcon,
 } from "@heroicons/react/24/outline";
-import { RButton } from "../ui";
 
 export const KPIsDashboard: React.FC<KPIsDashboardProps> = ({
   livingLabs,
@@ -21,32 +20,45 @@ export const KPIsDashboard: React.FC<KPIsDashboardProps> = ({
   modalSplitData = [],
   transportModes = [],
 }) => {
-  // State for sidebar collapse (desktop only)
+  // State for sidebar collapse - shared between filter component and navigation
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const navigationSections = [
-    {
-      id: "data-dashboard-filters",
-      label: "Filters",
-      icon: <FunnelIcon className="w-5 h-5 md:w-8 md:h-8" />,
-      onClick: () => setIsSidebarOpen(!isSidebarOpen),
-    },
-    {
-      id: "data-dashboard-top",
-      label: "Top of page",
-      icon: <ArrowUpCircleIcon className="w-5 h-5 md:w-8 md:h-8" />,
-    },
-    {
-      id: "data-dashboard-kpis-start",
-      label: "Data section",
-      icon: <PresentationChartLineIcon className="w-5 h-5 md:w-8 md:h-8" />,
-    },
-    {
-      id: "data-dashboard-kpis-end",
-      label: "Bottom of page",
-      icon: <ArrowDownCircleIcon className="w-5 h-5 md:w-8 md:h-8" />,
-    },
-  ];
+  // Memoized handler for open state changes to prevent re-renders
+  const handleOpenChange = useCallback((isOpen: boolean) => {
+    setIsSidebarOpen(isOpen);
+  }, []);
+
+  // Memoized toggle handler for navigation
+  const handleNavigationToggle = useCallback(() => {
+    setIsSidebarOpen((prev) => !prev);
+  }, []);
+
+  const navigationSections = useMemo(
+    () => [
+      {
+        id: "data-dashboard-filters",
+        label: "Filters",
+        icon: <FunnelIcon className="w-5 h-5 md:w-8 md:h-8" />,
+        onClick: handleNavigationToggle,
+      },
+      {
+        id: "data-dashboard-top",
+        label: "Top of page",
+        icon: <ArrowUpCircleIcon className="w-5 h-5 md:w-8 md:h-8" />,
+      },
+      {
+        id: "data-dashboard-kpis-start",
+        label: "Data section",
+        icon: <PresentationChartLineIcon className="w-5 h-5 md:w-8 md:h-8" />,
+      },
+      {
+        id: "data-dashboard-kpis-end",
+        label: "Bottom of page",
+        icon: <ArrowDownCircleIcon className="w-5 h-5 md:w-8 md:h-8" />,
+      },
+    ],
+    [handleNavigationToggle],
+  );
   // Generate consistent color assignments for all labs (defined once at parent level)
   // Uses seeded randomness based on lab IDs for deterministic but varied colors
   const labColors = useMemo(
@@ -65,57 +77,34 @@ export const KPIsDashboard: React.FC<KPIsDashboardProps> = ({
   });
 
   // Handler for filter changes from DataDashboardFilter component
-  const handleFilterChange = (newFilter: KpiLivingLabsCardsFilter) => {
-    setFilter(newFilter);
-  };
+  const handleFilterChange = useCallback(
+    (newFilter: KpiLivingLabsCardsFilter) => {
+      setFilter(newFilter);
+    },
+    [],
+  );
 
   return (
     <div className="relative">
       {/* Main content area - full width */}
       <div className="flex flex-col gap-6">
-        {/* Filters Section - fixed sidebar on right for both mobile and desktop */}
-        <div
-          className={`
-            fixed top-20 right-4 z-40 w-[calc(100%-2rem)] sm:w-80
-            transition-all duration-300
-            ${isSidebarOpen ? "translate-x-0" : "translate-x-[calc(100%+1rem)]"}
-          `}
-          style={{ maxHeight: "calc(100vh - 6rem)" }}
-        >
-          <div
-            className="overflow-y-auto"
-            style={{ maxHeight: "calc(100vh - 6rem)" }}
-          >
-            <DataDashboardFilter
-              livingLabs={livingLabs}
-              availableYears={availableYears}
-              categories={categories}
-              filter={filter}
-              onFilterChange={handleFilterChange}
-              onClose={() => setIsSidebarOpen(false)}
-            />
-          </div>
-        </div>
-
-        {/* Summary */}
+        {/* Summary and Filter Toggle */}
         <div className="flex items-center justify-between text-sm text-gray-600">
           <span>
             Showing {filter.selectedLabIds.length} of {livingLabs.length} living
             labs • {filter.selectedCategoryIds.length} of {categories.length}{" "}
             categories
           </span>
-          <div className="flex items-center gap-1 text-xs text-gray-500">
-            {/* Toggle button visible on both mobile and desktop */}
-            <RButton
-              variant="link"
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors"
-              aria-label={isSidebarOpen ? "Hide filters" : "Show filters"}
-            >
-              <FunnelIcon className="w-5 h-5 text-gray-500" />
-              <p>{isSidebarOpen ? "Hide Filters" : "Show Filters"}</p>
-            </RButton>
-          </div>
+          {/* Filter component with internal toggle button and panel */}
+          <DataDashboardFilter
+            livingLabs={livingLabs}
+            availableYears={availableYears}
+            categories={categories}
+            filter={filter}
+            onFilterChange={handleFilterChange}
+            isOpen={isSidebarOpen}
+            onOpenChange={handleOpenChange}
+          />
         </div>
 
         {/* KPI Cards Grid */}

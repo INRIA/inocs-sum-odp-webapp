@@ -11,8 +11,8 @@ export interface IResource {
   url: string | null;
   category_id: number;
   category: ICategory;
-  item_tag: ITag[];
-  project: IProject | null;
+  item_tag?: IItemTag[];
+  project?: IProject | null;
 }
 
 /**
@@ -24,13 +24,15 @@ export interface IResourceCategory {
   resources: IResource[];
 }
 
-export interface ITag {
+export interface IItemTag {
   id: number;
   item_id: number;
   tag_id: number;
-  tags: {
-    id: number;
-    name: string;
-    color: string;
-  };
+  tags: ITag;
+}
+
+export interface ITag {
+  id: number;
+  name: string;
+  color: string;
 }

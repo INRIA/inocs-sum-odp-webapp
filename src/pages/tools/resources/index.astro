@@ -2,17 +2,16 @@
 import Layout from "../../../layouts/Layout.astro";
 import ApiClient from "../../../lib/api-client/ApiClient";
 import { ResourcesDashboard } from "../../../components/react/ResourcesDashboard";
-import type {
-  IResource,
-  IResourceCategory,
-} from "../../../components/react/ResourcesDashboard";
 import { truncateHtml } from "../../../lib/helpers";
+import type { IProject, IResourceCategory, ITag } from "../../../types";
 
 const api = new ApiClient(Astro.request);
 
 const resources = await api.getItemsByCategoryType("RESOURCES");
 
 const categoryMap = new Map<number, IResourceCategory>();
+const projectsMap = new Map<number, IProject>();
+const tagsMap = new Map<number, ITag>();
 resources?.forEach((resource) => {
   if (!categoryMap.has(resource.category_id)) {
     categoryMap.set(resource.category_id, {
@@ -25,8 +24,25 @@ resources?.forEach((resource) => {
     ...resource,
     description: truncateHtml(resource.description ?? "", 200),
   });
+
+  if (resource.project) {
+    projectsMap.set(resource.project.id, {
+      id: resource.project.id,
+      name: resource.project.name,
+      type: resource.project.type,
+    });
+  }
+  if (resource.item_tag.length > 0) {
+    resource.item_tag.forEach((t) => {
+      if (!tagsMap.has(t.tags.id)) {
+        tagsMap.set(t.tags.id, t.tags);
+      }
+    });
+  }
 });
 const categories = Array.from(categoryMap.values());
+const projects = Array.from(projectsMap.values());
+const tags = Array.from(tagsMap.values());
 ---
 
 <Layout>
@@ -34,11 +50,17 @@ const categories = Array.from(categoryMap.values());
     <section class="mb-12 text-center">
       <h1 class="text-4xl font-bold text-gray-900">Innovation Resources</h1>
       <p class="mt-4 text-lg text-gray-600">
-        Discover research papers, datasets, and tools for sustainable urban
-        mobility.
+        Discover all of our resources available to support your sustainable
+        urban mobility projects and urban shared mobility integration with
+        public transport.
       </p>
     </section>
 
-    <ResourcesDashboard categories={categories} client:load />
+    <ResourcesDashboard
+      categories={categories}
+      projects={projects}
+      tags={tags}
+      client:load
+    />
   </main>
 </Layout>

@@ -4,7 +4,7 @@ export interface ICategory {
   id: number;
   name: string;
   description?: string;
-  type: "KPI_SIEF" | "ITEM" | "KPI_IMPACT";
+  type: "KPI_SIEF" | "ITEM" | "KPI_IMPACT" | "RESOURCES";
   kpis?: IKpi[]; // Many-to-many relation with KPIs
 }
 

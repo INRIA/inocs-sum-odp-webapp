@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { KPIsDashboard } from "./KPIsDashboard";
 import type {
@@ -109,7 +109,7 @@ const getLastMockCallProps = () => {
 };
 
 // ============================================================================
-// Tests
+// Tests - Focused on initial render and filter → data display integration
 // ============================================================================
 
 describe("KPIsDashboard", () => {
@@ -118,58 +118,6 @@ describe("KPIsDashboard", () => {
   });
 
   describe("Initial Render", () => {
-    it("renders the filters section with correct heading", () => {
-      render(<KPIsDashboard {...createDefaultProps()} />);
-
-      // Use getByRole to target the heading specifically, avoiding tooltip text
-      expect(
-        screen.getByRole("heading", { name: "Filters" }),
-      ).toBeInTheDocument();
-    });
-
-    it("renders all living lab filter buttons", () => {
-      const props = createDefaultProps();
-      render(<KPIsDashboard {...props} />);
-
-      props.livingLabs.forEach((lab) => {
-        expect(
-          screen.getByRole("button", { name: new RegExp(lab.name) }),
-        ).toBeInTheDocument();
-      });
-    });
-
-    it("renders all year filter buttons", () => {
-      const props = createDefaultProps();
-      render(<KPIsDashboard {...props} />);
-
-      props.availableYears.forEach((year) => {
-        expect(
-          screen.getByRole("button", { name: String(year) }),
-        ).toBeInTheDocument();
-      });
-    });
-
-    it("renders all category filter buttons", () => {
-      const props = createDefaultProps();
-      render(<KPIsDashboard {...props} />);
-
-      props.categories.forEach((category) => {
-        expect(
-          screen.getByRole("button", { name: category.name }),
-        ).toBeInTheDocument();
-      });
-    });
-
-    it("shows 'Deselect All' buttons when all items are selected initially", () => {
-      render(<KPIsDashboard {...createDefaultProps()} />);
-
-      // All three filter sections should show "Deselect All" initially
-      const deselectButtons = screen.getAllByRole("button", {
-        name: "Deselect All",
-      });
-      expect(deselectButtons).toHaveLength(3);
-    });
-
     it("displays correct summary text with all items selected", () => {
       const props = createDefaultProps();
       render(<KPIsDashboard {...props} />);
@@ -196,252 +144,35 @@ describe("KPIsDashboard", () => {
       );
     });
 
-    it("assigns consistent colors to living labs", () => {
+    it("renders child component", () => {
+      render(<KPIsDashboard {...createDefaultProps()} />);
+
+      expect(screen.getByTestId("kpi-living-labs-cards")).toBeInTheDocument();
+    });
+
+    it("passes all required props to KpiLivingLabsCards", () => {
       const props = createDefaultProps();
       render(<KPIsDashboard {...props} />);
 
       const childProps = getLastMockCallProps();
 
-      expect(childProps.labColors).toHaveLength(props.livingLabs.length);
-      childProps.labColors.forEach((colorAssignment, index) => {
-        expect(colorAssignment.labId).toBe(props.livingLabs[index].id);
-        expect(colorAssignment.labName).toBe(props.livingLabs[index].name);
-        expect(colorAssignment.color).toMatch(/^#[0-9a-fA-F]{6}$/);
-      });
-    });
-
-    it("does not render years section when no years available", () => {
-      const props = createDefaultProps();
-      props.availableYears = [];
-      render(<KPIsDashboard {...props} />);
-
-      expect(screen.queryByText("Years")).not.toBeInTheDocument();
-    });
-
-    it("does not render categories section when no categories available", () => {
-      const props = createDefaultProps();
-      props.categories = [];
-      render(<KPIsDashboard {...props} />);
-
-      expect(screen.queryByText("KPI Categories")).not.toBeInTheDocument();
+      expect(childProps.livingLabs).toEqual(props.livingLabs);
+      expect(childProps.kpis).toEqual(props.kpis);
+      expect(childProps.categories).toEqual(props.categories);
+      expect(childProps.filter).toBeDefined();
+      expect(childProps.labColors).toBeDefined();
     });
   });
 
-  describe("Living Lab Filter Interactions", () => {
-    it("deselects a lab when clicking on a selected lab button", async () => {
-      const user = userEvent.setup();
-      const props = createDefaultProps();
-      render(<KPIsDashboard {...props} />);
-
-      // Click on Geneva Lab to deselect it
-      await user.click(screen.getByRole("button", { name: /Geneva Lab/ }));
-
-      const childProps = getLastMockCallProps();
-      expect(childProps.filter.selectedLabIds).not.toContain("lab-1");
-      expect(childProps.filter.selectedLabIds).toContain("lab-2");
-      expect(childProps.filter.selectedLabIds).toContain("lab-3");
-    });
-
-    it("selects a lab when clicking on a deselected lab button", async () => {
-      const user = userEvent.setup();
-      const props = createDefaultProps();
-      render(<KPIsDashboard {...props} />);
-
-      // First deselect Geneva Lab
-      await user.click(screen.getByRole("button", { name: /Geneva Lab/ }));
-      // Then re-select it
-      await user.click(screen.getByRole("button", { name: /Geneva Lab/ }));
-
-      const childProps = getLastMockCallProps();
-      expect(childProps.filter.selectedLabIds).toContain("lab-1");
-    });
-
-    it("prevents deselecting the last remaining lab", async () => {
-      const user = userEvent.setup();
-      const props = createDefaultProps();
-      props.livingLabs = [createMockLivingLabs()[0]]; // Only one lab
-      render(<KPIsDashboard {...props} />);
-
-      // Try to deselect the only lab
-      await user.click(screen.getByRole("button", { name: /Geneva Lab/ }));
-
-      const childProps = getLastMockCallProps();
-      // Should still have the lab selected
-      expect(childProps.filter.selectedLabIds).toContain("lab-1");
-      expect(childProps.filter.selectedLabIds).toHaveLength(1);
-    });
-
-    it("toggles all labs when clicking 'Deselect All' button", async () => {
-      const user = userEvent.setup();
-      const props = createDefaultProps();
-      render(<KPIsDashboard {...props} />);
-
-      // Find the Living Labs section and click its Deselect All button
-      const labsSection = screen
-        .getByText("Living Labs")
-        .closest("div")?.parentElement;
-      const deselectButton = within(labsSection!).getByRole("button", {
-        name: "Deselect All",
-      });
-      await user.click(deselectButton);
-
-      const childProps = getLastMockCallProps();
-      // Should keep only one lab (the first one)
-      expect(childProps.filter.selectedLabIds).toHaveLength(1);
-      expect(childProps.filter.selectedLabIds).toContain("lab-1");
-    });
-
-    it("selects all labs when clicking 'Select All' button", async () => {
-      const user = userEvent.setup();
-      const props = createDefaultProps();
-      render(<KPIsDashboard {...props} />);
-
-      // First deselect all
-      const labsSection = screen
-        .getByText("Living Labs")
-        .closest("div")?.parentElement;
-      const toggleButton = within(labsSection!).getByRole("button", {
-        name: "Deselect All",
-      });
-      await user.click(toggleButton);
-
-      // Now click Select All
-      const selectAllButton = within(labsSection!).getByRole("button", {
-        name: "Select All",
-      });
-      await user.click(selectAllButton);
-
-      const childProps = getLastMockCallProps();
-      expect(childProps.filter.selectedLabIds).toHaveLength(
-        props.livingLabs.length,
-      );
-    });
-  });
-
-  describe("Year Filter Interactions", () => {
-    it("deselects a year when clicking on a selected year button", async () => {
-      const user = userEvent.setup();
-      const props = createDefaultProps();
-      render(<KPIsDashboard {...props} />);
-
-      await user.click(screen.getByRole("button", { name: "2024" }));
-
-      const childProps = getLastMockCallProps();
-      expect(childProps.filter.selectedYears).not.toContain(2024);
-      expect(childProps.filter.selectedYears).toContain(2023);
-      expect(childProps.filter.selectedYears).toContain(2025);
-    });
-
-    it("selects a year when clicking on a deselected year button", async () => {
-      const user = userEvent.setup();
-      const props = createDefaultProps();
-      render(<KPIsDashboard {...props} />);
-
-      // Deselect then re-select
-      await user.click(screen.getByRole("button", { name: "2024" }));
-      await user.click(screen.getByRole("button", { name: "2024" }));
-
-      const childProps = getLastMockCallProps();
-      expect(childProps.filter.selectedYears).toContain(2024);
-    });
-
-    it("prevents deselecting the last remaining year", async () => {
-      const user = userEvent.setup();
-      const props = createDefaultProps();
-      props.availableYears = [2024]; // Only one year
-      render(<KPIsDashboard {...props} />);
-
-      await user.click(screen.getByRole("button", { name: "2024" }));
-
-      const childProps = getLastMockCallProps();
-      expect(childProps.filter.selectedYears).toContain(2024);
-      expect(childProps.filter.selectedYears).toHaveLength(1);
-    });
-
-    it("toggles all years when clicking 'Deselect All' button", async () => {
-      const user = userEvent.setup();
-      const props = createDefaultProps();
-      render(<KPIsDashboard {...props} />);
-
-      const yearsSection = screen
-        .getByText("Years")
-        .closest("div")?.parentElement;
-      const deselectButton = within(yearsSection!).getByRole("button", {
-        name: "Deselect All",
-      });
-      await user.click(deselectButton);
-
-      const childProps = getLastMockCallProps();
-      expect(childProps.filter.selectedYears).toHaveLength(1);
-      expect(childProps.filter.selectedYears).toContain(2023); // First year kept
-    });
-  });
-
-  describe("Category Filter Interactions", () => {
-    it("deselects a category when clicking on a selected category button", async () => {
-      const user = userEvent.setup();
-      const props = createDefaultProps();
-      render(<KPIsDashboard {...props} />);
-
-      await user.click(screen.getByRole("button", { name: "Environment" }));
-
-      const childProps = getLastMockCallProps();
-      expect(childProps.filter.selectedCategoryIds).not.toContain(1);
-      expect(childProps.filter.selectedCategoryIds).toContain(2);
-      expect(childProps.filter.selectedCategoryIds).toContain(3);
-    });
-
-    it("selects a category when clicking on a deselected category button", async () => {
-      const user = userEvent.setup();
-      const props = createDefaultProps();
-      render(<KPIsDashboard {...props} />);
-
-      // Deselect then re-select
-      await user.click(screen.getByRole("button", { name: "Environment" }));
-      await user.click(screen.getByRole("button", { name: "Environment" }));
-
-      const childProps = getLastMockCallProps();
-      expect(childProps.filter.selectedCategoryIds).toContain(1);
-    });
-
-    it("prevents deselecting the last remaining category", async () => {
-      const user = userEvent.setup();
-      const props = createDefaultProps();
-      props.categories = [createMockCategories()[0]]; // Only one category
-      render(<KPIsDashboard {...props} />);
-
-      await user.click(screen.getByRole("button", { name: "Environment" }));
-
-      const childProps = getLastMockCallProps();
-      expect(childProps.filter.selectedCategoryIds).toContain(1);
-      expect(childProps.filter.selectedCategoryIds).toHaveLength(1);
-    });
-
-    it("toggles all categories when clicking 'Deselect All' button", async () => {
-      const user = userEvent.setup();
-      const props = createDefaultProps();
-      render(<KPIsDashboard {...props} />);
-
-      const categoriesSection = screen
-        .getByText("KPI Categories")
-        .closest("div")?.parentElement;
-      const deselectButton = within(categoriesSection!).getByRole("button", {
-        name: "Deselect All",
-      });
-      await user.click(deselectButton);
-
-      const childProps = getLastMockCallProps();
-      expect(childProps.filter.selectedCategoryIds).toHaveLength(1);
-      expect(childProps.filter.selectedCategoryIds).toContain(1); // First category kept
-    });
-  });
-
-  describe("Summary Text Updates", () => {
+  describe("Filter Changes → Data Display Updates", () => {
     it("updates summary when labs are deselected", async () => {
       const user = userEvent.setup();
       const props = createDefaultProps();
       render(<KPIsDashboard {...props} />);
 
+      // Open filter panel first
+      await user.click(screen.getByRole("button", { name: /show filters/i }));
+      // Click on Geneva Lab to deselect it
       await user.click(screen.getByRole("button", { name: /Geneva Lab/ }));
 
       expect(
@@ -456,6 +187,9 @@ describe("KPIsDashboard", () => {
       const props = createDefaultProps();
       render(<KPIsDashboard {...props} />);
 
+      // Open filter panel first
+      await user.click(screen.getByRole("button", { name: /show filters/i }));
+      // Click on Environment to deselect it
       await user.click(screen.getByRole("button", { name: "Environment" }));
 
       expect(
@@ -463,21 +197,6 @@ describe("KPIsDashboard", () => {
           `Showing ${props.livingLabs.length} of ${props.livingLabs.length} living labs • 2 of ${props.categories.length} categories`,
         ),
       ).toBeInTheDocument();
-    });
-  });
-
-  describe("Props Propagation to Child Component", () => {
-    it("passes all required props to KpiLivingLabsCards", () => {
-      const props = createDefaultProps();
-      render(<KPIsDashboard {...props} />);
-
-      const childProps = getLastMockCallProps();
-
-      expect(childProps.livingLabs).toEqual(props.livingLabs);
-      expect(childProps.kpis).toEqual(props.kpis);
-      expect(childProps.categories).toEqual(props.categories);
-      expect(childProps.filter).toBeDefined();
-      expect(childProps.labColors).toBeDefined();
     });
 
     it("updates child component filter when lab selection changes", async () => {
@@ -487,16 +206,64 @@ describe("KPIsDashboard", () => {
 
       const initialCallCount = mockKpiLivingLabsCards.mock.calls.length;
 
+      // Open filter panel first
+      await user.click(screen.getByRole("button", { name: /show filters/i }));
+      // Click on Geneva Lab to deselect it
       await user.click(screen.getByRole("button", { name: /Geneva Lab/ }));
 
       // Should have been called again with updated filter
       expect(mockKpiLivingLabsCards.mock.calls.length).toBeGreaterThan(
         initialCallCount,
       );
+
+      const childProps = getLastMockCallProps();
+      expect(childProps.filter.selectedLabIds).not.toContain("lab-1");
+    });
+
+    it("updates child component filter when year selection changes", async () => {
+      const user = userEvent.setup();
+      const props = createDefaultProps();
+      render(<KPIsDashboard {...props} />);
+
+      // Open filter panel first
+      await user.click(screen.getByRole("button", { name: /show filters/i }));
+      // Click on 2024 to deselect it
+      await user.click(screen.getByRole("button", { name: "2024" }));
+
+      const childProps = getLastMockCallProps();
+      expect(childProps.filter.selectedYears).not.toContain(2024);
+    });
+
+    it("updates child component filter when category selection changes", async () => {
+      const user = userEvent.setup();
+      const props = createDefaultProps();
+      render(<KPIsDashboard {...props} />);
+
+      // Open filter panel first
+      await user.click(screen.getByRole("button", { name: /show filters/i }));
+      // Click on Environment to deselect it
+      await user.click(screen.getByRole("button", { name: "Environment" }));
+
+      const childProps = getLastMockCallProps();
+      expect(childProps.filter.selectedCategoryIds).not.toContain(1);
     });
   });
 
   describe("Color Assignment", () => {
+    it("assigns consistent colors to living labs", () => {
+      const props = createDefaultProps();
+      render(<KPIsDashboard {...props} />);
+
+      const childProps = getLastMockCallProps();
+
+      expect(childProps.labColors).toHaveLength(props.livingLabs.length);
+      childProps.labColors.forEach((colorAssignment, index) => {
+        expect(colorAssignment.labId).toBe(props.livingLabs[index].id);
+        expect(colorAssignment.labName).toBe(props.livingLabs[index].name);
+        expect(colorAssignment.color).toMatch(/^#[0-9a-fA-F]{6}$/);
+      });
+    });
+
     it("assigns unique colors to each lab from the dynamic palette", () => {
       const props = createDefaultProps();
       render(<KPIsDashboard {...props} />);
@@ -564,11 +331,12 @@ describe("KPIsDashboard", () => {
       props.livingLabs = [];
       render(<KPIsDashboard {...props} />);
 
-      expect(screen.queryByText("Living Labs")).not.toBeInTheDocument();
-      // No lab buttons should be rendered
-      expect(
-        screen.queryByRole("button", { name: /Lab/ }),
-      ).not.toBeInTheDocument();
+      // Child component should still render
+      expect(screen.getByTestId("kpi-living-labs-cards")).toBeInTheDocument();
+
+      const childProps = getLastMockCallProps();
+      expect(childProps.livingLabs).toEqual([]);
+      expect(childProps.labColors).toEqual([]);
     });
 
     it("handles empty kpis array", () => {
@@ -580,10 +348,13 @@ describe("KPIsDashboard", () => {
       expect(childProps.kpis).toEqual([]);
     });
 
-    it("renders child component", () => {
-      render(<KPIsDashboard {...createDefaultProps()} />);
+    it("handles empty categories array", () => {
+      const props = createDefaultProps();
+      props.categories = [];
+      render(<KPIsDashboard {...props} />);
 
-      expect(screen.getByTestId("kpi-living-labs-cards")).toBeInTheDocument();
+      const childProps = getLastMockCallProps();
+      expect(childProps.categories).toEqual([]);
     });
   });
 });

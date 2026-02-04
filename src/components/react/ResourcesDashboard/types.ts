@@ -2,14 +2,21 @@
  * Types for the Resources Dashboard components
  */
 
-import type { IResource, IResourceCategory } from "../../../types";
+import type {
+  IResource,
+  IResourceCategory,
+  ITag,
+  IProject,
+} from "../../../types";
 
 /**
  * Props for the ResourcesDashboard component (parent)
  */
 export interface ResourcesDashboardProps {
   resources?: IResource[];
-  categories: IResourceCategory[];
+  categories?: IResourceCategory[];
+  projects?: IProject[];
+  tags?: ITag[];
 }
 
 /**

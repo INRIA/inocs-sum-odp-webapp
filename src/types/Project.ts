@@ -7,7 +7,7 @@ export enum ProjectType {
 }
 
 export interface IProject {
-  id: string;
+  id: number;
   name: string;
   description?: string | null;
   created_at?: Date | null;
@@ -32,8 +32,7 @@ export interface LivingLabProjectsImplementation {
   lab?: ILivingLab;
 }
 
-export interface LivingLabProjectsImplementationInput
-  extends Pick<
-    LivingLabProjectsImplementation,
-    "project_id" | "living_lab_id" | "description" | "start_at"
-  > {}
+export interface LivingLabProjectsImplementationInput extends Pick<
+  LivingLabProjectsImplementation,
+  "project_id" | "living_lab_id" | "description" | "start_at"
+> {}

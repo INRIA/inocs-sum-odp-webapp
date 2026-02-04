@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { ResourceCard } from "./ResourceCard";
-import type { IResource, ResourceCardProps } from "./types";
+import type { ResourceCardProps } from "./types";
+import type { IResource } from "../../../types";
 
 // ============================================================================
 // Test Fixtures

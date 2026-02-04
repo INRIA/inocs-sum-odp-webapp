@@ -9,7 +9,7 @@ import type { ICategory } from "../../../types/Category";
  * Living lab data with KPI results for dashboard display
  */
 export interface ILivingLabKpiData {
-  id: string;
+  id: number;
   name: string;
   kpiResults: IIKpiResultBeforeAfter[];
 }
@@ -46,9 +46,11 @@ export interface ILabColorAssignment {
  * Filter options for KPI cards
  */
 export interface KpiLivingLabsCardsFilter {
-  selectedLabIds: string[];
-  selectedYears: number[];
-  selectedCategoryIds: number[];
+  selectedLabIds?: number[];
+  selectedYears?: number[];
+  selectedCategoryIds?: number[];
+  selectedProjectIds?: number[];
+  selectedTagIds?: number[];
 }
 
 /**

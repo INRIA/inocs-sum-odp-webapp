@@ -1,5 +1,4 @@
 export { KPIsDashboard } from "./KPIsDashboard";
-export { DataDashboardFilter } from "./DataDashboardFilter";
 export { KpiLivingLabsCards } from "./KpiLivingLabsCards";
 export { KpiLivingLabsSingleCard } from "./KpiLivingLabsSingleCard";
 export { KpiLivingLabsMultipleCard } from "./KpiLivingLabsMultipleCard";
@@ -28,4 +27,3 @@ export type {
   ISingleKpiGroup,
   IParentKpiGroup,
 } from "./types";
-export type { DataDashboardFilterProps } from "./DataDashboardFilter";

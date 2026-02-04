@@ -7,8 +7,6 @@ export { ResourcesFilter } from "./ResourcesFilter";
 export { ResourcesCategoryGroup } from "./ResourcesCategoryGroup";
 export { ResourceCard } from "./ResourceCard";
 export type {
-  IResource,
-  IResourceCategory,
   ResourcesDashboardProps,
   ResourcesMetricsProps,
   ResourcesFilterProps,

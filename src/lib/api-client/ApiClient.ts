@@ -193,7 +193,7 @@ export default class ApiClient {
   }
 
   async getCategories(
-    type: "KPI_SIEF" | "ITEM" | "KPI_IMPACT",
+    type: "KPI_SIEF" | "ITEM" | "KPI_IMPACT" | "RESOURCES",
   ): Promise<ICategory[] | null> {
     return this.request<ICategory[]>(
       `/categories?type=${encodeURIComponent(type)}`,
@@ -244,7 +244,7 @@ export default class ApiClient {
    * Resources (items)
    */
   async getItemsByCategoryType(
-    categoryType: string,
+    categoryType: "KPI_SIEF" | "ITEM" | "KPI_IMPACT" | "RESOURCES",
   ): Promise<IResource[] | null> {
     return this.request<IResource[] | null>(
       `/items?category_type=${encodeURIComponent(categoryType)}`,

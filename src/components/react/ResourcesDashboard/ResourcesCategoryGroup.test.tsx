@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { render, screen, within, cleanup } from "@testing-library/react";
 import { ResourcesCategoryGroup } from "./ResourcesCategoryGroup";
-import type { IResource, ResourcesCategoryGroupProps } from "./types";
+import type { ResourcesCategoryGroupProps } from "./types";
+import type { IResource } from "../../../types";
 
 // ============================================================================
 // Test Fixtures
