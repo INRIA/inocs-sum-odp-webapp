@@ -23,7 +23,7 @@ const livingLab = await api.getLivingLab(labId);
 const modalSplitKpi = kpis?.find((kpi) => kpi.kpi_number === "15");
 const modalSplitKpis =
   kpis?.filter((kpi) =>
-    [kpi.id, kpi.parent_kpi_id].includes(modalSplitKpi?.id)
+    [kpi.id, kpi.parent_kpi_id].includes(modalSplitKpi?.id),
   ) ?? [];
 
 const labInfoProgress = getLivingLabInfoProgress(livingLab);
@@ -33,9 +33,9 @@ const modalSplitBeforeProgress = getKpiResultsModalSplitProgress(
     ?.filter(
       (r) =>
         r.result_before &&
-        modalSplitKpis.find((k) => k.id === r?.kpidefinition_id)
+        modalSplitKpis.find((k) => k.id === r?.kpidefinition_id),
     )
-    ?.map((r) => r.result_before as IKpiResult) ?? []
+    ?.map((r) => r.result_before as IKpiResult) ?? [],
 );
 const modalSplitAfterProgress = getKpiResultsModalSplitProgress(
   modalSplitKpis,
@@ -43,21 +43,21 @@ const modalSplitAfterProgress = getKpiResultsModalSplitProgress(
     ?.filter(
       (r) =>
         r.result_after &&
-        modalSplitKpis.find((k) => k.id === r?.kpidefinition_id)
+        modalSplitKpis.find((k) => k.id === r?.kpidefinition_id),
     )
-    ?.map((r) => r.result_after as IKpiResult) ?? []
+    ?.map((r) => r.result_after as IKpiResult) ?? [],
 );
 const kpisBeforeProgress = getKpiResultsProgress(
   kpis ?? [],
   livingLab?.kpi_results
     ?.filter((r) => r.result_before)
-    ?.map((r) => r.result_before as IKpiResult) ?? []
+    ?.map((r) => r.result_before as IKpiResult) ?? [],
 );
 const kpisAfterProgress = getKpiResultsProgress(
   kpis ?? [],
   livingLab?.kpi_results
     ?.filter((r) => r.result_after)
-    ?.map((r) => r.result_after as IKpiResult) ?? []
+    ?.map((r) => r.result_after as IKpiResult) ?? [],
 );
 const measuresProgress = getMeasuresProgress(livingLab?.projects ?? []);
 const stepsCTA = [
@@ -125,7 +125,11 @@ const stepsCTA = [
 ];
 ---
 
-<Layout role="editor">
+<Layout
+  role="editor"
+  breadcrumbs={[{ label: "Home", href: "/" }, { label: "Lab dashboard" }]}
+  backHref="/"
+>
   <div class="">
     <section
       class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8 flex flex-col gap-10 lg:gap-18"

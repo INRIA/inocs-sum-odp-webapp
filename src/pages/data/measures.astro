@@ -7,7 +7,15 @@ const api = new ApiClient(Astro.request);
 const measures = await api.getMeasures();
 ---
 
-<Layout role="visitor">
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Data" },
+    { label: "Policy Measures" },
+  ]}
+  backHref="/"
+>
   <div class="mx-auto max-w-2xl lg:max-w-none flex flex-col gap-4">
     <div class="text-center md:mx-10 flex flex-col gap-4">
       <h1>

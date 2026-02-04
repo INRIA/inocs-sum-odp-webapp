@@ -1,0 +1,62 @@
+---
+/**
+ * PageHeaderNavigation Component
+ *
+ * A navigation header component that displays breadcrumbs and/or a back button.
+ * Both props are optional - the component only renders when at least one is provided.
+ *
+ * @example
+ * ```astro
+ * <PageHeaderNavigation
+ *   backHref="/tools/resources"
+ *   breadcrumbs={[
+ *     { label: "Home", href: "/" },
+ *     { label: "Resources", href: "/tools/resources" },
+ *     { label: "Current Page" }
+ *   ]}
+ * />
+ * ```
+ */
+
+import { Breadcrumbs, type BreadcrumbItem } from "./Breadcrumbs";
+import { RButton } from "./react/ui";
+import { ArrowLeftIcon } from "@heroicons/react/20/solid";
+
+interface Props {
+  /** Optional breadcrumb navigation items. When provided, displays a breadcrumb trail. */
+  breadcrumbs?: BreadcrumbItem[];
+  /** Optional back button URL. When provided, displays a back button. */
+  backHref?: string;
+  /** Optional CSS class to apply to the container */
+  class?: string;
+}
+
+const { breadcrumbs, backHref, class: className } = Astro.props;
+
+const shouldRender = breadcrumbs || backHref;
+---
+
+{
+  shouldRender && (
+    <div
+      class:list={[
+        "nav-bar mb-4 flex flex-col gap-2 px-4 sm:flex-row sm:items-center sm:justify-between",
+        className,
+      ]}
+    >
+      {breadcrumbs && (
+        <Breadcrumbs items={breadcrumbs} class="hidden overflow-x-auto sm:flex" />
+      )}
+      {backHref && (
+        <RButton
+          variant="link"
+          href={backHref}
+          className="inline-flex items-center gap-2"
+        >
+          <ArrowLeftIcon className="h-5 w-5" />
+          Go back
+        </RButton>
+      )}
+    </div>
+  )
+}

@@ -1,5 +1,13 @@
 ---
 import MCDAADashboardPage from "../../../components/MCDAADashboardPage.astro";
+const { perspective } = Astro.params;
 ---
 
-<MCDAADashboardPage />
+<MCDAADashboardPage
+  perspective={perspective}
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Tools"},
+    { label: "MCDA Analysis" },
+  ]}
+/>

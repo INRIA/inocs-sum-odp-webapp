@@ -13,13 +13,13 @@ const kpis = (await api.getKPIs({})) || [];
 const modalSplitKpi = kpis.find((kpi) => kpi.kpi_number === "15");
 const filteredKpis = kpis.filter(
   (kpi) =>
-    kpi.id !== modalSplitKpi?.id && kpi.parent_kpi_id !== modalSplitKpi?.id
+    kpi.id !== modalSplitKpi?.id && kpi.parent_kpi_id !== modalSplitKpi?.id,
 );
 const livingLabData = await api.getLivingLab(labId);
 const categories = await api.getCategories("KPI_SIEF");
 
 const modalSplitResults = livingLabData?.kpi_results?.filter((result) =>
-  filteredKpis?.some((mk) => mk.id === result.kpidefinition_id)
+  filteredKpis?.some((mk) => mk.id === result.kpidefinition_id),
 );
 
 const valueBeforeDate = modalSplitResults?.reduce(
@@ -33,7 +33,7 @@ const valueBeforeDate = modalSplitResults?.reduce(
     }
     return minDate;
   },
-  null as Date | null
+  null as Date | null,
 );
 
 const valueAfterDate = modalSplitResults?.reduce(
@@ -47,11 +47,19 @@ const valueAfterDate = modalSplitResults?.reduce(
     }
     return maxDate;
   },
-  null as Date | null
+  null as Date | null,
 );
 ---
 
-<Layout role="editor">
+<Layout
+  role="editor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Lab dashboard", href: "/lab-admin" },
+    { label: "KPI edition" },
+  ]}
+  backHref="/lab-admin"
+>
   <div class="mx-auto px-4 py-8 flex flex-col gap-8">
     <h2>Share your Key Performance Indicators - KPI</h2>
 

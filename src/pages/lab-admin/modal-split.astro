@@ -10,11 +10,11 @@ const api = new ApiClient(Astro.request);
 
 const transportModes = await api.getTransportModes();
 const modalSplitKpis = (await api.getKPIs({ kpi_number: "15" }))?.filter(
-  (kpi) => kpi.parent_kpi_id
+  (kpi) => kpi.parent_kpi_id,
 );
 const livingLabData = await api.getLivingLab(labId);
 const modalSplitResults = livingLabData?.kpi_results?.filter((result) =>
-  modalSplitKpis?.some((mk) => mk.id === result.kpidefinition_id)
+  modalSplitKpis?.some((mk) => mk.id === result.kpidefinition_id),
 );
 
 const valueBeforeDate = modalSplitResults?.reduce(
@@ -28,7 +28,7 @@ const valueBeforeDate = modalSplitResults?.reduce(
     }
     return minDate;
   },
-  null as Date | null
+  null as Date | null,
 );
 
 const valueAfterDate = modalSplitResults?.reduce(
@@ -42,11 +42,19 @@ const valueAfterDate = modalSplitResults?.reduce(
     }
     return maxDate;
   },
-  null as Date | null
+  null as Date | null,
 );
 ---
 
-<Layout role="editor">
+<Layout
+  role="editor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Lab dashboard", href: "/lab-admin" },
+    { label: "Modal split edition" },
+  ]}
+  backHref="/lab-admin"
+>
   <div class="mx-auto px-4 py-8 flex flex-col gap-8">
     <h2 class="text-2xl font-bold mb-4">Modal split KPI</h2>
 

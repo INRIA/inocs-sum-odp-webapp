@@ -1,11 +1,11 @@
 ---
 import "../styles/global.css";
 import Footer from "../components/Footer.astro";
-import { RButton, SidebarMenu, SiteNavBar } from "../components/react/ui";
+import { SidebarMenu, SiteNavBar } from "../components/react/ui";
 import ApiClient from "../lib/api-client/ApiClient";
 import { getUrl } from "../lib/helpers";
-import { Breadcrumbs, type BreadcrumbItem } from "../components/Breadcrumbs";
-import { ArrowLeftIcon } from "@heroicons/react/20/solid";
+import type { BreadcrumbItem } from "../components/Breadcrumbs";
+import PageHeaderNavigation from "../components/PageHeaderNavigation.astro";
 
 interface Props {
   role?: "visitor" | "editor" | "admin";
@@ -16,9 +16,6 @@ interface Props {
 }
 
 const { role = "visitor", breadcrumbs, backHref } = Astro.props;
-
-/** Whether to show the navigation bar (breadcrumbs and/or back button) */
-const showNavBar = breadcrumbs || backHref;
 const api = new ApiClient(Astro.request);
 const labs = await api.getLivingLabs([]);
 const labsItems = labs?.map((lab) => ({
@@ -128,26 +125,7 @@ const footerMenuItems = [
           currentLivingLab={currentLivingLab}
           client:load
         >
-          {showNavBar && (
-            <div class="nav-bar mb-4 flex flex-col gap-2 px-4 sm:flex-row sm:items-center sm:justify-between">
-              {breadcrumbs && (
-                <Breadcrumbs
-                  items={breadcrumbs}
-                  class="hidden overflow-x-auto sm:flex"
-                />
-              )}
-              {backHref && (
-                <RButton
-                  variant="link"
-                  href={backHref}
-                  className="inline-flex items-center gap-2"
-                >
-                  <ArrowLeftIcon className="h-5 w-5" />
-                  Back to Resources
-                </RButton>
-              )}
-            </div>
-          )}
+          <PageHeaderNavigation breadcrumbs={breadcrumbs} backHref={backHref} />
           <slot />
         </SiteNavBar>
       )
@@ -159,40 +137,7 @@ const footerMenuItems = [
           currentLivingLab={currentLivingLab}
           client:load
         >
-          {showNavBar && (
-            <div class="nav-bar mb-4 flex flex-col gap-2 px-4 sm:flex-row sm:items-center sm:justify-between">
-              {backHref ? (
-                <a
-                  href={backHref}
-                  class="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900"
-                >
-                  <svg
-                    class="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="2"
-                    stroke="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
-                    />
-                  </svg>
-                  <span class="sm:hidden">Back</span>
-                </a>
-              ) : (
-                <div />
-              )}
-              {breadcrumbs && (
-                <Breadcrumbs
-                  items={breadcrumbs}
-                  class="hidden overflow-x-auto sm:flex"
-                />
-              )}
-            </div>
-          )}
+          <PageHeaderNavigation breadcrumbs={breadcrumbs} backHref={backHref} />
           <slot />
         </SidebarMenu>
       )

@@ -13,7 +13,15 @@ const measures = await api.getMeasures();
 const livinglab = await api.getLivingLab(labId, ["projects"]);
 ---
 
-<Layout role="editor">
+<Layout
+  role="editor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Lab dashboard", href: "/lab-admin" },
+    { label: "Measures edition" },
+  ]}
+  backHref="/lab-admin"
+>
   <div class="mx-auto px-4 py-8 flex flex-col gap-8">
     <h2>What measures is your living lab implementing ?</h2>
 

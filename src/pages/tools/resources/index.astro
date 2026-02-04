@@ -45,7 +45,12 @@ const projects = Array.from(projectsMap.values());
 const tags = Array.from(tagsMap.values());
 ---
 
-<Layout>
+<Layout
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Resources", href: "/tools/resources" },
+  ]}
+>
   <main class="mx-auto px-4 py-12">
     <section class="mb-12 text-center">
       <h1 class="text-4xl font-bold text-gray-900">Innovation Resources</h1>

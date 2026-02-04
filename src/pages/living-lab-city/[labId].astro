@@ -54,7 +54,14 @@ const kpiResultsByCategory = categories.map((category) => ({
 }));
 ---
 
-<Layout>
+<Layout
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Living Labs" },
+    { label: livingLabData?.name ?? "Living Lab" },
+  ]}
+  backHref="/"
+>
   <div class="lg:mx-10 mx-auto px-1 py-4 flex flex-col gap-8">
     <h2>
       <strong>{livingLabData?.name}</strong> Living lab data dashboard

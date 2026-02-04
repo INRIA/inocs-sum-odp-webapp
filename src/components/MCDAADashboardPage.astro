@@ -10,7 +10,7 @@ import {
 import ApiClient from "../lib/api-client/ApiClient";
 import type { IJobRun, IKpiGroup, MCDAGoal, McdaResults } from "../types";
 
-const { perspective } = Astro.props;
+const { perspective, breadcrumbs, backHref } = Astro.props;
 const api = new ApiClient(Astro.request);
 
 // Fetch the latest successful job run for mcda_analysis
@@ -116,7 +116,14 @@ const methodologyContent = `
 `;
 ---
 
-<Layout role="visitor">
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    ...breadcrumbs,
+    { label: `${perspectives[perspective]} perspective` },
+  ]}
+  backHref={backHref}
+>
   <div class="mx-auto px-1 py-8">
     <div class="mx-auto px-1 py-8">
       <!-- Info Section -->

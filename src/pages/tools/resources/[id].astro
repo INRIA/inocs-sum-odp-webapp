@@ -29,7 +29,15 @@ const formattedDate = resource.created_at
   : null;
 ---
 
-<Layout>
+<Layout
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Resources", href: "/tools/resources" },
+    { label: resource.category.name },
+    { label: resource.name },
+  ]}
+  backHref="/tools/resources"
+>
   <main class="mx-auto px-4 py-12">
     <article class="p-8 flex flex-col gap-4">
       <h1>{resource.name}</h1>
