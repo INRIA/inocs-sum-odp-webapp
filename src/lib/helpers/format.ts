@@ -1,5 +1,26 @@
 import { EnumKpiMetricType } from "../../types";
 
+export function stripHtml(html: string): string {
+  return html
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function truncateHtml(html: string, maxLength: number): string {
+  const text = stripHtml(html);
+  if (text.length <= maxLength) {
+    return text;
+  }
+  return `${text.slice(0, maxLength).trim()}…`;
+}
+
 export function formatDateToMonthYear(date?: string): string {
   if (!date) return "";
   const d = new Date(date);
@@ -31,6 +52,6 @@ export function getYearFromDate(date?: string): number | undefined {
 
 export function toSafeJsonString(obj: any): string {
   return JSON.stringify(obj, (key, value) =>
-    typeof value === "bigint" ? value.toString() : value
+    typeof value === "bigint" ? value.toString() : value,
   );
 }

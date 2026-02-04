@@ -9,7 +9,8 @@ export type BadgeColor =
   | "dark"
   | "light"
   | "transparent"
-  | "success";
+  | "success"
+  | "none";
 export type BadgeSize = "xs" | "sm" | "md" | "lg" | "xl";
 
 export interface BadgeProps {
@@ -35,6 +36,7 @@ const COLOR_CLASSES: Record<BadgeColor, string> = {
   light: "bg-light text-primary border-primary",
   transparent: "bg-transparent text-primary border-transparent",
   success: "bg-success text-primary border-primary",
+  none: "",
 };
 
 const SIZE_CLASSES: Record<BadgeSize, string> = {
@@ -65,6 +67,7 @@ export function Badge({
   "aria-label": ariaLabel,
   inline = true,
   onClick,
+  style,
 }: BadgeProps) {
   const colorClass = COLOR_CLASSES[color] ?? COLOR_CLASSES.secondary;
   const sizeClass = SIZE_CLASSES[size] ?? SIZE_CLASSES.md;
@@ -79,6 +82,7 @@ export function Badge({
     >
       <span
         className={`items-center gap-2 rounded-full font-medium ${colorClass} ${sizeClass} ${className} ${displayStyle} border`}
+        style={style}
         role={role}
         aria-label={ariaLabel}
         onMouseEnter={() => setDisplayTooltip(true)}

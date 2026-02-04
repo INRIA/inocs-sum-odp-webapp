@@ -12,6 +12,7 @@ import type {
   SignupLabEditorInput,
   IJobRun,
   CreateLabInput,
+  IResource,
 } from "../../types";
 import type { ICategory } from "../../types/Category";
 
@@ -237,5 +238,16 @@ export default class ApiClient {
   async getAllJobRuns(status?: string): Promise<IJobRun[] | null> {
     const params = status ? new URLSearchParams({ status }) : "";
     return this.request<IJobRun[]>(`/job-runs${params ? `?${params}` : ""}`);
+  }
+
+  /**
+   * Resources (items)
+   */
+  async getItemsByCategoryType(
+    categoryType: string,
+  ): Promise<IResource[] | null> {
+    return this.request<IResource[] | null>(
+      `/items?category_type=${encodeURIComponent(categoryType)}`,
+    );
   }
 }
