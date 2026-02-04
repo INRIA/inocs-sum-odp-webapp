@@ -250,4 +250,8 @@ export default class ApiClient {
       `/items?category_type=${encodeURIComponent(categoryType)}`,
     );
   }
+
+  async getItemById(id: number): Promise<IResource | null> {
+    return this.request<IResource | null>(`/items/${id}`);
+  }
 }

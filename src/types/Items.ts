@@ -1,4 +1,6 @@
 import type { ICategory } from "./Category";
+import type { IKpiDefinition } from "./ImpactAnalysis";
+import type { ILivingLab } from "./LivingLab";
 import type { IProject } from "./Project";
 
 /**
@@ -12,7 +14,11 @@ export interface IResource {
   category_id: number;
   category: ICategory;
   item_tag?: IItemTag[];
-  project?: IProject | null;
+  project?: IProject;
+  living_lab?: ILivingLab;
+  kpidefinition?: IKpiDefinition;
+  created_at: string;
+  updated_at: string;
 }
 
 /**

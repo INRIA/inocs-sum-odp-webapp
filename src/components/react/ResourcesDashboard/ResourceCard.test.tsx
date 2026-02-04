@@ -68,7 +68,7 @@ describe("ResourceCard", () => {
       // Assert
       const links = screen.getAllByRole("link");
       expect(links.length).toBeGreaterThanOrEqual(1);
-      expect(links[0]).toHaveAttribute("href", "https://example.com/alpha");
+      expect(links[0]).toHaveAttribute("href", "/tools/resources/1");
     });
 
     it("should open link in new tab with security attributes", () => {

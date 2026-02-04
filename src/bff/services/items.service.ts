@@ -10,4 +10,8 @@ export class ItemService {
   async getItemsByCategoryType(categoryType: string) {
     return this.repo.getItemsByCategoryType(categoryType);
   }
+
+  async getItemById(id: number) {
+    return this.repo.getItemById(id);
+  }
 }

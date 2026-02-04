@@ -4,7 +4,7 @@ import { InnerHtml, RButton } from "../ui";
 import { Badge } from "../ui";
 
 export function ResourceCard({ resource }: ResourceCardProps) {
-  const { name, description, url, item_tag, project } = resource;
+  const { id, name, description, url, item_tag, project } = resource;
 
   return (
     <article className="relative flex flex-col rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
@@ -51,7 +51,7 @@ export function ResourceCard({ resource }: ResourceCardProps) {
       </div>
 
       <div className="mt-4 flex items-center justify-between gap-4">
-        <RButton variant="secondary" href={url ?? "#"} className="w-full text-center">
+        <RButton variant="secondary" href={`/tools/resources/${id}`} className="w-full text-center">
           Learn more
         </RButton>
 

@@ -4,6 +4,6 @@ declare namespace App {
   interface Locals {
     user?: import("./types").User;
     livingLab?: import("./types").SessionLivingLabCookie;
-    odpAdminHost: string;
+    odpAdminHost?: string;
   }
 }

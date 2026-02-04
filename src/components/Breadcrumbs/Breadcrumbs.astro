@@ -1,0 +1,81 @@
+---
+/**
+ * Breadcrumbs Component
+ *
+ * A navigation component that displays the current page location within
+ * a hierarchical structure, helping users understand where they are
+ * and navigate back to parent pages.
+ *
+ * @example
+ * ```astro
+ * <Breadcrumbs
+ *   items={[
+ *     { label: "Home", href: "/" },
+ *     { label: "Tools", href: "/tools" },
+ *     { label: "Resources", href: "/tools/resources" },
+ *     { label: "Current Resource" }
+ *   ]}
+ * />
+ * ```
+ */
+
+export interface BreadcrumbItem {
+  /** Display text for the breadcrumb item */
+  label: string;
+  /** URL to navigate to. If omitted, the item is rendered as plain text (typically the current page) */
+  href?: string;
+}
+
+interface Props {
+  /** Array of breadcrumb items from root to current page */
+  items: BreadcrumbItem[];
+  /** Optional CSS class to apply to the nav container */
+  class?: string;
+}
+
+const { items, class: className } = Astro.props;
+---
+
+{
+  items.length > 0 && (
+    <nav
+      aria-label="Breadcrumb"
+      class:list={["flex items-center text-sm", className]}
+    >
+      <ol class="flex items-center space-x-2">
+        {items.map((item, index) => {
+          const isLast = index === items.length - 1;
+          return (
+            <li class="flex items-center">
+              {index > 0 && (
+                <svg
+                  class="mx-2 h-4 w-4 shrink-0 text-gray-400"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  aria-hidden="true"
+                >
+                  <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
+                </svg>
+              )}
+              {item.href && !isLast ? (
+                <a
+                  href={item.href}
+                  class="text-gray-500 hover:text-gray-700 hover:underline"
+                >
+                  {item.label}
+                </a>
+              ) : (
+                <span
+                  class={isLast ? "font-medium text-gray-900" : "text-gray-500"}
+                  aria-current={isLast ? "page" : undefined}
+                >
+                  {item.label}
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  )
+}

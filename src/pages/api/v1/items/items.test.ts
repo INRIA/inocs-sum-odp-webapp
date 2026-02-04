@@ -700,3 +700,440 @@ describe("GET /api/v1/items - Retrieve items by category type", () => {
     });
   });
 });
+
+// =============================================================================
+// GET /api/v1/items/:id - Retrieve item by ID
+// =============================================================================
+
+describe("GET /api/v1/items/:id - Retrieve item by ID", () => {
+  let mockContext: Partial<APIContext>;
+  let getItemByIdSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    mockContext = {
+      request: new Request("http://localhost:3000/api/v1/items/1", {
+        method: "GET",
+      }),
+      params: { id: "1" },
+      locals: {},
+    } as Partial<APIContext>;
+
+    getItemByIdSpy = vi.spyOn(ItemService.prototype, "getItemById");
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  describe("Happy path - Retrieve item by ID", () => {
+    it("should return item with given id", async () => {
+      // Arrange
+      const mockItem = {
+        id: BigInt(1),
+        name: "Alpha Resource",
+        orgname: "Org A",
+        fileorgname: "file_a.pdf",
+        category_id: BigInt(1),
+        url: "https://example.com/alpha",
+        description: "Alpha description",
+        living_lab: {
+          id: BigInt(1),
+          name: "Geneva Lab",
+          country: "Switzerland",
+        },
+        kpidefinition: {
+          id: BigInt(1),
+          kpi_number: "KPI-001",
+          name: "Air Quality",
+        },
+        project: { id: BigInt(1), name: "SUM Project", type: "research" },
+        item_tag: [
+          {
+            id: 1,
+            item_id: BigInt(1),
+            tag_id: BigInt(1),
+            tags: { id: BigInt(1), name: "sustainability", color: "#22c55e" },
+          },
+          {
+            id: 2,
+            item_id: BigInt(1),
+            tag_id: BigInt(2),
+            tags: { id: BigInt(2), name: "mobility", color: "#3b82f6" },
+          },
+        ],
+      };
+
+      getItemByIdSpy.mockResolvedValue(mockItem);
+
+      mockContext.params = { id: "1" };
+      mockContext.request = new Request(
+        "http://localhost:3000/api/v1/items/1",
+        {
+          method: "GET",
+        },
+      );
+
+      // Act
+      const { GET: GET_BY_ID } = await import("./[id]");
+      const response = await GET_BY_ID(mockContext as APIContext);
+      const responseData = await response.json();
+
+      // Assert
+      expect(response.status).toBe(200);
+      expect(responseData.id).toBeDefined();
+      expect(responseData.name).toBe("Alpha Resource");
+      expect(getItemByIdSpy).toHaveBeenCalledWith(1);
+    });
+
+    it("should include related living_lab data", async () => {
+      // Arrange
+      const mockItem = {
+        id: BigInt(1),
+        name: "Resource With Lab",
+        orgname: "Org A",
+        fileorgname: "file.pdf",
+        category_id: BigInt(1),
+        url: "https://example.com/resource",
+        description: "Resource description",
+        living_lab: {
+          id: BigInt(1),
+          name: "Geneva Lab",
+          country: "Switzerland",
+          lat: "46.2044",
+          lng: "6.1432",
+        },
+        kpidefinition: null,
+        project: null,
+        item_tag: [],
+      };
+
+      getItemByIdSpy.mockResolvedValue(mockItem);
+
+      mockContext.params = { id: "1" };
+      mockContext.request = new Request(
+        "http://localhost:3000/api/v1/items/1",
+        {
+          method: "GET",
+        },
+      );
+
+      // Act
+      const { GET: GET_BY_ID } = await import("./[id]");
+      const response = await GET_BY_ID(mockContext as APIContext);
+      const responseData = await response.json();
+
+      // Assert
+      expect(response.status).toBe(200);
+      expect(responseData.living_lab).toBeDefined();
+      expect(responseData.living_lab.name).toBe("Geneva Lab");
+      expect(responseData.living_lab.country).toBe("Switzerland");
+    });
+
+    it("should include related kpidefinition data", async () => {
+      // Arrange
+      const mockItem = {
+        id: BigInt(2),
+        name: "KPI Resource",
+        orgname: "Org B",
+        fileorgname: "kpi.pdf",
+        category_id: BigInt(1),
+        url: "https://example.com/kpi-resource",
+        description: "Resource about KPIs",
+        living_lab: null,
+        kpidefinition: {
+          id: BigInt(1),
+          kpi_number: "KPI-001",
+          name: "Air Quality",
+          type: "environmental",
+          description: "Measures air quality",
+        },
+        project: null,
+        item_tag: [],
+      };
+
+      getItemByIdSpy.mockResolvedValue(mockItem);
+
+      mockContext.params = { id: "2" };
+      mockContext.request = new Request(
+        "http://localhost:3000/api/v1/items/2",
+        {
+          method: "GET",
+        },
+      );
+
+      // Act
+      const { GET: GET_BY_ID } = await import("./[id]");
+      const response = await GET_BY_ID(mockContext as APIContext);
+      const responseData = await response.json();
+
+      // Assert
+      expect(response.status).toBe(200);
+      expect(responseData.kpidefinition).toBeDefined();
+      expect(responseData.kpidefinition.name).toBe("Air Quality");
+      expect(responseData.kpidefinition.kpi_number).toBe("KPI-001");
+    });
+
+    it("should include related project data", async () => {
+      // Arrange
+      const mockItem = {
+        id: BigInt(3),
+        name: "Project Resource",
+        orgname: "Org C",
+        fileorgname: "project.pdf",
+        category_id: BigInt(1),
+        url: "https://example.com/project-resource",
+        description: "Resource about project",
+        living_lab: null,
+        kpidefinition: null,
+        project: {
+          id: BigInt(1),
+          name: "SUM Project",
+          type: "research",
+          description: "Sustainable Urban Mobility",
+        },
+        item_tag: [],
+      };
+
+      getItemByIdSpy.mockResolvedValue(mockItem);
+
+      mockContext.params = { id: "3" };
+      mockContext.request = new Request(
+        "http://localhost:3000/api/v1/items/3",
+        {
+          method: "GET",
+        },
+      );
+
+      // Act
+      const { GET: GET_BY_ID } = await import("./[id]");
+      const response = await GET_BY_ID(mockContext as APIContext);
+      const responseData = await response.json();
+
+      // Assert
+      expect(response.status).toBe(200);
+      expect(responseData.project).toBeDefined();
+      expect(responseData.project.name).toBe("SUM Project");
+      expect(responseData.project.type).toBe("research");
+    });
+
+    it("should include related item_tags data", async () => {
+      // Arrange
+      const mockItem = {
+        id: BigInt(4),
+        name: "Tagged Resource",
+        orgname: "Org D",
+        fileorgname: "tagged.pdf",
+        category_id: BigInt(1),
+        url: "https://example.com/tagged-resource",
+        description: "Resource with tags",
+        living_lab: null,
+        kpidefinition: null,
+        project: null,
+        item_tag: [
+          {
+            id: 1,
+            item_id: BigInt(4),
+            tag_id: BigInt(1),
+            tags: { id: BigInt(1), name: "sustainability", color: "#22c55e" },
+          },
+          {
+            id: 2,
+            item_id: BigInt(4),
+            tag_id: BigInt(2),
+            tags: { id: BigInt(2), name: "mobility", color: "#3b82f6" },
+          },
+          {
+            id: 3,
+            item_id: BigInt(4),
+            tag_id: BigInt(3),
+            tags: { id: BigInt(3), name: "urban", color: "#f59e0b" },
+          },
+        ],
+      };
+
+      getItemByIdSpy.mockResolvedValue(mockItem);
+
+      mockContext.params = { id: "4" };
+      mockContext.request = new Request(
+        "http://localhost:3000/api/v1/items/4",
+        {
+          method: "GET",
+        },
+      );
+
+      // Act
+      const { GET: GET_BY_ID } = await import("./[id]");
+      const response = await GET_BY_ID(mockContext as APIContext);
+      const responseData = await response.json();
+
+      // Assert
+      expect(response.status).toBe(200);
+      expect(responseData.item_tag).toBeDefined();
+      expect(responseData.item_tag).toHaveLength(3);
+      expect(responseData.item_tag[0].tags.name).toBe("sustainability");
+      expect(responseData.item_tag[1].tags.name).toBe("mobility");
+      expect(responseData.item_tag[2].tags.name).toBe("urban");
+    });
+
+    it("should include all related data when item has all relations", async () => {
+      // Arrange
+      const mockItem = {
+        id: BigInt(5),
+        name: "Complete Resource",
+        orgname: "Org E",
+        fileorgname: "complete.pdf",
+        category_id: BigInt(1),
+        url: "https://example.com/complete-resource",
+        description: "Resource with all relations",
+        living_lab: {
+          id: BigInt(1),
+          name: "Geneva Lab",
+          country: "Switzerland",
+        },
+        kpidefinition: {
+          id: BigInt(1),
+          kpi_number: "KPI-001",
+          name: "Air Quality",
+        },
+        project: { id: BigInt(1), name: "SUM Project", type: "research" },
+        item_tag: [
+          {
+            id: 1,
+            item_id: BigInt(5),
+            tag_id: BigInt(1),
+            tags: { id: BigInt(1), name: "sustainability", color: "#22c55e" },
+          },
+        ],
+      };
+
+      getItemByIdSpy.mockResolvedValue(mockItem);
+
+      mockContext.params = { id: "5" };
+      mockContext.request = new Request(
+        "http://localhost:3000/api/v1/items/5",
+        {
+          method: "GET",
+        },
+      );
+
+      // Act
+      const { GET: GET_BY_ID } = await import("./[id]");
+      const response = await GET_BY_ID(mockContext as APIContext);
+      const responseData = await response.json();
+
+      // Assert
+      expect(response.status).toBe(200);
+      expect(responseData.living_lab).toBeDefined();
+      expect(responseData.kpidefinition).toBeDefined();
+      expect(responseData.project).toBeDefined();
+      expect(responseData.item_tag).toBeDefined();
+      expect(responseData.item_tag).toHaveLength(1);
+    });
+  });
+
+  describe("Error cases - Item not found", () => {
+    it("should return 404 when item id does not exist", async () => {
+      // Arrange
+      getItemByIdSpy.mockResolvedValue(null);
+
+      mockContext.params = { id: "999" };
+      mockContext.request = new Request(
+        "http://localhost:3000/api/v1/items/999",
+        {
+          method: "GET",
+        },
+      );
+
+      // Act
+      const { GET: GET_BY_ID } = await import("./[id]");
+      const response = await GET_BY_ID(mockContext as APIContext);
+      const responseData = await response.json();
+
+      // Assert
+      expect(response.status).toBe(404);
+      expect(responseData.error).toBeDefined();
+      expect(getItemByIdSpy).toHaveBeenCalledWith(999);
+    });
+
+    it("should return 404 when item id is 0", async () => {
+      // Arrange
+      getItemByIdSpy.mockResolvedValue(null);
+
+      mockContext.params = { id: "0" };
+      mockContext.request = new Request(
+        "http://localhost:3000/api/v1/items/0",
+        {
+          method: "GET",
+        },
+      );
+
+      // Act
+      const { GET: GET_BY_ID } = await import("./[id]");
+      const response = await GET_BY_ID(mockContext as APIContext);
+      const responseData = await response.json();
+
+      // Assert
+      expect(response.status).toBe(404);
+      expect(responseData.error).toBeDefined();
+    });
+  });
+
+  describe("Edge cases - Invalid id parameter", () => {
+    it("should return 400 when id is not a valid number", async () => {
+      // Arrange
+      mockContext.params = { id: "abc" };
+      mockContext.request = new Request(
+        "http://localhost:3000/api/v1/items/abc",
+        {
+          method: "GET",
+        },
+      );
+
+      // Act
+      const { GET: GET_BY_ID } = await import("./[id]");
+      const response = await GET_BY_ID(mockContext as APIContext);
+      const responseData = await response.json();
+
+      // Assert
+      expect(response.status).toBe(400);
+      expect(responseData.error).toBeDefined();
+    });
+
+    it("should return 400 when id is negative", async () => {
+      // Arrange
+      mockContext.params = { id: "-1" };
+      mockContext.request = new Request(
+        "http://localhost:3000/api/v1/items/-1",
+        {
+          method: "GET",
+        },
+      );
+
+      // Act
+      const { GET: GET_BY_ID } = await import("./[id]");
+      const response = await GET_BY_ID(mockContext as APIContext);
+      const responseData = await response.json();
+
+      // Assert
+      expect(response.status).toBe(400);
+      expect(responseData.error).toBeDefined();
+    });
+
+    it("should return 400 when id is empty string", async () => {
+      // Arrange
+      mockContext.params = { id: "" };
+      mockContext.request = new Request("http://localhost:3000/api/v1/items/", {
+        method: "GET",
+      });
+
+      // Act
+      const { GET: GET_BY_ID } = await import("./[id]");
+      const response = await GET_BY_ID(mockContext as APIContext);
+      const responseData = await response.json();
+
+      // Assert
+      expect(response.status).toBe(400);
+      expect(responseData.error).toBeDefined();
+    });
+  });
+});

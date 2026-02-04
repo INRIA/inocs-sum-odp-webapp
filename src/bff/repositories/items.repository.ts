@@ -59,4 +59,31 @@ export class ItemRepository {
       category: categoryMap.get(String(item.category_id)) || null,
     }));
   }
+
+  async getItemById(id: number) {
+    const data = await prisma.items.findUnique({
+      where: { id: BigInt(id) },
+      include: {
+        living_lab: true,
+        kpidefinition: true,
+        project: true,
+        item_tag: {
+          include: { tags: true },
+        },
+      },
+    });
+
+    if (!data) {
+      return null;
+    }
+
+    const category = await prisma.categories.findUnique({
+      where: { id: data.category_id },
+    });
+
+    return {
+      ...data,
+      category: category || null,
+    };
+  }
 }
