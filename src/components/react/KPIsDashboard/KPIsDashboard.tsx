@@ -64,16 +64,16 @@ export const KPIsDashboard: React.FC<KPIsDashboardProps> = ({
   const labColors = useMemo(
     () =>
       generateLabColorsWithSeed(
-        livingLabs.map((lab) => ({ id: lab.id, name: lab.name })),
+        livingLabs?.map((lab) => ({ id: lab.id, name: lab.name })) ?? [],
       ),
     [livingLabs],
   );
 
   // Initialize filter with all labs and years selected
   const [filter, setFilter] = useState<KpiLivingLabsCardsFilter>({
-    selectedLabIds: livingLabs.map((lab) => lab.id),
-    selectedYears: availableYears,
-    selectedCategoryIds: categories.map((cat) => cat.id),
+    selectedLabIds: livingLabs?.map((lab) => lab.id) ?? [],
+    selectedYears: availableYears ?? [],
+    selectedCategoryIds: categories?.map((cat) => cat.id) ?? [],
   });
 
   // Handler for filter changes from DataDashboardFilter component
@@ -84,6 +84,12 @@ export const KPIsDashboard: React.FC<KPIsDashboardProps> = ({
     [],
   );
 
+  const getKpisCount = useMemo(() => {
+    const modalSplitKpisCount = modalSplitData.length;
+    const otherKpisCount = kpis.filter((kpi) => !kpi.parent_kpi_id).length;
+    return modalSplitKpisCount + otherKpisCount;
+  }, [modalSplitData, kpis]);
+
   return (
     <div className="relative">
       {/* Main content area - full width */}
@@ -91,9 +97,8 @@ export const KPIsDashboard: React.FC<KPIsDashboardProps> = ({
         {/* Summary and Filter Toggle */}
         <div className="flex items-center justify-between text-sm text-gray-600">
           <span>
-            Showing {filter.selectedLabIds.length} of {livingLabs.length} living
-            labs • {filter.selectedCategoryIds.length} of {categories.length}{" "}
-            categories
+            Showing {filter.selectedLabIds?.length} of {livingLabs.length}{" "}
+            living labs • {getKpisCount} KPIs • {availableYears.length} years
           </span>
           {/* Filter component with internal toggle button and panel */}
           <DataDashboardFilter
@@ -107,23 +112,24 @@ export const KPIsDashboard: React.FC<KPIsDashboardProps> = ({
           />
         </div>
 
-        {/* KPI Cards Grid */}
         <section id="data-dashboard-kpis-start">
-          {/* Modal Split Section - One card per KPI subtype (15.a, 15.b, 15.c) */}
-          <ModalSplitLivingLabsCards
-            modalSplitData={modalSplitData}
-            filter={filter}
-            transportModes={transportModes}
-          />
+          {modalSplitData.length > 0 && (
+            <ModalSplitLivingLabsCards
+              modalSplitData={modalSplitData}
+              filter={filter}
+              transportModes={transportModes}
+            />
+          )}
 
-          {/* Other KPI Cards */}
-          <KpiLivingLabsCards
-            livingLabs={livingLabs}
-            kpis={kpis}
-            filter={filter}
-            labColors={labColors}
-            categories={categories}
-          />
+          {kpis.length > 0 && (
+            <KpiLivingLabsCards
+              livingLabs={livingLabs}
+              kpis={kpis}
+              filter={filter}
+              labColors={labColors}
+              categories={categories}
+            />
+          )}
         </section>
 
         <section id="data-dashboard-kpis-end" />

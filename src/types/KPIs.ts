@@ -4,9 +4,9 @@ import type { ITransportMode } from "./TransportMode";
 //Kpi interface is a compilation of tables KPIRESULT, and KPIDEFINITIONS
 export interface IKpi {
   //KPIDEFINITIONS
-  id: string;
+  id: number;
   kpi_number: string;
-  parent_kpi_id?: string | null;
+  parent_kpi_id?: number | null;
   name: string;
   description?: string;
   disclaimer?: string;
@@ -20,25 +20,20 @@ export interface IKpi {
 }
 
 export interface IKpiResult {
-  id: string;
-  kpidefinition_id: string;
-  living_lab_id: string;
+  id: number;
+  kpidefinition_id: number;
+  living_lab_id: number;
   value: number;
   date: string;
-  transport_mode_id?: string;
+  transport_mode_id?: number;
   transport_mode?: ITransportMode;
 }
 
-export interface IKpiResultInput
-  extends Pick<
-    IKpiResult,
-    | "value"
-    | "date"
-    | "transport_mode_id"
-    | "kpidefinition_id"
-    | "living_lab_id"
-  > {
-  id?: string;
+export interface IKpiResultInput extends Pick<
+  IKpiResult,
+  "value" | "date" | "transport_mode_id" | "kpidefinition_id" | "living_lab_id"
+> {
+  id?: number;
 }
 
 export enum EnumKpiMetricType {
@@ -56,9 +51,9 @@ export enum EnumKpiType {
 }
 
 export interface IIKpiResultBeforeAfter {
-  living_lab_id: string;
-  kpidefinition_id: string;
-  transport_mode_id?: string;
+  living_lab_id: number;
+  kpidefinition_id: number;
+  transport_mode_id?: number;
   result_before?: IKpiResult | null;
   result_after?: IKpiResult | null;
 }

@@ -5,14 +5,14 @@ import {
   CTASection,
   StatsSection,
   TransportBadge,
-  MobilityMeasures,
   ODPTimeline,
   LivingLabsMapSection,
   RButton,
+  CTACard,
 } from "../components/react";
 import heroImage from "../assets/img/sum-hero.png";
 import ApiClient from "../lib/api-client/ApiClient";
-import { getUrl } from "../lib/helpers";
+import { getUrl, getYearFromDate } from "../lib/helpers";
 import { COLOR_SECONDARY, type ILivingLabPopulated } from "../types";
 
 const api = new ApiClient(Astro.request);
@@ -26,22 +26,17 @@ const transportModes = (await api.getTransportModes())?.filter(
 );
 
 const labs = livingLabsData?.map((lab) => {
-  const kpisBeforeIds = lab.kpi_results
-    ?.filter((kpi) => kpi.result_before)
-    ?.map((kpiresult) => {
+  const kpiSet = new Set<number>();
+  const yearsSet = new Set<number>();
+  lab.kpi_results
+    ?.filter((kpi) => kpi.result_before || kpi.result_after)
+    ?.forEach((kpiresult) => {
       const kpiDefinition = allKPIs?.find(
         (pk) => pk.id === kpiresult.kpidefinition_id,
       );
-      return kpiDefinition?.parent_kpi_id ?? kpiDefinition?.id;
-    });
-
-  const kpisAfterIds = lab.kpi_results
-    ?.filter((kpi) => kpi.result_after)
-    ?.map((kpiresult) => {
-      const kpiDefinition = allKPIs?.find(
-        (pk) => pk.id === kpiresult.kpidefinition_id,
-      );
-      return kpiDefinition?.parent_kpi_id ?? kpiDefinition?.id;
+      kpiSet.add(kpiDefinition?.parent_kpi_id ?? kpiDefinition?.id ?? 0);
+      const year = getYearFromDate(kpiresult.result_after?.date);
+      year && yearsSet.add(year);
     });
 
   return {
@@ -51,8 +46,8 @@ const labs = livingLabsData?.map((lab) => {
     radius: lab.radius ?? 50,
     // status: lab.status,
     totalMeasures: lab.projects?.length,
-    kpisBefore: [...new Set(kpisBeforeIds)]?.length,
-    kpisAfter: [...new Set(kpisAfterIds)]?.length,
+    kpisCollected: kpiSet.size,
+    yearsCollected: Array.from(yearsSet),
     transportModes: lab.transport_modes?.filter((tm) => tm.type === "NSM")
       .length,
     sustainablePercentage: 0.4,
@@ -152,7 +147,7 @@ const steps = [
       ]}
     />
 
-    <CTASection
+    <!-- <CTASection
       title="Measures for Seamless Shared Urban Mobility"
       description="Measures are policy actions, infrastructure changes, service rollouts, or regulatory shifts implemented by cities to impact how people move through urban spaces. Each measure falls under one of two strategic categories: "
       order="center"
@@ -166,6 +161,70 @@ const steps = [
         cols={4}
         client:load
       />
+    </CTASection> -->
+
+    <CTASection
+      title="Open Data Platform features"
+      description="Multiple ways to explore SUM Open Data Platform and leverage its data and tools."
+      order="center"
+      className="border-t border-b border-gray-200 py-10 mx-4"
+    >
+      <div class="my-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <CTACard
+          id="interactive-kpi-dashboard"
+          title="Interactive KPI dashboard"
+          description="Filter and explore SUM data (Living Labs and KPIs) with customizable views and charts."
+          cta="Explore KPIs"
+          href={getUrl("/data/kpis")}
+          iconVariant="chart"
+          client:load
+        />
+        <CTACard
+          id="interactive-modalsplit-dashboard"
+          title="Interactive Modalsplit dashboard"
+          description="Filter and explore SUM data (Living Labs and Modalsplit) with customizable views and charts."
+          cta="Explore Modalsplit"
+          href={getUrl("/data/modal-split")}
+          iconVariant="pie"
+          client:load
+        />
+        <CTACard
+          id="measures-dashboard"
+          title="Policy Measures"
+          description="Explore the various push and pull measures implemented across Living Labs to promote New Shared Mobility integration with Public Transport."
+          cta="Explore Measures"
+          href={getUrl("/data/measures")}
+          iconVariant="checklist"
+          client:load
+        />
+        <CTACard
+          id="measures-impact-analysis"
+          title="Impact analysis and variations comparison tool"
+          description="Data-driven tools to estimate and visualise the impact level of push & pull measures on KPIs across Living Labs."
+          cta="Analyze measures"
+          href={getUrl("/tools/impact_analysis")}
+          iconVariant="trending"
+          client:load
+        />
+        <CTACard
+          id="mcda-decision-tool"
+          title="Business activity decision tool"
+          description="A multi-criteria analysis tool to compare and prioritise NSM business activities for your city or project."
+          cta="Use the decision tool"
+          href={getUrl("/tools/mcda_analysis")}
+          iconVariant="scale"
+          client:load
+        />
+        <CTACard
+          id="resources-and-tools"
+          title="Resources & tools"
+          description="Models, optimisation tools and software to plan integrated New Shared Mobility and Public Transport systems."
+          cta="Discover resources"
+          href={getUrl("/tools/resources")}
+          iconVariant="tools"
+          client:load
+        />
+      </div>
     </CTASection>
 
     <LivingLabsMapSection labs={labs} client:only="react" />
@@ -324,132 +383,4 @@ const steps = [
       </div>
     </div>
   </section>
-
-  <CTASection
-    title="Coming soon ! \nTools and features to explore SUM data"
-    description="We continue building the SUM Open Data Platform together. Share your feedback or ideas in the link bellow. Some of the upcoming features are :"
-    order="center"
-    linkText="Contribute feedback or request features"
-    linkHref="https://fider-webapp.inocs-sum.lille.inria.fr"
-    class="border-t border-gray-200 py-10"
-  >
-    <div class="my-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-      <!-- Feature 1 -->
-      <article
-        class="bg-white rounded-lg shadow-sm border border-gray-100 p-5 flex flex-col"
-      >
-        <div
-          class="flex items-center justify-center h-12 w-12 rounded-md bg-blue-50 text-primary"
-        >
-          <!-- data/dashboard icon -->
-          <svg
-            class="h-6 w-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M3 3h7v7H3V3zM14 3h7v4h-7V3zM14 12h7v9h-7v-9zM3 11h7v11H3V11z"
-            ></path>
-          </svg>
-        </div>
-        <h4>Interactive data dashboard</h4>
-        <p class="mt-2 text-sm text-gray-600 flex-1">
-          Filter and explore SUM data (Living Labs, KPIs, measures) with
-          customizable views and charts.
-        </p>
-      </article>
-
-      <!-- Feature 2 -->
-      <article
-        class="bg-white rounded-lg shadow-sm border border-gray-100 p-5 flex flex-col"
-      >
-        <div
-          class="flex items-center justify-center h-12 w-12 rounded-md bg-green-50 text-green-600"
-        >
-          <!-- analysis icon -->
-          <svg
-            class="h-6 w-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M11 3v8H3m18 0h-8v8m0-8l-4 4m4-4l4 4"></path>
-          </svg>
-        </div>
-        <h4>Measures impact analysis</h4>
-        <p class="mt-2 text-sm text-gray-600 flex-1">
-          Data-driven tools to estimate and visualise the impact level of push &
-          pull measures on KPIs across Living Labs.
-        </p>
-      </article>
-
-      <!-- Feature 3 -->
-      <article
-        class="bg-white rounded-lg shadow-sm border border-gray-100 p-5 flex flex-col"
-      >
-        <div
-          class="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-50 text-indigo-600"
-        >
-          <!-- decision tool icon -->
-          <svg
-            class="h-6 w-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-          </svg>
-        </div>
-        <h4>Business activity decision tool</h4>
-        <p class="mt-2 text-sm text-gray-600 flex-1">
-          A multi-criteria analysis tool to compare and prioritise NSM business
-          activities for your city or project.
-        </p>
-      </article>
-
-      <!-- Feature 4 -->
-      <article
-        class="bg-white rounded-lg shadow-sm border border-gray-100 p-5 flex flex-col"
-      >
-        <div
-          class="flex items-center justify-center h-12 w-12 rounded-md bg-yellow-50 text-yellow-600"
-        >
-          <!-- resources icon -->
-          <svg
-            class="h-6 w-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 20l9-5-9-5-9 5 9 5zM12 12l9-5-9-5-9 5 9 5z"></path>
-          </svg>
-        </div>
-        <h4>Resources & tools</h4>
-        <p class="mt-2 text-sm text-gray-600 flex-1">
-          Models, optimisation tools and software to plan integrated New Shared
-          Mobility and Public Transport systems.
-        </p>
-      </article>
-    </div>
-  </CTASection>
 </Layout>

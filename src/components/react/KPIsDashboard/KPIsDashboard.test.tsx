@@ -124,7 +124,7 @@ describe("KPIsDashboard", () => {
 
       expect(
         screen.getByText(
-          `Showing ${props.livingLabs.length} of ${props.livingLabs.length} living labs • ${props.categories.length} of ${props.categories.length} categories`,
+          `Showing ${props.livingLabs.length} of ${props.livingLabs.length} living labs • ${props.kpis.length} KPIs • ${props.availableYears.length} years`,
         ),
       ).toBeInTheDocument();
     });
@@ -177,7 +177,7 @@ describe("KPIsDashboard", () => {
 
       expect(
         screen.getByText(
-          `Showing 2 of ${props.livingLabs.length} living labs • ${props.categories.length} of ${props.categories.length} categories`,
+          `Showing 2 of ${props.livingLabs.length} living labs • ${props.kpis.length} KPIs • ${props.availableYears.length} years`,
         ),
       ).toBeInTheDocument();
     });
@@ -192,9 +192,10 @@ describe("KPIsDashboard", () => {
       // Click on Environment to deselect it
       await user.click(screen.getByRole("button", { name: "Environment" }));
 
+      // Summary text remains unchanged as it no longer shows category count
       expect(
         screen.getByText(
-          `Showing ${props.livingLabs.length} of ${props.livingLabs.length} living labs • 2 of ${props.categories.length} categories`,
+          `Showing ${props.livingLabs.length} of ${props.livingLabs.length} living labs • ${props.kpis.length} KPIs • ${props.availableYears.length} years`,
         ),
       ).toBeInTheDocument();
     });
@@ -344,8 +345,10 @@ describe("KPIsDashboard", () => {
       props.kpis = [];
       render(<KPIsDashboard {...props} />);
 
-      const childProps = getLastMockCallProps();
-      expect(childProps.kpis).toEqual([]);
+      // KpiLivingLabsCards should not render when there are no KPIs
+      expect(
+        screen.queryByTestId("kpi-living-labs-cards"),
+      ).not.toBeInTheDocument();
     });
 
     it("handles empty categories array", () => {
