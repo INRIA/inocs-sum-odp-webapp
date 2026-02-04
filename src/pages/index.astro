@@ -13,7 +13,7 @@ import {
 import heroImage from "../assets/img/sum-hero.png";
 import ApiClient from "../lib/api-client/ApiClient";
 import { getUrl } from "../lib/helpers";
-import type { ILivingLabPopulated } from "../types";
+import { COLOR_SECONDARY, type ILivingLabPopulated } from "../types";
 
 const api = new ApiClient(Astro.request);
 
@@ -22,7 +22,7 @@ const measures = await api.getMeasures();
 const allKPIs = await api.getKPIs();
 const parentKpis = allKPIs?.filter((kpi) => !kpi.parent_kpi_id);
 const transportModes = (await api.getTransportModes())?.filter(
-  (tm) => tm.type === "NSM"
+  (tm) => tm.type === "NSM",
 );
 
 const labs = livingLabsData?.map((lab) => {
@@ -30,7 +30,7 @@ const labs = livingLabsData?.map((lab) => {
     ?.filter((kpi) => kpi.result_before)
     ?.map((kpiresult) => {
       const kpiDefinition = allKPIs?.find(
-        (pk) => pk.id === kpiresult.kpidefinition_id
+        (pk) => pk.id === kpiresult.kpidefinition_id,
       );
       return kpiDefinition?.parent_kpi_id ?? kpiDefinition?.id;
     });
@@ -39,7 +39,7 @@ const labs = livingLabsData?.map((lab) => {
     ?.filter((kpi) => kpi.result_after)
     ?.map((kpiresult) => {
       const kpiDefinition = allKPIs?.find(
-        (pk) => pk.id === kpiresult.kpidefinition_id
+        (pk) => pk.id === kpiresult.kpidefinition_id,
       );
       return kpiDefinition?.parent_kpi_id ?? kpiDefinition?.id;
     });
@@ -116,6 +116,7 @@ const steps = [
       text: "Explore the Living Labs",
       href: "#labs-section",
     }}
+    titleTextColor={COLOR_SECONDARY}
   />
   <div class="text-center">
     <div class="flex justify-center flex-wrap gap-1 md:gap-4 my-6">

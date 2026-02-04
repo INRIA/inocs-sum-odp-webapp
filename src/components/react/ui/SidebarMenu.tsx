@@ -44,6 +44,7 @@ import {
 import { getUrl } from "../../../lib/helpers";
 import React from "react";
 import type { SessionLivingLabCookie } from "../../../types";
+import { BrandLogo } from "./BrandLogo";
 
 interface Props {
   children?: React.ReactNode;
@@ -209,7 +210,7 @@ export function SidebarMenu({ children, userInfo, currentLivingLab }: Props) {
 
   const getDropdownSection = (
     item: MenuItem,
-    anchor: "bottom start" | "top start" = "bottom start"
+    anchor: "bottom start" | "top start" = "bottom start",
   ) => {
     return (
       <Dropdown>
@@ -299,11 +300,7 @@ export function SidebarMenu({ children, userInfo, currentLivingLab }: Props) {
 
   const navBarContent = (
     <Navbar className="flex flex-row gap-x-0">
-      <img
-        src={getUrl("/sum_logo.jpg")}
-        alt="SUM Logo"
-        className="w-40 mx-4 max-sm:w-20"
-      />
+      <BrandLogo className="mx-4" />
 
       <NavbarSpacer />
 
@@ -321,7 +318,7 @@ export function SidebarMenu({ children, userInfo, currentLivingLab }: Props) {
               )}
               {item.separator && <NavbarDivider />}
             </NavbarSection>
-          )
+          ),
       )}
     </Navbar>
   );

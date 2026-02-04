@@ -29,7 +29,7 @@ export function CTASection({
   return (
     <div className={`overflow-hidden mt-20 mx-2 ${className}`}>
       <div className="relative isolate">
-        <div className="mx-auto max-w-7xl sm:px-6 md:px-6  lg:px-8 xl:px-20 flex flex-col">
+        <div className="mx-auto flex flex-col">
           <div
             className={`mx-auto flex flex-col gap-16 bg-white/75 shadow-lg ring-1 ring-gray-900/5 sm:rounded-3xl lg:mx-0 lg:max-w-none ${
               order === "right"

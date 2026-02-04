@@ -29,6 +29,7 @@ import {
 import { getUrl } from "../../../lib/helpers";
 import type { SessionLivingLabCookie } from "../../../types";
 import { RButton } from "./RButton";
+import { BrandLogo } from "./BrandLogo";
 
 interface Props {
   menuItems?: MenuItem[];
@@ -63,7 +64,7 @@ export function SiteNavBar({
           separator: true,
         },
       ],
-      className: "max-md:hidden",
+      className: "max-md:hidden border border-secondary rounded-lg",
     };
     if (currentLivingLab?.authorizedLabs?.length) {
       // If there are authorized labs, add them to the navbar
@@ -72,7 +73,7 @@ export function SiteNavBar({
           label: `Manage ${lab.name}`,
           icon: <Cog8ToothIcon />,
           href: getUrl(`/lab-admin/set-lab?id=${lab.id}`),
-        }))
+        })),
       );
     }
     navbarItems = [...navbarItems, userMenu];
@@ -102,11 +103,7 @@ export function SiteNavBar({
     <StackedLayout
       navbar={
         <Navbar className="flex flex-row w-full min-w-0 flex-1">
-          <img
-            src={getUrl("/sum_logo.jpg")}
-            alt="SUM Logo"
-            className="w-40 mx-4"
-          />
+          <BrandLogo className="mx-4" />
 
           <NavbarSpacer />
 
@@ -119,6 +116,7 @@ export function SiteNavBar({
                     <DropdownButton
                       as={NavbarItem}
                       aria-label={`${item.label} menu`}
+                      className={item.className}
                     >
                       <NavbarLabel className="text-primary">
                         {item.label}

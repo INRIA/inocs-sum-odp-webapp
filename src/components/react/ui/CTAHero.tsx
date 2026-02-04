@@ -19,6 +19,7 @@ export interface CTAHeroProps {
   className?: string;
   image?: string | { src: string; alt?: string; position?: string };
   announcement?: BaseAction;
+  titleTextColor?: string;
 }
 
 export function CTAHero({
@@ -35,9 +36,10 @@ export function CTAHero({
   className = "",
   image,
   announcement,
+  titleTextColor,
 }: CTAHeroProps) {
   const imageSrc = typeof image === "string" ? image : image?.src;
-  const imageAlt = typeof image === "string" ? "" : image?.alt ?? ""; // background decorative by default
+  const imageAlt = typeof image === "string" ? "" : (image?.alt ?? ""); // background decorative by default
   const imagePosition = typeof image === "string" ? undefined : image?.position;
 
   return (
@@ -75,8 +77,15 @@ export function CTAHero({
             )}
 
             <div className="text-center">
-              <h1 className="drop-shadow-[1px_1px_1px_white]">{title}</h1>
-              <h6 className="mt-8 text-light">{subtitle}</h6>
+              <h1
+                className="drop-shadow-[1px_1px_1px_white]"
+                style={{ color: titleTextColor }}
+              >
+                {title}
+              </h1>
+              <h4 className="mt-8 text-light drop-shadow-[1px_1px_1px_gray]">
+                {subtitle}
+              </h4>
 
               <div className="mt-10 flex items-center justify-center gap-x-6">
                 <RButton

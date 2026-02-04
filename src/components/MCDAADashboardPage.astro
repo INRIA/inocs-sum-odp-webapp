@@ -13,6 +13,7 @@ import type { IJobRun, IKpiGroup, MCDAGoal, McdaResults } from "../types";
 const { perspective, breadcrumbs, backHref } = Astro.props;
 const api = new ApiClient(Astro.request);
 
+let pageBreadcrumbs = breadcrumbs ?? [];
 // Fetch the latest successful job run for mcda_analysis
 let jobRun: IJobRun | null = null;
 let kpiGroups: IKpiGroup[] = [];
@@ -29,6 +30,9 @@ const perspectives = {
 
 if (perspective) {
   try {
+    pageBreadcrumbs.push({
+      label: `${perspectives[perspective]} perspective`,
+    });
     const response = await api.getLatestJobRun(`mcda_analysis_${perspective}`);
     if (response) {
       jobRun = response;
@@ -116,14 +120,7 @@ const methodologyContent = `
 `;
 ---
 
-<Layout
-  role="visitor"
-  breadcrumbs={[
-    ...breadcrumbs,
-    { label: `${perspectives[perspective]} perspective` },
-  ]}
-  backHref={backHref}
->
+<Layout role="visitor" breadcrumbs={pageBreadcrumbs} backHref={backHref}>
   <div class="mx-auto px-1 py-8">
     <div class="mx-auto px-1 py-8">
       <!-- Info Section -->

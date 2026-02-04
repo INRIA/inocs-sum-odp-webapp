@@ -63,10 +63,12 @@ const footerMenuItems = [
   {
     title: "Open Data Platform",
     items: [
-      { label: "About", href: getUrl("/") },
+      { label: "KPIs", href: getUrl("/data/kpis") },
       { label: "Measures", href: getUrl("/data/measures") },
+      { href: "/tools/impact_analysis", label: "Impact analysis" },
+      { href: "/tools/mcda_analysis", label: "Multi‑criteria decision tool" },
+      { label: "Innovation Resources", href: getUrl("/tools/resources") },
       { label: "FAQ", href: getUrl("/faq") },
-      // { label: "Analysis Tools", href: "#" },
     ],
   },
   {
@@ -146,12 +148,3 @@ const footerMenuItems = [
     <Footer sections={footerMenuItems} />
   </body>
 </html>
-
-<style>
-  html,
-  body {
-    margin: 0;
-    width: 100%;
-    height: 100%;
-  }
-</style>
