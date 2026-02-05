@@ -7,7 +7,7 @@ import {
 } from "./utils";
 import type { ILivingLabKpiData, KpiLivingLabsCardsFilter } from "./types";
 import type { IKpi } from "../../../types";
-import { COLOR_GRAY } from "../../../types/Constants";
+import { COLOR_GRAY } from "../../../styles/constants";
 
 describe("KPIsDashboard Utils", () => {
   describe("processKpiResults", () => {

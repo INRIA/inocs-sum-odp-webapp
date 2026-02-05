@@ -11,7 +11,6 @@ import {
   Legend,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-import { COLOR_DANGER, COLOR_SUCCESS, COLOR_PRIMARY } from "../../../types";
 import {
   formatValue,
   formatMonthYear,
@@ -19,6 +18,7 @@ import {
   getFormattedValueString,
 } from "../../../lib/helpers";
 import { Badge, Tooltip } from "../ui";
+import { COLORS } from "../../../styles/constants";
 
 ChartJS.register(
   CategoryScale,
@@ -28,7 +28,7 @@ ChartJS.register(
   Title,
   ChartTooltip,
   Filler,
-  Legend
+  Legend,
 );
 
 type Props = {
@@ -70,7 +70,7 @@ export function KpiMultiple({ parentKpi, kpis, results }: Props) {
       return null;
     });
 
-    const colors = [COLOR_PRIMARY, COLOR_SUCCESS, COLOR_DANGER];
+    const colors = COLORS;
     const color = colors[index % colors.length];
 
     chartDatasets.push({
@@ -79,6 +79,7 @@ export function KpiMultiple({ parentKpi, kpis, results }: Props) {
       borderColor: color,
       backgroundColor: color,
       tension: 0.1,
+      spanGaps: true,
     });
   });
 
@@ -128,7 +129,7 @@ export function KpiMultiple({ parentKpi, kpis, results }: Props) {
         <div className="flex flex-row flex-wrap items-stretch gap-0 mx-auto">
           {results.map((kpiRes, index) => {
             const kpiData = kpis.find(
-              (item) => item.id === kpiRes.kpidefinition_id
+              (item) => item.id === kpiRes.kpidefinition_id,
             );
 
             const before = kpiRes.result_before ?? null;
@@ -136,21 +137,21 @@ export function KpiMultiple({ parentKpi, kpis, results }: Props) {
 
             const currentValue = formatValue(
               after?.value ?? before?.value ?? null,
-              kpiData?.metric
+              kpiData?.metric,
             );
             const beforeValue = before?.value
               ? formatValue(before?.value, kpiData?.metric)
               : null;
             const displayDate = formatMonthYear(
               after?.date ?? before?.date,
-              true
+              true,
             );
 
             const change = getChange(
               before?.value ?? null,
               after?.value ?? null,
               kpiData?.metric,
-              kpiData?.progression_target
+              kpiData?.progression_target,
             );
 
             return (

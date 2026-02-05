@@ -3,9 +3,9 @@ import type { KpiLivingLabsCardsProps, IKpiGroup } from "./types";
 import { KpiLivingLabsSingleCard } from "./KpiLivingLabsSingleCard";
 import { KpiLivingLabsMultipleCard } from "./KpiLivingLabsMultipleCard";
 import { buildKpiDataMap, groupKpisByParentChild } from "./utils";
-import { COLOR_GRAY } from "../../../types/Constants";
 import { ExpansionPanel, Badge, TopStickyLegend } from "../ui";
 import type { IKpiTimelineMap } from "./types";
+import { COLOR_GRAY } from "../../../styles/constants";
 
 export const KpiLivingLabsCards: React.FC<KpiLivingLabsCardsProps> = ({
   livingLabs,
@@ -16,16 +16,16 @@ export const KpiLivingLabsCards: React.FC<KpiLivingLabsCardsProps> = ({
 }) => {
   // Create a color lookup map for quick access
   const colorMap = useMemo(() => {
-    const map = new Map<string, string>();
+    const map = new Map<number, string>();
     labColors.forEach((lc) => map.set(lc.labId, lc.color));
     return map;
   }, [labColors]);
 
   // Create a set of KPI IDs that belong to selected categories
   const kpiIdsInSelectedCategories = useMemo(() => {
-    const kpiIds = new Set<string>();
+    const kpiIds = new Set<number>();
     categories.forEach((category) => {
-      if (filter.selectedCategoryIds.includes(category.id)) {
+      if (filter.selectedCategoryIds?.includes(category.id)) {
         // Add all KPIs in this category
         category.kpis?.forEach((kpi) => {
           kpiIds.add(kpi.id);
@@ -86,7 +86,7 @@ export const KpiLivingLabsCards: React.FC<KpiLivingLabsCardsProps> = ({
 
     // Initialize with selected categories
     categories
-      .filter((cat) => filter.selectedCategoryIds.includes(cat.id))
+      .filter((cat) => filter.selectedCategoryIds?.includes(cat.id))
       .forEach((category) => {
         categoryMap.set(category.id, { category, groups: [] });
       });
@@ -117,7 +117,7 @@ export const KpiLivingLabsCards: React.FC<KpiLivingLabsCardsProps> = ({
   // IMPORTANT: This must be before any early returns to maintain consistent hook order
   const legendItems = useMemo(() => {
     return livingLabs
-      .filter((lab) => filter.selectedLabIds.includes(lab.id))
+      .filter((lab) => filter.selectedLabIds?.includes(lab.id))
       .map((lab) => ({
         id: lab.id,
         label: lab.name,

@@ -1,7 +1,39 @@
-export const GREEN_COLOR = "#98c33a";
-export const BLUE_COLOR = "#004494";
-export const LIGHT_BLUE_COLOR = "#75bdfb";
-export const ORANGE_COLOR = "#ff632f";
-export const RED_COLOR = "#ff442f";
-export const GRAY_COLOR = "#606060";
-export const LIGHT_GRAY_COLOR = "#dadada";
+export const COLOR_GREEN = "#98c33a"; //COLOR_SECONDARY COLOR_SUCCESS
+export const COLOR_BLUE = "#004494"; //COLOR_PRIMARY
+export const COLOR_LIGHT_BLUE = "#75bdfb"; //COLOR_PRIMARY_LIGHT
+export const COLOR_ORANGE = "#ff632f"; //COLOR_WARNING
+export const COLOR_RED = "#ff442f"; //COLOR_DANGER
+export const COLOR_GRAY = "#606060"; //COLOR_GRAY
+export const COLOR_LIGHT_GRAY = "#dadada";
+export const COLOR_GREEN_OPACITY_50 = "#98c33a80"; // 50% opacity
+export const COLOR_ORANGE_OPACITY_50 = "#ff442f80"; // 50% opacity
+export const COLOR_BLUE_ALTERNATIVE = "#4d8ef7";
+export const COLOR_GREEN_DARK = "#5a8201";
+export const COLOR_RED_DARK = "#8c261b";
+export const COLOR_PINK_DARK = "#8c1b88";
+export const COLOR_PINK = "#e06cdd";
+
+export const COLORS_BASELINE = [
+  COLOR_BLUE,
+  COLOR_GREEN,
+  COLOR_ORANGE,
+  COLOR_LIGHT_BLUE,
+  COLOR_RED,
+];
+
+export const COLORS = [
+  COLOR_BLUE,
+  COLOR_GREEN,
+  COLOR_ORANGE,
+  COLOR_LIGHT_BLUE,
+  COLOR_GRAY,
+  COLOR_RED,
+  COLOR_LIGHT_GRAY,
+  COLOR_ORANGE_OPACITY_50,
+  COLOR_PINK_DARK,
+  COLOR_BLUE_ALTERNATIVE,
+  COLOR_GREEN_OPACITY_50,
+  COLOR_GREEN_DARK,
+  COLOR_RED_DARK,
+  COLOR_PINK,
+];

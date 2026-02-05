@@ -15,17 +15,18 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import {
-  COLOR_DANGER,
-  COLOR_DANGER_OPACITY_50,
-  COLOR_SUCCESS,
-  COLOR_SUCCESS_OPACITY_50,
-} from "../../../types";
-import {
   formatValue,
   formatMonthYear,
   getChange,
   getFormattedValueString,
+  notNullOrUndefined,
 } from "../../../lib/helpers";
+import {
+  COLOR_GREEN,
+  COLOR_GREEN_OPACITY_50,
+  COLOR_ORANGE_OPACITY_50,
+  COLOR_RED,
+} from "../../../styles/constants";
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -55,7 +56,7 @@ export function KpiDefault({
     after?.value ?? before?.value ?? null,
     metricType,
   );
-  const beforeValue = before?.value
+  const beforeValue = notNullOrUndefined<number>(before?.value)
     ? formatValue(before?.value, metricType)
     : null;
   const displayDate = formatMonthYear(after?.date ?? before?.date);
@@ -79,9 +80,9 @@ export function KpiDefault({
     chartLabels.push(after.date ? formatMonthYear(after.date) : "?");
   }
   const backgroundColor = change?.startsWith("+")
-    ? COLOR_SUCCESS_OPACITY_50
-    : COLOR_DANGER_OPACITY_50;
-  const borderColor = change?.startsWith("+") ? COLOR_SUCCESS : COLOR_DANGER;
+    ? COLOR_GREEN_OPACITY_50
+    : COLOR_ORANGE_OPACITY_50;
+  const borderColor = change?.startsWith("+") ? COLOR_GREEN : COLOR_RED;
   const chartData = {
     labels: ["", ...chartLabels, ""],
     datasets: [

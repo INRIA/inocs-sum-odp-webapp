@@ -28,17 +28,17 @@ vi.mock("./KpiLivingLabsCards", () => ({
 
 const createMockLivingLabs = (): ILivingLabKpiData[] => [
   {
-    id: "lab-1",
+    id: 1,
     name: "Geneva Lab",
     kpiResults: [],
   },
   {
-    id: "lab-2",
+    id: 2,
     name: "Lyon Lab",
     kpiResults: [],
   },
   {
-    id: "lab-3",
+    id: 3,
     name: "Barcelona Lab",
     kpiResults: [],
   },
@@ -46,7 +46,7 @@ const createMockLivingLabs = (): ILivingLabKpiData[] => [
 
 const createMockKpis = (): IKpi[] => [
   {
-    id: "kpi-1",
+    id: 1,
     kpi_number: "KPI-001",
     name: "Air Quality Index",
     type: "SIEF" as never,
@@ -54,7 +54,7 @@ const createMockKpis = (): IKpi[] => [
     metric: "percentage" as never,
   },
   {
-    id: "kpi-2",
+    id: 2,
     kpi_number: "KPI-002",
     name: "Traffic Reduction",
     type: "SIEF" as never,
@@ -218,7 +218,7 @@ describe("KPIsDashboard", () => {
       );
 
       const childProps = getLastMockCallProps();
-      expect(childProps.filter.selectedLabIds).not.toContain("lab-1");
+      expect(childProps.filter.selectedLabIds).not.toContain(1);
     });
 
     it("updates child component filter when year selection changes", async () => {
@@ -261,7 +261,7 @@ describe("KPIsDashboard", () => {
       childProps.labColors.forEach((colorAssignment, index) => {
         expect(colorAssignment.labId).toBe(props.livingLabs[index].id);
         expect(colorAssignment.labName).toBe(props.livingLabs[index].name);
-        expect(colorAssignment.color).toMatch(/^#[0-9a-fA-F]{6}$/);
+        expect(colorAssignment.color).toMatch(/^#[0-9a-fA-F]{6,8}$/);
       });
     });
 
@@ -272,9 +272,9 @@ describe("KPIsDashboard", () => {
       const childProps = getLastMockCallProps();
 
       // Each lab should have a color assigned
-      expect(childProps.labColors[0].color).toMatch(/^#[0-9a-fA-F]{6}$/);
-      expect(childProps.labColors[1].color).toMatch(/^#[0-9a-fA-F]{6}$/);
-      expect(childProps.labColors[2].color).toMatch(/^#[0-9a-fA-F]{6}$/);
+      expect(childProps.labColors[0].color).toMatch(/^#[0-9a-fA-F]{6,8}$/);
+      expect(childProps.labColors[1].color).toMatch(/^#[0-9a-fA-F]{6,8}$/);
+      expect(childProps.labColors[2].color).toMatch(/^#[0-9a-fA-F]{6,8}$/);
 
       // Colors should be unique for different labs
       const colors = childProps.labColors.map(
@@ -308,7 +308,7 @@ describe("KPIsDashboard", () => {
       const props = createDefaultProps();
       // Create 20 labs (more than the base palette)
       props.livingLabs = Array.from({ length: 20 }, (_, i) => ({
-        id: `lab-${i + 1}`,
+        id: i + 1,
         name: `Lab ${i + 1}`,
         kpiResults: [],
       }));
@@ -321,7 +321,7 @@ describe("KPIsDashboard", () => {
 
       // Each should be a valid hex color
       childProps.labColors.forEach((lc: { color: string }) => {
-        expect(lc.color).toMatch(/^#[0-9a-fA-F]{6}$/);
+        expect(lc.color).toMatch(/^#[0-9a-fA-F]{6,8}$/);
       });
     });
   });

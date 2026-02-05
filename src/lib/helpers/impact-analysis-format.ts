@@ -1,3 +1,4 @@
+import { COLOR_GREEN, COLOR_ORANGE, COLOR_RED } from "../../styles/constants";
 import {
   type IMeasureCoefficient,
   type ILivingLabAnalysis,
@@ -6,9 +7,6 @@ import {
   type IKpiVariation,
   type IGroupAnalysisResult,
   type ILivingLab,
-  COLOR_SUCCESS,
-  COLOR_DANGER,
-  COLOR_WARNING,
   type IKpiDefinition,
 } from "../../types";
 
@@ -211,20 +209,20 @@ export function ratioToPercentageNumber(ratio: number | null): number | null {
 
 /**
  * Get color based on ratio variation value
- * - Positive: Green (COLOR_SUCCESS)
- * - Negative: Red (COLOR_DANGER)
- * - Zero or null: Orange (COLOR_WARNING)
+ * - Positive: Green (COLOR_GREEN)
+ * - Negative: Red (COLOR_RED)
+ * - Zero or null: Orange (COLOR_ORANGE)
  */
 export function getVariationColor(ratio: number | null): string {
   if (ratio === null || ratio === undefined) {
-    return COLOR_WARNING; // null/undefined treated as neutral/unknown
+    return COLOR_ORANGE; // null/undefined treated as neutral/unknown
   }
   if (ratio > 0) {
-    return COLOR_SUCCESS; // green for positive
+    return COLOR_GREEN; // green for positive
   } else if (ratio < 0) {
-    return COLOR_DANGER; // red for negative
+    return COLOR_RED; // red for negative
   } else {
-    return COLOR_WARNING; // orange for zero
+    return COLOR_ORANGE; // orange for zero
   }
 }
 

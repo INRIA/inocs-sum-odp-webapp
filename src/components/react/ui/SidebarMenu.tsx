@@ -151,10 +151,8 @@ export function SidebarMenu({ children, userInfo, currentLivingLab }: Props) {
         navbar: false,
       });
     }
-    navbarItems.push({
-      label: "Manage " + (currentLivingLab?.name ?? "My Living Lab"),
-      icon: <MapPinIcon />,
-      subItems: [
+    navbarItems.push(
+      ...[
         {
           label: "Edit Lab information",
           icon: <Cog8ToothIcon />,
@@ -163,14 +161,10 @@ export function SidebarMenu({ children, userInfo, currentLivingLab }: Props) {
         {
           label: "View lab dashboard",
           icon: <EyeIcon />,
-          href: getUrl("/living-lab-city/" + currentLivingLab?.id),
+          href: getUrl("/living-lab-city/" + currentLivingLab?.id),      separator: true,
+
         },
-      ],
-      separator: true,
-      className: "bg-warning/50 rounded-lg",
-      dropdown: true,
-      navbar: true,
-    });
+      ]);
 
     navbarItems.push({
       label: `Manage ${currentLivingLab?.name ?? "my Living Lab"} data`,

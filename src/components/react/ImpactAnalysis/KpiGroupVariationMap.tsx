@@ -1,14 +1,14 @@
 import React, { useMemo, useState } from "react";
 import type { IKpiVariation, ILivingLabVariation } from "../../../types";
-import {
-  COLOR_SUCCESS,
-  COLOR_DANGER,
-  COLOR_WARNING,
-} from "../../../types/Constants";
 import { getVariationColor } from "../../../lib/helpers/impact-analysis-format";
 import { MapViewer, type MarkerData } from "../MapViewer";
 import { KpiVariationCard } from "./KpiVariationCard";
 import { KpiVariationsTable } from "./KpiVariationsTable";
+import {
+  COLOR_GREEN,
+  COLOR_ORANGE,
+  COLOR_RED,
+} from "../../../styles/constants";
 
 interface KpiGroupVariationMapProps {
   livingLabVariations: ILivingLabVariation[];
@@ -22,8 +22,8 @@ interface KpiGroupVariationMapProps {
  * Get status label based on marker color
  */
 function getStatusLabel(color: string): string {
-  if (color === COLOR_SUCCESS) return "All KPIs Improved";
-  if (color === COLOR_DANGER) return "All KPIs Regressed";
+  if (color === COLOR_GREEN) return "All KPIs Improved";
+  if (color === COLOR_RED) return "All KPIs Regressed";
   return "Mixed Results";
 }
 
@@ -139,21 +139,21 @@ export const KpiGroupVariationMap: React.FC<KpiGroupVariationMapProps> = ({
         <div className="flex items-center gap-2">
           <span
             className="w-4 h-4 rounded-full"
-            style={{ backgroundColor: COLOR_SUCCESS }}
+            style={{ backgroundColor: COLOR_GREEN }}
           />
           <span className="text-sm text-gray-600">All KPIs improved</span>
         </div>
         <div className="flex items-center gap-2">
           <span
             className="w-4 h-4 rounded-full"
-            style={{ backgroundColor: COLOR_DANGER }}
+            style={{ backgroundColor: COLOR_RED }}
           />
           <span className="text-sm text-gray-600">All KPIs regressed</span>
         </div>
         <div className="flex items-center gap-2">
           <span
             className="w-4 h-4 rounded-full"
-            style={{ backgroundColor: COLOR_WARNING }}
+            style={{ backgroundColor: COLOR_ORANGE }}
           />
           <span className="text-sm text-gray-600">Mixed results</span>
         </div>
@@ -195,7 +195,7 @@ export const KpiGroupVariationMap: React.FC<KpiGroupVariationMapProps> = ({
                       <span
                         className="w-3 h-3 rounded-full flex-shrink-0"
                         style={{
-                          backgroundColor: selectedLabColor || COLOR_WARNING,
+                          backgroundColor: selectedLabColor || COLOR_ORANGE,
                         }}
                       />
                       <h3 className="text-lg font-bold text-gray-900 truncate">
@@ -203,7 +203,7 @@ export const KpiGroupVariationMap: React.FC<KpiGroupVariationMapProps> = ({
                       </h3>
                     </div>
                     <p className="text-sm text-gray-500">
-                      {getStatusLabel(selectedLabColor || COLOR_WARNING)}
+                      {getStatusLabel(selectedLabColor || COLOR_ORANGE)}
                     </p>
                   </div>
                   <button

@@ -27,7 +27,7 @@ export interface ITimelineDataPoint {
  * Living lab timeline data for a specific KPI
  */
 export interface ILabKpiTimeline {
-  labId: string;
+  labId: number;
   labName: string;
   color: string;
   dataPoints: ITimelineDataPoint[];
@@ -37,7 +37,7 @@ export interface ILabKpiTimeline {
  * Color assignment for a living lab (consistent across all charts)
  */
 export interface ILabColorAssignment {
-  labId: string;
+  labId: number;
   labName: string;
   color: string;
 }

@@ -15,14 +15,14 @@ import {
   TableHeader,
   TableRow,
 } from "../react-catalyst-ui-kit";
-import { Tabs, Tooltip } from "./ui";
+import { Tabs, Tooltip, type Tab } from "./ui";
 import { getKpiValueByMetricType, getYearFromDate } from "../../lib/helpers";
-import ModalSplitChart, { type SplitItem } from "./KpiCards/ModalSplitChart";
+import { ModalSplitChart, type SplitItem } from "./KpiCards";
 
 interface Props {
   modes: ITransportMode[];
   kpis: IKpi[];
-  livingLabId: string;
+  livingLabId: number;
   livingLabTransportModes: ITransportModeLivingLabImplementation[];
   kpiResults: IIKpiResultBeforeAfter[];
   valueBeforeDate?: string;
@@ -40,18 +40,18 @@ export function LivingLabModalSplit({
 }: Props) {
   const today = new Date().toISOString().slice(0, 10);
   const [beforeDate, setBeforeDate] = useState<string>(
-    valueBeforeDate ?? today
+    valueBeforeDate ?? today,
   );
   const [afterDate, setAfterDate] = useState<string | undefined>(
-    valueAfterDate
+    valueAfterDate,
   );
 
   const [livingLabTransportModesMap, setLivingLabTransportModesMap] = useState<
-    Map<string, ITransportModeLivingLabImplementation>
+    Map<number, ITransportModeLivingLabImplementation>
   >(
     new Map(
-      livingLabTransportModes.map((mode) => [mode.transport_mode_id, mode])
-    )
+      livingLabTransportModes.map((mode) => [mode.transport_mode_id, mode]),
+    ),
   );
 
   const [livingLabKpiMap, setLivingLabKpiMap] = useState<
@@ -63,17 +63,17 @@ export function LivingLabModalSplit({
           resultKpi?.transport_mode_id ?? "none"
         }`,
         resultKpi,
-      ])
-    )
+      ]),
+    ),
   );
   // totals per KPI id: { before: number, after: number }
   const [kpiTotals, setKpiTotals] = useState<
-    Map<string, { before: number; after: number }>
+    Map<number, { before: number; after: number }>
   >(new Map());
 
   // compute initial totals on mount from kpis + kpiResults
   useEffect(() => {
-    const totals = new Map<string, { before: number; after: number }>();
+    const totals = new Map<number, { before: number; after: number }>();
     kpis.forEach((kpi) => {
       let beforeSum = 0;
       let afterSum = 0;
@@ -93,7 +93,7 @@ export function LivingLabModalSplit({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const getChartValues = (kpiId: string) => {
+  const getChartValues = (kpiId: number) => {
     let beforeDate = "";
     let afterDate = "";
     const dataBefore: SplitItem[] = [];
@@ -122,7 +122,7 @@ export function LivingLabModalSplit({
     return [
       {
         label: `${kpis.find((k) => k.id === kpiId)?.name} (${getYearFromDate(
-          beforeDate
+          beforeDate,
         )})`,
         data: dataBefore,
       },
@@ -136,25 +136,25 @@ export function LivingLabModalSplit({
   };
 
   const getTabs = () => {
-    return (
-      <Tabs
-        align="right"
-        tabs={
-          kpis.map((kpi) => ({
-            id: `modal-split-${kpi.id}`,
-            label: <p>{kpi.name}</p>,
-            content: <ModalSplitChart data={getChartValues(kpi.id)} />,
-          })) ?? []
-        }
-      ></Tabs>
-    );
+    const tabs: Tab[] = [];
+    kpis.forEach((kpi) => {
+      const chartData = getChartValues(kpi.id);
+      if (chartData.length > 0) {
+        tabs.push({
+          id: `modal-split-${kpi.id}`,
+          label: <p>{kpi.name}</p>,
+          content: <ModalSplitChart data={chartData} />,
+        });
+      }
+    });
+    return <Tabs align="right" tabs={tabs}></Tabs>;
   };
 
   const onKpiValuesChange = (
-    kpiId: string,
-    transportModeId: string,
-    before: number | null,
-    after: number | null
+    kpiId: number,
+    transportModeId: number,
+    before: number,
+    after: number,
   ) => {
     const key = `${kpiId}_${transportModeId}`;
     // previous entry for this KPI+mode
@@ -232,14 +232,14 @@ export function LivingLabModalSplit({
                         {!!kpiTotals.get(kpi.id)?.before &&
                           getKpiValueByMetricType(
                             kpiTotals.get(kpi.id)?.before,
-                            kpi.metric
+                            kpi.metric,
                           )}
                       </span>
                       <span className="text-right">
                         {!!kpiTotals.get(kpi.id)?.after &&
                           getKpiValueByMetricType(
                             kpiTotals.get(kpi.id)?.after,
-                            kpi.metric
+                            kpi.metric,
                           )}
                       </span>
                     </span>

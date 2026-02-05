@@ -25,14 +25,39 @@ export function formatDateToMonthYear(date?: string): string {
   if (!date) return "";
   const d = new Date(date);
   if (Number.isNaN(d.getTime())) return String(date);
-  return d.toLocaleDateString("en-US", { year: "numeric", month: "short" });
+  return d.toLocaleDateString("en-GB", { year: "numeric", month: "short" });
+}
+
+export function formatDate(date?: string | Date): string {
+  if (!date) return "";
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return String(date);
+  return d.toLocaleDateString("en-GB", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+export function formatDateWithTime(date?: string | Date): string {
+  if (!date) return "";
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return String(date);
+  return d.toLocaleDateString("en-GB", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 export function getKpiValueByMetricType(value?: number, kpiMetric?: string) {
+  if (value === undefined || value === null) return "";
+  if (value === 0) return "0%";
   if (value && kpiMetric && kpiMetric === EnumKpiMetricType.PERCENTAGE) {
     return `${Math.round(value * 100)}%`;
   }
-
   return value ?? "";
 }
 
@@ -54,4 +79,8 @@ export function toSafeJsonString(obj: any): string {
   return JSON.stringify(obj, (key, value) =>
     typeof value === "bigint" ? value.toString() : value,
   );
+}
+
+export function notNullOrUndefined<T>(value: T | null | undefined): value is T {
+  return value !== null && value !== undefined;
 }

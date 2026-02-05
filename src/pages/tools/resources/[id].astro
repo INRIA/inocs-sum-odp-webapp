@@ -1,11 +1,9 @@
 ---
 import Layout from "../../../layouts/Layout.astro";
 import ApiClient from "../../../lib/api-client/ApiClient";
-import {
-  ArrowLeftIcon,
-  ArrowTopRightOnSquareIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { Badge, InnerHtml, RButton } from "../../../components/react/ui";
+import { formatDate } from "../../../lib/helpers";
 
 const { id } = Astro.params;
 
@@ -20,13 +18,7 @@ if (!resource) {
   return Astro.redirect("/tools/resources");
 }
 
-const formattedDate = resource.created_at
-  ? new Date(resource.created_at).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })
-  : null;
+const formattedDate = formatDate(resource.created_at);
 ---
 
 <Layout

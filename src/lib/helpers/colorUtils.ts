@@ -1,8 +1,9 @@
 import {
-  GREEN_COLOR,
-  LIGHT_BLUE_COLOR,
-  ORANGE_COLOR,
-  RED_COLOR,
+  COLOR_GREEN,
+  COLOR_LIGHT_BLUE,
+  COLOR_ORANGE,
+  COLOR_RED,
+  COLORS,
 } from "../../styles/constants";
 
 /**
@@ -10,25 +11,18 @@ import {
  * Strong, vibrant colors that work well for data visualization
  */
 export const LAB_BASE_COLORS = [
-  GREEN_COLOR, // #98c33a
-  LIGHT_BLUE_COLOR, // #75bdfb
-  ORANGE_COLOR, // #ff632f
-  RED_COLOR, // #ff442f
+  COLOR_GREEN, // #98c33a
+  COLOR_LIGHT_BLUE, // #75bdfb
+  COLOR_ORANGE, // #ff632f
+  COLOR_RED, // #ff442f
 ];
 
 /**
  * Additional strong colors to expand the palette when needed
  */
-const EXTENDED_BASE_COLORS = [
-  "#9333ea", // Purple
-  "#0891b2", // Cyan
-  "#ca8a04", // Yellow/Gold
-  "#16a34a", // Emerald
-  "#2563eb", // Royal Blue
-  "#c026d3", // Fuchsia
-  "#0d9488", // Teal
-  "#7c3aed", // Violet
-];
+const EXTENDED_BASE_COLORS = COLORS.filter(
+  (color) => !LAB_BASE_COLORS.includes(color),
+);
 
 // ============================================================================
 // Color Conversion Utilities
@@ -184,7 +178,8 @@ export function generateColorVariation(
   hsl.s = Math.max(55, Math.min(90, hsl.s + satShift));
 
   // Lightness: keep between 35-55% for good visibility
-  const lightShift = (random() * 15 - 7.5) * (variationIndex % 2 === 0 ? 1 : -1);
+  const lightShift =
+    (random() * 15 - 7.5) * (variationIndex % 2 === 0 ? 1 : -1);
   hsl.l = Math.max(35, Math.min(55, hsl.l + lightShift));
 
   return hslToHex(hsl);
@@ -315,7 +310,10 @@ export function generateDynamicLabColors(
     let finalIndex = colorIndex;
 
     // Find an unused color index
-    while (assignedColors.has(finalIndex) && assignedColors.size < palette.length) {
+    while (
+      assignedColors.has(finalIndex) &&
+      assignedColors.size < palette.length
+    ) {
       finalIndex = (finalIndex + 1) % palette.length;
     }
 
@@ -340,8 +338,8 @@ export function generateDynamicLabColors(
  * Colors are shuffled deterministically based on all lab IDs combined
  */
 export function generateLabColorsWithSeed(
-  labs: { id: string; name: string }[],
-): { labId: string; labName: string; color: string }[] {
+  labs: { id: number; name: string }[],
+): { labId: number; labName: string; color: string }[] {
   const labCount = labs.length;
 
   // Combine base colors with extended colors
@@ -364,7 +362,12 @@ export function generateLabColorsWithSeed(
   }
 
   // Create a combined seed from all lab IDs for consistent shuffling
-  const combinedSeed = hashString(labs.map((l) => l.id).sort().join("-"));
+  const combinedSeed = hashString(
+    labs
+      .map((l) => l.id)
+      .sort()
+      .join("-"),
+  );
   const random = createSeededRandom(combinedSeed);
 
   // Fisher-Yates shuffle with seeded random

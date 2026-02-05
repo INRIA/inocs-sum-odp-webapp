@@ -72,14 +72,14 @@ export function buildLabTimelines(
   kpi: IKpi,
   livingLabs: ILivingLabKpiData[],
   filter: KpiLivingLabsCardsFilter,
-  colorMap: Map<string, string>,
+  colorMap: Map<number, string>,
   fallbackColor: string,
 ): ILabKpiTimeline[] {
   const labTimelines: ILabKpiTimeline[] = [];
 
   livingLabs.forEach((lab) => {
     // Skip if lab is not selected
-    if (!filter.selectedLabIds.includes(lab.id)) {
+    if (!filter.selectedLabIds?.includes(lab.id)) {
       return;
     }
 
@@ -90,7 +90,9 @@ export function buildLabTimelines(
       return;
     }
 
-    const dataPoints = processKpiResults(kpiResult, filter.selectedYears);
+    const dataPoints = filter.selectedYears
+      ? processKpiResults(kpiResult, filter.selectedYears)
+      : [];
 
     // Only add if there are data points
     if (dataPoints.length > 0) {
@@ -114,10 +116,10 @@ export function buildKpiDataMap(
   filteredKpis: IKpi[],
   livingLabs: ILivingLabKpiData[],
   filter: KpiLivingLabsCardsFilter,
-  colorMap: Map<string, string>,
+  colorMap: Map<number, string>,
   fallbackColor: string,
-): Map<string, ILabKpiTimeline[]> {
-  const map = new Map<string, ILabKpiTimeline[]>();
+): Map<number, ILabKpiTimeline[]> {
+  const map = new Map<number, ILabKpiTimeline[]>();
 
   filteredKpis.forEach((kpi) => {
     const labTimelines = buildLabTimelines(

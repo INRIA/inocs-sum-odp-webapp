@@ -27,16 +27,16 @@ interface Props {
 }
 
 function normalizePercentages(items: SplitItem[]) {
-  const total = items.reduce((s, it) => s + (Number(it.value) || 0), 0);
+  const total = items.reduce((s, it) => s + (Number(it.value) ?? 0), 0);
   if (total === 0) {
     // avoid division by zero: produce equal slices if all zero
     const len = items.length || 3;
     return items.map(() => +(100 / len).toFixed(1));
   }
-  return items.map((it) => +((Number(it.value) || 0) * 100).toFixed(1));
+  return items.map((it) => +((Number(it.value) ?? 0) * 100).toFixed(1));
 }
 
-export default function ModalSplitChart({
+export function ModalSplitChart({
   data,
   view = "doughnut",
   orientation = "vertical",

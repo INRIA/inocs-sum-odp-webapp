@@ -1,16 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import {
-  GREEN_COLOR,
-  GRAY_COLOR,
-  LIGHT_BLUE_COLOR,
-  RED_COLOR,
+  COLOR_GREEN,
+  COLOR_GRAY,
+  COLOR_LIGHT_BLUE,
+  COLOR_RED,
 } from "../../../styles/constants";
 
 // Flow colors
-const NET_FLOW_COLOR = LIGHT_BLUE_COLOR;
-const POSITIVE_FLOW_COLOR = GREEN_COLOR;
-const NEGATIVE_FLOW_COLOR = RED_COLOR;
+const NET_FLOW_COLOR = COLOR_LIGHT_BLUE;
+const POSITIVE_FLOW_COLOR = COLOR_GREEN;
+const NEGATIVE_FLOW_COLOR = COLOR_RED;
 
 interface D3McdaNetFlowsChartProps {
   netFlows: { [key: string]: number };
@@ -237,7 +237,7 @@ export const D3McdaNetFlowsChart: React.FC<D3McdaNetFlowsChartProps> = ({
         .attr("y", (d) => (yScale(d.label) || 0) + offset + barHeight / 2)
         .attr("dy", "0.35em")
         .attr("text-anchor", (d) => (d[flowType] >= 0 ? "start" : "end"))
-        .attr("fill", GRAY_COLOR)
+        .attr("fill", COLOR_GRAY)
         .attr("font-size", "10px")
         .attr("font-weight", "600")
         .attr("opacity", 0)
@@ -269,7 +269,7 @@ export const D3McdaNetFlowsChart: React.FC<D3McdaNetFlowsChartProps> = ({
       .attr("x", width / 2)
       .attr("y", chartHeight + 40)
       .attr("text-anchor", "middle")
-      .attr("fill", GRAY_COLOR)
+      .attr("fill", COLOR_GRAY)
       .attr("font-size", "12px")
       .attr("font-weight", "600")
       .text("Net Flow (φ)");
@@ -287,7 +287,7 @@ export const D3McdaNetFlowsChart: React.FC<D3McdaNetFlowsChartProps> = ({
       .attr("y", (d) => (yScale(d.label) || 0) + yScale.bandwidth() / 2)
       .attr("dy", "0.35em")
       .attr("text-anchor", "end")
-      .attr("fill", GRAY_COLOR)
+      .attr("fill", COLOR_GRAY)
       .attr("font-size", isMobile ? "11px" : "13px")
       .attr("font-weight", "600")
       .attr("cursor", "pointer")
@@ -302,7 +302,7 @@ export const D3McdaNetFlowsChart: React.FC<D3McdaNetFlowsChartProps> = ({
         return text.length > 30 ? text.substring(0, 27) + "..." : text;
       })
       .on("mouseenter", function (event, d) {
-        d3.select(this).attr("fill", LIGHT_BLUE_COLOR);
+        d3.select(this).attr("fill", COLOR_LIGHT_BLUE);
         setTooltip({
           key: d.key,
           label: d.label,
@@ -319,7 +319,7 @@ export const D3McdaNetFlowsChart: React.FC<D3McdaNetFlowsChartProps> = ({
         );
       })
       .on("mouseleave", function () {
-        d3.select(this).attr("fill", GRAY_COLOR);
+        d3.select(this).attr("fill", COLOR_GRAY);
         setTooltip(null);
       });
 
@@ -331,7 +331,7 @@ export const D3McdaNetFlowsChart: React.FC<D3McdaNetFlowsChartProps> = ({
       .attr("x", margin.left + width / 2)
       .attr("y", margin.top / 2)
       .attr("text-anchor", "middle")
-      .attr("fill", GRAY_COLOR)
+      .attr("fill", COLOR_GRAY)
       .attr("font-size", "16px")
       .attr("font-weight", "700")
       .text("Business Activities - ranking");

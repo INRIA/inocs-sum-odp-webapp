@@ -13,7 +13,8 @@ import {
 import heroImage from "../assets/img/sum-hero.png";
 import ApiClient from "../lib/api-client/ApiClient";
 import { getUrl, getYearFromDate } from "../lib/helpers";
-import { COLOR_SECONDARY, type ILivingLabPopulated } from "../types";
+import { type ILivingLabPopulated } from "../types";
+import { COLOR_GREEN } from "../styles/constants";
 
 const api = new ApiClient(Astro.request);
 
@@ -111,7 +112,7 @@ const steps = [
       text: "Explore the Living Labs",
       href: "#labs-section",
     }}
-    titleTextColor={COLOR_SECONDARY}
+    titleTextColor={COLOR_GREEN}
   />
   <div class="text-center">
     <div class="flex justify-center flex-wrap gap-1 md:gap-4 my-6">

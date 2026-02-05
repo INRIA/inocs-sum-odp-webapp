@@ -8,6 +8,7 @@ import type {
 } from "../../types";
 import type { SplitItem } from "../../components/react/KpiCards/ModalSplitChart";
 import type { MarkerData } from "../../components/react/MapViewer";
+import { notNullOrUndefined } from "./format";
 
 /**
  * Filter transport modes that are of type "NSM" (New Mobility Service)
@@ -111,7 +112,7 @@ function prepareModalSplitData(
     );
 
     if (transportMode) {
-      if (kpi.result_before?.value) {
+      if (notNullOrUndefined(kpi.result_before?.value)) {
         beforeData.push({
           label: transportMode.name,
           value: kpi.result_before.value,
@@ -119,7 +120,7 @@ function prepareModalSplitData(
         });
       }
 
-      if (kpi.result_after?.value) {
+      if (notNullOrUndefined(kpi.result_after?.value)) {
         afterData.push({
           label: transportMode.name,
           value: kpi.result_after.value,

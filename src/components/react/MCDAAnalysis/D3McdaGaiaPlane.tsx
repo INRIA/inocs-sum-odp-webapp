@@ -1,19 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import {
-  GRAY_COLOR,
-  GREEN_COLOR,
-  LIGHT_GRAY_COLOR,
-  BLUE_COLOR,
-  ORANGE_COLOR,
-  RED_COLOR,
+  COLOR_GRAY,
+  COLOR_GREEN,
+  COLOR_LIGHT_GRAY,
+  COLOR_BLUE,
+  COLOR_ORANGE,
+  COLOR_RED,
 } from "../../../styles/constants";
 
 // GAIA colors
-const CRITERIA_COLOR = BLUE_COLOR;
-const DECISION_STICK_COLOR = ORANGE_COLOR;
-const GOOD_FLOW_COLOR = GREEN_COLOR;
-const BAD_FLOW_COLOR = RED_COLOR;
+const CRITERIA_COLOR = COLOR_BLUE;
+const DECISION_STICK_COLOR = COLOR_ORANGE;
+const GOOD_FLOW_COLOR = COLOR_GREEN;
+const BAD_FLOW_COLOR = COLOR_RED;
 
 interface GAIAPoint {
   key: string;
@@ -357,9 +357,9 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
       .attr("r", 0)
       .attr("fill", (d) => {
         const rank = ranking.indexOf(d.key);
-        return rank >= 0 && rank < 3 ? GREEN_COLOR : GRAY_COLOR;
+        return rank >= 0 && rank < 3 ? COLOR_GREEN : COLOR_GRAY;
       })
-      .attr("stroke", LIGHT_GRAY_COLOR)
+      .attr("stroke", COLOR_LIGHT_GRAY)
       .attr("stroke-width", 2)
       .attr("opacity", 0.85)
       .style("cursor", "pointer")
@@ -411,7 +411,7 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
       .attr("y", (d) => yScale(d.y + 0.12))
       .attr("dy", "0.35em")
       .attr("text-anchor", "middle")
-      .attr("fill", GRAY_COLOR)
+      .attr("fill", COLOR_GRAY)
       .attr("font-size", "9px")
       .attr("font-weight", "500")
       .attr("pointer-events", "none")
@@ -440,7 +440,7 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
       .attr("x", width / 2)
       .attr("y", chartHeight + 45)
       .attr("text-anchor", "middle")
-      .attr("fill", GRAY_COLOR)
+      .attr("fill", COLOR_GRAY)
       .attr("font-size", "13px")
       .attr("font-weight", "600")
       .text("Principal Component 1");
@@ -450,7 +450,7 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
       .attr("x", -chartHeight / 2)
       .attr("y", -45)
       .attr("text-anchor", "middle")
-      .attr("fill", GRAY_COLOR)
+      .attr("fill", COLOR_GRAY)
       .attr("font-size", "13px")
       .attr("font-weight", "600")
       .text("Principal Component 2");
@@ -461,7 +461,7 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
       .attr("x", margin.left + width / 2)
       .attr("y", margin.top / 2)
       .attr("text-anchor", "middle")
-      .attr("fill", GRAY_COLOR)
+      .attr("fill", COLOR_GRAY)
       .attr("font-size", "16px")
       .attr("font-weight", "700")
       .text("GAIA Plane Visualization");
@@ -562,8 +562,8 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
               <div
                 className="w-4 h-4 rounded-full border-2"
                 style={{
-                  backgroundColor: GREEN_COLOR,
-                  borderColor: LIGHT_GRAY_COLOR,
+                  backgroundColor: COLOR_GREEN,
+                  borderColor: COLOR_LIGHT_GRAY,
                 }}
               ></div>
               <span className="text-gray-700">Top 3 alternatives</span>
@@ -572,8 +572,8 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
               <div
                 className="w-4 h-4 rounded-full border-2"
                 style={{
-                  backgroundColor: GRAY_COLOR,
-                  borderColor: LIGHT_GRAY_COLOR,
+                  backgroundColor: COLOR_GRAY,
+                  borderColor: COLOR_LIGHT_GRAY,
                 }}
               ></div>
               <span className="text-gray-700">Other alternatives</span>

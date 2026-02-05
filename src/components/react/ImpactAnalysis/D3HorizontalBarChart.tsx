@@ -8,10 +8,11 @@ import {
   findImplementingLabs,
 } from "../../../lib/helpers/impact-analysis-format";
 import {
-  BLUE_COLOR,
-  GRAY_COLOR,
-  LIGHT_BLUE_COLOR,
-  LIGHT_GRAY_COLOR,
+  COLOR_BLUE,
+  COLOR_GRAY,
+  COLOR_LIGHT_BLUE,
+  COLOR_LIGHT_GRAY,
+  COLORS_BASELINE,
 } from "../../../styles/constants";
 
 const MAX_BADGES_COUNT = 3;
@@ -147,7 +148,7 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
     const colorScale = d3
       .scaleLinear<string>()
       .domain([-maxAbsValue, 0, maxAbsValue])
-      .range(["#ef4444", "#fbbf24", "#10b981"]);
+      .range(COLORS_BASELINE);
 
     // Add gridlines
     g.append("g")
@@ -248,7 +249,7 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
       .attr("x", labelXOffset)
       .attr("y", (d) => (yScale(d.name) || 0) + yScale.bandwidth() / 3)
       .attr("text-anchor", labelAnchor)
-      .attr("fill", GRAY_COLOR)
+      .attr("fill", COLOR_GRAY)
       .attr("font-size", labelFontSize)
       .attr("font-weight", "600")
       .attr("cursor", "pointer")
@@ -259,7 +260,7 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
           : text;
       })
       .on("mouseenter", function (event, d) {
-        d3.select(this).attr("fill", LIGHT_BLUE_COLOR);
+        d3.select(this).attr("fill", COLOR_LIGHT_BLUE);
         const labs = findImplementingLabs(d.id, livingLabsAnalysis);
         setTooltip({
           measure: d,
@@ -274,7 +275,7 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
         );
       })
       .on("mouseleave", function () {
-        d3.select(this).attr("fill", GRAY_COLOR);
+        d3.select(this).attr("fill", COLOR_GRAY);
         setTooltip(null);
       });
 
@@ -339,7 +340,7 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
               .append("text")
               .attr("y", yPos)
               .attr("font-size", "8px")
-              .attr("fill", BLUE_COLOR)
+              .attr("fill", COLOR_BLUE)
               .attr("font-weight", "500")
               .text(lab.length > 8 ? lab.substring(0, 6) + ".." : lab);
 
@@ -353,8 +354,8 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
               .attr("width", bbox.width + padding * 2)
               .attr("height", bbox.height + 2)
               .attr("rx", 3)
-              .attr("fill", LIGHT_GRAY_COLOR)
-              .attr("stroke", BLUE_COLOR)
+              .attr("fill", COLOR_LIGHT_GRAY)
+              .attr("stroke", COLOR_BLUE)
               .attr("stroke-width", 0.5);
 
             text
@@ -364,7 +365,7 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
             // Add tooltip handlers to the badge group
             badgeG
               .on("mouseenter", function (event) {
-                rect.attr("fill", LIGHT_BLUE_COLOR).attr("stroke", BLUE_COLOR);
+                rect.attr("fill", COLOR_LIGHT_BLUE).attr("stroke", COLOR_BLUE);
                 setTooltip({
                   measure: d,
                   labs,
@@ -378,7 +379,7 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
                 );
               })
               .on("mouseleave", function () {
-                rect.attr("fill", LIGHT_GRAY_COLOR).attr("stroke", BLUE_COLOR);
+                rect.attr("fill", COLOR_LIGHT_GRAY).attr("stroke", COLOR_BLUE);
                 setTooltip(null);
               });
 
@@ -393,7 +394,7 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
               .attr("y", yPos)
               .attr("text-anchor", "end")
               .attr("font-size", "8px")
-              .attr("fill", BLUE_COLOR)
+              .attr("fill", COLOR_BLUE)
               .attr("font-weight", "500")
               .attr("cursor", "pointer")
               .text(`+${remainingCount}`)
@@ -436,7 +437,7 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
       .attr("y", (d) => (yScale(d.name) || 0) + yScale.bandwidth() / 2)
       .attr("dy", "0.35em")
       .attr("text-anchor", (d) => (d.percentValue >= 0 ? "start" : "end"))
-      .attr("fill", GRAY_COLOR)
+      .attr("fill", COLOR_GRAY)
       .attr("font-size", valueLabelFontSize)
       .attr("font-weight", "600")
       .attr("opacity", 0)
@@ -453,7 +454,7 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
       .attr("x", margin.left + width / 2)
       .attr("y", margin.top / 2)
       .attr("text-anchor", "middle")
-      .attr("fill", GRAY_COLOR)
+      .attr("fill", COLOR_GRAY)
       .attr("font-size", titleFontSize)
       .attr("font-weight", "600")
       .text("Contribution levels by Policy measure");

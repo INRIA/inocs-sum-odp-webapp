@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { COLOR_PRIMARY, COLOR_WARNING } from "../../types";
+import { COLOR_BLUE, COLOR_ORANGE } from "../../styles/constants";
 
 export type MarkerData = {
   id: string;
   name?: string;
   coordinates: { lat: number; lng: number };
   radius?: number;
-  color?: string; // Optional marker color, defaults to COLOR_PRIMARY
+  color?: string; // Optional marker color, defaults to COLOR_BLUE
   // allow attaching any payload if needed
   meta?: Record<string, any>;
 };
@@ -70,7 +70,7 @@ export function MapViewer({
   const { MapContainer, TileLayer, Marker, Circle, Popup } =
     leafletComponents as any;
 
-  const createMarkerIcon = (color: string = COLOR_PRIMARY) =>
+  const createMarkerIcon = (color: string = COLOR_BLUE) =>
     leaflet.divIcon({
       html: `
                   <div style="
@@ -123,7 +123,7 @@ export function MapViewer({
               <Circle
                 center={[m.coordinates.lat, m.coordinates.lng]}
                 radius={m.radius}
-                pathOptions={{ color: COLOR_WARNING, fillOpacity: 0.2 }}
+                pathOptions={{ color: COLOR_ORANGE, fillOpacity: 0.2 }}
               />
             )}
           </React.Fragment>

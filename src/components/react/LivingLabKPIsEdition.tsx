@@ -15,7 +15,7 @@ import type { ICategory } from "../../types/Category";
 
 type Props = {
   kpis: IKpi[];
-  livingLabId: string;
+  livingLabId: number;
   kpiResults: IIKpiResultBeforeAfter[];
   categories: ICategory[];
   valueBeforeDate?: string;
@@ -46,7 +46,7 @@ export function LivingLabKPIsEdition({
     valueAfterDate
   );
 
-  const getKpiRow = (kpiId: string) => {
+  const getKpiRow = (kpiId: number) => {
     let kpi = kpis.find((k) => k.id === kpiId);
     const hasChildren = kpis.some((k) => k.parent_kpi_id === kpiId);
     const idChild = kpi?.parent_kpi_id ? true : false;

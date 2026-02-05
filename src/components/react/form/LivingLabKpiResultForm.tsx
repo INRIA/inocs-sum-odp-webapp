@@ -15,6 +15,7 @@ import { Field, Input } from "../../react-catalyst-ui-kit";
 import {
   formatDateToMonthYear,
   getKpiValueByMetricType,
+  notNullOrUndefined,
   parseDateToInputHtml,
 } from "../../../lib/helpers";
 import ApiClient from "../../../lib/api-client/ApiClient";
@@ -23,8 +24,8 @@ const api = new ApiClient();
 type Props = {
   initial?: IKpiResult | null;
   kpi: IKpi;
-  livingLabId: string;
-  transportModeId?: string;
+  livingLabId: number;
+  transportModeId?: number;
   defaultDate?: string;
   defaultValue?: number;
   onChange?: (result: IKpiResultInput) => void;
@@ -50,11 +51,11 @@ export function LivingLabKpiResultForm({
   };
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState<number | undefined>(
-    _setValue(initial?.value)
+    _setValue(initial?.value),
   );
   const [date, setDate] = useState<string>(initial?.date ?? defaultDate);
   const [error, setError] = useState<string | null>(null);
-  const [id, setId] = useState<string | undefined>(initial?.id);
+  const [id, setId] = useState<number | undefined>(initial?.id);
   const {
     id: kpiId,
     metric: kpiMetric,
@@ -80,7 +81,7 @@ export function LivingLabKpiResultForm({
 
   const handleSave = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!value || !validateValue(value) || !validateDate(date)) return;
+    if (!validateValue(value) || !validateDate(date)) return;
 
     try {
       const result = await api.upsertLivingLabKpiResults({
@@ -114,7 +115,8 @@ export function LivingLabKpiResultForm({
     setEditing(false);
   };
 
-  const validateValue = (val: number) => {
+  const validateValue = (val?: number) => {
+    if (val === undefined || val === null) return true;
     if (
       kpiMetric === EnumKpiMetricType.PERCENTAGE &&
       min !== undefined &&
@@ -133,11 +135,11 @@ export function LivingLabKpiResultForm({
       return false;
     } else if (min !== undefined && min !== null && val < min) {
       setError(
-        `Min value observed is ${min}. \nAre you sure the value is correct ?`
+        `Min value observed is ${min}. \nAre you sure the value is correct ?`,
       );
     } else if (max !== undefined && max !== null && val > max) {
       setError(
-        `Max value observed is ${max}. \nAre you sure the value is correct ?`
+        `Max value observed is ${max}. \nAre you sure the value is correct ?`,
       );
     } else {
       setError(null);
@@ -178,7 +180,7 @@ export function LivingLabKpiResultForm({
             onClick={setDefaultAndOpenEditing}
             className="inline-flex items-center"
           >
-            {value ? (
+            {notNullOrUndefined<number>(value) ? (
               <PencilSquareIcon className="h-4 w-4 text-primary" />
             ) : (
               <PlusCircleIcon className="h-4 w-4 text-secondary" />

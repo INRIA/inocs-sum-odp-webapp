@@ -165,15 +165,15 @@ describe("colorUtils", () => {
   describe("generateLabColorsWithSeed", () => {
     it("assigns colors to all labs", () => {
       const labs = [
-        { id: "lab-1", name: "Lab 1" },
-        { id: "lab-2", name: "Lab 2" },
-        { id: "lab-3", name: "Lab 3" },
+        { id: 1, name: "Lab 1" },
+        { id: 2, name: "Lab 2" },
+        { id: 3, name: "Lab 3" },
       ];
       const result = generateLabColorsWithSeed(labs);
 
       expect(result).toHaveLength(3);
       result.forEach((assignment) => {
-        expect(assignment.color).toMatch(/^#[0-9a-fA-F]{6}$/);
+        expect(assignment.color).toMatch(/^#[0-9a-fA-F]{6,8}$/);
         expect(assignment.labId).toBeDefined();
         expect(assignment.labName).toBeDefined();
       });
@@ -181,8 +181,8 @@ describe("colorUtils", () => {
 
     it("generates consistent colors for same lab set", () => {
       const labs = [
-        { id: "lab-1", name: "Lab 1" },
-        { id: "lab-2", name: "Lab 2" },
+        { id: 1, name: "Lab 1" },
+        { id: 2, name: "Lab 2" },
       ];
 
       const result1 = generateLabColorsWithSeed(labs);
@@ -193,7 +193,7 @@ describe("colorUtils", () => {
 
     it("handles large number of labs by generating variations", () => {
       const labs = Array.from({ length: 25 }, (_, i) => ({
-        id: `lab-${i}`,
+        id: i + 1,
         name: `Lab ${i}`,
       }));
 
@@ -201,15 +201,15 @@ describe("colorUtils", () => {
 
       expect(result).toHaveLength(25);
       result.forEach((assignment) => {
-        expect(assignment.color).toMatch(/^#[0-9a-fA-F]{6}$/);
+        expect(assignment.color).toMatch(/^#[0-9a-fA-F]{6,8}$/);
       });
     });
 
     it("maintains lab ID and name in assignment", () => {
-      const labs = [{ id: "test-id", name: "Test Name" }];
+      const labs = [{ id: 123, name: "Test Name" }];
       const result = generateLabColorsWithSeed(labs);
 
-      expect(result[0].labId).toBe("test-id");
+      expect(result[0].labId).toBe(123);
       expect(result[0].labName).toBe("Test Name");
     });
   });

@@ -16,6 +16,7 @@ import type {
   ILivingLab,
 } from "../../types";
 import { calculateKpiVariationsData } from "../../lib/helpers/impact-analysis-format";
+import { formatDateWithTime } from "../../lib/helpers";
 
 const api = new ApiClient(Astro.request);
 
@@ -26,7 +27,7 @@ let kpiDefinitionsMap: Map<string, IKpiDefinition> = new Map();
 let livingLabsMap: Map<string, ILivingLab> = new Map();
 let kpiVariationsDataMap: Map<string, IKpiVariationData> = new Map();
 let errorMessage: string | null = null;
-
+let formattedDate: string | null = null;
 try {
   const response = await api.getLatestJobRun("kpi_measures_analysis");
 
@@ -52,6 +53,7 @@ try {
 
     // Pre-compute KPI variations for each group (server-side)
     if (jobRun?.output_data?.success) {
+      formattedDate = formatDateWithTime(jobRun.created_at);
       jobRun.output_data.success.forEach((successItem) => {
         try {
           const variationData = calculateKpiVariationsData(
@@ -164,7 +166,7 @@ const methodologyContent = `
   backHref="/"
 >
   <div class="mx-auto px-1 py-8">
-    <div class="mx-auto px-1 py-8">
+    <div class="mx-auto px-1 py-8 gap-y-4 flex flex-col">
       <!-- Info Section -->
       <InfoSection
         badgeIcon={badgeIcon}
@@ -172,6 +174,11 @@ const methodologyContent = `
         title="Impact Analysis Dashboard"
         description="Quantifying the effectiveness of mobility measures across Living Labs. This tool uses regression analysis to correlate the implementation of push/pull measures with changes in Key Performance Indicators (KPIs)."
       />
+      {
+        formattedDate && (
+          <p class="text-sm text-gray-500">Updated on {formattedDate}</p>
+        )
+      }
 
       <!-- Features Grid -->
       <FeaturesGrid features={impactAnalysisFeatures} />

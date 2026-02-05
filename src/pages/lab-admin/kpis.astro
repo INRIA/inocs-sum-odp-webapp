@@ -112,7 +112,7 @@ const valueAfterDate = modalSplitResults?.reduce(
     <LivingLabKPIsEdition
       categories={categories || []}
       kpis={filteredKpis}
-      livingLabId={labId}
+      livingLabId={Number(labId)}
       kpiResults={livingLabData?.kpi_results || []}
       valueAfterDate={valueAfterDate
         ? valueAfterDate.toISOString().slice(0, 10)

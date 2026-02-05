@@ -3,17 +3,7 @@ import {
   D3KpiLabsVariationsChart,
   type Series,
 } from "./D3KpiLabsVariationsChart";
-
-const COLORS = [
-  "#3b82f6", // blue-500 (Overall)
-  "#22c55e", // green-500
-  "#ef4444", // red-500
-  "#f59e0b", // amber-500
-  "#a855f7", // purple-500
-  "#06b6d4", // cyan-500
-  "#ec4899", // pink-500
-  "#84cc16", // lime-500
-];
+import { COLORS } from "../../../styles/constants";
 
 export interface KpiVariationChartData {
   labs: Array<{ id: string; name: string }>;

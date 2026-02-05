@@ -6,11 +6,12 @@ import {
   EqualsIcon,
 } from "@heroicons/react/20/solid";
 import type { IKpi } from "../../../types";
+import { notNullOrUndefined } from "../../../lib/helpers";
 
 type Props = {
-  livingLabId: string;
+  livingLabId: number;
   kpi: IKpi;
-  transportModeId?: string;
+  transportModeId?: number;
   initialBefore?: any;
   initialAfter?: any;
   defaultBeforeDate?: string;
@@ -67,13 +68,13 @@ export function LivingLabKpiResultsForm({
         {getChangeIcon(before, after)}
       </div>
       <div className="flex-1">
-        {initialBefore?.value && (
+        {notNullOrUndefined<number>(before) && (
           <LivingLabKpiResultForm
             livingLabId={livingLabId}
             kpi={kpi}
             transportModeId={transportModeId}
             initial={initialAfter}
-            defaultValue={initialBefore?.value}
+            defaultValue={before}
             defaultDate={defaultAfterDate}
             placeholder="After value"
             onChange={(result) => {
