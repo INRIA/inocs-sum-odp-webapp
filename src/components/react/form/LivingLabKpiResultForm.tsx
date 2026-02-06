@@ -187,7 +187,7 @@ export function LivingLabKpiResultForm({
             )}
           </button>
         </div>
-        {changeDateAllowed && value && date && (
+        {changeDateAllowed && notNullOrUndefined(value) && date && (
           <small>{formatDateToMonthYear(date)}</small>
         )}
       </div>

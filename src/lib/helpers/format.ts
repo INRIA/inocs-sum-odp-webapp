@@ -54,11 +54,10 @@ export function formatDateWithTime(date?: string | Date): string {
 
 export function getKpiValueByMetricType(value?: number, kpiMetric?: string) {
   if (value === undefined || value === null) return "";
-  if (value === 0) return "0%";
-  if (value && kpiMetric && kpiMetric === EnumKpiMetricType.PERCENTAGE) {
+  if (value >= 0 && kpiMetric && kpiMetric === EnumKpiMetricType.PERCENTAGE) {
     return `${Math.round(value * 100)}%`;
   }
-  return value ?? "";
+  return `${value}`;
 }
 
 export function parseDateToInputHtml(date?: string): string {
