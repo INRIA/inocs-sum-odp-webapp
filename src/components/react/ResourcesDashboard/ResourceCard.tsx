@@ -15,7 +15,7 @@ export function ResourceCard({ resource }: ResourceCardProps) {
               key={tag.id}
               color="none"
               size="md"
-              className="text-dark"
+              className="text-white font-bold"
               style={{ backgroundColor: tag.tags.color }}
             >
               {tag.tags.name}
