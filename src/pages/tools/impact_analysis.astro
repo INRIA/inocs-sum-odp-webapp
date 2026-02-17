@@ -10,6 +10,7 @@ import {
 import ApiClient from "../../lib/api-client/ApiClient";
 import type {
   IJobRun,
+  IJobRunOutputData,
   IKpiDefinition,
   IKpiGroup,
   IKpiVariationData,
@@ -28,6 +29,7 @@ let livingLabsMap: Map<string, ILivingLab> = new Map();
 let kpiVariationsDataMap: Map<string, IKpiVariationData> = new Map();
 let errorMessage: string | null = null;
 let formattedDate: string | null = null;
+let jobRunOutput: IJobRunOutputData | null = null;
 try {
   const response = await api.getLatestJobRun("kpi_measures_analysis");
 
@@ -53,6 +55,22 @@ try {
 
     // Pre-compute KPI variations for each group (server-side)
     if (jobRun?.output_data?.success) {
+      jobRunOutput = {
+        success:
+          jobRun.output_data.success?.map((item) => ({
+            ...item,
+            results: {
+              ...item.results,
+              living_labs_analysis:
+                item.results.living_labs_analysis?.map((labAnalysis) => ({
+                  ...labAnalysis,
+                  kpis: [], //remove kpis from living labs analysis to reduce payload size, as they are already included in the main results and can be accessed via the kpiDefinitionsMap
+                })) || [],
+            },
+          })) || [],
+        error: jobRun.output_data.error,
+        timestamp: jobRun.output_data.timestamp,
+      };
       formattedDate = formatDateWithTime(jobRun.created_at);
       jobRun.output_data.success.forEach((successItem) => {
         try {
@@ -212,7 +230,7 @@ const methodologyContent = `
       ) : (
         <ImpactAnalysisDashboard
           kpiGroups={kpiGroups}
-          jobRun={jobRun}
+          jobRunOutput={jobRunOutput}
           kpiVariationsData={kpiVariationsData}
           client:load
         />

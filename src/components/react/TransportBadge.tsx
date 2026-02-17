@@ -78,8 +78,8 @@ export function TransportBadge({
     ) : null);
 
   const transportByName = name
-    ? transportModes.find(
-        (mode) => mode.name.toLowerCase() === name?.toLowerCase()
+    ? transportModes.find((mode) =>
+        name?.toLowerCase().includes(mode.name.toLowerCase() ?? ""),
       )
     : null;
 

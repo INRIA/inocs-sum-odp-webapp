@@ -5,20 +5,20 @@ import { KpiVariations } from ".";
 import { PageNavigation } from "../ui/PageNavigation";
 import type {
   IKpiGroup,
-  IJobRun,
   IGroupAnalysisResult,
   IKpiVariationData,
+  IJobRunOutputData,
 } from "../../../types";
 
 interface ImpactAnalysisDashboardProps {
   kpiGroups: IKpiGroup[];
-  jobRun: IJobRun | null;
+  jobRunOutput: IJobRunOutputData | null;
   kpiVariationsData: Record<string, IKpiVariationData>;
 }
 
 export const ImpactAnalysisDashboard: React.FC<
   ImpactAnalysisDashboardProps
-> = ({ kpiGroups, jobRun, kpiVariationsData }) => {
+> = ({ kpiGroups, jobRunOutput, kpiVariationsData }) => {
   const [selectedGroupId, setSelectedGroupId] = useState<string | number>();
 
   const handleGroupSelect = (groupId: string | number) => {
@@ -36,18 +36,18 @@ export const ImpactAnalysisDashboard: React.FC<
 
   // Find matching analysis result from output_data
   const analysisResult: IGroupAnalysisResult | null = useMemo(() => {
-    if (!selectedGroupId || !jobRun?.output_data?.success) {
+    if (!selectedGroupId || !jobRunOutput?.success) {
       return null;
     }
 
-    const match = jobRun.output_data.success.find(
+    const match = jobRunOutput.success.find(
       (item) =>
         String(item.group_id) === String(selectedGroupId) ||
         String(item.results.id) === String(selectedGroupId),
     );
 
     return match?.results || null;
-  }, [selectedGroupId, jobRun]);
+  }, [selectedGroupId, jobRunOutput]);
 
   // Get variations data for selected group
   const selectedVariationsData: IKpiVariationData | null = useMemo(() => {
