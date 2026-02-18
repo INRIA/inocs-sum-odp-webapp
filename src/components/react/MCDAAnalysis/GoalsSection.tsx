@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import type { MCDAGoal } from "../../../types";
 import { GoalWeightBar } from "./GoalWeightBar";
+import { RButton } from "../ui";
 
 interface GoalsSectionProps {
   goals: MCDAGoal[];
@@ -81,7 +82,7 @@ export const GoalsSection: React.FC<GoalsSectionProps> = ({
     <div className="space-y-6">
       {/* Goals List */}
       <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <div className="space-y-4">
+        <div className="space-y-2">
           {displayGoals.map((goal, index) => (
             <GoalWeightBar
               key={`${goal.name}-${index}`}
@@ -96,21 +97,21 @@ export const GoalsSection: React.FC<GoalsSectionProps> = ({
         {/* Edit Mode Controls */}
         {editable && (
           <div className="mt-6 pt-6 border-t border-gray-200">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex flex-col items-start justify-between gap-4">
               {/* Sum Display */}
               <div className="flex items-center gap-3">
                 <span className="text-sm font-medium text-gray-600">
-                  Total weight:
+                  Total :
                 </span>
                 <span
                   className={`text-lg font-bold tabular-nums ${
-                    isNormalized ? "text-green-600" : "text-orange-600"
+                    isNormalized ? "text-secondary" : "text-warning"
                   }`}
                 >
                   {sumPercentage}%
                 </span>
                 {!isNormalized && (
-                  <span className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded">
+                  <span className="text-xs text-warning bg-warning/20 px-2 py-1 rounded">
                     Will be normalized to 100%
                   </span>
                 )}
@@ -118,22 +119,20 @@ export const GoalsSection: React.FC<GoalsSectionProps> = ({
 
               {/* Action Buttons */}
               <div className="flex gap-3">
-                <button
+                <RButton
+                  variant="secondary"
                   onClick={handleReset}
                   disabled={!hasChanges}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  aria-label="Reset weights to original values"
-                >
-                  Reset
-                </button>
-                <button
+                  text="Reset"
+                  className="disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                />
+                <RButton
+                  variant="primary"
                   onClick={handleValidate}
                   disabled={!hasChanges}
-                  className="px-4 py-2 text-sm font-medium text-white bg-primary border border-primary rounded-lg hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
-                  aria-label="Validate and normalize weights"
-                >
-                  Validate
-                </button>
+                  text="Validate"
+                  className="disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                />
               </div>
             </div>
 
@@ -141,7 +140,7 @@ export const GoalsSection: React.FC<GoalsSectionProps> = ({
             {hasChanges && (
               <div className="mt-4 flex gap-2 text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded-lg p-3">
                 <svg
-                  className="w-5 h-5 text-blue-600 flex-shrink-0"
+                  className="w-5 h-5 text-blue-600 shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -168,7 +167,7 @@ export const GoalsSection: React.FC<GoalsSectionProps> = ({
         <div className="text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-lg p-4">
           <div className="flex gap-2">
             <svg
-              className="w-5 h-5 text-gray-500 flex-shrink-0"
+              className="w-5 h-5 text-gray-500 shrink-0"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"

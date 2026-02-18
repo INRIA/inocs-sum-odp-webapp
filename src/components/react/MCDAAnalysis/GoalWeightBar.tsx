@@ -23,10 +23,14 @@ export const GoalWeightBar: React.FC<GoalWeightBarProps> = ({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-2">
-      {/* Goal Name */}
-      <div className="flex-shrink-0 w-full sm:w-80 text-left lg:text-right">
-        <span className="text-lg font-medium text-gray-900 ">{goal.name}</span>
+    <div className="flex flex-col gap-2 py-2">
+      <div className="w-full flex items-center justify-between">
+        {/* Goal Name */}
+        <span className="font-medium text-gray-900 text-left">{goal.name}</span>
+        {/* Percentage Label */}
+        <span className="text-sm font-semibold text-gray-700 tabular-nums">
+          {percentage}%
+        </span>
       </div>
 
       {/* Weight Bar / Slider */}
@@ -46,7 +50,7 @@ export const GoalWeightBar: React.FC<GoalWeightBarProps> = ({
               step="0.01"
               value={value}
               onChange={handleSliderChange}
-              className="w-full h-8 bg-gray-200 rounded-lg appearance-none cursor-pointer range-slider"
+              className="w-full h-4 bg-gray-200 rounded-lg appearance-none cursor-pointer range-slider"
               aria-label={`Weight for ${goal.name}`}
               aria-valuemin={0}
               aria-valuemax={100}
@@ -69,7 +73,7 @@ export const GoalWeightBar: React.FC<GoalWeightBarProps> = ({
           </div>
         ) : (
           <div
-            className="relative h-8 bg-gray-200 rounded-lg overflow-hidden"
+            className="relative h-4 bg-gray-200 rounded-lg overflow-hidden"
             role="progressbar"
             aria-label={`Weight for ${goal.name}`}
             aria-valuemin={0}
@@ -83,13 +87,6 @@ export const GoalWeightBar: React.FC<GoalWeightBarProps> = ({
             ></div>
           </div>
         )}
-      </div>
-
-      {/* Percentage Label */}
-      <div className="flex-shrink-0 w-16 text-left">
-        <span className="text-sm font-semibold text-gray-700 tabular-nums">
-          {percentage}%
-        </span>
       </div>
     </div>
   );

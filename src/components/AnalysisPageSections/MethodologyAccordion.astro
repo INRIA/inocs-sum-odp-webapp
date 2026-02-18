@@ -61,5 +61,6 @@ const { title, subtitle, content } = Astro.props;
     class="bg-info/5 rounded-b-xl p-6 border-x border-b border-gray-200 mt-2"
   >
     <Fragment set:html={content} />
+    <slot />
   </div>
 </details>

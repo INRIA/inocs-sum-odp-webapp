@@ -49,12 +49,50 @@ export interface MCDAGoal {
   name: string;
   weight: number;
 }
+
+export interface McdaPreferenceMatrix {
+  [sourceKey: string]: {
+    [targetKey: string]: number;
+  };
+}
+
+export interface OutrankingGraphNode {
+  id: string;
+  label: string;
+  rank?: number;
+  netFlow: number;
+  positiveFlow?: number;
+  negativeFlow?: number;
+}
+
+export interface OutrankingGraphEdge {
+  source: string;
+  target: string;
+  weight: number;
+}
+
+export interface OutrankingGraphData {
+  nodes: OutrankingGraphNode[];
+  edges: OutrankingGraphEdge[];
+}
+
+export interface McdaKeyInsightCard {
+  title: string;
+  description: string;
+  value: string;
+  detail?: string;
+  tooltip?: string;
+}
+
 export interface McdaResults {
   net_flows?: { [key: string]: number };
   alternative_labels?: { [key: string]: string };
   negative_flows?: { [key: string]: number };
   positive_flows?: { [key: string]: number };
+  preference_matrix?: McdaPreferenceMatrix;
   criteria_labels?: { [key: string]: string };
+  gaia_method?: string;
+  gaia_quality?: number;
   gaia_criteria?: { key: string; x: number; y: number }[];
   gaia_alternatives?: { key: string; x: number; y: number }[];
   gaia_decision_stick?: [number, number];

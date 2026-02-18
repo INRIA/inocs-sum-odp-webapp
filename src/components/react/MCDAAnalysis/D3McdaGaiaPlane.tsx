@@ -6,14 +6,11 @@ import {
   COLOR_LIGHT_GRAY,
   COLOR_BLUE,
   COLOR_ORANGE,
-  COLOR_RED,
 } from "../../../styles/constants";
 
 // GAIA colors
 const CRITERIA_COLOR = COLOR_BLUE;
 const DECISION_STICK_COLOR = COLOR_ORANGE;
-const GOOD_FLOW_COLOR = COLOR_GREEN;
-const BAD_FLOW_COLOR = COLOR_RED;
 
 interface GAIAPoint {
   key: string;
@@ -124,13 +121,6 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
       .scaleLinear()
       .domain([yExtent[0] - yPadding, yExtent[1] + yPadding])
       .range([chartHeight, 0]);
-
-    // Color scale for net flows
-    const flowExtent = d3.extent(Object.values(netFlows)) as [number, number];
-    const colorScale = d3
-      .scaleLinear<string>()
-      .domain([flowExtent[0], 0, flowExtent[1]])
-      .range([BAD_FLOW_COLOR, "#fbbf24", GOOD_FLOW_COLOR]);
 
     // Add gridlines
     g.append("g")
@@ -489,70 +479,13 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
   return (
     <div ref={containerRef} className="relative w-full">
       <div className="flex flex-col gap-6 rounded-lg shadow-sm border border-gray-200">
-        <div className="flex flex-col lg:flex-row-reverse">
-          {/* Alternatives Legend */}
-          <div className="w-full lg:w-1/4 flex flex-col p-1 self-start overflow-y-auto">
-            <h5> Alternatives Legend</h5>
-            <p>Sorted by ranking</p>
-            <div className="space-y-2 flex flex-col ">
-              {gaiaAlternatives
-                .slice()
-                .sort((a, b) => {
-                  const rankA = ranking.indexOf(a.key);
-                  const rankB = ranking.indexOf(b.key);
-                  return rankA - rankB;
-                })
-                .map((alt) => {
-                  const rank = ranking.indexOf(alt.key);
-                  const isTop3 = rank >= 0 && rank < 3;
-                  const netFlow = netFlows[alt.key] || 0;
-                  const flowColor =
-                    netFlow > 0
-                      ? "text-success"
-                      : netFlow < 0
-                        ? "text-danger"
-                        : "text-gray-500";
-
-                  return (
-                    <div
-                      key={alt.key}
-                      className={`flex items-start gap-2 p-2 rounded text-xs transition-colors hover:bg-gray-50 ${
-                        isTop3 ? "bg-success/5 border border-success" : ""
-                      }`}
-                    >
-                      <span
-                        className={`inline-flex items-center justify-center min-w-[28px] h-5 px-1 rounded font-bold text-white ${
-                          isTop3 ? "text-dark-light bg-success" : "bg-dark"
-                        }`}
-                      >
-                        {alt.key.toUpperCase()}
-                      </span>
-                      <div className="flex-1">
-                        <div className="font-medium text-gray-900">
-                          {alternativeLabels[alt.key] || alt.key}
-                        </div>
-                        {rank >= 0 && (
-                          <div className="text-xs text-gray-600 mt-0.5">
-                            Rank: #{rank + 1} • Net Flow:{" "}
-                            <span className={flowColor}>
-                              {netFlow.toFixed(3)}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
-          </div>
-          <div ref={chartContainerRef} className="flex-1 w-full lg:w-3/4">
-            <svg
-              ref={svgRef}
-              width={dimensions.width}
-              height={dimensions.height}
-              className="bg-white"
-            />
-          </div>
+        <div ref={chartContainerRef} className="w-full">
+          <svg
+            ref={svgRef}
+            width={dimensions.width}
+            height={dimensions.height}
+            className="bg-white"
+          />
         </div>
         {/* Legend */}
         <div className=" bg-white p-4">

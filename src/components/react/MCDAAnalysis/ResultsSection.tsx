@@ -1,20 +1,34 @@
-import React from "react";
-import type { IKpiGroup, McdaResults } from "../../../types";
-import { AlternativeCard } from "./AlternativeCard";
+import React, { useEffect, useMemo, useState } from "react";
+import type {
+  IKpiGroup,
+  McdaKeyInsightCard,
+  McdaResults,
+  OutrankingGraphData,
+} from "../../../types";
 import { D3McdaNetFlowsChart } from "./D3McdaNetFlowsChart";
 import { D3McdaGaiaPlane } from "./D3McdaGaiaPlane";
+import { D3McdaNetworkChart } from "./D3McdaNetworkChart";
+import { McdaRankingAlternatives } from "./McdaRankingAlternatives";
+import { McdaKeyResults } from "./McdaKeyResults";
+import { Tabs } from "../ui";
 
 interface ResultsSectionProps {
-  selectedGroupId: string | number;
   selectedGroup: IKpiGroup | undefined;
   mcdaResults?: McdaResults | null;
+  outrankingGraphData?: OutrankingGraphData;
+  mcdaKeyInsights?: McdaKeyInsightCard[];
 }
 
 export const ResultsSection: React.FC<ResultsSectionProps> = ({
-  selectedGroupId,
   selectedGroup,
   mcdaResults,
+  outrankingGraphData,
+  mcdaKeyInsights,
 }) => {
+  const NET_FLOWS_TAB_ID = "net-flows";
+  const NETWORK_TAB_ID = "outranking-graph";
+  const GAIA_TAB_ID = "gaia-plane";
+
   const netFlows = mcdaResults?.net_flows || {};
   const labels = mcdaResults?.alternative_labels || {};
   const positiveFlows = mcdaResults?.positive_flows || {};
@@ -26,6 +40,7 @@ export const ResultsSection: React.FC<ResultsSectionProps> = ({
     | undefined;
   const criteriaLabels = mcdaResults?.criteria_labels || {};
   const ranking = mcdaResults?.ranking || [];
+  const hasGaiaData = gaiaAlternatives.length > 0 && gaiaCriteria.length > 0;
 
   // Convert to sorted entries
   const flowEntries = Object.entries(netFlows).map(([key, value]) => ({
@@ -34,83 +49,138 @@ export const ResultsSection: React.FC<ResultsSectionProps> = ({
     label: labels[key] || key,
   }));
 
-  // Sort by net flow descending to find best alternative
+  // Sort by net flow descending
   flowEntries.sort((a, b) => b.flow - a.flow);
-  const top3Alternatives = flowEntries.slice(0, 3);
+  const hasResults = flowEntries.length > 0;
+
+  const resolveTabIdFromHash = () => {
+    if (typeof window === "undefined") return NET_FLOWS_TAB_ID;
+
+    const hash = window.location.hash.replace("#", "");
+    if (hash === NETWORK_TAB_ID) return NETWORK_TAB_ID;
+    if (hash === GAIA_TAB_ID && hasGaiaData) return GAIA_TAB_ID;
+    if (hash === NET_FLOWS_TAB_ID) return NET_FLOWS_TAB_ID;
+
+    return NET_FLOWS_TAB_ID;
+  };
+
+  const [activeTabId, setActiveTabId] = useState<string>(resolveTabIdFromHash);
+
+  useEffect(() => {
+    const onHashChange = () => {
+      setActiveTabId(resolveTabIdFromHash());
+    };
+
+    onHashChange();
+    window.addEventListener("hashchange", onHashChange);
+
+    return () => {
+      window.removeEventListener("hashchange", onHashChange);
+    };
+  }, [hasGaiaData]);
+
+  const handleTabChange = (id: string) => {
+    setActiveTabId(id);
+
+    if (typeof window === "undefined") return;
+
+    const nextHash = `#${id}`;
+    if (window.location.hash !== nextHash) {
+      window.history.replaceState(
+        null,
+        "",
+        `${window.location.pathname}${nextHash}`,
+      );
+    }
+  };
+
+  const chartTabs = useMemo(() => {
+    const tabs = [
+      {
+        id: NET_FLOWS_TAB_ID,
+        label: "Ranking Flow",
+        content: (
+          <D3McdaNetFlowsChart
+            netFlows={netFlows}
+            positiveFlows={positiveFlows}
+            negativeFlows={negativeFlows}
+            alternativeLabels={labels}
+            height={Math.max(520, flowEntries.length * 56)}
+          />
+        ),
+      },
+      {
+        id: NETWORK_TAB_ID,
+        label: "Outranking Graph",
+        content: (
+          <D3McdaNetworkChart
+            outrankingGraphData={outrankingGraphData}
+            height={700}
+          />
+        ),
+      },
+    ];
+
+    if (hasGaiaData) {
+      tabs.push({
+        id: GAIA_TAB_ID,
+        label: "GAIA Plane",
+        content: (
+          <D3McdaGaiaPlane
+            gaiaAlternatives={gaiaAlternatives}
+            gaiaCriteria={gaiaCriteria}
+            gaiaDecisionStick={gaiaDecisionStick}
+            alternativeLabels={labels}
+            criteriaLabels={criteriaLabels}
+            netFlows={netFlows}
+            ranking={ranking}
+            height={700}
+          />
+        ),
+      });
+    }
+
+    return tabs;
+  }, [
+    netFlows,
+    positiveFlows,
+    negativeFlows,
+    outrankingGraphData,
+    labels,
+    flowEntries.length,
+    hasGaiaData,
+    gaiaAlternatives,
+    gaiaCriteria,
+    gaiaDecisionStick,
+    criteriaLabels,
+    ranking,
+  ]);
 
   return (
     <div className="space-y-8">
-      {/* Top Decision Insights Section */}
-      <div className="text-center space-y-3">
-        <h2 className="text-3xl font-bold text-gray-900">
-          Top Decision Insights
-        </h2>
-        <p className="text-gray-600 max-w-4xl mx-auto">
-          A quick view of the leading project activities across all Living Labs,
-          see which options win most often, understand the biggest trade-offs,
-          and learn how stable these choices are under different priorities.
-        </p>
-      </div>
-
-      {/* Top 3 Alternatives Grid */}
-      {top3Alternatives.length > 0 ? (
+      {/* Result Visualizations */}
+      {hasResults ? (
         <>
-          <div className="grid md:grid-cols-3 gap-6 content-center">
-            {top3Alternatives.map((alternative, index) => (
-              <AlternativeCard
-                key={alternative.key}
-                label={alternative.label}
-                flow={alternative.flow}
-                rank={index + 1}
-                isTop={index === 0}
+          <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-6 items-start">
+            <div className="min-w-0 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+              <Tabs
+                key={activeTabId}
+                tabs={chartTabs}
+                defaultTabId={activeTabId}
+                onChange={handleTabChange}
               />
-            ))}
-          </div>
-
-          {/* PROMETHEE-GAIA Detailed Analysis Section */}
-          <div className="mt-12">
-            <div className="text-center space-y-2 mb-8">
-              <h2 className="text-3xl font-bold text-gray-900">
-                PROMETHEE-GAIA detailed analysis
-              </h2>
-              <p className="text-gray-600 max-w-3xl mx-auto">
-                Business Activities - ranking
-              </p>
             </div>
-            <D3McdaNetFlowsChart
-              netFlows={netFlows}
-              positiveFlows={positiveFlows}
-              negativeFlows={negativeFlows}
-              alternativeLabels={labels}
-              height={Math.max(400, flowEntries.length * 60)}
-            />
-          </div>
 
-          {/* GAIA Plane Section */}
-          {gaiaAlternatives.length > 0 && gaiaCriteria.length > 0 && (
-            <div className="mt-12">
-              <div className="text-center space-y-2 mb-8">
-                <h2 className="text-3xl font-bold text-gray-900">
-                  GAIA Visual Analysis
-                </h2>
-                <p className="text-gray-600 max-w-3xl mx-auto">
-                  Geometric representation of alternatives and goals in decision
-                  space. Alternatives closer to the decision stick (π) represent
-                  better compromise solutions.
-                </p>
-              </div>
-              <D3McdaGaiaPlane
-                gaiaAlternatives={gaiaAlternatives}
-                gaiaCriteria={gaiaCriteria}
-                gaiaDecisionStick={gaiaDecisionStick}
-                alternativeLabels={labels}
-                criteriaLabels={criteriaLabels}
-                netFlows={netFlows}
+            <div className="xl:sticky xl:top-6">
+              <McdaRankingAlternatives
                 ranking={ranking}
-                height={700}
+                alternativeLabels={labels}
+                netFlows={netFlows}
               />
             </div>
-          )}
+          </div>
+
+          <McdaKeyResults cards={mcdaKeyInsights} />
         </>
       ) : (
         <div className="bg-white rounded-lg border border-gray-200 p-8">

@@ -11,16 +11,22 @@ export function AnalysisSectionDivider({
   description,
 }: AnalysisSectionDividerProps) {
   return (
-    <div className="bg-info/20 border border-info rounded-lg p-2 lg:p-4">
-      <div className="flex items-start gap-2 lg:gap-4">
-        <div className="flex items-center justify-center w-12 h-12 bg-info text-white rounded-full font-bold text-xl flex-shrink-0">
+    <div className="rounded-lg p-2 lg:p-4">
+      <div className="flex items-start gap-2">
+        <div className="mt-1 flex items-center justify-center w-6 h-6 bg-info text-white rounded-full font-bold text-xl flex-shrink-0">
           {step}
         </div>
-        <div className="flex flex-col gap-4">
-          <h2 className="text-2xl font-bold text-gray-900 content-center">{title}</h2>
+        <div className="flex flex-col">
+          <h4 className="text-2xl font-bold text-gray-900 content-center">
+            {title}
+          </h4>
           <p className="justify-center content-center">
-            <strong>{subtitle}</strong>
-            <br />
+            {subtitle && (
+              <strong>
+                {subtitle} <br />
+              </strong>
+            )}
+
             {description}
           </p>
         </div>

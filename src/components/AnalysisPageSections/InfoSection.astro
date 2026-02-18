@@ -3,6 +3,7 @@ interface Props {
   badgeIcon: string;
   badgeText: string;
   title: string;
+  highlightedText?: string;
   description: string;
   descriptionClass?: string;
 }
@@ -11,9 +12,16 @@ const {
   badgeIcon,
   badgeText,
   title,
+  highlightedText,
   description,
   descriptionClass = "text-lg text-gray-600 max-w-4xl leading-relaxed",
 } = Astro.props;
+
+const splitedTitleText = highlightedText
+  ? title.split(highlightedText)
+  : [title];
+const titleBeforeHighlight = splitedTitleText[0];
+const titleAfterHighlight = splitedTitleText[1];
 ---
 
 <div class="">
@@ -24,7 +32,15 @@ const {
     {badgeText}
   </div>
   <h1 class="text-4xl font-bold text-gray-900 mb-4 tracking-tight">
-    {title}
+    {titleBeforeHighlight}
+    {
+      highlightedText && (
+        <span class=" text-secondary px-1 rounded">
+          {highlightedText}
+        </span>
+      )
+    }
+    {titleAfterHighlight}
   </h1>
   <p
     class:list={[

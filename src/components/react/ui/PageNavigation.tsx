@@ -121,8 +121,9 @@ export const PageNavigation: React.FC<PageNavigationProps> = ({
 
       {/* Disclaimer Text */}
       {disclaimer && (
-        <div className="bg-white rounded-lg shadow-lg border border-gray-200 px-4 py-2 w-11/12 md:w-4/6">
-          <small className="italic">{disclaimer}</small>
+        <div className="bg-warning rounded-lg shadow-lg border border-gray-200 px-4 py-2 w-11/12 md:w-5/6">
+          <p className="hidden lg:block italic text-white">{disclaimer}</p>
+          <small className="lg:hidden italic text-white">{disclaimer}</small>
         </div>
       )}
     </div>

@@ -355,82 +355,16 @@ export const D3McdaNetFlowsChart: React.FC<D3McdaNetFlowsChartProps> = ({
     );
   }
 
-  // Prepare data for alternatives legend
-  const sortedData: ChartDataPoint[] = Object.entries(netFlows)
-    .map(([key, netFlow]) => ({
-      key,
-      label: alternativeLabels[key] || key,
-      netFlow,
-      positiveFlow: positiveFlows[key] || 0,
-      negativeFlow: negativeFlows[key] || 0,
-    }))
-    .sort((a, b) => b.netFlow - a.netFlow);
-
   return (
     <div ref={containerRef} className="relative w-full">
       <div className="flex flex-col rounded-lg shadow-md border border-gray-200">
-        <div
-          className={`flex ${isMobile ? "flex-col" : "flex-col lg:flex-row"}`}
-        >
-          {/* Alternatives Legend */}
-          <div
-            className={`${isMobile ? "w-full" : "w-full lg:w-1/4"} flex flex-col p-4 self-start overflow-y-auto`}
-          >
-            {/* <h5>Alternatives Legend</h5>
-            <p className="text-xs text-gray-500 mb-2">Sorted by net flow</p> */}
-            <div className={`mt-0 lg:mt-8 space-y-2 flex flex-col`}>
-              {sortedData.map((alt, index) => {
-                const isTop3 = index < 3;
-                const flowColor =
-                  alt.netFlow > 0
-                    ? "text-success"
-                    : alt.netFlow < 0
-                      ? "text-danger"
-                      : "text-gray-500";
-
-                return (
-                  <div
-                    key={alt.key}
-                    className={`h-12 p-1 gap-1 flex flex-row lg:flex-row-reverse items-center rounded text-xs transition-colors hover:bg-gray-50 ${
-                      isTop3 ? "bg-success/5 border border-success" : ""
-                    }`}
-                  >
-                    <span
-                      className={`inline-flex items-center justify-center min-w-[28px] h-5 px-1 rounded font-bold text-white ${
-                        isTop3 ? "text-dark-light bg-success" : "bg-dark"
-                      }`}
-                    >
-                      {alt.key.toUpperCase()}
-                    </span>
-                    <div className="flex-1">
-                      <div className="font-medium text-gray-900">
-                        {alt.label}
-                      </div>
-                      <div className="text-xs text-gray-600 mt-0.5">
-                        Rank: #{index + 1} • Net Flow:{" "}
-                        <span className={flowColor}>
-                          {alt.netFlow.toFixed(3)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Chart Container */}
-          <div
-            ref={chartContainerRef}
-            className={`flex-1 ${isMobile ? "w-full" : "w-full lg:w-3/4"}`}
-          >
-            <svg
-              ref={svgRef}
-              width={dimensions.width}
-              height={dimensions.height}
-              className="bg-white"
-            />
-          </div>
+        <div ref={chartContainerRef} className="w-full">
+          <svg
+            ref={svgRef}
+            width={dimensions.width}
+            height={dimensions.height}
+            className="bg-white"
+          />
         </div>
 
         {/* Flow Types Legend */}
