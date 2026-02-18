@@ -22,11 +22,11 @@ export const KpiVariations: React.FC<KpiVariationsProps> = ({
     <AnalysisSectionDivider
       step={3}
       title="KPI Variations percentage"
-      subtitle={
-        "Observe and compare " +
-        selectedGroup?.name +
-        " KPIs variations among living labs"
-      }
+      // subtitle={
+      //   "Observe and compare " +
+      //   selectedGroup?.name +
+      //   " KPIs variations among living labs"
+      // }
       description={
         "Only Living Labs with enough data collected are included, for KPIs in the scope of " +
         selectedGroup?.name +

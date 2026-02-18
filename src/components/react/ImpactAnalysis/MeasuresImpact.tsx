@@ -27,7 +27,7 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
     <AnalysisSectionDivider
       step={2}
       title="Measures Impact"
-      subtitle="Analyse how implemented measures contributed to the KPIs variations"
+      // subtitle="Analyse how implemented measures contributed to the KPIs variations"
       description={
         "Estimation of the level of contribution for each measure to KPIs in the scope " +
         selectedGroup?.name +

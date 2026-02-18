@@ -183,7 +183,7 @@ const methodologyContent = `
   ]}
   backHref="/"
 >
-  <div class="mx-auto px-1 py-8">
+  <div class="mx-auto px-1 py-8" id="how-to">
     <div class="mx-auto px-1 py-8 gap-y-4 flex flex-col">
       <!-- Info Section -->
       <InfoSection
@@ -192,11 +192,6 @@ const methodologyContent = `
         title="Impact Analysis Dashboard"
         description="Quantifying the effectiveness of mobility measures across Living Labs. This tool uses regression analysis to correlate the implementation of push/pull measures with changes in Key Performance Indicators (KPIs)."
       />
-      {
-        formattedDate && (
-          <p class="text-sm text-gray-500">Updated on {formattedDate}</p>
-        )
-      }
 
       <!-- Features Grid -->
       <FeaturesGrid features={impactAnalysisFeatures} />
@@ -228,12 +223,19 @@ const methodologyContent = `
           </p>
         </div>
       ) : (
-        <ImpactAnalysisDashboard
-          kpiGroups={kpiGroups}
-          jobRunOutput={jobRunOutput}
-          kpiVariationsData={kpiVariationsData}
-          client:load
-        />
+        <section id="impact-results">
+          {formattedDate && (
+            <p class="text-sm text-gray-500">
+              Results where updated on {formattedDate}
+            </p>
+          )}
+          <ImpactAnalysisDashboard
+            kpiGroups={kpiGroups}
+            jobRunOutput={jobRunOutput}
+            kpiVariationsData={kpiVariationsData}
+            client:load
+          />
+        </section>
       )
     }
   </div>

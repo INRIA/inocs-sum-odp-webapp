@@ -3,6 +3,7 @@ import type { IKpiDefinition } from "../../../types";
 import { KpiCard } from "../KpiCards";
 import { getUniqueParentKpis } from "../../../lib/helpers";
 import { InfoAlert } from "./InfoAlert";
+import { InfoCard } from "./InfoCard";
 
 interface CardFilterProps {
   groups: { id: string | number; name: string; kpis: IKpiDefinition[] }[];
@@ -39,20 +40,24 @@ export const CardFilter: React.FC<CardFilterProps> = ({
       <section id="kpis-in-group"></section>
       {selectedGroup && uniqueKpis.length > 0 && (
         <div className="mt-10">
-          <InfoAlert
-            variant="neutral"
+          <InfoCard
             title={"KPIs considered for group " + selectedGroup.name}
+            textAlign="left"
+            variant="light"
+            showIcon={false}
           >
-            <i>
-              We have collected data from the living labs from the following
-              KPIs in this group:{" "}
-            </i>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 mt-2">
               {uniqueKpis.map((kpi) => (
                 <KpiCard kpi={kpi} key={kpi.id} />
               ))}
+              <i>
+                Our platform has collected living lab's data from these KPIs,
+                which are in the scope of the selected group. The impact
+                analysis results are based on the variations observed in these
+                KPIs and the measures implemented in the living labs.
+              </i>
             </div>
-          </InfoAlert>
+          </InfoCard>
         </div>
       )}
     </div>

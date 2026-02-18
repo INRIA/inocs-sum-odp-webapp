@@ -2,13 +2,17 @@ import React, { useState, useMemo } from "react";
 import { AnalysisConditionsFilter } from "./AnalysisConditionsFilter";
 import { MeasuresImpact } from "./MeasuresImpact";
 import { KpiVariations } from ".";
-import { PageNavigation } from "../ui/PageNavigation";
+import { Tabs } from "../ui";
 import type {
   IKpiGroup,
   IGroupAnalysisResult,
   IKpiVariationData,
   IJobRunOutputData,
 } from "../../../types";
+import { PageNavigation } from "../ui/PageNavigation";
+
+const MEASURES_TAB_ID = "measures-impact";
+const KPI_VARIATIONS_TAB_ID = "kpi-variations";
 
 interface ImpactAnalysisDashboardProps {
   kpiGroups: IKpiGroup[];
@@ -20,13 +24,11 @@ export const ImpactAnalysisDashboard: React.FC<
   ImpactAnalysisDashboardProps
 > = ({ kpiGroups, jobRunOutput, kpiVariationsData }) => {
   const [selectedGroupId, setSelectedGroupId] = useState<string | number>();
+  const [activeTabId, setActiveTabId] = useState<string>(MEASURES_TAB_ID);
 
   const handleGroupSelect = (groupId: string | number) => {
     setSelectedGroupId(groupId);
-    const element = document.getElementById("kpis-in-group");
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
+    setActiveTabId(MEASURES_TAB_ID);
   };
 
   const selectedGroup =
@@ -55,38 +57,75 @@ export const ImpactAnalysisDashboard: React.FC<
     return kpiVariationsData[String(selectedGroupId)] || null;
   }, [selectedGroupId, kpiVariationsData]);
 
-  // Navigation sections configuration
   const navigationSections = [
-    { id: "analysis-conditions-filter", label: "Conditions" },
-    { id: "measures-impact", label: "Measures" },
-    { id: "kpi-variations", label: "KPI Variations" },
+    { id: "how-to", label: "Information about the tool" },
+    { id: "impact-results", label: "Impact analysis results" },
   ];
 
+  const contentTabs = useMemo(
+    () => [
+      {
+        id: MEASURES_TAB_ID,
+        label: "Measures Impact",
+        content: (
+          <MeasuresImpact
+            selectedGroup={selectedGroup}
+            analysisResult={analysisResult}
+            kpiCount={selectedVariationsData?.allKpiVariations.length || 0}
+          />
+        ),
+      },
+      {
+        id: KPI_VARIATIONS_TAB_ID,
+        label: "KPI Variations",
+        content: (
+          <KpiVariations
+            selectedGroup={selectedGroup}
+            variationsData={selectedVariationsData}
+          />
+        ),
+      },
+    ],
+    [selectedGroup, analysisResult, selectedVariationsData],
+  );
+
+  const filterContent = (
+    <AnalysisConditionsFilter
+      kpiGroups={kpiGroups}
+      selectedGroupId={selectedGroupId}
+      onGroupSelect={handleGroupSelect}
+    />
+  );
+
   return (
-    <div className="flex flex-col gap-6">
-      <section id="analysis-conditions-filter"></section>
-      <AnalysisConditionsFilter
-        kpiGroups={kpiGroups}
-        selectedGroupId={selectedGroupId}
-        onGroupSelect={handleGroupSelect}
-      />
+    <div className="space-y-6">
+      {/* Desktop: two-column grid — sticky sidebar + tabbed content */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[350px_minmax(0,1fr)]">
+        <aside className="sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto pr-2">
+          {filterContent}
+        </aside>
 
-      <section id="measures-impact"></section>
-      <MeasuresImpact
-        selectedGroup={selectedGroup}
-        analysisResult={analysisResult}
-        kpiCount={selectedVariationsData?.allKpiVariations.length || 0}
-      />
-
-      <section id="kpi-variations"></section>
-      <KpiVariations
-        selectedGroup={selectedGroup}
-        variationsData={selectedVariationsData}
-      />
+        <section className="min-w-0">
+          <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+            {selectedVariationsData ? (
+              <Tabs
+                key={activeTabId}
+                tabs={contentTabs}
+                defaultTabId={activeTabId}
+                onChange={setActiveTabId}
+              />
+            ) : (
+              <p className="text-gray-500">
+                Please select analysis conditions to view the results.
+              </p>
+            )}
+          </div>
+        </section>
+      </div>
 
       <PageNavigation
         sections={navigationSections}
-        disclaimer="Analysis results are based on the selected KPI group and living lab conditions"
+        disclaimer="The impact levels reported by this assessment tool are algorithmic estimates derived from implemented measures and observed KPI changes. They serve as indicative values and may not exactly reflect real-world outcomes."
       />
     </div>
   );
