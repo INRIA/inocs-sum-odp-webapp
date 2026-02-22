@@ -17,9 +17,9 @@ export const MeasureImpactCard: React.FC<MeasureImpactCardProps> = ({
   const isPositive = coefficient >= 0;
 
   // Determine colors based on impact
-  const colorClasses = isPositive
-    ? "from-secondary/20 to-secondary/40 border-secondary text-secondary"
-    : "from-danger/20 to-danger/40 border-danger text-danger";
+  const colorClasses = ""; //isPositive
+  // ? "from-secondary/20 to-secondary/40 border-secondary text-dark"
+  // : "from-danger/20 to-danger/40 border-danger text-dark";
 
   const badgeClasses = isPositive
     ? "bg-secondary text-white"
@@ -42,7 +42,7 @@ export const MeasureImpactCard: React.FC<MeasureImpactCardProps> = ({
       </div>
 
       {/* Measure Name */}
-      <h5 className={`font-bold mb-2 pr-5 leading-tight`}>{measure.name}</h5>
+      <h6 className={`font-bold mb-2 pr-5 leading-tight`}>{measure.name}</h6>
 
       {/* Coefficient Value */}
       <div className="flex items-baseline gap-2 mb-2">

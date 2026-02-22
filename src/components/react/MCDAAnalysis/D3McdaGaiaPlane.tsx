@@ -189,12 +189,59 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
       .attr("d", "M0,-5L10,0L0,5")
       .attr("fill", CRITERIA_COLOR);
 
-    gaiaCriteria.forEach((criterion) => {
+    const placedCriterionLabels: { x: number; y: number }[] = [];
+    const CRITERIA_LABEL_MIN_DISTANCE = 20;
+    const CRITERIA_LABEL_BASE_OFFSET = 30;
+    const CRITERIA_LABEL_PUSH_STEP = 30;
+
+    gaiaCriteria.forEach((criterion, criterionIndex) => {
       const scale = 1.2; // Scale up vectors for visibility
       const endX = xScale(criterion.x * scale);
       const endY = yScale(criterion.y * scale);
       const startX = xScale(0);
       const startY = yScale(0);
+      const shortKey = `G${criterionIndex + 1}`;
+      const fullLabel = `${shortKey}: ${criteriaLabels[criterion.key] || criterion.key}`;
+
+      const dx = endX - startX;
+      const dy = endY - startY;
+      const vectorLength = Math.hypot(dx, dy) || 1;
+      const ux = dx / vectorLength;
+      const uy = dy / vectorLength;
+
+      let labelX = endX + ux * CRITERIA_LABEL_BASE_OFFSET;
+      let labelY = endY + uy * CRITERIA_LABEL_BASE_OFFSET;
+
+      let attempts = 0;
+      while (
+        placedCriterionLabels.some(
+          (point) =>
+            Math.hypot(point.x - labelX, point.y - labelY) <
+            CRITERIA_LABEL_MIN_DISTANCE,
+        ) &&
+        attempts < 12
+      ) {
+        labelX += ux * CRITERIA_LABEL_PUSH_STEP;
+        labelY += uy * CRITERIA_LABEL_PUSH_STEP;
+        attempts += 1;
+      }
+
+      placedCriterionLabels.push({ x: labelX, y: labelY });
+
+      const displacement = Math.hypot(labelX - endX, labelY - endY);
+      const textAnchor = ux > 0.25 ? "start" : ux < -0.25 ? "end" : "middle";
+
+      if (displacement > 10) {
+        g.append("line")
+          .attr("x1", endX)
+          .attr("y1", endY)
+          .attr("x2", labelX)
+          .attr("y2", labelY)
+          .attr("stroke", CRITERIA_COLOR)
+          .attr("stroke-width", 1)
+          .attr("stroke-opacity", 0.65)
+          .attr("stroke-dasharray", "2,2");
+      }
 
       // Draw arrow line
       g.append("line")
@@ -210,7 +257,7 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
           d3.select(this).attr("stroke-width", 4);
           setTooltip({
             type: "criterion",
-            label: criteriaLabels[criterion.key] || criterion.key,
+            label: fullLabel,
             x: criterion.x,
             y: criterion.y,
             clientX: event.clientX,
@@ -229,23 +276,22 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
           setTooltip(null);
         });
 
-      // Add criterion label
-      const labelX = endX + (endX - startX) * 0.15;
-      const labelY = endY + (endY - startY) * 0.15;
-
       g.append("text")
         .attr("x", labelX)
         .attr("y", labelY)
-        .attr("text-anchor", "middle")
+        .attr("text-anchor", textAnchor)
         .attr("fill", CRITERIA_COLOR)
         .attr("font-size", "13px")
         .attr("font-weight", "700")
+        .attr("stroke", "#ffffff")
+        .attr("stroke-width", 2)
+        .attr("paint-order", "stroke")
         .style("cursor", "pointer")
-        .text(criteriaLabels[criterion.key] || criterion.key)
+        .text(shortKey)
         .on("mouseenter", function (event) {
           setTooltip({
             type: "criterion",
-            label: criteriaLabels[criterion.key] || criterion.key,
+            label: fullLabel,
             x: criterion.x,
             y: criterion.y,
             clientX: event.clientX,
@@ -271,10 +317,10 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
         .append("marker")
         .attr("id", "arrow-decision")
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", 8)
+        .attr("refX", 6)
         .attr("refY", 0)
-        .attr("markerWidth", 8)
-        .attr("markerHeight", 8)
+        .attr("markerWidth", 4)
+        .attr("markerHeight", 4)
         .attr("orient", "auto");
 
       decisionMarker
@@ -479,6 +525,31 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
   return (
     <div ref={containerRef} className="relative w-full">
       <div className="flex flex-col gap-6 rounded-lg shadow-sm border border-gray-200">
+        {/* Goals key legend */}
+        <div className="bg-white px-4 pt-4">
+          <h5 className="text-sm font-semibold text-gray-800 mb-2">
+            Goal vectors
+          </h5>
+          <div className="flex flex-wrap gap-x-4 gap-y-1">
+            {gaiaCriteria.map((criterion, index) => (
+              <div
+                key={criterion.key}
+                className="flex items-center gap-1.5 text-xs"
+              >
+                <span
+                  className="inline-flex items-center justify-center rounded px-1.5 py-0.5 font-bold text-white"
+                  style={{ backgroundColor: CRITERIA_COLOR }}
+                >
+                  G{index + 1}
+                </span>
+                <span className="text-gray-700">
+                  {criteriaLabels[criterion.key] || criterion.key}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div ref={chartContainerRef} className="w-full">
           <svg
             ref={svgRef}

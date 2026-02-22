@@ -45,6 +45,17 @@ export const KpiGroupVariationCharts: React.FC<
     labs.map((l) => l.id),
   );
 
+  const normalizeTransportMode = (mode?: string | null): string | null => {
+    if (!mode) return null;
+    const trimmed = mode.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  };
+
+  const buildKpiModeKey = (kpiId: string, mode?: string | null): string => {
+    const normalizedMode = normalizeTransportMode(mode);
+    return normalizedMode ? `${kpiId}__${normalizedMode}` : kpiId;
+  };
+
   const chartsByName = new Map<string, KpiVariationChartData>();
   chartsByName.set(`Variation per Lab for all KPIs in ${groupName} group`, {
     labs,
@@ -68,31 +79,54 @@ export const KpiGroupVariationCharts: React.FC<
     ],
   });
 
-  const uniqueParentKpiIds = new Set<string>();
+  const chartGroups = new Map<
+    string,
+    {
+      parentName: string;
+      transportMode: string | null;
+      kpis: IKpiVariation[];
+    }
+  >();
+
   globalKpiVariations.forEach((kpi) => {
     const parentId = kpi.kpiParentId ?? kpi.kpiId;
-    uniqueParentKpiIds.add(parentId);
+    const parentName = kpi.kpiParentName ?? kpi.kpiName ?? "Unnamed KPI";
+    const transportMode = normalizeTransportMode(kpi.transportModeName);
+    const groupKey = `${parentId}__${transportMode ?? "no-mode"}`;
+
+    if (!chartGroups.has(groupKey)) {
+      chartGroups.set(groupKey, {
+        parentName,
+        transportMode,
+        kpis: [],
+      });
+    }
+
+    chartGroups.get(groupKey)!.kpis.push(kpi);
   });
 
-  uniqueParentKpiIds.forEach((parentKpiId) => {
-    const kpisForParent = globalKpiVariations.filter((kpi) => {
-      // const pid = kpi.kpiParentId ?? kpi.kpiId;
-      return [kpi.kpiParentId, kpi.kpiId].includes(parentKpiId);
-    });
-
+  chartGroups.forEach((group) => {
     const kpiMap = new Map<string, IKpiVariation>();
-    for (const kpi of kpisForParent) {
-      if (!kpiMap.has(kpi.kpiId)) {
-        kpiMap.set(kpi.kpiId, kpi);
+    for (const kpi of group.kpis) {
+      const kpiModeKey = buildKpiModeKey(kpi.kpiId, kpi.transportModeName);
+      if (!kpiMap.has(kpiModeKey)) {
+        kpiMap.set(kpiModeKey, kpi);
       }
     }
 
     const kpis = Array.from(kpiMap.values())
       .map((globalKpi) => {
-        // Build variation by lab for this KPI
+        const globalMode = normalizeTransportMode(globalKpi.transportModeName);
+
+        // Build variation by lab for this KPI and transport mode
         const byLab: Record<string, number> = {};
         for (const lab of livingLabVariations) {
-          const labKpi = lab.kpis.find((k) => k.kpiId === globalKpi.kpiId);
+          const labKpi = lab.kpis.find(
+            (k) =>
+              k.kpiId === globalKpi.kpiId &&
+              normalizeTransportMode(k.transportModeName) === globalMode,
+          );
+
           byLab[lab.labId] = toPercent(
             labKpi?.ratioVariation,
             labKpi?.ratioVariationPercentage,
@@ -100,7 +134,7 @@ export const KpiGroupVariationCharts: React.FC<
         }
 
         return {
-          id: globalKpi.kpiId,
+          id: buildKpiModeKey(globalKpi.kpiId, globalKpi.transportModeName),
           name: globalKpi.kpiName,
           variation: {
             global: toPercent(
@@ -113,11 +147,11 @@ export const KpiGroupVariationCharts: React.FC<
       })
       .sort((a, b) => a.name.localeCompare(b.name));
 
-    const parentKpiName =
-      kpisForParent[0]?.kpiParentName ??
-      kpisForParent[0]?.kpiName ??
-      "Unnamed KPI";
-    chartsByName.set(parentKpiName, { labs, kpis });
+    const chartTitle = group.transportMode
+      ? `${group.parentName} (${group.transportMode})`
+      : group.parentName;
+
+    chartsByName.set(chartTitle, { labs, kpis });
   });
 
   //actions
@@ -169,7 +203,6 @@ export const KpiGroupVariationCharts: React.FC<
                 color={isSelected ? "primary" : "light"}
                 className="cursor-pointer border transition-all hover:shadow-md"
                 onClick={() => toggleLab(lab.id)}
-                title={lab.name}
               >
                 {displayName}
               </Badge>
@@ -187,7 +220,9 @@ export const KpiGroupVariationCharts: React.FC<
                 data={data}
                 selectedLabIds={selectedLabIds}
               />
-              <h3 className="text-center">Variations per KPI in {groupName} group</h3>
+              <h3 className="text-center">
+                Variations per KPI in {groupName} group
+              </h3>
             </div>
           ) : (
             <KpiVariationChart

@@ -26,7 +26,7 @@ export const GoalWeightBar: React.FC<GoalWeightBarProps> = ({
     <div className="flex flex-col gap-2 py-2">
       <div className="w-full flex items-center justify-between">
         {/* Goal Name */}
-        <span className="font-medium text-gray-900 text-left">{goal.name}</span>
+        <span className="font-medium text-gray-900 text-left capitalize">{goal.name}</span>
         {/* Percentage Label */}
         <span className="text-sm font-semibold text-gray-700 tabular-nums">
           {percentage}%

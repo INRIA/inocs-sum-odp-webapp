@@ -129,81 +129,8 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
         </div>
       </div>
 
-      {/* Top Impactful Measures */}
-      <div className="mt-8">
-        <div className="flex items-center gap-3 mb-4">
-          <svg
-            className="w-8 h-8 text-secondary"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
-          <h3>
-            High contribution measures to <strong>{selectedGroup.name}</strong>{" "}
-            KPIs
-          </h3>
-        </div>
-        <p className="text-dark mb-4">
-          Top {topMeasures.length} measures estimated to have contributed the
-          most positively to KPI improvements
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {topMeasures.map((measure, index) => (
-            <MeasureImpactCard
-              key={measure.id}
-              measure={measure}
-              rank={index + 1}
-              size="large"
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Bottom Impactful Measures */}
-      <div className="mt-8">
-        <div className="flex items-center gap-3 mb-4">
-          <svg
-            className="w-8 h-8 text-danger"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z"
-              clipRule="evenodd"
-            />
-          </svg>
-          <h3>
-            Low contribution measures to <strong>{selectedGroup.name}</strong>{" "}
-            KPIs
-          </h3>
-        </div>
-        <p className="text-dark mb-4">
-          Bottom {bottomMeasures.length} policy measures estimated to have
-          contributed negatively or had adverse effects
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {bottomMeasures.map((measure, index) => (
-            <MeasureImpactCard
-              key={measure.id}
-              measure={measure}
-              rank={measures.length - bottomMeasures.length + index + 1}
-              size="small"
-            />
-          ))}
-        </div>
-      </div>
-
       {/* Horizontal Bar Chart */}
       <div className="mt-12">
-        <h3 className="text-2xl font-bold text-dark mb-2">
-          Complete Measures Analysis
-        </h3>
         <p className="text-dark mb-6">
           Comprehensive view of all {measures.length} measures ranked by their
           contribution coefficient. Hover over bars to see detailed information
@@ -244,6 +171,76 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
           </li>
         </ul>
       </InfoAlert>
+
+      {/* Top Impactful Measures */}
+      <div className="mt-8">
+        <div className="flex items-center gap-3 mb-4">
+          <svg
+            className="w-8 h-8 text-secondary"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fillRule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <h3>
+            High contribution measures to <strong>{selectedGroup.name}</strong>{" "}
+            KPIs
+          </h3>
+        </div>
+        <p className="text-dark mb-4">
+          Top {topMeasures.length} measures estimated to have contributed the
+          most positively to KPI improvements
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {topMeasures.map((measure, index) => (
+            <MeasureImpactCard
+              key={measure.id}
+              measure={measure}
+              rank={index + 1}
+              size="small"
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Bottom Impactful Measures */}
+      <div className="mt-8">
+        <div className="flex items-center gap-3 mb-4">
+          <svg
+            className="w-8 h-8 text-danger"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fillRule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <h3>
+            Low contribution measures to <strong>{selectedGroup.name}</strong>{" "}
+            KPIs
+          </h3>
+        </div>
+        <p className="text-dark mb-4">
+          Bottom {bottomMeasures.length} policy measures estimated to have
+          contributed negatively or had adverse effects
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {bottomMeasures.map((measure, index) => (
+            <MeasureImpactCard
+              key={measure.id}
+              measure={measure}
+              rank={measures.length - bottomMeasures.length + index + 1}
+              size="small"
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

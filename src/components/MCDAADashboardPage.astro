@@ -21,7 +21,7 @@ import {
   MCDA_PERSPECTIVES,
   resolveMcdaPerspectiveLabel,
 } from "../lib/helpers";
-import { InfoAlert, InfoCard, RButton } from "./react";
+import { FAQAccordion, InfoAlert, InfoCard, RButton } from "./react";
 
 const { perspective, breadcrumbs, backHref } = Astro.props;
 const api = new ApiClient(Astro.request);
@@ -38,7 +38,9 @@ if (perspective) {
     pageBreadcrumbs.push({
       label: resolveMcdaPerspectiveLabel(perspective, MCDA_PERSPECTIVES),
     });
-    const latestRun = await api.getLatestJobRun(`mcda_analysis_${perspective}`);
+    const latestRun = await api.getLatestJobRun(
+      `mcda_analysis_qualitative_${perspective}`,
+    );
 
     if (latestRun) {
       formattedDate = formatDateWithTime(latestRun.created_at);
@@ -108,6 +110,39 @@ const howToUseSteps = [
       "Examine the PROMETHEE scores, rankings, and GAIA plane visualization to understand trade-offs and recommendations.",
   },
 ];
+
+const methodologyQuestions = [
+  {
+    question: "What is PROMETHEE?",
+    answer: `PROMETHEE (Preference Ranking Organisation METHod for Enrichment
+              Evaluations) is a Multi-Criteria Decision Analysis (MCDA) method
+              used to evaluate and rank alternatives when multiple, and sometimes conflicting, criteria must be considered simultaneously.
+              It handles both quantitative data (e.g. costs, travel times) and qualitative
+              factors (e.g. environmental impact, social acceptability), making it
+              well-suited for complex decisions like urban transport policy evaluation.
+              It also incorporates the diverse perspectives of multiple stakeholders
+              (citizens, businesses, public authorities) by building preference relations
+              between alternatives based on how each group values the criteria.`,
+  },
+  {
+    question: "What is GAIA?",
+    answer: `GAIA (Graphical Analysis for Interactive Assistance) is the
+              visual, interactive companion to PROMETHEE. It displays evaluation
+              results graphically on a GAIA plane, mapping both the policy
+              alternatives and the evaluation criteria together. This visual
+              representation helps stakeholders (regardless of their technical
+              background) better understand the analysis, communicate results,
+              and identify trade-offs and areas where preferences converge or
+              conflict.`,
+  },
+  {
+    question: "How to read the PROMETHEE-GAIA results?",
+    answer: `PROMETHEE-GAIA results combine two complementary outputs: PROMETHEE and GAIA.
+              Together, they allow users to quickly identify the strongest
+              policy options, understand key trade-offs, and assess the overall
+              robustness and consensus behind the recommended solutions.`,
+  },
+];
 ---
 
 <Layout role="visitor" breadcrumbs={pageBreadcrumbs} backHref={backHref}>
@@ -141,76 +176,20 @@ const howToUseSteps = [
     >
       <!-- How to Use Guide -->
       <HowToUseAccordion
-        title="How to use this tool"
+        title="How to use this tool ?"
         subtitle="3 simple steps to get started"
         steps={howToUseSteps}
       />
 
       <!-- Methodology -->
       <MethodologyAccordion
-        title="Understanding the Methodology"
+        title="Understanding the methodology"
         subtitle="Multi-criteria decision analysis approach with PROMETHEE and GAIA visualization"
         content=""
       >
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
-          <InfoAlert title="What is PROMETHEE?" variant="question">
-            <p>
-              PROMETHEE (Preference Ranking Organisation METHod for Enrichment
-              Evaluations) is a Multi-Criteria Decision Analysis (MCDA) method
-              used to evaluate and rank alternatives when multiple, <i
-                >and sometimes conflicting,</i
-              > criteria must be considered simultaneously. <br />
-              It handles both quantitative data (e.g. costs, travel times) and qualitative
-              factors (e.g. environmental impact, social acceptability), making it
-              well-suited for complex decisions like urban transport policy evaluation.
-              It also incorporates the diverse perspectives of multiple stakeholders
-              (citizens, businesses, public authorities) by building preference relations
-              between alternatives based on how each group values the criteria.
-            </p>
-          </InfoAlert>
-          <InfoAlert title="What is GAIA?" variant="question">
-            <p>
-              GAIA (Graphical Analysis for Interactive Assistance) is the
-              visual, interactive companion to PROMETHEE. It displays evaluation
-              results graphically on a GAIA plane, mapping both the policy
-              alternatives and the evaluation criteria together. This visual
-              representation helps stakeholders — regardless of their technical
-              background — better understand the analysis, communicate results,
-              and identify trade-offs and areas where preferences converge or
-              conflict.
-            </p>
-          </InfoAlert>
-          <InfoAlert
-            title="How to read the PROMETHEE-GAIA results?"
-            className=""
-            variant="question"
-          >
-            <p>
-              PROMETHEE-GAIA results combine two complementary outputs:
-              <ul class="list-disc list-inside my-2">
-                <li class="text-sm">
-                  PROMETHEE provides a ranked order of alternatives, reflecting
-                  how well each performs across all weighted criteria and
-                  stakeholder preferences.
-                </li>
-                <li class="text-sm">
-                  The GAIA plane visually maps these alternatives alongside the
-                  criteria, revealing which policies excel in specific areas and
-                  where tensions between different objectives lie.
-                </li>
-              </ul>
-            </p>
-            <p>
-              Together, they allow users to quickly identify the strongest
-              policy options, understand key trade-offs, and assess the overall
-              robustness and consensus behind the recommended solutions.
-            </p>
-          </InfoAlert>
-          <InfoAlert
-            title="Pro tip for interpretation"
-            className="md:col-span-2"
-            variant="success"
-          >
+        <div class="grid grid-cols-1 gap-3 mt-2">
+          <FAQAccordion questions={methodologyQuestions} client:load />
+          <InfoAlert title="Pro tip for interpretation" variant="success">
             <p>
               Compare results across different perspectives to identify measures
               that work well for multiple stakeholders.
@@ -268,6 +247,50 @@ const howToUseSteps = [
               these surveys, which were conducted between 2025 and 2026.
             </p>
           </div>
+        </div>
+      </MethodologyAccordion>
+
+      <MethodologyAccordion
+        title="How to interpret the results ?"
+        subtitle="Understanding Multi-Criteria Analysis outputs and model accuracy"
+        content=""
+      >
+        <p class="mb-4">
+          PROMETHEE-GAIA results combine two complementary outputs that work
+          together to support decision-making. PROMETHEE produces a ranked order
+          of the transport policy alternatives, reflecting how each city's
+          interventions perform across all weighted criteria and stakeholder
+          perspectives. A higher rank indicates a policy that better satisfies
+          the overall set of criteria as valued by the stakeholders involved.
+          The GAIA plane then brings a visual dimension to these rankings,
+          mapping both the policy alternatives and the evaluation criteria onto
+          a two-dimensional graph. On this plane, criteria pointing in similar
+          directions indicate aligned objectives, while criteria pointing in
+          opposite directions reveal trade-offs. Policies positioned close to a
+          criterion's axis perform well on that specific criterion. A decision
+          axis summarizes the overall PROMETHEE ranking direction, helping users
+          quickly identify the most globally preferred alternatives.
+        </p>
+        <p class="mb-6">Together, these two outputs allow users to:</p>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <InfoCard
+            title="Rank Alternatives"
+            description="Compare transport policies based on their overall performance across all criteria and stakeholder groups"
+            showIcon={false}
+            textAlign="center"
+          />
+          <InfoCard
+            title="Identify Trade-offs"
+            description="Spot tensions between competing objectives (e.g. cost reduction vs. environmental impact) that cannot be simultaneously optimized"
+            showIcon={false}
+            textAlign="center"
+          />
+          <InfoCard
+            title="Explore Consensus"
+            description="Identify areas where different stakeholders' preferences align, supporting more inclusive and robust decision-making"
+            showIcon={false}
+            textAlign="center"
+          />
         </div>
       </MethodologyAccordion>
     </section>

@@ -252,7 +252,7 @@ export function calculateKpiVariationsData(
         kpiName: kpiDef.name,
         kpiParentId: kpiDef.parent_kpi_id || null,
         kpiParentName: kpiDef.parent_kpi_name || null,
-        transportModeName: kpiDef.transport_mode_name,
+        transportModeName: kpi.transport_mode_name,
         ratioVariation: kpi.ratio_variation,
         ratioVariationPercentage: ratioToPercentage(kpi.ratio_variation),
         absVariation: kpi.abs_variation,

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid";
 
 interface Section {
   id: string;
@@ -18,6 +19,7 @@ export const PageNavigation: React.FC<PageNavigationProps> = ({
   disclaimer,
 }) => {
   const [activeSection, setActiveSection] = useState<string>(sections[0]?.id);
+  const [isDisclaimerOpen, setIsDisclaimerOpen] = useState(true);
 
   useEffect(() => {
     // Create Intersection Observer to track which section is visible
@@ -121,9 +123,32 @@ export const PageNavigation: React.FC<PageNavigationProps> = ({
 
       {/* Disclaimer Text */}
       {disclaimer && (
-        <div className="bg-warning rounded-lg shadow-lg border border-gray-200 px-4 py-2 w-11/12 md:w-5/6">
-          <p className="hidden lg:block italic text-white">{disclaimer}</p>
-          <small className="lg:hidden italic text-white">{disclaimer}</small>
+        <div className="flex flex-col items-end gap-1">
+          <button
+            type="button"
+            aria-label={isDisclaimerOpen ? "Hide disclaimer" : "Show disclaimer"}
+            onClick={() => setIsDisclaimerOpen((prev) => !prev)}
+            className="flex items-center gap-1 rounded-full bg-warning px-2 py-1 text-xs font-medium text-white shadow hover:bg-warning/90 transition-colors"
+          >
+            {isDisclaimerOpen ? (
+              <>
+                <ChevronDownIcon className="h-3 w-3" />
+                <span className="hidden md:inline">Close disclaimer</span>
+              </>
+            ) : (
+              <>
+                <ChevronUpIcon className="h-3 w-3" />
+                <span className="hidden md:inline">Read disclaimer</span>
+              </>
+            )}
+          </button>
+
+          {isDisclaimerOpen && (
+            <div className="bg-warning rounded-lg shadow-lg border border-gray-200 px-4 py-2 w-11/12 md:w-5/6">
+              <p className="hidden lg:block italic text-white">{disclaimer}</p>
+              <small className="lg:hidden italic text-white">{disclaimer}</small>
+            </div>
+          )}
         </div>
       )}
     </div>

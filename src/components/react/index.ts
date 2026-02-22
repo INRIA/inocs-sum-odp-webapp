@@ -15,6 +15,7 @@ export * from "./TransportTypeBadge";
 export * from "./LivingLabsMapSection";
 export * from "./MapViewer";
 export * from "./LivingLabMeasures";
+export * from "./KpisFrameworkDiagram";
 export * from "./KpiCards";
 export * from "./ImpactAnalysis";
 export * from "./KPIsDashboard";

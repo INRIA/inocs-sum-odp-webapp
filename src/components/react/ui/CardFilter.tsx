@@ -77,7 +77,7 @@ function getGroupIcon(groupName: string): string {
   if (name.includes("provider") || name.includes("kpi provider")) {
     return "📊";
   }
-  if (name.includes("environment")) {
+  if (name.includes("environment") || name.includes("emission") || name.includes("sustainabl")) {
     return "♻️";
   }
   if (name.includes("maaS") || name.includes("service")) {

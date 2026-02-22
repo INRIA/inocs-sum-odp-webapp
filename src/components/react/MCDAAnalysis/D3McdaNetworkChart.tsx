@@ -17,12 +17,20 @@ interface D3McdaNetworkChartProps {
   height?: number;
 }
 
+interface TooltipEdgeData {
+  sourceId: string;
+  sourceLabel: string;
+  targetId: string;
+  targetLabel: string;
+  weight: number;
+}
+
 interface TooltipData {
   type: "node" | "edge";
   clientX: number;
   clientY: number;
   node?: OutrankingGraphNode;
-  edge?: OutrankingGraphEdge;
+  edge?: TooltipEdgeData;
 }
 
 type SensitivityLevelId = "all" | "moderate" | "significant" | "strong";
@@ -202,9 +210,17 @@ export const D3McdaNetworkChart: React.FC<D3McdaNetworkChartProps> = ({
       .style("cursor", "pointer")
       .on("mouseenter", function (event, d) {
         d3.select(this).attr("stroke-opacity", 1).attr("stroke-width", 5);
+        const sourceNode = d.source as SimulationNode;
+        const targetNode = d.target as SimulationNode;
         setTooltip({
           type: "edge",
-          edge: d,
+          edge: {
+            sourceId: sourceNode.id,
+            sourceLabel: sourceNode.label,
+            targetId: targetNode.id,
+            targetLabel: targetNode.label,
+            weight: d.weight,
+          },
           clientX: event.clientX,
           clientY: event.clientY,
         });
@@ -441,10 +457,19 @@ export const D3McdaNetworkChart: React.FC<D3McdaNetworkChartProps> = ({
             <>
               <div className="mb-1 font-bold">Outranking relation</div>
               <div className="text-xs text-dark">
-                {tooltip.edge?.source?.toUpperCase()} →{" "}
-                {tooltip.edge?.target?.toUpperCase()}
+                <span className="font-medium">
+                  {tooltip.edge.sourceId.toUpperCase()}
+                </span>{" "}
+                {tooltip.edge.sourceLabel && `(${tooltip.edge.sourceLabel})`}
               </div>
+              <div className="my-1 text-xs text-gray-400">↓ outranks</div>
               <div className="text-xs text-dark">
+                <span className="font-medium">
+                  {tooltip.edge.targetId.toUpperCase()}
+                </span>{" "}
+                {tooltip.edge.targetLabel && `(${tooltip.edge.targetLabel})`}
+              </div>
+              <div className="mt-2 text-xs text-dark">
                 Strength: {tooltip.edge.weight.toFixed(3)}
               </div>
             </>

@@ -38,7 +38,7 @@
     "id": 6,
     "name": "Walking",
     "description": "Pedestrian travel for short distances; zero-emission active mode.",
-    "type": "OTHER",
+    "type": "NSM",
     "color": "#DADADA"
   },
   {

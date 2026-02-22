@@ -102,10 +102,10 @@ export const D3McdaNetFlowsChart: React.FC<D3McdaNetFlowsChartProps> = ({
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove(); // Clear previous render
 
-    // Adjust margins based on screen size - more left margin on desktop for full labels
+    // Left margin gives room for the key label (A1, A2…) on both mobile and desktop
     const margin = isMobile
       ? { top: 40, right: 20, bottom: 60, left: 50 }
-      : { top: 40, right: 40, bottom: 60, left: 0 };
+      : { top: 40, right: 40, bottom: 60, left: 50 };
     const width = dimensions.width - margin.left - margin.right;
     const chartHeight = dimensions.height - margin.top - margin.bottom;
 
@@ -283,24 +283,15 @@ export const D3McdaNetFlowsChart: React.FC<D3McdaNetFlowsChartProps> = ({
       .enter()
       .append("text")
       .attr("class", "alternative-label")
-      .attr("x", isMobile ? -20 : 0)
+      .attr("x", -8)
       .attr("y", (d) => (yScale(d.label) || 0) + yScale.bandwidth() / 2)
       .attr("dy", "0.35em")
       .attr("text-anchor", "end")
       .attr("fill", COLOR_GRAY)
-      .attr("font-size", isMobile ? "11px" : "13px")
-      .attr("font-weight", "600")
+      .attr("font-size", isMobile ? "11px" : "12px")
+      .attr("font-weight", "700")
       .attr("cursor", "pointer")
-      .text((d) => {
-        // On mobile, show only key (A1, A2, etc.)
-        if (isMobile) {
-          return d.key.toUpperCase();
-        }
-        // On desktop, show truncated label
-        return "";
-        const text = d.label;
-        return text.length > 30 ? text.substring(0, 27) + "..." : text;
-      })
+      .text((d) => d.key.toUpperCase())
       .on("mouseenter", function (event, d) {
         d3.select(this).attr("fill", COLOR_LIGHT_BLUE);
         setTooltip({
