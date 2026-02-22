@@ -31,7 +31,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           {title}
         </h4>
         <div className="flex flex-row justify-between items-center  mb-4">
-          <h3 className=" text-secondary text-left">{value}</h3>
+          <h3 className="text-secondary text-left whitespace-pre-line">{value}</h3>
           <div
             className={`text-sm font-medium text-gray-700 ${
               progress > 50 ? "text-success" : "text-warning"

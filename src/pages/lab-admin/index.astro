@@ -72,27 +72,6 @@ const stepsCTA = [
     details: labInfoProgress.details,
   },
   {
-    id: "modal-split-before",
-    title: "Modal split (before)",
-    description: "",
-    ctaLabel: "Edit modal split",
-    ctaLink: getUrl("/lab-admin/modal-split"),
-    progress: modalSplitBeforeProgress.progress,
-    value: modalSplitBeforeProgress.value,
-    details: modalSplitBeforeProgress.details,
-  },
-  {
-    id: "kpis-before",
-    title: "Baseline KPIs (before)",
-    description: "",
-    ctaLabel: "Edit KPIs",
-    ctaLink: getUrl("/lab-admin/kpis"),
-    progress: kpisBeforeProgress.progress,
-    value: kpisBeforeProgress.value,
-    details: kpisBeforeProgress.details,
-  },
-
-  {
     id: "measures",
     title: "Measures implemented",
     description: "",
@@ -103,24 +82,44 @@ const stepsCTA = [
     details: measuresProgress.details,
   },
   {
-    id: "modal-split-after",
-    title: "Modal split (after)",
+    id: "modal-split-before",
+    title: "Modal split (before)",
     description: "",
     ctaLabel: "Edit modal split",
     ctaLink: getUrl("/lab-admin/modal-split"),
-    progress: modalSplitAfterProgress.progress,
-    value: modalSplitAfterProgress.value,
-    details: modalSplitAfterProgress.details,
+    progress:
+      (modalSplitBeforeProgress.progress + modalSplitAfterProgress.progress) /
+      2,
+    value: `${modalSplitBeforeProgress.value} baseline modal split \n ${modalSplitAfterProgress.value} 2nd round modal split`,
+    details: [
+      ...(modalSplitBeforeProgress.details?.map((d) => ({
+        ...d,
+        label: `Baseline ${d.label}`,
+      })) ?? []),
+      ...(modalSplitAfterProgress.details?.map((d) => ({
+        ...d,
+        label: `2nd round ${d.label}`,
+      })) ?? []),
+    ],
   },
   {
     id: "kpis-before",
-    title: "KPIs (after)",
+    title: "Baseline KPIs (before)",
     description: "",
     ctaLabel: "Edit KPIs",
     ctaLink: getUrl("/lab-admin/kpis"),
-    progress: kpisAfterProgress.progress,
-    value: kpisAfterProgress.value,
-    details: kpisAfterProgress.details,
+    progress: (kpisBeforeProgress.progress + kpisAfterProgress.progress) / 2,
+    value: `${kpisBeforeProgress.value} baseline KPIs \n ${kpisAfterProgress.value} 2nd round KPIs`,
+    details: [
+      ...(kpisBeforeProgress.details?.map((d) => ({
+        ...d,
+        label: `Baseline ${d.label}`,
+      })) ?? []),
+      ...(kpisAfterProgress.details?.map((d) => ({
+        ...d,
+        label: `2nd round ${d.label}`,
+      })) ?? []),
+    ],
   },
 ];
 ---
@@ -150,9 +149,7 @@ const stepsCTA = [
 
       <div class="grid gap-10 grid-cols-1">
         <h3 class="text-center">Manage living lab data</h3>
-        <div
-          class="grid gap-2 lg:gap-10 grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
-        >
+        <div class="grid gap-2 lg:gap-10 grid-cols-1 md:grid-cols-2">
           {
             stepsCTA.map((step, i) => (
               <TaskCard

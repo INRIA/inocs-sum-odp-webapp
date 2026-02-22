@@ -9,12 +9,63 @@ interface Props {
   title: string;
   subtitle: string;
   steps: Step[];
+  vertical?: boolean;
 }
 
-const { title, subtitle, steps } = Astro.props;
+const { title, subtitle, steps, vertical = false } = Astro.props;
 ---
 
-<details class="group mb-12">
+{vertical && (
+  <div class="mb-8">
+    <div class="bg-white rounded-xl p-6 border border-gray-200">
+      <div class="flex items-center gap-3">
+        <div class="p-2 bg-light rounded-lg text-info">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="w-6 h-6"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-xl font-bold text-gray-900">{title}</h3>
+          <p class="text-sm text-gray-500">{subtitle}</p>
+        </div>
+      </div>
+    </div>
+    <div class="bg-info/5 rounded-b-xl p-8 border-x border-b border-gray-200">
+      <div class="relative flex flex-col gap-6">
+        <div
+          class="hidden md:block absolute left-8 w-0.5 bg-linear-to-b from-blue-200 via-indigo-200 to-violet-200"
+          style="top: 32px; bottom: 32px;"
+        />
+        {
+          steps.map((step) => (
+            <div class="relative flex items-start gap-6">
+              <div class="relative z-10 shrink-0 flex items-center justify-center w-16 h-16 bg-primary/90 text-white rounded-2xl font-bold text-xl shadow-lg">
+                {step.number}
+              </div>
+              <div class="pt-3">
+                <h4 class="font-semibold text-gray-900 mb-1">{step.title}</h4>
+                <p class="text-sm text-gray-600 leading-relaxed">{step.description}</p>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+)}
+
+{!vertical && <details class="group mb-12">
   <summary
     class="cursor-pointer bg-white from-slate-50 to-blue-50 rounded-xl p-6 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 list-none group-open:bg-info/10"
   >
@@ -69,7 +120,7 @@ const { title, subtitle, steps } = Astro.props;
     <div class="grid md:grid-cols-3 gap-8 relative">
       <!-- Connection Line (hidden on mobile) -->
       <div
-        class="hidden md:block absolute top-8 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-200 via-indigo-200 to-violet-200"
+        class="hidden md:block absolute top-8 left-0 right-0 h-0.5 bg-linear-to-r from-blue-200 via-indigo-200 to-violet-200"
         style="margin: 0 12%;"
       >
       </div>
@@ -93,4 +144,4 @@ const { title, subtitle, steps } = Astro.props;
       }
     </div>
   </div>
-</details>
+</details>}

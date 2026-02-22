@@ -1,31 +1,112 @@
 ---
+import { Badge } from "../react/ui";
+
+type IconComponent = any;
+
 interface Feature {
-  icon: string;
+  icon?: string;
+  iconComponent?: IconComponent;
   title: string;
   description: string;
+  badge?: {
+    label: string;
+    color?: string;
+    className?: string;
+  };
+  ctas?: {
+    label: string;
+    href?: string;
+    variant?: "primary" | "secondary";
+    iconComponent?: IconComponent;
+    download?: boolean;
+    target?: string;
+    rel?: string;
+    className?: string;
+  }[];
 }
 
 interface Props {
   features: Feature[];
+  columns?: 1 | 2 | 3 | 4;
+  className?: string;
 }
 
-const { features } = Astro.props;
+const { features, columns = 3, className = "" } = Astro.props;
+
+const gridColsClass =
+  columns === 1
+    ? "md:grid-cols-1"
+    : columns === 2
+      ? "md:grid-cols-2"
+      : columns === 4
+        ? "md:grid-cols-2 lg:grid-cols-4"
+        : "md:grid-cols-3";
+
+const ctaClassByVariant = {
+  primary:
+    "rounded-md bg-secondary px-3.5 py-2.5 text-sm font-semibold text-primary shadow-xs hover:bg-primary-light",
+  secondary:
+    "rounded-md border border-secondary px-3.5 py-2.5 text-sm font-semibold shadow-xs hover:bg-primary-light",
+};
 ---
 
-<div class="grid md:grid-cols-3 gap-6 mb-12">
+<div class={`grid gap-6 mb-12 ${gridColsClass} ${className}`}>
   {
-    features.map((feature) => (
-      <div class="group relative bg-white rounded-xl p-6 shadow-sm border-l-4 border-warning/30 transition-all duration-300">
-        <div class="flex items-start gap-4 mb-3">
-          <div class="p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg text-warning transition-transform duration-300">
-            <Fragment set:html={feature.icon} />
+    features.map((feature) => {
+      const FeatureIcon = feature.iconComponent;
+
+      return (
+        <div class="group relative bg-white rounded-xl p-6 shadow-sm border-l-4 border-warning/30 transition-all duration-300">
+          <div class="flex items-start gap-4 mb-3">
+            <div class="p-3 bg-linear-to-br from-blue-50 to-blue-100 rounded-lg text-warning transition-transform duration-300">
+              {FeatureIcon ? (
+                <FeatureIcon className="w-6 h-6" />
+              ) : feature.icon ? (
+                <Fragment set:html={feature.icon} />
+              ) : null}
+            </div>
+            <div class="flex-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <h6>{feature.title}</h6>
+                {feature.badge && (
+                  <Badge
+                    size="sm"
+                    color={(feature.badge.color ?? "light") as any}
+                    className={feature.badge.className ?? ""}
+                  >
+                    {feature.badge.label}
+                  </Badge>
+                )}
+              </div>
+            </div>
           </div>
-          <h6>{feature.title}</h6>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            {feature.description}
+          </p>
+
+          {feature.ctas && feature.ctas.length > 0 && (
+            <div class="mt-4 flex flex-wrap gap-2 justify-center">
+              {feature.ctas.map((cta) => {
+                const CtaIcon = cta.iconComponent;
+                const ctaClass = ctaClassByVariant[cta.variant ?? "secondary"];
+
+                return (
+                  <a
+                    href={cta.href}
+                    target={cta.target}
+                    rel={cta.rel}
+                    download={cta.download}
+                    class={`inline-flex items-center gap-1.5 ${ctaClass} ${cta.className ?? ""}`}
+                  >
+                    {cta.label}
+                    {CtaIcon && <CtaIcon className="w-4 h-4" />}
+                  </a>
+                );
+              })}
+            </div>
+          )}
         </div>
-        <p class="text-sm text-gray-600 leading-relaxed">
-          {feature.description}
-        </p>
-      </div>
-    ))
+      );
+    })
   }
 </div>

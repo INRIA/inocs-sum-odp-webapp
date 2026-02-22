@@ -51,8 +51,8 @@ const variantClasses: Record<
   warning: {
     bg: "bg-warning/50",
     border: "border-orange-200",
-    text: "text-warning",
-    buttonBg: "border-warning hover:border-warning/90 text-primary",
+    text: "text-dark",
+    buttonBg: "border-warning hover:border-warning/90 text-dark",
   },
   danger: {
     bg: "bg-danger/50",
@@ -111,11 +111,11 @@ export function InfoAlert({
 
         <div className="flex-1 gap-0">
           {title && <h6 className={`${v.text}`}>{title}</h6>}
-          <p className={`${v.text}`}>{children}</p>
+          <div className={`${v.text}`}>{children}</div>
         </div>
 
         {actionText && (
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <RButton
               variant="link"
               onClick={onAction}
