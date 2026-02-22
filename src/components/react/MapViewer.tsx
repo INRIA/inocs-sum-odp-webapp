@@ -18,6 +18,8 @@ type Props = {
   className?: string;
   scrollWheelZoom?: boolean;
   onMarkerClick?: (m: MarkerData) => void;
+  onMapClick?: (lat: number, lng: number) => void;
+  onMarkerDrag?: (markerId: string, lat: number, lng: number) => void;
 };
 
 export function MapViewer({
@@ -27,6 +29,8 @@ export function MapViewer({
   className = "h-full w-full",
   scrollWheelZoom = false,
   onMarkerClick,
+  onMapClick,
+  onMarkerDrag,
 }: Props) {
   const [leafletComponents, setLeafletComponents] = useState<any | null>(null);
   const [markersState, setMarkersState] = useState<MarkerData[]>(markers);
@@ -67,8 +71,19 @@ export function MapViewer({
     );
   }
 
-  const { MapContainer, TileLayer, Marker, Circle, Popup } =
+  const { MapContainer, TileLayer, Marker, Circle, Popup, useMapEvents } =
     leafletComponents as any;
+
+  function MapClickHandler() {
+    useMapEvents({
+      click(e: any) {
+        if (onMapClick) {
+          onMapClick(e.latlng.lat, e.latlng.lng);
+        }
+      },
+    });
+    return null;
+  }
 
   const createMarkerIcon = (color: string = COLOR_BLUE) =>
     leaflet.divIcon({
@@ -102,14 +117,23 @@ export function MapViewer({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
+      {onMapClick && <MapClickHandler />}
+
       {leaflet &&
         markersState?.map((m) => (
           <React.Fragment key={m.id}>
             <Marker
               position={[m.coordinates.lat, m.coordinates.lng]}
               icon={createMarkerIcon(m.color)}
+              draggable={!!onMarkerDrag}
               eventHandlers={{
                 click: () => onMarkerClick && onMarkerClick(m),
+                dragend: (e: any) => {
+                  if (onMarkerDrag) {
+                    const { lat, lng } = e.target.getLatLng();
+                    onMarkerDrag(m.id, lat, lng);
+                  }
+                },
               }}
             >
               {m.name && (

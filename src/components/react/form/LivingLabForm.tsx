@@ -21,12 +21,56 @@ export default function LivingLabForm({ livingLab }: Props) {
     `${livingLab?.population ?? ""}`,
   );
   const [errorMessage, setErrorMessage] = useState("");
+  const [isAreaManuallyEdited, setIsAreaManuallyEdited] = useState(false);
+  const [hasPlacedMarker, setHasPlacedMarker] = useState(
+    !!(livingLab?.lat && livingLab?.lng),
+  );
 
   const [mapMarker, setMapMarker] = useState<MarkerData | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>([50, 10]);
 
   // derive a key from center so MapViewer remounts whenever center changes
   const mapKey = mapCenter ? `${mapCenter[0]},${mapCenter[1]}` : "no-center";
+
+  function handleMapClick(lat: number, lng: number) {
+    const latStr = lat.toFixed(5);
+    const lngStr = lng.toFixed(5);
+    setLatitude(latStr);
+    setLongitude(lngStr);
+    setHasPlacedMarker(true);
+  }
+
+  function handleMarkerDrag(markerId: string, lat: number, lng: number) {
+    setLatitude(lat.toFixed(5));
+    setLongitude(lng.toFixed(5));
+  }
+
+  function calcAreaFromRadius(r: number): string {
+    return `${Math.round(Math.PI * r * r)}`;
+  }
+
+  function handleRadiusChange(value: string) {
+    setRadius(value);
+    if (!isAreaManuallyEdited) {
+      const r = parseFloat(value);
+      if (!isNaN(r) && r > 0) {
+        setArea(calcAreaFromRadius(r));
+      }
+    }
+  }
+
+  function handleAreaChange(value: string) {
+    setArea(value);
+    setIsAreaManuallyEdited(true);
+  }
+
+  function recalculateArea() {
+    setIsAreaManuallyEdited(false);
+    const r = parseFloat(radius);
+    if (!isNaN(r) && r > 0) {
+      setArea(calcAreaFromRadius(r));
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -117,7 +161,7 @@ export default function LivingLabForm({ livingLab }: Props) {
           <Input
             type="number"
             value={radius}
-            onChange={(e: any) => setRadius(e.target.value)}
+            onChange={(e: any) => handleRadiusChange(e.target.value)}
             placeholder="100"
           />
         </div>
@@ -128,9 +172,23 @@ export default function LivingLabForm({ livingLab }: Props) {
           <label className="block text-sm font-medium mb-1">Area</label>
           <Input
             value={area}
-            onChange={(e: any) => setArea(e.target.value)}
+            onChange={(e: any) => handleAreaChange(e.target.value)}
             placeholder="e.g. 120 km²"
           />
+          {!isAreaManuallyEdited && area && radius && (
+            <p className="text-xs text-gray-500 mt-1">
+              (auto-calculated from radius)
+            </p>
+          )}
+          {isAreaManuallyEdited && radius && (
+            <button
+              type="button"
+              onClick={recalculateArea}
+              className="text-xs text-blue-600 underline mt-1 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+            >
+              Recalculate from radius
+            </button>
+          )}
         </div>
 
         <div>
@@ -144,15 +202,83 @@ export default function LivingLabForm({ livingLab }: Props) {
         </div>
       </div>
 
-      <div className="h-[400px] rounded shadow ">
-        <MapViewer
-          key={mapKey}
-          markers={mapMarker ? [mapMarker] : []}
-          center={mapCenter}
-          zoom={9}
-          className="h-full w-full z-0"
-        />
+      <div className="flex flex-col lg:flex-row gap-4">
+        {/* Map with hint overlay */}
+        <div className="relative h-[400px] lg:flex-1 rounded shadow overflow-hidden">
+          <MapViewer
+            key={mapKey}
+            markers={mapMarker ? [mapMarker] : []}
+            center={mapCenter}
+            zoom={9}
+            className="h-full w-full z-0"
+            onMapClick={handleMapClick}
+            onMarkerDrag={handleMarkerDrag}
+          />
+          {!hasPlacedMarker && (
+            <div
+              className="absolute bottom-3 right-3 z-10 bg-white/90 text-xs rounded px-2 py-1 shadow pointer-events-none"
+              aria-label="Click to place marker, drag to move"
+            >
+              🖱 Click to place · Drag to move
+            </div>
+          )}
+        </div>
+
+        {/* Instruction panel */}
+        <div className="lg:w-64 bg-gray-50 rounded shadow p-4 text-sm space-y-4">
+          <p className="font-semibold text-gray-800">
+            How to set your Living Lab location
+          </p>
+          <div className="flex gap-2">
+            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
+              1
+            </span>
+            <div>
+              <p className="font-medium text-gray-700">Place your lab on the map</p>
+              <p className="text-gray-500 text-xs mt-0.5">
+                Click anywhere on the map to drop a marker. The latitude and
+                longitude fields will update automatically.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
+              2
+            </span>
+            <div>
+              <p className="font-medium text-gray-700">Fine-tune the position</p>
+              <p className="text-gray-500 text-xs mt-0.5">
+                Drag the marker to adjust the location precisely.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
+              3
+            </span>
+            <div>
+              <p className="font-medium text-gray-700">Set the activity radius</p>
+              <p className="text-gray-500 text-xs mt-0.5">
+                Enter the estimated radius (in km) of your lab's intervention
+                area. The circle on the map will update in real time.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
+              4
+            </span>
+            <div>
+              <p className="font-medium text-gray-700">Review the area</p>
+              <p className="text-gray-500 text-xs mt-0.5">
+                The area is automatically calculated from the radius. You can
+                edit it manually if needed.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
+
       {errorMessage && (
         <div className="text-red-600 text-sm font-medium">{errorMessage}</div>
       )}
