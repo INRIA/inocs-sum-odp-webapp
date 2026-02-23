@@ -1,9 +1,13 @@
 import { formatDateToMonthYear, getUrl } from "../../lib/helpers";
 import type { IProject } from "../../types";
-import { Tooltip } from "./ui";
-import { InfoCard } from "./ui/InfoCard";
+import {
+  ArrowLeftCircleIcon,
+  ArrowRightCircleIcon,
+  MapPinIcon,
+} from "@heroicons/react/20/solid";
+import type { ReactNode } from "react";
+import { ExpansionPanel, Tooltip } from "./ui";
 import { Badge } from "./ui/Badge";
-import { useState } from "react";
 
 type MobilityMeasuresProps = {
   pushMeasures?: IProject[];
@@ -16,6 +20,7 @@ type MobilityMeasuresProps = {
 
 type MeasuresSectionProps = {
   heading: string;
+  headingIcon?: ReactNode;
   smallText?: string;
   paragraph?: string;
   measures: IProject[];
@@ -23,6 +28,71 @@ type MeasuresSectionProps = {
   cols?: 1 | 2 | 4;
   style?: "card" | "list";
 };
+
+type LabInfo = {
+  key: string;
+  labName: string;
+  startDate?: string;
+  description?: string;
+};
+
+function getMeasureLabs(m: IProject): LabInfo[] {
+  const rawLabs =
+    m.living_lab_projects_implementation
+      ?.map((impl) => ({
+        key: `${m.id}-lab-${impl.lab?.name}`,
+        labName: impl?.lab?.name,
+        startDate: impl.start_at
+          ? formatDateToMonthYear(impl.start_at)
+          : undefined,
+        description: impl.description,
+      }))
+      .filter((n) => n?.labName) ?? [];
+
+  const uniqueByName = new Map<string, LabInfo>();
+  for (const lab of rawLabs) {
+    if (!lab.labName) continue;
+    if (!uniqueByName.has(lab.labName)) {
+      uniqueByName.set(lab.labName, {
+        key: lab.key,
+        labName: lab.labName,
+        startDate: lab.startDate,
+        description: lab.description ?? undefined,
+      });
+      continue;
+    }
+
+    const prev = uniqueByName.get(lab.labName)!;
+    uniqueByName.set(lab.labName, {
+      ...prev,
+      startDate: prev.startDate ?? lab.startDate,
+      description: prev.description ?? lab.description ?? undefined,
+    });
+  }
+
+  return Array.from(uniqueByName.values());
+}
+
+function CityBadges({ labs }: { labs: LabInfo[] }) {
+  if (labs.length === 0) return null;
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {labs.map((lab) => (
+        <Badge
+          key={lab.key}
+          size="sm"
+          color="light"
+          className="border px-2!"
+          inline={true}
+          icon={<MapPinIcon className="h-3 w-3" />}
+        >
+          {lab.labName}
+        </Badge>
+      ))}
+    </div>
+  );
+}
 
 function MeasureItem({
   m,
@@ -33,111 +103,87 @@ function MeasureItem({
   style: "card" | "list";
   hideDescription?: boolean;
 }) {
-  const [labDetails, setLabDetails] = useState<{
-    key: string;
-    startDate?: string;
-    description?: string;
-  }>();
-  const labs =
-    m.living_lab_projects_implementation
-      ?.map((impl) => ({
-        key: `${m.id}-lab-${impl.lab?.name}`,
-        labName: impl?.lab?.name,
-        startDate: impl.start_at
-          ? `Started by ${formatDateToMonthYear(impl.start_at)}`
-          : undefined,
-        description: impl.description,
-      }))
-      .filter((n) => n?.labName) ?? [];
+  const labs = getMeasureLabs(m);
+  const labsWithDetails = labs.filter((l) => l.startDate || l.description);
+  const hasExpandableContent = labsWithDetails.length > 0;
 
   if (style === "list") {
     return (
-      <div key={m.name} className="flex items-center space-x-2">
+      <div
+        key={m.name}
+        className="flex flex-col gap-2 border-b border-gray-200 py-2"
+      >
+        <div className="flex items-center">
+          <div>
+            {hideDescription && m.description ? (
+              <Tooltip content={m.description} placement="top">
+                <p className="font-bold text-primary">{m.name}</p>
+              </Tooltip>
+            ) : (
+              <p className="font-bold text-primary">{m.name}</p>
+            )}
+            {!hideDescription && m.description ? (
+              <p className="mt-0 block">{m.description}</p>
+            ) : null}
+          </div>
+        </div>
+        <CityBadges labs={labs} />
+      </div>
+    );
+  } else {
+    const header = (
+      <div className="flex flex-row gap-2">
         {m.image_url ? (
           <img
             alt={m.name}
             src={getUrl(m.image_url)}
-            className="h-6 w-6 flex-none rounded-full "
+            className="h-10 w-10 flex-none rounded-full "
           />
         ) : null}
-
-        <div>
-          <div className="flex items-center ">
-            {hideDescription && m.description ? (
-              <Tooltip content={m.description} placement="top">
-                <p>{m.name}</p>
-              </Tooltip>
-            ) : (
-              <p>{m.name}</p>
-            )}
+        <div className="flex flex-col gap-3 pr-2">
+          <div>
+            <p className="font-bold text-primary">{m.name}</p>
+            {!hideDescription && m.description ? (
+              <p className="mt-0.5 block">{m.description}</p>
+            ) : null}
           </div>
-          {!hideDescription && m.description ? (
-            <small className="mt-0 leading-0">{m.description}</small>
-          ) : null}
+          <CityBadges labs={labs} />
         </div>
       </div>
     );
-  } else {
-    return (
-      <div className="flex flex-col">
-        <InfoCard
-          key={m.name}
-          title={m.name}
-          description={m.description ?? undefined}
-          hideDescription={hideDescription}
-          imageUrl={getUrl(m.image_url)}
-        ></InfoCard>
-        {labs.length > 0 && (
+
+    const content = hasExpandableContent ? (
+      <div className="w-full py-2">
+        {labsWithDetails.map((lab) => (
           <div
-            className={`flex flex-col py-2 items-center space-x-2 rounded-lg border border-gray-300 bg-light shadow-xs cursor-pointer`}
+            key={`${lab.key}-details`}
+            className="flex items-start justify-between gap-3 border-b border-gray-200 py-2 last:border-b-0"
           >
-            <small className="text-center">Living Labs implementing</small>
-            <div className={`flex flex-wrap gap-1 m-auto justify-center`}>
-              {labs.map(({ key, labName, description, startDate }, idx) => (
-                <Badge
-                  key={key}
-                  size="sm"
-                  color={
-                    !hideDescription && labDetails?.key === key
-                      ? "secondary"
-                      : "primary"
-                  }
-                  className="border !px-2"
-                  inline={true}
-                  onClick={() => {
-                    !hideDescription &&
-                      (description || startDate) &&
-                      setLabDetails((prev) => {
-                        const isOpen = prev?.key === key;
-                        if (isOpen) {
-                          return {};
-                        } else {
-                          return {
-                            key,
-                            startDate,
-                            description,
-                          };
-                        }
-                      });
-                  }}
-                >
-                  {labName}{" "}
-                  {!hideDescription && (description || startDate) ? "ⓘ" : null}
-                </Badge>
-              ))}
+            <div className="w-5/6  flex items-start gap-2">
+              <span className="mt-2 h-1.5 w-1.5 rounded-full bg-dark" />
+              <div>
+                <p className="font-bold">{lab.labName}</p>
+                {lab.description ? <p>{lab.description}</p> : null}
+              </div>
             </div>
-            <div>
-              {labDetails?.key &&
-                (labDetails?.startDate || labDetails?.description) && (
-                  <p className="m-2">
-                    {labDetails?.startDate}
-                    <br></br>
-                    {labDetails?.description}
-                  </p>
-                )}
-            </div>
+            {lab.startDate ? (
+              <p className="w-1/6 whitespace-nowrap text-gray-500 text-end">
+                Since: {lab.startDate}
+              </p>
+            ) : null}
           </div>
-        )}
+        ))}
+      </div>
+    ) : null;
+
+    return (
+      <div className="lg:w-5xl flex flex-col rounded-lg border border-gray-200 bg-light p-2 md:px-4">
+        <ExpansionPanel
+          header={header}
+          content={content}
+          arrow={hasExpandableContent}
+          open={false}
+        />
       </div>
     );
   }
@@ -145,6 +191,7 @@ function MeasureItem({
 
 export function MeasuresSection({
   heading,
+  headingIcon,
   smallText,
   paragraph,
   measures = [],
@@ -153,21 +200,27 @@ export function MeasuresSection({
   style = "card",
 }: MeasuresSectionProps) {
   const GRID_CLASS = {
-    1: "grid grid-cols-1 mx-1 lg:mx-4 gap-1",
-    2: "grid grid-cols-2 lg:grid-cols-2 mx-1 lg:mx-4 gap-4",
-    4: "grid grid-cols-2 lg:grid-cols-4 mx-1 lg:mx-4 gap-4",
+    1: "grid grid-cols-1 gap-1",
+    2: "grid grid-cols-2 lg:grid-cols-2 gap-4",
+    4: "grid grid-cols-2 lg:grid-cols-4 gap-4",
   };
+
+  const measuresLayoutClass =
+    style === "card" ? "grid grid-cols-1 gap-3" : GRID_CLASS[cols];
 
   return (
     <div className="flex-1 grid grid-cols-1 gap-4">
-      {heading && <h3 className="text-center">{heading}</h3>}
-      {smallText && (
-        <small className="text-center italic min-h-10 lg:min-h-0">
-          {smallText}
-        </small>
+      {heading && (
+        <div className="flex items-center gap-2">
+          {headingIcon ? (
+            <span className="h-8 w-8 shrink-0">{headingIcon}</span>
+          ) : null}
+          <h3>{heading}</h3>
+        </div>
       )}
-      {paragraph && <p className="text-center">{paragraph}</p>}
-      <div className={GRID_CLASS[cols]}>
+      {smallText && <p>{smallText}</p>}
+      {paragraph && <p>{paragraph}</p>}
+      <div className={measuresLayoutClass}>
         {measures.map((m) => (
           <MeasureItem
             key={m.name}
@@ -189,12 +242,20 @@ export function MobilityMeasures({
   cols = 2,
   style = "card",
 }: MobilityMeasuresProps) {
+  const pushIcon = (
+    <ArrowRightCircleIcon className="h-8 w-8 text-dark" aria-hidden="true" />
+  );
+  const pullIcon = (
+    <ArrowLeftCircleIcon className="h-8 w-8 text-dark" aria-hidden="true" />
+  );
+
   return (
     <div
-      className={`flex flex-col gap-4 items-start my-4 mx-auto ${className}`}
+      className={`w-full flex flex-col gap-4 items-center my-4 mx-auto ${className}`}
     >
       <MeasuresSection
-        heading="🔴 Push measures"
+        heading="Push measures"
+        headingIcon={pushIcon}
         smallText={`Push measures are restrictions designed to discourage private car use and reduce car dominance in urban environments.`}
         paragraph={``}
         measures={pushMeasures}
@@ -204,7 +265,8 @@ export function MobilityMeasures({
       />
 
       <MeasuresSection
-        heading="🟢 Pull measures"
+        heading="Pull measures"
+        headingIcon={pullIcon}
         smallText={`Pull measures are incentives and improvements that make shared mobility and public transport more attractive and accessible.`}
         paragraph={``}
         measures={pullMeasures}

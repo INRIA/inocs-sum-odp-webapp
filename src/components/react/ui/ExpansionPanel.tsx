@@ -14,19 +14,22 @@ export const ExpansionPanel: React.FC<ExpansionPanelProps> = ({
   open = false,
 }) => {
   const [isOpen, setIsOpen] = useState(open);
+  const hasContent = React.Children.count(content) > 0;
+  const canExpand = hasContent;
 
   const handleToggle = () => {
+    if (!canExpand) return;
     setIsOpen((prev) => !prev);
   };
 
   return (
     <div className="mb-2 w-full flex flex-col min-w-0">
       <div
-        className="flex items-center cursor-pointer py-3 select-none w-full"
+        className={`flex items-center py-3 select-none w-full ${canExpand ? "cursor-pointer" : "cursor-default"}`}
         onClick={handleToggle}
       >
         <div className="flex-1">{header}</div>
-        {arrow && (
+        {arrow && canExpand && (
           <span className="ml-0 transition-transform duration-200">
             {isOpen ? (
               <svg width="24" height="24" viewBox="0 0 24 24">
@@ -50,7 +53,7 @@ export const ExpansionPanel: React.FC<ExpansionPanelProps> = ({
           </span>
         )}
       </div>
-      {isOpen && (
+      {isOpen && hasContent && (
         <div className="border-t border-gray-200 w-full">{content}</div>
       )}
     </div>

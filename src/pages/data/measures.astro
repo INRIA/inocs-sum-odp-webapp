@@ -2,9 +2,53 @@
 import Layout from "../../layouts/Layout.astro";
 import { CTASection, MobilityMeasures } from "../../components/react";
 import ApiClient from "../../lib/api-client/ApiClient";
+import { FeaturesGrid } from "../../components/AnalysisPageSections";
 
 const api = new ApiClient(Astro.request);
 const measures = await api.getMeasures();
+
+const uniqueLabsIds = new Set<number>();
+const uniqueImplementations = new Set<number>();
+measures?.forEach((measure) => {
+  measure.living_lab_projects_implementation?.forEach(
+    (lab) =>
+      uniqueLabsIds.add(lab.living_lab_id) && uniqueImplementations.add(lab.id),
+  );
+});
+
+const measuresFeatures = [
+  {
+    title: measures?.filter((m) => m.type === "PULL")?.length ?? 0,
+    description: "PULL Policy Measures (incentives and improvements)",
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 9-3 3m0 0 3 3m-3-3h7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>`,
+  },
+  {
+    title: measures?.filter((m) => m.type === "PUSH")?.length ?? 0,
+    description: "PUSH Policy Measures (disincentives and restrictions)",
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m12.75 15 3-3m0 0-3-3m3 3h-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>`,
+  },
+  {
+    title: uniqueLabsIds.size,
+    description: "Living Labs implementing measures (either push or pull)",
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+          </svg>
+          `,
+  },
+  {
+    title: uniqueImplementations.size,
+    description: "Total policy measures implementations across all Living Labs",
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
+          </svg>
+          `,
+  },
+];
 ---
 
 <Layout
@@ -16,29 +60,30 @@ const measures = await api.getMeasures();
   ]}
   backHref="/"
 >
-  <div class="mx-auto max-w-2xl lg:max-w-none flex flex-col gap-4">
-    <div class="text-center md:mx-10 flex flex-col gap-4">
+  <div class="mx-auto max-w-7xl px-2 flex flex-col gap-4">
+    <div class="text-center md:mx-10 flex flex-col gap-4 lg:gap-8">
       <h1>
         <span class="text-secondary">Measures </span>
         implemented for
         <span class="text-secondary">SEAMLESS </span>
         Shared Urban Mobility
       </h1>
-    </div>
-    <CTASection
-      title=""
-      description="Measures are policy actions, infrastructure changes, service rollouts, or regulatory shifts implemented by cities to impact how people move through urban spaces. Each measure falls under one of two strategic categories: push and pull measures."
-      order="center"
-    >
-      <p class="text-center">
-        You will find below the full list of measures, and the Living Labs
-        implementing them.
+      <p class="max-w-3xl text-justify w-full mx-auto my-10">
+        Measures are policy actions, infrastructure changes, service rollouts,
+        or regulatory shifts implemented by cities to impact how people move
+        through urban spaces. Each measure falls under one of two strategic
+        categories: push and pull measures.
       </p>
+    </div>
+
+    <FeaturesGrid features={measuresFeatures} columns={4} />
+
+    <CTASection title="Policy Measures implemented" order="center">
       <MobilityMeasures
         pullMeasures={measures?.filter((m) => m.type === "PULL") ?? []}
         pushMeasures={measures?.filter((m) => m.type === "PUSH") ?? []}
         hideDescription={false}
-        cols={4}
+        style="card"
         client:load
       />
     </CTASection>

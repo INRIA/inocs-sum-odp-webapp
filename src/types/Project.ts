@@ -20,9 +20,9 @@ export interface IProject {
 export interface UpdateProjectInput extends Partial<Omit<IProject, "id">> {}
 
 export interface LivingLabProjectsImplementation {
-  id: string;
-  project_id: string;
-  living_lab_id: string;
+  id: number;
+  project_id: number;
+  living_lab_id: number;
   description?: string | null;
   user_id?: string;
   created_at?: string | null;
