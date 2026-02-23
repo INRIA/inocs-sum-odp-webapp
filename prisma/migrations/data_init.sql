@@ -53,7 +53,7 @@ INSERT INTO `transport_mode` (`id`, `name`, `description`, `type`, `color`, `cre
 (3, 'Carsharing', 'Shared access to cars on demand through a membership or app.', 'NSM', '#6FAE24', NOW()),
 (4, 'Bicycle (or e-bike)', 'User-owned bicycle for short-to-medium distance trips.', 'NSM', '#81BF2D', NOW()),
 (5, 'E-scooter', 'Electric micromobility vehicles', 'NSM', '#98C33A', NOW()),
-(6, 'Walking', 'Pedestrian travel for short distances; zero-emission active mode.', 'OTHER', '#DADADA', NOW()),
+(6, 'Walking', 'Pedestrian travel for short distances; zero-emission active mode.', 'NSM', '#DADADA', NOW()),
 (7, 'Micromobility', '', 'NSM', '#B4D952', NOW()),
 (8, 'Ride hailing', 'Flexible shared transit that adapts routes and schedules to demand.', 'NSM', '#D0F06A', NOW()),
 (9, 'Taxi', 'Taxi ride hailing', 'NSM', '#55910b', NOW()),
