@@ -119,20 +119,31 @@ export default function LivingLabForm({ livingLab }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <label className="block text-sm font-medium mb-1">
-          Living Lab or city Name
-        </label>
-        <Input
-          value={name}
-          onChange={(e: any) => setName(e.target.value)}
-          placeholder="e.g. Geneva Living Lab"
-          required
-        />
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
+          <label className="block text-sm font-medium mb-1">
+            Living Lab or city Name
+          </label>
+          <Input
+            value={name}
+            onChange={(e: any) => setName(e.target.value)}
+            placeholder="e.g. Geneva Living Lab"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Estimated Population
+          </label>
+          <Input
+            type="number"
+            value={population}
+            onChange={(e: any) => setPopulation(e.target.value)}
+            placeholder="e.g. 500000"
+          />
+        </div>
+        <div className="hidden">
           <label className="block text-sm font-medium mb-1">Latitude</label>
           <Input
             type="number"
@@ -143,7 +154,7 @@ export default function LivingLabForm({ livingLab }: Props) {
           />
         </div>
 
-        <div>
+        <div className="hidden">
           <label className="block text-sm font-medium mb-1">Longitude</label>
           <Input
             type="number"
@@ -165,9 +176,6 @@ export default function LivingLabForm({ livingLab }: Props) {
             placeholder="100"
           />
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium mb-1">Area</label>
           <Input
@@ -176,35 +184,84 @@ export default function LivingLabForm({ livingLab }: Props) {
             placeholder="e.g. 120 km²"
           />
           {!isAreaManuallyEdited && area && radius && (
-            <p className="text-xs text-gray-500 mt-1">
-              (auto-calculated from radius)
-            </p>
+            <small>(auto-calculated from radius)</small>
           )}
           {isAreaManuallyEdited && radius && (
-            <button
+            <RButton
               type="button"
               onClick={recalculateArea}
-              className="text-xs text-blue-600 underline mt-1 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+              variant="link"
+              // className="text-xs text-blue-600 underline mt-1 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
             >
               Recalculate from radius
-            </button>
+            </RButton>
           )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Population</label>
-          <Input
-            type="number"
-            value={population}
-            onChange={(e: any) => setPopulation(e.target.value)}
-            placeholder="e.g. 500000"
-          />
         </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4">
+        {/* Instruction panel */}
+        <div className="lg:w-1/3 bg-gray-50 rounded shadow p-4 text-sm space-y-4">
+          <p className="font-semibold text-gray-800">
+            How to set your Living Lab location
+          </p>
+          <div className="flex gap-2">
+            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-info text-white flex items-center justify-center text-xs font-bold">
+              1
+            </span>
+            <div>
+              <p className="font-medium text-gray-700">
+                Place your lab on the map
+              </p>
+              <p className="text-gray-500 text-xs mt-0.5">
+                Click anywhere on the map to drop a marker. The latitude and
+                longitude fields will update automatically.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-info text-white flex items-center justify-center text-xs font-bold">
+              2
+            </span>
+            <div>
+              <p className="font-medium text-gray-700">
+                Fine-tune the position
+              </p>
+              <p className="text-gray-500 text-xs mt-0.5">
+                Drag the marker to adjust the location precisely.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-info text-white flex items-center justify-center text-xs font-bold">
+              3
+            </span>
+            <div>
+              <p className="font-medium text-gray-700">
+                Set the activity radius
+              </p>
+              <p className="text-gray-500 text-xs mt-0.5">
+                Enter the estimated radius (in km) of your lab's intervention
+                area. The circle on the map will update in real time.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-info text-white flex items-center justify-center text-xs font-bold">
+              4
+            </span>
+            <div>
+              <p className="font-medium text-gray-700">Review the area</p>
+              <p className="text-gray-500 text-xs mt-0.5">
+                The area is automatically calculated from the radius. You can
+                edit it manually if needed.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Map with hint overlay */}
-        <div className="relative h-[400px] lg:flex-1 rounded shadow overflow-hidden">
+        <div className="h-[400px] lg:h-auto relative lg:flex-1 rounded shadow overflow-hidden lg:w-2/3">
           <MapViewer
             key={mapKey}
             markers={mapMarker ? [mapMarker] : []}
@@ -222,60 +279,6 @@ export default function LivingLabForm({ livingLab }: Props) {
               🖱 Click to place · Drag to move
             </div>
           )}
-        </div>
-
-        {/* Instruction panel */}
-        <div className="lg:w-64 bg-gray-50 rounded shadow p-4 text-sm space-y-4">
-          <p className="font-semibold text-gray-800">
-            How to set your Living Lab location
-          </p>
-          <div className="flex gap-2">
-            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
-              1
-            </span>
-            <div>
-              <p className="font-medium text-gray-700">Place your lab on the map</p>
-              <p className="text-gray-500 text-xs mt-0.5">
-                Click anywhere on the map to drop a marker. The latitude and
-                longitude fields will update automatically.
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
-              2
-            </span>
-            <div>
-              <p className="font-medium text-gray-700">Fine-tune the position</p>
-              <p className="text-gray-500 text-xs mt-0.5">
-                Drag the marker to adjust the location precisely.
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
-              3
-            </span>
-            <div>
-              <p className="font-medium text-gray-700">Set the activity radius</p>
-              <p className="text-gray-500 text-xs mt-0.5">
-                Enter the estimated radius (in km) of your lab's intervention
-                area. The circle on the map will update in real time.
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
-              4
-            </span>
-            <div>
-              <p className="font-medium text-gray-700">Review the area</p>
-              <p className="text-gray-500 text-xs mt-0.5">
-                The area is automatically calculated from the radius. You can
-                edit it manually if needed.
-              </p>
-            </div>
-          </div>
         </div>
       </div>
 
