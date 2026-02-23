@@ -121,10 +121,11 @@ export default function LivingLabForm({ livingLab }: Props) {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">
+          <label htmlFor="name" className="block text-sm font-medium mb-1">
             Living Lab or city Name
           </label>
           <Input
+            id="name"
             value={name}
             onChange={(e: any) => setName(e.target.value)}
             placeholder="e.g. Geneva Living Lab"
@@ -133,10 +134,11 @@ export default function LivingLabForm({ livingLab }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">
+          <label htmlFor="population" className="block text-sm font-medium mb-1">
             Estimated Population
           </label>
           <Input
+            id="population"
             type="number"
             value={population}
             onChange={(e: any) => setPopulation(e.target.value)}
@@ -144,8 +146,9 @@ export default function LivingLabForm({ livingLab }: Props) {
           />
         </div>
         <div className="hidden">
-          <label className="block text-sm font-medium mb-1">Latitude</label>
+          <label htmlFor="lat" className="block text-sm font-medium mb-1">Latitude</label>
           <Input
+            id="lat"
             type="number"
             step="any"
             value={latitude}
@@ -155,8 +158,9 @@ export default function LivingLabForm({ livingLab }: Props) {
         </div>
 
         <div className="hidden">
-          <label className="block text-sm font-medium mb-1">Longitude</label>
+          <label htmlFor="lng" className="block text-sm font-medium mb-1">Longitude</label>
           <Input
+            id="lng"
             type="number"
             step="any"
             value={longitude}
@@ -166,10 +170,11 @@ export default function LivingLabForm({ livingLab }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">
+          <label htmlFor="radius" className="block text-sm font-medium mb-1">
             Activity radius (km)
           </label>
           <Input
+            id="radius"
             type="number"
             value={radius}
             onChange={(e: any) => handleRadiusChange(e.target.value)}
@@ -177,8 +182,9 @@ export default function LivingLabForm({ livingLab }: Props) {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Area</label>
+          <label htmlFor="area" className="block text-sm font-medium mb-1">Area</label>
           <Input
+            id="area"
             value={area}
             onChange={(e: any) => handleAreaChange(e.target.value)}
             placeholder="e.g. 120 km²"
