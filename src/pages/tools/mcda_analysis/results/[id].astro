@@ -1,0 +1,121 @@
+---
+import Layout from "../../../../layouts/Layout.astro";
+import MCDAADashboardPage from "../../../../components/MCDAADashboardPage.astro";
+import { JobResultStatus } from "../../../../components/react/MCDAAnalysis";
+import { JobRunsService } from "../../../../bff/services/job-runs.service";
+import { JobStatus } from "../../../../types/JobRun";
+import type { IJobRun } from "../../../../types";
+import {
+  buildOutrankingGraphData,
+  buildMcdaKeyInsights,
+  formatDateWithTime,
+} from "../../../../lib/helpers";
+
+const { id } = Astro.params;
+
+// If no id, redirect to the MCDA analysis tool
+if (!id) {
+  return Astro.redirect("/tools/mcda_analysis");
+}
+
+// Basic UUID-shape guard (prevents crashes on obviously invalid input)
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const isValidIdFormat = UUID_REGEX.test(id);
+
+let jobRun: IJobRun | null = null;
+let fetchError = false;
+
+if (isValidIdFormat) {
+  const jobRunsService = new JobRunsService();
+  try {
+    jobRun = await jobRunsService.getJobRunById(id);
+  } catch (err) {
+    console.error("Error fetching job run on results page:", err);
+    fetchError = true;
+  }
+}
+
+// Resolve display data for SUCCESS status
+const analysisName = jobRun?.input_data?.params?.name ?? null;
+const completedAt = jobRun?.completed_at
+  ? formatDateWithTime(jobRun.completed_at)
+  : null;
+---
+
+{
+  /* Not found state: no valid format, fetch error, or jobRun === null */
+  (!isValidIdFormat || fetchError || (isValidIdFormat && !fetchError && jobRun === null)) && (
+    <Layout title="Job Not Found — MCDA Analysis">
+      <div class="mx-auto max-w-2xl px-4 py-16 text-center">
+        <h1 class="text-2xl font-bold text-gray-900">Analysis Not Found</h1>
+        <p class="mt-4 text-gray-600">
+          No analysis job could be found for the requested ID.
+        </p>
+        <a
+          href="/tools/mcda_analysis"
+          class="mt-6 inline-block rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+        >
+          Back to MCDA Analysis
+        </a>
+      </div>
+    </Layout>
+  )
+}
+
+{
+  jobRun?.status === JobStatus.SUCCESS && (
+    <MCDAADashboardPage
+      perspective={undefined}
+      breadcrumbs={[
+        { label: "Home", href: "/" },
+        { label: "Tools" },
+        { label: "MCDA Analysis", href: "/tools/mcda_analysis" },
+        { label: analysisName ?? "Custom Analysis Results" },
+      ]}
+      backHref="/tools/mcda_analysis"
+      jobRun={jobRun}
+    />
+  )
+}
+
+{
+  jobRun?.status === JobStatus.FAILURE && (
+    <Layout title="Analysis Failed — MCDA Analysis">
+      <div class="mx-auto max-w-2xl px-4 py-8">
+        <JobResultStatus
+          status="FAILURE"
+          message={jobRun.message ?? undefined}
+          client:load
+        />
+        <div class="mt-6">
+          <a
+            href="/tools/mcda_analysis"
+            class="inline-block text-sm text-blue-600 hover:underline"
+          >
+            ← Back to MCDA Analysis
+          </a>
+        </div>
+      </div>
+    </Layout>
+  )
+}
+
+{
+  (jobRun?.status === JobStatus.PENDING ||
+    jobRun?.status === JobStatus.STARTED) && (
+    <Layout title="Analysis In Progress — MCDA Analysis">
+      <div class="mx-auto max-w-2xl px-4 py-8">
+        <JobResultStatus status={jobRun.status as "PENDING" | "STARTED"} client:load />
+        <div class="mt-6">
+          <a
+            href="/tools/mcda_analysis"
+            class="inline-block text-sm text-blue-600 hover:underline"
+          >
+            ← Back to MCDA Analysis
+          </a>
+        </div>
+      </div>
+    </Layout>
+  )
+}
