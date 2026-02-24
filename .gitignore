@@ -24,7 +24,7 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
-specs/
+specs_obsolete/
 
 # Prisma
 .env

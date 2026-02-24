@@ -44,3 +44,14 @@ All commands are run from the root of the project, from a terminal:
 ## 👀 Want to learn more?
 
 Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+
+## Engineering Constitution (Contributor Rules)
+
+Project governance is defined in `.specify/memory/constitution.md`.
+
+- Practice TDD/SDD: tests first, failing first, then implementation.
+- Add at least one new test file for every new feature.
+- Keep Astro SSR and React island concerns clearly separated.
+- Use Prisma + PostgreSQL as the only data layer.
+- Keep TypeScript strict mode intact.
+- Use Vitest + `@testing-library/react` for component/API behavior tests.
