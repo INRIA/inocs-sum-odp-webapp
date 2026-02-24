@@ -10,7 +10,6 @@ export const MCDA_PERSPECTIVES: Record<string, string> = {
 	regulatory: "Regulatory Authorities",
 	pto: "Public Transport Operators",
 	nsm_providers: "New Shared Mobility Providers",
-	citizens_users: "Citizens and Users",
 };
 
 export const resolveMcdaPerspectiveLabel = (
