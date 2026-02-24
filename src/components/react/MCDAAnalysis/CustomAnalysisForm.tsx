@@ -80,8 +80,15 @@ export const CustomAnalysisForm: React.FC<CustomAnalysisFormProps> = ({
       if (!res.ok) {
         let errMsg = "Something went wrong. Please try again.";
         try {
-          const data = await res.json() as { error?: string };
-          if (data.error) errMsg = data.error;
+          const data: unknown = await res.json();
+          if (
+            typeof data === "object" &&
+            data !== null &&
+            "error" in data &&
+            typeof (data as { error: unknown }).error === "string"
+          ) {
+            errMsg = (data as { error: string }).error;
+          }
         } catch {
           // ignore parse error
         }
@@ -90,8 +97,15 @@ export const CustomAnalysisForm: React.FC<CustomAnalysisFormProps> = ({
         return;
       }
 
-      const data = (await res.json()) as { job_id: string };
-      window.location.href = `/tools/mcda_analysis/results/${data.job_id}`;
+      const raw: unknown = await res.json();
+      const job_id =
+        typeof raw === "object" &&
+        raw !== null &&
+        "job_id" in raw &&
+        typeof (raw as { job_id: unknown }).job_id === "string"
+          ? (raw as { job_id: string }).job_id
+          : "";
+      window.location.href = `/tools/mcda_analysis/results/${job_id}`;
     } catch (networkErr) {
       console.error("Network error in CustomAnalysisForm:", networkErr);
       setError("A network error occurred. Please check your connection and try again.");
