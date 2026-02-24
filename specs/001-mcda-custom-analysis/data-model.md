@@ -28,7 +28,7 @@ route, and the external analysis API.
 | `created_at` | `DateTime` | |
 | `started_at` | `DateTime?` | |
 | `completed_at` | `DateTime?` | |
-| `input_data` | `Json?` | Contains `params.name` and `params.goals_weights` |
+| `input_data` | `Json?` | Contains `params.name` and `params.goals_weights` for custom runs — accessed via `jobRun.input_data?.params?.name`; note: `IJobRunInputData` does not currently have a typed `params` sub-object, so access goes through the `[key: string]: any` index signature. Consider adding `params?: { name?: string; goals_weights?: Record<string, number>; perspective?: string }` to `IJobRunInputData` in `src/types/JobRun.ts` as part of this feature (see T002). |
 | `output_data` | `Json?` | Contains `mcda_results` when status is `SUCCESS` |
 
 **No migration needed.** The existing schema already accommodates JSON blobs for `input_data`
@@ -107,7 +107,7 @@ Content-Type: application/json
       "Improve Accessibility": number,
       "Improve Mobility Service": number,
       "Improve Multimodality": number,
-      "Noise Hinderance": number,
+      "Noise Hinderance": number,      ← preserved spelling: matches external API exactly
       "Improve Public Transport": number,
       "Reduction of Congestion": number,
       "Reduction of Emission": number,
@@ -116,6 +116,11 @@ Content-Type: application/json
   }
 }
 ```
+
+> **Note — "Noise Hinderance"**: The correct English spelling is *"Hindrance"*, but the external
+> API uses *"Hinderance"* (one 'n'). This spelling is intentionally preserved throughout all
+> artifacts and in goal label strings to ensure exact key-matching with the external service.
+> Do not "correct" this spelling in any code that maps goal labels to API keys.
 
 And returns a JSON body containing at minimum `{ "job_id": string }`.  
 This contract is owned by the external service and is documented here for reference only.

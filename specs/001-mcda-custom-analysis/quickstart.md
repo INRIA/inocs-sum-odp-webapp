@@ -103,7 +103,7 @@ npm run test:coverage
 |------|---------------|
 | `src/pages/api/v1/job-runs.post.test.ts` | POST handler: happy path, validation errors, proxy errors, env var missing |
 | `src/components/react/MCDAAnalysis/CustomAnalysisForm.test.tsx` | Form render, name input, weight editing, loading state, redirect, error display, privacy hint presence |
-| `src/components/react/MCDAAnalysis/JobResultStatus.test.tsx` | SUCCESS state display, FAILURE state display, in-process state display, Refresh button, not-found state |
+| `src/components/react/MCDAAnalysis/JobResultStatus.test.tsx` | FAILURE state display (error heading + admin contact), PENDING/STARTED in-process state display, Refresh button visibility and click behavior; note: SUCCESS rendering and not-found state are handled by the Astro results page, not this component |
 
 ### Running a specific test file
 

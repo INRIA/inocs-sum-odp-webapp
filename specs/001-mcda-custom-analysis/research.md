@@ -176,6 +176,10 @@ The `goals_weights` map is built from `MCDAGoal[]` by using `goal.name` as the k
 `goal.weight` as the value. `MCDAGoal.name` values in the existing data match the eight labels
 the external API expects.
 
+> **Note — "Noise Hinderance"**: The correct English spelling is *"Hindrance"*, but the external
+> API uses *"Hinderance"* (one 'n'). This spelling intentionally matches the external service's
+> expected key and MUST NOT be "corrected" in any goal label string or API mapping code.
+
 **Alternatives considered**:
 - Sending `MCDAGoal[]` array directly and transforming in the BFF — chosen over sending the
   map from the client to keep the frontend representation consistent with the existing

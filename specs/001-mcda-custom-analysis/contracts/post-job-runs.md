@@ -43,7 +43,7 @@ None required. The platform is anonymous; no session or token is expected.
 **Constraints**:
 - `name` must be a non-empty string after trimming whitespace.
 - `goals_weights` must be a non-null object with at least one value > 0.
-- All weight values must be ≥ 0 (negative values are invalid).
+- All weight values must be ≥ 0 (negative values are invalid — the BFF rejects them with 400).
 - The weights are expected to already sum to approximately 1 (normalization is the client's
   responsibility via `GoalsSection.handleValidate`). The BFF forwards them as-is.
 
@@ -65,6 +65,10 @@ None required. The platform is anonymous; no session or token is expected.
 }
 ```
 
+> **Note — "Noise Hinderance"**: The correct English spelling is *"Hindrance"*, but the external
+> API uses *"Hinderance"*. This spelling is preserved here and in all artifacts intentionally to
+> ensure exact key-matching with the external service. Do not correct it.
+
 ---
 
 ## Success Response — `200 OK`
@@ -74,6 +78,12 @@ None required. The platform is anonymous; no session or token is expected.
   "job_id": "550e8400-e29b-41d4-a716-446655440000"
 }
 ```
+
+> **Implementation note**: The handler uses `new ApiResponse({ data: { job_id } })`. The
+> `ApiResponse` constructor (see `src/types/ApiResponse.ts`) serialises `data.data` directly as
+> the response body, so the HTTP body is `{ "job_id": "..." }` — **not** the nested
+> `{ "data": { "job_id": "..." } }` that the constructor call may suggest at first glance.
+> Client code should parse with `const { job_id } = await res.json()`.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -120,6 +130,7 @@ These scenarios MUST be covered by tests in `src/pages/api/v1/job-runs.post.test
 | 4 | Empty `name` after trim | `400` |
 | 5 | Missing `goals_weights` | `400` |
 | 6 | All weights are zero | `400` |
+| 6b | Any weight is negative | `400` |
 | 7 | External API returns 500 | `502` |
 | 8 | External API unreachable (fetch throws) | `502` or `503` |
 | 9 | `JOB_RUN_IMPACT_ASSESS_ROUTE` not set | `500` |

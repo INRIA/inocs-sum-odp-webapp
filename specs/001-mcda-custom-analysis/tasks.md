@@ -51,6 +51,7 @@ across Phases 3–5.
   - `CustomAnalysisInput`: `name: string` (non-empty, max 120 chars) and `goals_weights: Record<string, number>` (normalized to sum 1)
   - `CustomAnalysisJobRunRequest`: `name: string` and `goals_weights: Record<string, number>` (BFF request body shape)
   - `CustomAnalysisJobRunResponse`: `job_id: string` (BFF success response shape)
+  - Also augment `IJobRunInputData` (same file) with an optional `params?: { name?: string; goals_weights?: Record<string, number>; perspective?: string }` field so that `jobRun.input_data.params.name` on the results page is type-safe rather than accessed via `[key: string]: any`
 
 **Checkpoint**: Types defined — all three user story phases can now begin
 
@@ -76,7 +77,7 @@ map. No UI or component rendering required.
 - [ ] T003 [US3] Create `src/pages/api/v1/job-runs.post.test.ts` with two initial test groups:
   - Happy path: POST with valid `name` and valid `goals_weights` → 200 response with `{ job_id: "<uuid>" }` (contract scenario 1)
   - Forwarded payload shape: `fetch` spy verifies request body contains `params.perspective === "user_personalized"`, `params.name`, and `params.goals_weights` exactly as sent (contract scenario 10)
-- [ ] T004 [P] [US3] Add input validation tests to `src/pages/api/v1/job-runs.post.test.ts`: empty body → 400 `"Invalid JSON in request body"`; missing `name` field → 400 `"Analysis name is required"`; `name` is empty string after `.trim()` → 400 `"Analysis name is required"`; missing `goals_weights` → 400 `"goals_weights must be provided with at least one non-zero weight"`; `goals_weights` provided but all values are `0` → 400 (contract scenarios 2–6)
+- [ ] T004 [P] [US3] Add input validation tests to `src/pages/api/v1/job-runs.post.test.ts`: empty body → 400 `"Invalid JSON in request body"`; missing `name` field → 400 `"Analysis name is required"`; `name` is empty string after `.trim()` → 400 `"Analysis name is required"`; missing `goals_weights` → 400 `"goals_weights must be provided with at least one non-zero weight"`; `goals_weights` provided but all values are `0` → 400; `goals_weights` provided with a negative value → 400 (contract: "negative values are invalid") (contract scenarios 2–6)
 - [ ] T005 [P] [US3] Add upstream and configuration error tests to `src/pages/api/v1/job-runs.post.test.ts`: external API returns non-2xx status → 502 `"Analysis service is unavailable. Please try again later."`; `fetch` throws a network error → 502/503 with the same safe message; `JOB_RUN_IMPACT_ASSESS_ROUTE` env var is `undefined` → 500 `"Internal Server Error"` (internal details must not be exposed in body) (contract scenarios 7–9)
 - [ ] T006 [US3] Run `npm run test:run -- job-runs.post` and confirm all tests are **RED** — expected: all tests fail because no implementation exists; do not proceed until confirmed
 
@@ -91,9 +92,9 @@ map. No UI or component rendering required.
 - [ ] T008 [US3] Add `export const POST: APIRoute` to `src/pages/api/v1/job-runs.ts`:
   1. Parse JSON body — catch `SyntaxError` → return 400 `"Invalid JSON in request body"`
   2. Validate `name` is non-empty after `.trim()` → 400 `"Analysis name is required"`
-  3. Validate `goals_weights` is a non-null object with at least one value `> 0` → 400 `"goals_weights must be provided with at least one non-zero weight"`
+  3. Validate `goals_weights` is a non-null object with at least one value `> 0` and no negative values → 400 `"goals_weights must be provided with at least one non-zero weight"` (negative values are also invalid per contract)
   4. Call `JobRunsService.triggerCustomAnalysis(name, goals_weights)`
-  5. Return 200 with `{ job_id }` wrapped in `ApiResponse`
+  5. Return 200 with `{ job_id }` wrapped in `ApiResponse` — note: `new ApiResponse({ data: { job_id } })` serializes the body as `{ "job_id": "..." }` directly (the `ApiResponse` constructor unwraps `.data` as the response body; see `src/types/ApiResponse.ts`)
   6. Catch config error → 500 `"Internal Server Error"` (no internal details in response body)
   7. Catch upstream error → 502 `"Analysis service is unavailable. Please try again later."`
 - [ ] T009 [US3] Run `npm run test:run -- job-runs.post` and confirm all tests are **GREEN**
@@ -127,7 +128,7 @@ triggers `window.location.reload()`. No API call or Astro page required.
 ### Implementation for US2
 
 - [ ] T013 [P] [US2] Create `src/components/react/MCDAAnalysis/JobResultStatus.tsx`: accept `status: 'PENDING' | 'STARTED' | 'FAILURE'` and `message?: string` props; render an error heading and "contact the platform administrator" paragraph for `FAILURE`; render the in-process message paragraph and a "Refresh page" `<button>` with `onClick={() => window.location.reload()}` for `PENDING` and `STARTED`; do not render a Refresh button for `FAILURE`; render `message` prop content when provided in `FAILURE` state
-- [ ] T014 [P] [US2] Create `src/pages/tools/mcda_analysis/results/[id].astro`: read `Astro.params.id`; redirect to `/tools/mcda_analysis` if `id` is missing or fails a basic format check; instantiate `JobRunsService` directly (no HTTP round-trip) and call `getJobRunById(id)` in a `try/catch`; when `jobRun === null` render a not-found message inline without crashing; branch on `JobStatus` enum — `SUCCESS`: render `MCDAADashboardPage` (read-only, no `enableCustomAnalysis`) with data from `jobRun.output_data` and `jobRun.input_data`, display `jobRun.input_data.params.name` and `jobRun.completed_at`; `FAILURE`: `<JobResultStatus status="FAILURE" message={jobRun.message} client:load />`; `PENDING`/`STARTED`: `<JobResultStatus status={jobRun.status} client:load />`
+- [ ] T014 [P] [US2] Create `src/pages/tools/mcda_analysis/results/[id].astro`: read `Astro.params.id`; redirect to `/tools/mcda_analysis` only if `id` is absent (empty/undefined); if `id` is present but fails a basic format check (e.g., not UUID-shaped), render a not-found state inline without crashing (per spec edge case); instantiate `JobRunsService` directly (no HTTP round-trip) and call `getJobRunById(id)` in a `try/catch`; when `jobRun === null` render a not-found message inline without crashing; branch on `JobStatus` enum — `SUCCESS`: render `MCDAADashboardPage` (read-only, no `enableCustomAnalysis`) with data from `jobRun.output_data` and `jobRun.input_data`, display `jobRun.input_data.params.name` and `jobRun.completed_at`; `FAILURE`: `<JobResultStatus status="FAILURE" message={jobRun.message} client:load />`; `PENDING`/`STARTED`: `<JobResultStatus status={jobRun.status} client:load />`
 - [ ] T015 [US2] Run `npm run test:run -- JobResultStatus` and confirm all tests are **GREEN**
 
 **Checkpoint**: Results page and status component fully functional — US2 independently deliverable
@@ -165,7 +166,7 @@ results URL. No real API call — stub `fetch` via `vi.stubGlobal`.
   2. Render a controlled name `<input>` (max 120 chars)
   3. Render the privacy hint `<p>` as a permanent sibling below the input: "Your analysis name is not linked to any personal identity. Do not include names, emails, or other identifying information."
   4. Render `<GoalsSection goals={...} editable={true} onWeightsUpdate={setCurrentGoals} />`
-  5. On submit: validate name non-empty after trim and at least one weight `> 0`; show inline validation messages on failure
+  5. On submit: validate name non-empty after trim; validate at least one weight `> 0`; validate weights sum ≈ 1 (i.e., `GoalsSection.handleValidate` has been clicked — if not normalized, show an inline message prompting the user to click "Validate" first, or auto-normalize and display an inline notification per FR-005); show inline validation messages on any failure
   6. Set `isLoading=true` and call `onLoadingChange?.(true)` before the fetch
   7. POST `{ name: name.trim(), goals_weights }` (built from `MCDAGoal[]` using `goal.name` as key and `goal.weight` as value) to `/api/v1/job-runs`
   8. On success: set `window.location.href = /tools/mcda_analysis/results/${data.job_id}`
