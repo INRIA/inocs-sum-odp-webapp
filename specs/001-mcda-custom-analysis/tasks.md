@@ -35,7 +35,7 @@ remains independently testable via mocks at any point.
 **Purpose**: Ensure the required environment variable is documented before development begins.
 No new packages are needed — this feature uses only existing dependencies.
 
-- [ ] T001 Add `JOB_RUN_IMPACT_ASSESS_ROUTE` to `.env.example` with a descriptive comment: `# URL of the external MCDA analysis service — required for POST /api/v1/job-runs (returns 500 if unset)`
+- [x] T001 Add `JOB_RUN_IMPACT_ASSESS_ROUTE` to `.env.example` with a descriptive comment: `# URL of the external MCDA analysis service — required for POST /api/v1/job-runs (returns 500 if unset)`
 
 ---
 
@@ -47,7 +47,7 @@ across Phases 3–5.
 
 **⚠️ CRITICAL**: No user story work can begin until T002 is complete.
 
-- [ ] T002 Add three TypeScript interfaces to `src/types/JobRun.ts` per data-model.md:
+- [x] T002 Add three TypeScript interfaces to `src/types/JobRun.ts` per data-model.md:
   - `CustomAnalysisInput`: `name: string` (non-empty, max 120 chars) and `goals_weights: Record<string, number>` (normalized to sum 1)
   - `CustomAnalysisJobRunRequest`: `name: string` and `goals_weights: Record<string, number>` (BFF request body shape)
   - `CustomAnalysisJobRunResponse`: `job_id: string` (BFF success response shape)
@@ -74,22 +74,22 @@ map. No UI or component rendering required.
 > Write these before any implementation. Run `npm run test:run -- job-runs.post` and confirm
 > ALL tests fail. Do not proceed to T007 until T006 confirms RED.
 
-- [ ] T003 [US3] Create `src/pages/api/v1/job-runs.post.test.ts` with two initial test groups:
+- [x] T003 [US3] Create `src/pages/api/v1/job-runs.post.test.ts` with two initial test groups:
   - Happy path: POST with valid `name` and valid `goals_weights` → 200 response with `{ job_id: "<uuid>" }` (contract scenario 1)
   - Forwarded payload shape: `fetch` spy verifies request body contains `params.perspective === "user_personalized"`, `params.name`, and `params.goals_weights` exactly as sent (contract scenario 10)
-- [ ] T004 [P] [US3] Add input validation tests to `src/pages/api/v1/job-runs.post.test.ts`: empty body → 400 `"Invalid JSON in request body"`; missing `name` field → 400 `"Analysis name is required"`; `name` is empty string after `.trim()` → 400 `"Analysis name is required"`; missing `goals_weights` → 400 `"goals_weights must be provided with at least one non-zero weight"`; `goals_weights` provided but all values are `0` → 400; `goals_weights` provided with a negative value → 400 (contract: "negative values are invalid") (contract scenarios 2–6)
-- [ ] T005 [P] [US3] Add upstream and configuration error tests to `src/pages/api/v1/job-runs.post.test.ts`: external API returns non-2xx status → 502 `"Analysis service is unavailable. Please try again later."`; `fetch` throws a network error → 502/503 with the same safe message; `JOB_RUN_IMPACT_ASSESS_ROUTE` env var is `undefined` → 500 `"Internal Server Error"` (internal details must not be exposed in body) (contract scenarios 7–9)
-- [ ] T006 [US3] Run `npm run test:run -- job-runs.post` and confirm all tests are **RED** — expected: all tests fail because no implementation exists; do not proceed until confirmed
+- [x] T004 [P] [US3] Add input validation tests to `src/pages/api/v1/job-runs.post.test.ts`: empty body → 400 `"Invalid JSON in request body"`; missing `name` field → 400 `"Analysis name is required"`; `name` is empty string after `.trim()` → 400 `"Analysis name is required"`; missing `goals_weights` → 400 `"goals_weights must be provided with at least one non-zero weight"`; `goals_weights` provided but all values are `0` → 400; `goals_weights` provided with a negative value → 400 (contract: "negative values are invalid") (contract scenarios 2–6)
+- [x] T005 [P] [US3] Add upstream and configuration error tests to `src/pages/api/v1/job-runs.post.test.ts`: external API returns non-2xx status → 502 `"Analysis service is unavailable. Please try again later."`; `fetch` throws a network error → 502/503 with the same safe message; `JOB_RUN_IMPACT_ASSESS_ROUTE` env var is `undefined` → 500 `"Internal Server Error"` (internal details must not be exposed in body) (contract scenarios 7–9)
+- [x] T006 [US3] Run `npm run test:run -- job-runs.post` and confirm all tests are **RED** — expected: all tests fail because no implementation exists; do not proceed until confirmed
 
 ### Implementation for US3
 
-- [ ] T007 [US3] Add `triggerCustomAnalysis(name: string, goalsWeights: Record<string, number>): Promise<{ job_id: string }>` to `src/bff/services/job-runs.service.ts`:
+- [x] T007 [US3] Add `triggerCustomAnalysis(name: string, goalsWeights: Record<string, number>): Promise<{ job_id: string }>` to `src/bff/services/job-runs.service.ts`:
   1. Read `process.env.JOB_RUN_IMPACT_ASSESS_ROUTE`
   2. Throw a typed config error (logged server-side only) if the variable is `undefined`
   3. POST to the external API with body `{ params: { perspective: "user_personalized", name, goals_weights: goalsWeights } }`
   4. Throw a typed upstream error if `!res.ok`
   5. Parse the response body and return `{ job_id }`
-- [ ] T008 [US3] Add `export const POST: APIRoute` to `src/pages/api/v1/job-runs.ts`:
+- [x] T008 [US3] Add `export const POST: APIRoute` to `src/pages/api/v1/job-runs.ts`:
   1. Parse JSON body — catch `SyntaxError` → return 400 `"Invalid JSON in request body"`
   2. Validate `name` is non-empty after `.trim()` → 400 `"Analysis name is required"`
   3. Validate `goals_weights` is a non-null object with at least one value `> 0` and no negative values → 400 `"goals_weights must be provided with at least one non-zero weight"` (negative values are also invalid per contract)
@@ -97,7 +97,7 @@ map. No UI or component rendering required.
   5. Return 200 with `{ job_id }` wrapped in `ApiResponse` — note: `new ApiResponse({ data: { job_id } })` serializes the body as `{ "job_id": "..." }` directly (the `ApiResponse` constructor unwraps `.data` as the response body; see `src/types/ApiResponse.ts`)
   6. Catch config error → 500 `"Internal Server Error"` (no internal details in response body)
   7. Catch upstream error → 502 `"Analysis service is unavailable. Please try again later."`
-- [ ] T009 [US3] Run `npm run test:run -- job-runs.post` and confirm all tests are **GREEN**
+- [x] T009 [US3] Run `npm run test:run -- job-runs.post` and confirm all tests are **GREEN**
 
 **Checkpoint**: BFF proxy fully functional and test-verified — US3 independently deliverable
 
@@ -121,15 +121,15 @@ triggers `window.location.reload()`. No API call or Astro page required.
 > Write these before any implementation. Run `npm run test:run -- JobResultStatus` and confirm
 > ALL tests fail. Do not proceed to T013 until T012 confirms RED.
 
-- [ ] T010 [US2] Create `src/components/react/MCDAAnalysis/JobResultStatus.test.tsx`: `status="FAILURE"` renders error heading and text instructing the user to contact the platform administrator; `status="PENDING"` renders "The job is currently in process. Please try again by refreshing the page."; `status="STARTED"` renders the same in-process message
-- [ ] T011 [P] [US2] Add interaction and detail tests to `src/components/react/MCDAAnalysis/JobResultStatus.test.tsx`: "Refresh page" button is visible when `status` is `"PENDING"` or `"STARTED"`; clicking "Refresh page" calls `window.location.reload()` (stub with `vi.stubGlobal`); optional `message` prop text is rendered within the `FAILURE` state; "Refresh page" button is NOT rendered when `status` is `"FAILURE"`
-- [ ] T012 [US2] Run `npm run test:run -- JobResultStatus` and confirm all tests are **RED**
+- [x] T010 [US2] Create `src/components/react/MCDAAnalysis/JobResultStatus.test.tsx`: `status="FAILURE"` renders error heading and text instructing the user to contact the platform administrator; `status="PENDING"` renders "The job is currently in process. Please try again by refreshing the page."; `status="STARTED"` renders the same in-process message
+- [x] T011 [P] [US2] Add interaction and detail tests to `src/components/react/MCDAAnalysis/JobResultStatus.test.tsx`: "Refresh page" button is visible when `status` is `"PENDING"` or `"STARTED"`; clicking "Refresh page" calls `window.location.reload()` (stub with `vi.stubGlobal`); optional `message` prop text is rendered within the `FAILURE` state; "Refresh page" button is NOT rendered when `status` is `"FAILURE"`
+- [x] T012 [US2] Run `npm run test:run -- JobResultStatus` and confirm all tests are **RED**
 
 ### Implementation for US2
 
-- [ ] T013 [P] [US2] Create `src/components/react/MCDAAnalysis/JobResultStatus.tsx`: accept `status: 'PENDING' | 'STARTED' | 'FAILURE'` and `message?: string` props; render an error heading and "contact the platform administrator" paragraph for `FAILURE`; render the in-process message paragraph and a "Refresh page" `<button>` with `onClick={() => window.location.reload()}` for `PENDING` and `STARTED`; do not render a Refresh button for `FAILURE`; render `message` prop content when provided in `FAILURE` state
-- [ ] T014 [P] [US2] Create `src/pages/tools/mcda_analysis/results/[id].astro`: read `Astro.params.id`; redirect to `/tools/mcda_analysis` only if `id` is absent (empty/undefined); if `id` is present but fails a basic format check (e.g., not UUID-shaped), render a not-found state inline without crashing (per spec edge case); instantiate `JobRunsService` directly (no HTTP round-trip) and call `getJobRunById(id)` in a `try/catch`; when `jobRun === null` render a not-found message inline without crashing; branch on `JobStatus` enum — `SUCCESS`: render `MCDAADashboardPage` (read-only, no `enableCustomAnalysis`) with data from `jobRun.output_data` and `jobRun.input_data`, display `jobRun.input_data.params.name` and `jobRun.completed_at`; `FAILURE`: `<JobResultStatus status="FAILURE" message={jobRun.message} client:load />`; `PENDING`/`STARTED`: `<JobResultStatus status={jobRun.status} client:load />`
-- [ ] T015 [US2] Run `npm run test:run -- JobResultStatus` and confirm all tests are **GREEN**
+- [x] T013 [P] [US2] Create `src/components/react/MCDAAnalysis/JobResultStatus.tsx`: accept `status: 'PENDING' | 'STARTED' | 'FAILURE'` and `message?: string` props; render an error heading and "contact the platform administrator" paragraph for `FAILURE`; render the in-process message paragraph and a "Refresh page" `<button>` with `onClick={() => window.location.reload()}` for `PENDING` and `STARTED`; do not render a Refresh button for `FAILURE`; render `message` prop content when provided in `FAILURE` state
+- [x] T014 [P] [US2] Create `src/pages/tools/mcda_analysis/results/[id].astro`: read `Astro.params.id`; redirect to `/tools/mcda_analysis` only if `id` is absent (empty/undefined); if `id` is present but fails a basic format check (e.g., not UUID-shaped), render a not-found state inline without crashing (per spec edge case); instantiate `JobRunsService` directly (no HTTP round-trip) and call `getJobRunById(id)` in a `try/catch`; when `jobRun === null` render a not-found message inline without crashing; branch on `JobStatus` enum — `SUCCESS`: render `MCDAADashboardPage` (read-only, no `enableCustomAnalysis`) with data from `jobRun.output_data` and `jobRun.input_data`, display `jobRun.input_data.params.name` and `jobRun.completed_at`; `FAILURE`: `<JobResultStatus status="FAILURE" message={jobRun.message} client:load />`; `PENDING`/`STARTED`: `<JobResultStatus status={jobRun.status} client:load />`
+- [x] T015 [US2] Run `npm run test:run -- JobResultStatus` and confirm all tests are **GREEN**
 
 **Checkpoint**: Results page and status component fully functional — US2 independently deliverable
 
@@ -154,14 +154,14 @@ results URL. No real API call — stub `fetch` via `vi.stubGlobal`.
 > Write these before any implementation. Run `npm run test:run -- CustomAnalysisForm` and
 > confirm ALL tests fail. Do not proceed to T020 until T019 confirms RED.
 
-- [ ] T016 [US1] Create `src/components/react/MCDAAnalysis/CustomAnalysisForm.test.tsx`: form renders without crashing given a `goals` prop; privacy hint `<p>` is present in the DOM on every render; a name `<input>` element is present; `GoalsSection` receives `editable={true}`; a submit button is present and labelled appropriately
-- [ ] T017 [P] [US1] Add interaction and happy path tests to `src/components/react/MCDAAnalysis/CustomAnalysisForm.test.tsx`: typing in the name input reflects in the controlled state; clicking submit calls `fetch` (stubbed) with `POST /api/v1/job-runs` and body `{ name, goals_weights }`; a loading indicator is visible while the fetch is pending; the submit button is disabled while `isLoading` is `true`; on a successful response `window.location.href` equals `/tools/mcda_analysis/results/<returned-job-id>`
-- [ ] T018 [P] [US1] Add edge-case and error tests to `src/components/react/MCDAAnalysis/CustomAnalysisForm.test.tsx`: submitting with an empty name is prevented and a validation message is shown; submitting when all goal weights are zero is prevented and a validation message is shown; when the API returns an error response, an `<InfoAlert variant="error">` is rendered with descriptive error text; clicking submit a second time while `isLoading` is `true` does not trigger a second `fetch` call (double-submission prevented)
-- [ ] T019 [US1] Run `npm run test:run -- CustomAnalysisForm` and confirm all tests are **RED**
+- [x] T016 [US1] Create `src/components/react/MCDAAnalysis/CustomAnalysisForm.test.tsx`: form renders without crashing given a `goals` prop; privacy hint `<p>` is present in the DOM on every render; a name `<input>` element is present; `GoalsSection` receives `editable={true}`; a submit button is present and labelled appropriately
+- [x] T017 [P] [US1] Add interaction and happy path tests to `src/components/react/MCDAAnalysis/CustomAnalysisForm.test.tsx`: typing in the name input reflects in the controlled state; clicking submit calls `fetch` (stubbed) with `POST /api/v1/job-runs` and body `{ name, goals_weights }`; a loading indicator is visible while the fetch is pending; the submit button is disabled while `isLoading` is `true`; on a successful response `window.location.href` equals `/tools/mcda_analysis/results/<returned-job-id>`
+- [x] T018 [P] [US1] Add edge-case and error tests to `src/components/react/MCDAAnalysis/CustomAnalysisForm.test.tsx`: submitting with an empty name is prevented and a validation message is shown; submitting when all goal weights are zero is prevented and a validation message is shown; when the API returns an error response, an `<InfoAlert variant="error">` is rendered with descriptive error text; clicking submit a second time while `isLoading` is `true` does not trigger a second `fetch` call (double-submission prevented)
+- [x] T019 [US1] Run `npm run test:run -- CustomAnalysisForm` and confirm all tests are **RED**
 
 ### Implementation for US1
 
-- [ ] T020 [US1] Create `src/components/react/MCDAAnalysis/CustomAnalysisForm.tsx`:
+- [x] T020 [US1] Create `src/components/react/MCDAAnalysis/CustomAnalysisForm.tsx`:
   1. Accept `goals: MCDAGoal[]` and `onLoadingChange?: (loading: boolean) => void` props
   2. Render a controlled name `<input>` (max 120 chars)
   3. Render the privacy hint `<p>` as a permanent sibling below the input: "Your analysis name is not linked to any personal identity. Do not include names, emails, or other identifying information."
@@ -172,16 +172,16 @@ results URL. No real API call — stub `fetch` via `vi.stubGlobal`.
   8. On success: set `window.location.href = /tools/mcda_analysis/results/${data.job_id}`
   9. On error: set `error` state and render `<InfoAlert variant="error">`
   10. Disable all inputs and the submit button while `isLoading` is `true`
-- [ ] T021 [US1] Modify `src/components/react/MCDAAnalysis/MCDADashboard.tsx`:
+- [x] T021 [US1] Modify `src/components/react/MCDAAnalysis/MCDADashboard.tsx`:
   1. Add optional `enableCustomAnalysis?: boolean` prop (default `false`)
   2. Add `isCustomMode: boolean` and `isSubmitting: boolean` `useState` hooks
   3. When `enableCustomAnalysis` is `true`, render a toggle button in the configuration panel header to switch between custom and standard modes
   4. In the goals `section`: render `<CustomAnalysisForm goals={goals} onLoadingChange={setIsSubmitting} />` when `isCustomMode` is `true`; otherwise render the existing `<GoalsSection goals={goals} editable={false} />`
   5. In the results panel: render an `animate-pulse` loading skeleton with an SVG spinner in place of `<ResultsSection>` when `isSubmitting` is `true`
   6. All behaviour when `enableCustomAnalysis` is `false` or omitted remains unchanged
-- [ ] T022 [P] [US1] Add named exports for `CustomAnalysisForm` and `JobResultStatus` to `src/components/react/MCDAAnalysis/index.ts`
-- [ ] T023 [P] [US1] Pass `enableCustomAnalysis={true}` to `<MCDADashboard>` in `src/pages/tools/mcda_analysis/index.astro`
-- [ ] T024 [US1] Run `npm run test:run -- CustomAnalysisForm` and confirm all tests are **GREEN**
+- [x] T022 [P] [US1] Add named exports for `CustomAnalysisForm` and `JobResultStatus` to `src/components/react/MCDAAnalysis/index.ts`
+- [x] T023 [P] [US1] Pass `enableCustomAnalysis={true}` to `<MCDADashboard>` in `src/pages/tools/mcda_analysis/index.astro`
+- [x] T024 [US1] Run `npm run test:run -- CustomAnalysisForm` and confirm all tests are **GREEN**
 
 **Checkpoint**: All three user stories are independently functional and test-verified — full feature deliverable
 
@@ -192,8 +192,8 @@ results URL. No real API call — stub `fetch` via `vi.stubGlobal`.
 **Purpose**: TypeScript compliance, full test-suite validation, and manual verification against
 the quickstart.md checklist before the feature branch is considered merge-ready.
 
-- [ ] T025 [P] Run `npx tsc --noEmit` and resolve any TypeScript strict mode violations in all new and modified files: `src/types/JobRun.ts`, `src/bff/services/job-runs.service.ts`, `src/pages/api/v1/job-runs.ts`, `src/pages/tools/mcda_analysis/results/[id].astro`, `src/components/react/MCDAAnalysis/CustomAnalysisForm.tsx`, `src/components/react/MCDAAnalysis/JobResultStatus.tsx`, `src/components/react/MCDAAnalysis/MCDADashboard.tsx`, `src/components/react/MCDAAnalysis/index.ts`, `src/pages/tools/mcda_analysis/index.astro`
-- [ ] T026 [P] Run `npm run test:run` and verify all three new test suites pass with zero failures: `src/pages/api/v1/job-runs.post.test.ts`, `src/components/react/MCDAAnalysis/JobResultStatus.test.tsx`, `src/components/react/MCDAAnalysis/CustomAnalysisForm.test.tsx`
+- [x] T025 [P] Run `npx tsc --noEmit` and resolve any TypeScript strict mode violations in all new and modified files: `src/types/JobRun.ts`, `src/bff/services/job-runs.service.ts`, `src/pages/api/v1/job-runs.ts`, `src/pages/tools/mcda_analysis/results/[id].astro`, `src/components/react/MCDAAnalysis/CustomAnalysisForm.tsx`, `src/components/react/MCDAAnalysis/JobResultStatus.tsx`, `src/components/react/MCDAAnalysis/MCDADashboard.tsx`, `src/components/react/MCDAAnalysis/index.ts`, `src/pages/tools/mcda_analysis/index.astro`
+- [x] T026 [P] Run `npm run test:run` and verify all three new test suites pass with zero failures: `src/pages/api/v1/job-runs.post.test.ts`, `src/components/react/MCDAAnalysis/JobResultStatus.test.tsx`, `src/components/react/MCDAAnalysis/CustomAnalysisForm.test.tsx`
 - [ ] T027 Execute quickstart.md manual verification checklist:
   - Start the dev server: `npm run dev`
   - Open `http://localhost:4321/tools/mcda_analysis`

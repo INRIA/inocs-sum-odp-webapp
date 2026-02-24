@@ -8,3 +8,5 @@ export { McdaKeyResults } from "./McdaKeyResults";
 export { D3McdaNetFlowsChart } from "./D3McdaNetFlowsChart";
 export { D3McdaGaiaPlane } from "./D3McdaGaiaPlane";
 export { D3McdaNetworkChart } from "./D3McdaNetworkChart";
+export { CustomAnalysisForm } from "./CustomAnalysisForm";
+export { JobResultStatus } from "./JobResultStatus";

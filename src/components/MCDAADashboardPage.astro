@@ -23,7 +23,7 @@ import {
 } from "../lib/helpers";
 import { FAQAccordion, InfoAlert, InfoCard, RButton } from "./react";
 
-const { perspective, breadcrumbs, backHref } = Astro.props;
+const { perspective, breadcrumbs, backHref, enableCustomAnalysis } = Astro.props;
 const api = new ApiClient(Astro.request);
 
 let pageBreadcrumbs = breadcrumbs ?? [];
@@ -311,6 +311,7 @@ const methodologyQuestions = [
         mcdaResults={mcdaResults}
         outrankingGraphData={outrankingGraphData}
         mcdaKeyInsights={mcdaKeyInsights}
+        enableCustomAnalysis={enableCustomAnalysis === true}
         client:load
       />
     </div>
