@@ -57,3 +57,7 @@ export interface IIKpiResultBeforeAfter {
   result_before?: IKpiResult | null;
   result_after?: IKpiResult | null;
 }
+
+export interface IKpiResultGroup extends IIKpiResultBeforeAfter {
+  results: IKpiResult[];
+}

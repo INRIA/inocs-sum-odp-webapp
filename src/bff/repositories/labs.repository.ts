@@ -116,6 +116,7 @@ export class LabRepository {
           transport_mode_id: minKpiResult?.transport_mode_id || null,
           result_before: minKpiResult ?? null,
           result_after: maxKpiResult ?? null,
+          results: groupedResults,
         };
       },
     );

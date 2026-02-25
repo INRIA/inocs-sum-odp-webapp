@@ -18,37 +18,9 @@ const filteredKpis = kpis.filter(
 const livingLabData = await api.getLivingLab(labId);
 const categories = await api.getCategories("KPI_SIEF");
 
-const modalSplitResults = livingLabData?.kpi_results?.filter((result) =>
+const kpiResults = livingLabData?.kpi_results?.filter((result) =>
   filteredKpis?.some((mk) => mk.id === result.kpidefinition_id),
-);
-
-const valueBeforeDate = modalSplitResults?.reduce(
-  (minDate, result) => {
-    const dateStr = result.result_before?.date;
-    if (dateStr) {
-      const date = new Date(dateStr);
-      if (!minDate || date < minDate) {
-        return date;
-      }
-    }
-    return minDate;
-  },
-  null as Date | null,
-);
-
-const valueAfterDate = modalSplitResults?.reduce(
-  (maxDate, result) => {
-    const dateStr = result.result_after?.date;
-    if (dateStr) {
-      const date = new Date(dateStr);
-      if (!maxDate || date > maxDate) {
-        return date;
-      }
-    }
-    return maxDate;
-  },
-  null as Date | null,
-);
+) ?? [];
 ---
 
 <Layout
@@ -80,13 +52,7 @@ const valueAfterDate = modalSplitResults?.reduce(
       categories={categories || []}
       kpis={filteredKpis}
       livingLabId={Number(labId)}
-      kpiResults={livingLabData?.kpi_results || []}
-      valueAfterDate={valueAfterDate
-        ? valueAfterDate.toISOString().slice(0, 10)
-        : undefined}
-      valueBeforeDate={valueBeforeDate
-        ? valueBeforeDate.toISOString().slice(0, 10)
-        : undefined}
+      kpiResults={kpiResults}
       client:load
     />
   </div>

@@ -1,4 +1,4 @@
-import { type IIKpiResultBeforeAfter, type IKpiResult } from "./KPIs";
+import { type IIKpiResultBeforeAfter, type IKpiResult, type IKpiResultGroup } from "./KPIs";
 import type { IProject, LivingLabProjectsImplementation } from "./Project";
 import type {
   ITransportMode,
@@ -31,7 +31,7 @@ export interface UpdateLabInput extends Partial<ILivingLab> {}
 export interface CreateLabInput extends Partial<Omit<ILivingLab, "id">> {}
 
 export interface ILivingLabPopulated extends ILivingLab {
-  kpi_results?: IIKpiResultBeforeAfter[];
+  kpi_results?: IKpiResultGroup[];
   /**
    * Measures list — may be empty
    */
