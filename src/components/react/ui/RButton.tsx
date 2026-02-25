@@ -1,9 +1,11 @@
 import React from "react";
 
 export type ButtonVariant = "link" | "primary" | "secondary" | "warning";
+export type ButtonSize = "xs" | "md" | "lg";
 
 export interface RButtonProps {
   variant?: ButtonVariant;
+  size?: ButtonSize;
   text?: string;
   children?: React.ReactNode;
   href?: string;
@@ -16,6 +18,7 @@ export interface RButtonProps {
 
 export function RButton({
   variant = "link",
+  size = "md",
   text,
   children,
   href,
@@ -25,14 +28,17 @@ export function RButton({
   type,
   ...props
 }: RButtonProps) {
+  const sizeClasses = {
+    xs: "px-2 py-1",
+    md: "px-3.5 py-2.5",
+    lg: "px-5 py-4",
+  };
+
   const style = {
-    primary:
-      " rounded-md bg-secondary px-3.5 py-2.5 text-sm font-semibold text-primary shadow-xs hover:bg-primary-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ",
+    primary: ` rounded-md bg-secondary ${sizeClasses[size]} text-sm font-semibold text-primary shadow-xs hover:bg-primary-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary `,
     link: " underline text-sm/6 text-blue-900 ",
-    secondary:
-      " rounded-md border border-secondary px-3.5 py-2.5 text-sm font-semibold shadow-xs hover:bg-primary-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary ",
-    warning:
-      " rounded-md bg-warning px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-warning-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-warning ",
+    secondary: ` rounded-md border border-secondary ${sizeClasses[size]} text-sm font-semibold shadow-xs hover:bg-primary-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary `,
+    warning: ` rounded-md bg-warning ${sizeClasses[size]} text-sm font-semibold text-white shadow-xs hover:bg-warning-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-warning `,
   };
   const actionClassName = `cursor-pointer ${style[variant]} ${className}`;
 

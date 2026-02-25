@@ -1,11 +1,81 @@
 import { JobRunsRepository } from "../repositories/job-runs.repository";
 import type { IJobRun } from "../../types";
 
+/** Error thrown when JOB_RUN_IMPACT_ASSESS_ROUTE env var is not configured */
+export class ConfigurationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ConfigurationError";
+  }
+}
+
+/** Error thrown when the upstream analysis API returns a non-2xx response or is unreachable */
+export class UpstreamError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "UpstreamError";
+  }
+}
+
 export class JobRunsService {
   private jobRunsRepository: JobRunsRepository;
 
   constructor() {
     this.jobRunsRepository = new JobRunsRepository();
+  }
+
+  /**
+   * Trigger a custom MCDA analysis job by proxying to the external analysis API.
+   * @param name - User-provided analysis name
+   * @param goalsWeights - Map of goal label to normalized weight
+   * @returns Promise resolving to IJobRun
+   * @throws ConfigurationError if JOB_RUN_IMPACT_ASSESS_ROUTE is not set
+   * @throws UpstreamError if the external API returns a non-2xx response or is unreachable
+   */
+  async triggerCustomAnalysis(
+    name: string,
+    goalsWeights: Record<string, number>,
+  ): Promise<IJobRun> {
+    const route = process.env.JOB_RUN_IMPACT_ASSESS_ROUTE;
+    if (!route) {
+      const err = new ConfigurationError(
+        "JOB_RUN_IMPACT_ASSESS_ROUTE environment variable is not set",
+      );
+      console.error(
+        "Configuration error in triggerCustomAnalysis:",
+        err.message,
+      );
+      throw err;
+    }
+    let res: Response;
+    try {
+      res = await fetch(route, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          params: {
+            perspective: "user_personalized",
+            name,
+            goals_weights: goalsWeights,
+          },
+        }),
+      });
+    } catch (networkError) {
+      console.error("Network error in triggerCustomAnalysis:", networkError);
+      throw new UpstreamError("External analysis API is unreachable");
+    }
+
+    if (!res.ok) {
+      console.error(
+        `Upstream error in triggerCustomAnalysis: external API responded with status ${res.status}`,
+      );
+      throw new UpstreamError(
+        `External analysis API returned status ${res.status}`,
+      );
+    }
+
+    const data = (await res.json()) as IJobRun;
+    return data;
   }
 
   /**
@@ -18,7 +88,7 @@ export class JobRunsService {
       }
 
       return await this.jobRunsRepository.findLatestSuccessfulByJobName(
-        jobName
+        jobName,
       );
     } catch (error) {
       console.error("Error in getLatestSuccessfulJobRun service:", error);

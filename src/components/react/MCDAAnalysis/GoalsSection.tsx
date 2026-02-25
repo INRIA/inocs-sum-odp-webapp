@@ -24,42 +24,35 @@ export const GoalsSection: React.FC<GoalsSectionProps> = ({
     setHasChanges(false);
   }, [goals]);
 
+  // Notify parent of initial weights on mount
+  useEffect(() => {
+    if (editable && onWeightsUpdate) {
+      onWeightsUpdate(goals);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array = run only on mount
+
   const handleWeightChange = (index: number, newWeight: number) => {
     const updatedGoals = [...editedGoals];
     updatedGoals[index] = { ...updatedGoals[index], weight: newWeight };
-    setEditedGoals(updatedGoals);
-    setHasChanges(true);
-  };
 
-  const normalizeWeights = (goalsToNormalize: MCDAGoal[]): MCDAGoal[] => {
-    const sum = goalsToNormalize.reduce((acc, goal) => acc + goal.weight, 0);
+    // Calculate the new sum
+    const newSum = updatedGoals.reduce((acc, goal) => acc + goal.weight, 0);
 
-    // If sum is 0, distribute equally
-    if (sum === 0) {
-      const equalWeight = 1 / goalsToNormalize.length;
-      return goalsToNormalize.map((goal) => ({
-        ...goal,
-        weight: equalWeight,
-      }));
+    // Block if exceeds 100%
+    if (newSum > 1) {
+      return;
     }
 
-    // Normalize to sum to 1
-    return goalsToNormalize.map((goal) => ({
-      ...goal,
-      weight: goal.weight / sum,
-    }));
-  };
-
-  const handleValidate = () => {
-    const normalizedGoals = normalizeWeights(editedGoals);
-    setEditedGoals(normalizedGoals);
-    setHasChanges(false);
-    onWeightsUpdate?.(normalizedGoals);
+    setEditedGoals(updatedGoals);
+    setHasChanges(true);
+    onWeightsUpdate?.(updatedGoals);
   };
 
   const handleReset = () => {
     setEditedGoals(goals);
     setHasChanges(false);
+    onWeightsUpdate?.(goals);
   };
 
   const currentSum = editedGoals.reduce((acc, goal) => acc + goal.weight, 0);
@@ -79,9 +72,33 @@ export const GoalsSection: React.FC<GoalsSectionProps> = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-1">
       {/* Goals List */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
+      <div>
+        {/* Edit Mode Controls */}
+        {editable && (
+          <div className="mt-3 pt-2 border-t border-gray-200">
+            <div className="flex flex-col items-end justify-between gap-4">
+              {/* Sum Display */}
+              <div className="flex items-center gap-3">
+                <RButton
+                  variant="link"
+                  onClick={handleReset}
+                  disabled={!hasChanges}
+                  text="Reset"
+                ></RButton>
+                <p>Total :</p>
+                <span
+                  className={`text-lg font-bold tabular-nums ${
+                    isNormalized ? "text-secondary" : "text-warning"
+                  }`}
+                >
+                  {sumPercentage}%
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="space-y-2">
           {displayGoals.map((goal, index) => (
             <GoalWeightBar
@@ -93,75 +110,7 @@ export const GoalsSection: React.FC<GoalsSectionProps> = ({
             />
           ))}
         </div>
-
-        {/* Edit Mode Controls */}
-        {editable && (
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <div className="flex flex-col items-start justify-between gap-4">
-              {/* Sum Display */}
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-medium text-gray-600">
-                  Total :
-                </span>
-                <span
-                  className={`text-lg font-bold tabular-nums ${
-                    isNormalized ? "text-secondary" : "text-warning"
-                  }`}
-                >
-                  {sumPercentage}%
-                </span>
-                {!isNormalized && (
-                  <span className="text-xs text-warning bg-warning/20 px-2 py-1 rounded">
-                    Will be normalized to 100%
-                  </span>
-                )}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-3">
-                <RButton
-                  variant="secondary"
-                  onClick={handleReset}
-                  disabled={!hasChanges}
-                  text="Reset"
-                  className="disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                />
-                <RButton
-                  variant="primary"
-                  onClick={handleValidate}
-                  disabled={!hasChanges}
-                  text="Validate"
-                  className="disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
-                />
-              </div>
-            </div>
-
-            {/* Info message */}
-            {hasChanges && (
-              <div className="mt-4 flex gap-2 text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <svg
-                  className="w-5 h-5 text-blue-600 shrink-0"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <p>
-                  Click <strong>Validate</strong> to apply changes. Weights will
-                  be automatically normalized to sum to 100%.
-                </p>
-              </div>
-            )}
-          </div>
-        )}
       </div>
-
       {/* Read-only info */}
       {!editable && (
         <div className="text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-lg p-4">

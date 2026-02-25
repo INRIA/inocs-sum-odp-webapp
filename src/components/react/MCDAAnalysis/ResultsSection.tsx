@@ -10,7 +10,7 @@ import { D3McdaGaiaPlane } from "./D3McdaGaiaPlane";
 import { D3McdaNetworkChart } from "./D3McdaNetworkChart";
 import { McdaRankingAlternatives } from "./McdaRankingAlternatives";
 import { McdaKeyResults } from "./McdaKeyResults";
-import { Tabs } from "../ui";
+import { InfoAlert, RButton, Tabs } from "../ui";
 
 interface ResultsSectionProps {
   selectedGroup: IKpiGroup | undefined;
@@ -41,6 +41,9 @@ export const ResultsSection: React.FC<ResultsSectionProps> = ({
   const criteriaLabels = mcdaResults?.criteria_labels || {};
   const ranking = mcdaResults?.ranking || [];
   const hasGaiaData = gaiaAlternatives.length > 0 && gaiaCriteria.length > 0;
+  const isPersonalizedAnalysis =
+    typeof window !== "undefined" &&
+    window.location.pathname.includes("/mcda_analysis/user_personalized/");
 
   // Convert to sorted entries
   const flowEntries = Object.entries(netFlows).map(([key, value]) => ({
@@ -158,6 +161,34 @@ export const ResultsSection: React.FC<ResultsSectionProps> = ({
 
   return (
     <div className="space-y-8">
+      {isPersonalizedAnalysis && (
+        <InfoAlert variant="info" title={"Anonymous Analysis"}>
+          <p className="mb-4">
+            Results are saved in database and accessible only via link. Save the
+            link below to retrieve this analysis later.
+          </p>
+          <div className="flex items-center gap-2 p-1 bg-white rounded-lg border border-gray-300">
+            <input
+              type="text"
+              readOnly
+              value={typeof window !== "undefined" ? window.location.href : ""}
+              className="flex-1 bg-transparent outline-none text-gray-700 text-sm"
+            />
+            <RButton
+              variant="primary"
+              size="xs"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  navigator.clipboard.writeText(window.location.href);
+                }
+              }}
+            >
+              Copy
+            </RButton>
+          </div>
+        </InfoAlert>
+      )}
+
       {/* Result Visualizations */}
       {hasResults ? (
         <>

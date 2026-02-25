@@ -20,12 +20,12 @@ export const CardFilter: React.FC<CardFilterProps> = ({
   const uniqueKpis = getUniqueParentKpis(selectedGroup?.kpis || []);
   return (
     <div className="flex flex-col">
-      <div className="gap-0 md:gap-2 flex justify-start mt-4 flex-row flex-wrap">
+      <div className="gap-2 flex justify-start flex-row flex-wrap">
         {groups.map((group) => (
           <button
             key={group.id}
             onClick={() => onGroupSelect(group.id)}
-            className={`w-full px-1 py-3 md:px-4 rounded-lg border-2 font-medium transition-all duration-200 text-start ${
+            className={`w-full p-2 md:p-3 rounded-lg border-2 font-medium transition-all duration-200 text-start ${
               selectedGroupId === group.id
                 ? "border-warning bg-warning/10 text-dark"
                 : "border-gray-200 bg-white text-gray-700 hover:border-warning/50 hover:bg-warning/5"

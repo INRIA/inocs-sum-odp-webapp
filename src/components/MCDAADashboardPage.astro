@@ -19,11 +19,19 @@ import {
   buildOutrankingGraphData,
   formatDateWithTime,
   MCDA_PERSPECTIVES,
+  MCDA_DEFAULT_GOALS,
   resolveMcdaPerspectiveLabel,
 } from "../lib/helpers";
 import { FAQAccordion, InfoAlert, InfoCard, RButton } from "./react";
 
-const { perspective, breadcrumbs, backHref } = Astro.props;
+const {
+  perspective,
+  breadcrumbs,
+  backHref,
+  enableCustomAnalysis,
+  name,
+  jobId,
+} = Astro.props;
 const api = new ApiClient(Astro.request);
 
 let pageBreadcrumbs = breadcrumbs ?? [];
@@ -32,15 +40,16 @@ let goals: MCDAGoal[] = [];
 let mcdaResults: McdaResults | undefined = undefined;
 let outrankingGraphData: OutrankingGraphData | undefined = undefined;
 let mcdaKeyInsights: McdaKeyInsightCard[] = [];
+let resultsTitle = name ?? "MCDA Analysis Results";
 
-if (perspective) {
+if (perspective === "user_personalized" && !jobId) {
+  goals = MCDA_DEFAULT_GOALS;
+} else if (perspective) {
   try {
-    pageBreadcrumbs.push({
-      label: resolveMcdaPerspectiveLabel(perspective, MCDA_PERSPECTIVES),
-    });
-    const latestRun = await api.getLatestJobRun(
-      `mcda_analysis_qualitative_${perspective}`,
-    );
+    resultsTitle = resolveMcdaPerspectiveLabel(perspective, MCDA_PERSPECTIVES);
+    const latestRun = jobId
+      ? await api.getJobRunById(jobId)
+      : await api.getLatestJobRun(`mcda_analysis_qualitative_${perspective}`);
 
     if (latestRun) {
       formattedDate = formatDateWithTime(latestRun.created_at);
@@ -53,6 +62,9 @@ if (perspective) {
     console.error("Error fetching job run data:", error);
   }
 }
+pageBreadcrumbs.push({
+  label: resultsTitle,
+});
 // Define badge icon SVG
 const badgeIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
   <path stroke-linecap="round" stroke-linejoin="round" d="M12 8.25v-4.5m0 0a2.25 2.25 0 100 4.5m0-4.5a2.25 2.25 0 110 4.5m-9 6h18m-3-12.75h.008v.008h-.008v-.008zm0 0h.008v.008h-.008v-.008zm0 0h.008v.008h-.008v-.008zm0 6h.008v.008h-.008v-.008zm0 0h.008v.008h-.008v-.008zm0 0h.008v.008h-.008v-.008zm0 6h.008v.008h-.008v-.008zm0 0h.008v.008h-.008v-.008zm0 0h.008v.008h-.008v-.008z"></path>
@@ -296,11 +308,26 @@ const methodologyQuestions = [
     </section>
 
     <!-- Dashboard Section -->
-    <div class="mx-auto px-1 py-8 border-t border-gray-200 mt-12">
+    <div
+      id="results"
+      class="mx-auto px-1 py-8 border-t border-gray-200 mt-12 space-y-4"
+    >
+      <h2 class="text-2xl font-bold text-gray-900 mb-3 text-center">
+        {resultsTitle}
+        {
+          name && (
+            <>
+              <br />
+              {name}
+            </>
+          )
+        }
+      </h2>
+
       {
         formattedDate && (
-          <p class="text-sm text-gray-500">
-            Results where updated on {formattedDate}
+          <p class="text-sm text-gray-500 text-center">
+            Results were updated on {formattedDate}
           </p>
         )
       }
@@ -311,6 +338,8 @@ const methodologyQuestions = [
         mcdaResults={mcdaResults}
         outrankingGraphData={outrankingGraphData}
         mcdaKeyInsights={mcdaKeyInsights}
+        enableCustomAnalysis={enableCustomAnalysis === true &&
+          perspective === "user_personalized"}
         client:load
       />
     </div>
