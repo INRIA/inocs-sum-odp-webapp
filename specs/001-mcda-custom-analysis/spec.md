@@ -2,7 +2,7 @@
 
 **Feature Branch**: `001-mcda-custom-analysis`  
 **Created**: 2026-02-24  
-**Status**: Draft  
+**Status**: Planning Complete  
 **Input**: User description: "Introduce custom analysis for the MCDA decision tool. Enables editable weights mode, user-named analysis submissions, proxied job-run creation, loading UX, and a dedicated results page per job ID."
 
 ## User Scenarios & Testing *(mandatory)*
@@ -45,7 +45,7 @@ is triggered with the returned job ID. The results page is not required.
    submits the analysis, **Then** a loading indicator replaces the results area while the request
    is in progress.
 4. **Given** the submission succeeds and a job ID is returned, **When** the response is received,
-   **Then** the user is navigated to `/tools/mcda_analysis/<job-id>`.
+   **Then** the user is navigated to `/tools/mcda_analysis/results/<job-id>`.
 5. **Given** the goal weights do not sum to 1, **When** the user submits, **Then** the weights
    are automatically normalized before submission and the user is informed of the normalization.
 6. **Given** the user clears the analysis name field completely, **When** they attempt to submit,
@@ -55,7 +55,7 @@ is triggered with the returned job ID. The results page is not required.
 
 ### User Story 2 - View Custom Analysis Results (Priority: P2)
 
-After being redirected to `/tools/mcda_analysis/<job-id>`, the user sees the results of their
+After being redirected to `/tools/mcda_analysis/results/<job-id>`, the user sees the results of their
 custom run rendered through the same dashboard used by pre-defined perspectives. The page is
 server-rendered and checks the job status before deciding what to display.
 
@@ -123,8 +123,10 @@ external API endpoint.
 - What happens when the weight for all goals is set to zero? The system must detect this,
   prevent submission, and inform the user that at least one goal must have a non-zero weight.
 - What happens when the job ID in the URL is not a valid format or contains unexpected characters?
-  The page MUST return a not-found state without throwing an unhandled error.
-- What happens when the user navigates directly to `/tools/mcda_analysis/<job-id>` for a job
+  The page MUST render a not-found state (matching FR-016 — no dashboard, no crash) rather than
+  throwing an unhandled error. A missing `id` segment (e.g., direct navigation with no trailing
+  path) may redirect to `/tools/mcda_analysis` instead.
+- What happens when the user navigates directly to `/tools/mcda_analysis/results/<job-id>` for a job
   belonging to a different user? Since the platform is fully anonymous, all job results are
   accessible by URL (public by design). No authentication check is required.
 - What happens when the analysis name contains characters that could be displayed in the
@@ -138,14 +140,14 @@ external API endpoint.
 - **FR-002**: The custom analysis mode MUST display a text input for the user to name their analysis.
 - **FR-003**: The name input MUST display a hint informing users that no personal information should be entered, as all analyses are anonymous.
 - **FR-004**: Users MUST be able to adjust the weight of each goal independently using the already-existing weight editing interface (currently controlled by the `editable` prop on `GoalsSection`).
-- **FR-005**: The system MUST normalize goal weights to sum to 1 before submitting, and MUST inform the user if normalization was applied.
+- **FR-005**: The system MUST normalize goal weights to sum to 1 before submitting, and MUST inform the user if normalization was applied. *(Normalization is performed by `GoalsSection.handleValidate` when the user clicks "Validate". `CustomAnalysisForm` MUST additionally guard at submit time: if weights are not yet normalized — because the user never clicked Validate — the form MUST block submission and prompt the user to click "Validate" first, or auto-normalize and inform the user inline.)*
 - **FR-006**: Submission MUST be prevented if the analysis name is empty or if all goal weights are zero.
 - **FR-007**: On submission, the results section MUST display a loading indicator while the job creation request is in progress.
 - **FR-008**: The submission MUST be disabled and the user MUST NOT be able to trigger a second job while one is already pending.
 - **FR-009**: The BFF endpoint `POST /api/v1/job-runs` MUST accept a custom analysis payload and forward it to the external analysis API configured at `JOB_RUN_IMPACT_ASSESS_ROUTE`.
 - **FR-010**: The forwarded request MUST use `perspective: "user_personalized"`, the user-provided name, and the normalized goals weights keyed by goal label.
-- **FR-011**: Upon a successful response, the system MUST navigate the user to `/tools/mcda_analysis/<job-id>`.
-- **FR-012**: The page `/tools/mcda_analysis/<job-id>` MUST be server-rendered and MUST retrieve the job status and data by job ID at request time.
+- **FR-011**: Upon a successful response, the system MUST navigate the user to `/tools/mcda_analysis/results/<job-id>`.
+- **FR-012**: The page `/tools/mcda_analysis/results/<job-id>` MUST be server-rendered and MUST retrieve the job status and data by job ID at request time.
 - **FR-013**: If the job status is `SUCCESS`, the page MUST render the full MCDA results dashboard (reusing `MCDAADashboardPage.astro`) with the job's output data, the analysis name, and the completion date.
 - **FR-014**: If the job status is `FAILURE`, the page MUST display an error message and instructions to contact the platform administrator.
 - **FR-015**: If the job is in any other status, the page MUST display a status message and a "Refresh page" button that reloads the current URL.

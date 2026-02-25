@@ -128,6 +128,12 @@ Self-contained React island managing:
 - `error` state: renders `<InfoAlert variant="error">` below the form
 - On success: `window.location.href = /tools/mcda_analysis/results/${job_id}`
 - Calls `onLoadingChange` prop to let `MCDADashboard` render loading skeleton in results panel
+- **Normalization guard at submit**: `GoalsSection.handleValidate` normalizes weights when the
+  user clicks "Validate" — `onWeightsUpdate` fires after that. If the user submits without
+  clicking Validate, the weights may not sum to 1. `CustomAnalysisForm` MUST check at submit
+  time. Recommended approach: block submission with an inline message "Please click 'Validate'
+  to apply your weight changes before submitting." (This is simpler to test than auto-normalizing
+  and avoids duplicate normalization logic.)
 
 **Props**:
 ```typescript
@@ -191,7 +197,7 @@ In results section: when `isSubmitting` is `true`, render loading skeleton in pl
 ```
 1. Parse JSON body → 400 "Invalid JSON in request body" on failure
 2. Validate name (non-empty after trim) → 400 "Analysis name is required"
-3. Validate goals_weights (non-null object, at least one value > 0)
+3. Validate goals_weights (non-null object, at least one value > 0, no negative values)
    → 400 "goals_weights must be provided with at least one non-zero weight"
 4. Call JobRunsService.triggerCustomAnalysis(name, goals_weights)
    ├─ Read process.env.JOB_RUN_IMPACT_ASSESS_ROUTE
@@ -200,6 +206,9 @@ In results section: when `isSubmitting` is `true`, render loading skeleton in pl
    ├─ If !res.ok → throw upstream error
    └─ Return { job_id } from parsed response
 5. Return 200: new ApiResponse({ data: { job_id } })
+   ⚠ Note: ApiResponse serialises the body as the contents of `.data` directly
+   (see ApiResponse constructor in src/types/ApiResponse.ts). The HTTP response body
+   will be `{ "job_id": "..." }` — not `{ "data": { "job_id": "..." } }`.
 6. Catch:
    - Config error → 500
    - Upstream error → 502 "Analysis service is unavailable. Please try again later."

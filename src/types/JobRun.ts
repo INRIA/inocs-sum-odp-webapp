@@ -22,6 +22,11 @@ export interface IJobRunInputData {
   goals?: MCDAGoal[];
   kpis: IKpiDefinition[];
   living_labs: ILivingLab[];
+  params?: {
+    name?: string;
+    goals_weights?: Record<string, number>;
+    perspective?: string;
+  };
   [key: string]: any;
 }
 
