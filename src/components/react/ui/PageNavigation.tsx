@@ -70,7 +70,7 @@ export const PageNavigation: React.FC<PageNavigationProps> = ({
   };
 
   return (
-    <div className="fixed bottom-2 md:bottom-5 right-2 md:right-8 z-50 flex flex-col items-end gap-3">
+    <div className=" w-11/12 md:w-4/6 fixed bottom-2 md:bottom-5 right-2 md:right-8 z-50 flex flex-col items-end gap-3">
       {/* Navigation Dots */}
       <div className="flex flex-col items-center gap-3 bg-white rounded-full shadow-lg border border-gray-200 p-4">
         {sections.map((section, index) => {
@@ -144,7 +144,7 @@ export const PageNavigation: React.FC<PageNavigationProps> = ({
           </button>
 
           {isDisclaimerOpen && (
-            <div className="bg-warning rounded-lg shadow-lg border border-gray-200 px-4 py-2 w-11/12 md:w-5/6">
+            <div className="bg-warning rounded-lg shadow-lg border border-gray-200 px-4 py-2">
               <p className="hidden lg:block italic text-white">{disclaimer}</p>
               <small className="lg:hidden italic text-white">{disclaimer}</small>
             </div>

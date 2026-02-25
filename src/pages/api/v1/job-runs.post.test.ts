@@ -31,7 +31,8 @@ describe("POST /api/v1/job-runs", () => {
     // Stub global fetch before each test
     vi.stubGlobal("fetch", vi.fn());
     // Set the env var for tests that need it
-    process.env.JOB_RUN_IMPACT_ASSESS_ROUTE = "https://analysis-api.example.com/run";
+    process.env.JOB_RUN_IMPACT_ASSESS_ROUTE =
+      "https://analysis-api.example.com/run";
   });
 
   afterEach(() => {
@@ -42,10 +43,18 @@ describe("POST /api/v1/job-runs", () => {
   // ─── Happy Path (scenario 1) ──────────────────────────────────────────────
 
   describe("happy path", () => {
-    it("returns 200 with { job_id } when given valid name and goals_weights", async () => {
-      const returnedJobId = "550e8400-e29b-41d4-a716-446655440000";
+    it("returns 200 with full job data when given valid name and goals_weights", async () => {
+      const mockJobResponse = {
+        id: "550e8400-e29b-41d4-a716-446655440000",
+        job_name: "mcda_analysis_qualitative_user_personalized",
+        status: "PENDING",
+        message: null,
+        created_at: "2026-02-25T06:13:46",
+        started_at: null,
+        completed_at: null,
+      };
       vi.mocked(fetch).mockResolvedValueOnce(
-        new Response(JSON.stringify({ job_id: returnedJobId }), { status: 200 }),
+        new Response(JSON.stringify(mockJobResponse), { status: 200 }),
       );
 
       const req = makeRequest(validPayload);
@@ -53,7 +62,7 @@ describe("POST /api/v1/job-runs", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body).toEqual({ job_id: returnedJobId });
+      expect(body).toEqual(mockJobResponse);
     });
   });
 
@@ -61,10 +70,20 @@ describe("POST /api/v1/job-runs", () => {
 
   describe("forwarded payload shape", () => {
     it("forwards perspective='user_personalized', name, and goals_weights to external API", async () => {
-      const returnedJobId = "abc123-uuid";
-      const fetchMock = vi.mocked(fetch).mockResolvedValueOnce(
-        new Response(JSON.stringify({ job_id: returnedJobId }), { status: 200 }),
-      );
+      const mockJobResponse = {
+        id: "abc123-uuid",
+        job_name: "mcda_analysis_qualitative_user_personalized",
+        status: "PENDING",
+        message: null,
+        created_at: "2026-02-25T06:13:46",
+        started_at: null,
+        completed_at: null,
+      };
+      const fetchMock = vi
+        .mocked(fetch)
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify(mockJobResponse), { status: 200 }),
+        );
 
       const req = makeRequest(validPayload);
       await POST({ request: req } as any);
@@ -74,7 +93,9 @@ describe("POST /api/v1/job-runs", () => {
 
       expect(_url).toBe("https://analysis-api.example.com/run");
 
-      const forwardedBody = JSON.parse((fetchInit as RequestInit).body as string);
+      const forwardedBody = JSON.parse(
+        (fetchInit as RequestInit).body as string,
+      );
       expect(forwardedBody.params.perspective).toBe("user_personalized");
       expect(forwardedBody.params.name).toBe(validPayload.name);
       expect(forwardedBody.params.goals_weights).toEqual(validGoalsWeights);
@@ -107,7 +128,10 @@ describe("POST /api/v1/job-runs", () => {
     });
 
     it("returns 400 'Analysis name is required' when name is empty string after trim", async () => {
-      const req = makeRequest({ name: "   ", goals_weights: validGoalsWeights });
+      const req = makeRequest({
+        name: "   ",
+        goals_weights: validGoalsWeights,
+      });
       const res = await POST({ request: req } as any);
 
       expect(res.status).toBe(400);
@@ -121,30 +145,47 @@ describe("POST /api/v1/job-runs", () => {
 
       expect(res.status).toBe(400);
       const body = await res.json();
-      expect(body.error).toBe("goals_weights must be provided with at least one non-zero weight");
+      expect(body.error).toBe(
+        "goals_weights must be provided with at least one non-zero weight",
+      );
     });
 
     it("returns 400 when all goals_weights values are 0", async () => {
       const zeroWeights: Record<string, number> = {};
-      Object.keys(validGoalsWeights).forEach((k) => { zeroWeights[k] = 0; });
+      Object.keys(validGoalsWeights).forEach((k) => {
+        zeroWeights[k] = 0;
+      });
 
-      const req = makeRequest({ name: "My Analysis", goals_weights: zeroWeights });
+      const req = makeRequest({
+        name: "My Analysis",
+        goals_weights: zeroWeights,
+      });
       const res = await POST({ request: req } as any);
 
       expect(res.status).toBe(400);
       const body = await res.json();
-      expect(body.error).toBe("goals_weights must be provided with at least one non-zero weight");
+      expect(body.error).toBe(
+        "goals_weights must be provided with at least one non-zero weight",
+      );
     });
 
     it("returns 400 when any goals_weights value is negative", async () => {
-      const negativeWeights = { ...validGoalsWeights, "Improve Accessibility": -0.1 };
+      const negativeWeights = {
+        ...validGoalsWeights,
+        "Improve Accessibility": -0.1,
+      };
 
-      const req = makeRequest({ name: "My Analysis", goals_weights: negativeWeights });
+      const req = makeRequest({
+        name: "My Analysis",
+        goals_weights: negativeWeights,
+      });
       const res = await POST({ request: req } as any);
 
       expect(res.status).toBe(400);
       const body = await res.json();
-      expect(body.error).toBe("goals_weights must be provided with at least one non-zero weight");
+      expect(body.error).toBe(
+        "goals_weights must be provided with at least one non-zero weight",
+      );
     });
   });
 
@@ -153,7 +194,9 @@ describe("POST /api/v1/job-runs", () => {
   describe("upstream and configuration errors", () => {
     it("returns 502 when external API returns non-2xx status", async () => {
       vi.mocked(fetch).mockResolvedValueOnce(
-        new Response(JSON.stringify({ error: "Server error" }), { status: 500 }),
+        new Response(JSON.stringify({ error: "Server error" }), {
+          status: 500,
+        }),
       );
 
       const req = makeRequest(validPayload);
@@ -161,7 +204,9 @@ describe("POST /api/v1/job-runs", () => {
 
       expect(res.status).toBe(502);
       const body = await res.json();
-      expect(body.error).toBe("Analysis service is unavailable. Please try again later.");
+      expect(body.error).toBe(
+        "Analysis service is unavailable. Please try again later.",
+      );
     });
 
     it("returns 502 or 503 when fetch throws a network error", async () => {
@@ -172,7 +217,9 @@ describe("POST /api/v1/job-runs", () => {
 
       expect([502, 503]).toContain(res.status);
       const body = await res.json();
-      expect(body.error).toBe("Analysis service is unavailable. Please try again later.");
+      expect(body.error).toBe(
+        "Analysis service is unavailable. Please try again later.",
+      );
     });
 
     it("returns 500 'Internal Server Error' when JOB_RUN_IMPACT_ASSESS_ROUTE is undefined", async () => {

@@ -22,7 +22,11 @@ export interface IJobRunInputData {
   goals?: MCDAGoal[];
   kpis: IKpiDefinition[];
   living_labs: ILivingLab[];
-  params?: { name?: string; goals_weights?: Record<string, number>; perspective?: string };
+  params?: {
+    name?: string;
+    goals_weights?: Record<string, number>;
+    perspective?: string;
+  };
   [key: string]: any;
 }
 
@@ -105,23 +109,4 @@ export enum JobStatus {
   STARTED = "STARTED",
   SUCCESS = "SUCCESS",
   FAILURE = "FAILURE",
-}
-
-/** Validated, normalized payload produced by CustomAnalysisForm before sending to BFF */
-export interface CustomAnalysisInput {
-  /** Non-empty after .trim(); max 120 chars */
-  name: string;
-  /** Normalized to sum 1; all values >= 0; at least one > 0 */
-  goals_weights: Record<string, number>;
-}
-
-/** JSON body accepted by POST /api/v1/job-runs */
-export interface CustomAnalysisJobRunRequest {
-  name: string;
-  goals_weights: Record<string, number>;
-}
-
-/** JSON body returned by POST /api/v1/job-runs on success */
-export interface CustomAnalysisJobRunResponse {
-  job_id: string;
 }

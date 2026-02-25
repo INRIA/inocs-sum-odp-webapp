@@ -51,11 +51,17 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     body = await request.json();
   } catch {
-    return new ApiResponse({ error: "Invalid JSON in request body", status: 400 }, { status: 400 });
+    return new ApiResponse(
+      { error: "Invalid JSON in request body", status: 400 },
+      { status: 400 },
+    );
   }
 
   if (typeof body !== "object" || body === null) {
-    return new ApiResponse({ error: "Invalid JSON in request body", status: 400 }, { status: 400 });
+    return new ApiResponse(
+      { error: "Invalid JSON in request body", status: 400 },
+      { status: 400 },
+    );
   }
 
   const payload = body as Record<string, unknown>;
@@ -63,7 +69,10 @@ export const POST: APIRoute = async ({ request }) => {
   // 2. Validate name
   const name = payload.name;
   if (typeof name !== "string" || name.trim() === "") {
-    return new ApiResponse({ error: "Analysis name is required", status: 400 }, { status: 400 });
+    return new ApiResponse(
+      { error: "Analysis name is required", status: 400 },
+      { status: 400 },
+    );
   }
 
   // 3. Validate goals_weights
@@ -74,7 +83,11 @@ export const POST: APIRoute = async ({ request }) => {
     Array.isArray(goalsWeights)
   ) {
     return new ApiResponse(
-      { error: "goals_weights must be provided with at least one non-zero weight", status: 400 },
+      {
+        error:
+          "goals_weights must be provided with at least one non-zero weight",
+        status: 400,
+      },
       { status: 400 },
     );
   }
@@ -88,7 +101,11 @@ export const POST: APIRoute = async ({ request }) => {
 
   if (hasNegative || !hasPositive) {
     return new ApiResponse(
-      { error: "goals_weights must be provided with at least one non-zero weight", status: 400 },
+      {
+        error:
+          "goals_weights must be provided with at least one non-zero weight",
+        status: 400,
+      },
       { status: 400 },
     );
   }
@@ -99,21 +116,30 @@ export const POST: APIRoute = async ({ request }) => {
       name.trim(),
       weightsMap as Record<string, number>,
     );
-    // 5. Return 200 with { job_id }
-    return new ApiResponse({ data: { job_id: result.job_id } });
+    // 5. Return 200 with { id, status, ... }
+    return new ApiResponse({ data: result });
   } catch (err) {
     if (err instanceof ConfigurationError) {
       // 6. Config error → 500 (no internal details in response body)
-      return new ApiResponse({ error: "Internal Server Error", status: 500 }, { status: 500 });
+      return new ApiResponse(
+        { error: "Internal Server Error", status: 500 },
+        { status: 500 },
+      );
     }
     if (err instanceof UpstreamError) {
       // 7. Upstream error → 502
       return new ApiResponse(
-        { error: "Analysis service is unavailable. Please try again later.", status: 502 },
+        {
+          error: "Analysis service is unavailable. Please try again later.",
+          status: 502,
+        },
         { status: 502 },
       );
     }
     console.error("Unexpected error in POST /api/v1/job-runs:", err);
-    return new ApiResponse({ error: "Internal Server Error", status: 500 }, { status: 500 });
+    return new ApiResponse(
+      { error: "Internal Server Error", status: 500 },
+      { status: 500 },
+    );
   }
 };

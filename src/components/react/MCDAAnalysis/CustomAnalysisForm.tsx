@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import type { MCDAGoal } from "../../../types";
 import { GoalsSection } from "./GoalsSection";
-import { InfoAlert } from "../ui";
+import { InfoAlert, RButton } from "../ui";
+import ApiClient from "../../../lib/api-client/ApiClient";
+import { Input } from "../../react-catalyst-ui-kit/typescript/input";
 
 interface CustomAnalysisFormProps {
   goals: MCDAGoal[];
@@ -18,6 +20,9 @@ export const CustomAnalysisForm: React.FC<CustomAnalysisFormProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [nameError, setNameError] = useState<string | null>(null);
   const [weightsError, setWeightsError] = useState<string | null>(null);
+
+  // Create API client instance inside component so it uses the mocked version in tests
+  const api = new ApiClient();
 
   const setLoading = (loading: boolean) => {
     setIsLoading(loading);
@@ -38,118 +43,63 @@ export const CustomAnalysisForm: React.FC<CustomAnalysisFormProps> = ({
     setWeightsError(null);
     setError(null);
 
-    // 1. Validate name
-    if (!name.trim()) {
-      setNameError("Analysis name is required");
-      return;
-    }
-
-    // 2. Validate weights: at least one goal must have a non-zero weight
+    // 1. Validate weights: at least one goal must have a non-zero weight
     const hasPositiveWeight = currentGoals.some((g) => g.weight > 0);
     if (!hasPositiveWeight) {
       setWeightsError("At least one goal must have a non-zero weight");
       return;
     }
 
-    // 3. Build goals_weights map from MCDAGoal[]
+    // 2. Build goals_weights map from MCDAGoal[]
     const goals_weights: Record<string, number> = {};
     currentGoals.forEach((g) => {
       goals_weights[g.name] = g.weight;
     });
 
-    // 4. Check normalization — sum should be approximately 1
+    // 3. Check normalization — sum should be approximately 1
     const sum = currentGoals.reduce((acc, g) => acc + g.weight, 0);
     const isNormalized = Math.abs(sum - 1) < 0.01;
     if (!isNormalized) {
-      setWeightsError(
-        "Please click 'Validate' to apply your weight changes before submitting.",
-      );
+      setWeightsError("Weights must sum to 100% before submitting.");
       return;
+    }
+
+    // 4. Generate name if empty
+    let analysisName = name.trim();
+    if (!analysisName) {
+      // Find highest and lowest weighted goals
+      const sortedGoals = [...currentGoals].sort((a, b) => b.weight - a.weight);
+      const highestGoal = sortedGoals[0];
+      const lowestGoal = sortedGoals[sortedGoals.length - 1];
+      analysisName = `High ${highestGoal.name} and low ${lowestGoal.name}`;
     }
 
     // 5. Submit
     setLoading(true);
 
     try {
-      const res = await fetch("/api/v1/job-runs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), goals_weights }),
-      });
+      const jobRunRes = await api.triggerJobRun(analysisName, goals_weights);
 
-      if (!res.ok) {
+      if (!jobRunRes) {
         let errMsg = "Something went wrong. Please try again.";
-        try {
-          const data: unknown = await res.json();
-          if (
-            typeof data === "object" &&
-            data !== null &&
-            "error" in data &&
-            typeof (data as { error: unknown }).error === "string"
-          ) {
-            errMsg = (data as { error: string }).error;
-          }
-        } catch {
-          // ignore parse error
-        }
         setError(errMsg);
         setLoading(false);
         return;
       }
 
-      const raw: unknown = await res.json();
-      const job_id =
-        typeof raw === "object" &&
-        raw !== null &&
-        "job_id" in raw &&
-        typeof (raw as { job_id: unknown }).job_id === "string"
-          ? (raw as { job_id: string }).job_id
-          : "";
-      window.location.href = `/tools/mcda_analysis/results/${job_id}`;
+      const id = jobRunRes.id;
+      window.location.href = `/tools/mcda_analysis/user_personalized/${id}#results`;
     } catch (networkErr) {
       console.error("Network error in CustomAnalysisForm:", networkErr);
-      setError("A network error occurred. Please check your connection and try again.");
+      setError(
+        "A network error occurred. Please check your connection and try again.",
+      );
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-      {/* Analysis Name Input */}
-      <div className="space-y-2">
-        <label
-          htmlFor="analysis-name"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Analysis Name
-        </label>
-        <input
-          id="analysis-name"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          maxLength={120}
-          disabled={isLoading}
-          placeholder="e.g. Urban mobility priorities — Geneva pilot"
-          className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500"
-          aria-label="Analysis Name"
-          aria-describedby="analysis-name-hint"
-        />
-        {/* Privacy hint — always visible */}
-        <p
-          id="analysis-name-hint"
-          className="text-xs text-gray-500"
-        >
-          Your analysis name is not linked to any personal identity. Do not
-          include names, emails, or other identifying information.
-        </p>
-        {nameError && (
-          <p className="text-sm text-red-600" role="alert">
-            {nameError}
-          </p>
-        )}
-      </div>
-
+    <form onSubmit={handleSubmit} className="space-y-2" noValidate>
       {/* Goals Weights Section */}
       <GoalsSection
         goals={currentGoals}
@@ -157,17 +107,13 @@ export const CustomAnalysisForm: React.FC<CustomAnalysisFormProps> = ({
         onWeightsUpdate={handleWeightsUpdate}
       />
       {weightsError && (
-        <p className="text-sm text-red-600" role="alert">
+        <p className="text-sm text-danger" role="alert">
           {weightsError}
         </p>
       )}
 
       {/* Error Alert */}
-      {error && (
-        <InfoAlert variant="danger">
-          {error}
-        </InfoAlert>
-      )}
+      {error && <InfoAlert variant="danger">{error}</InfoAlert>}
 
       {/* Loading indicator */}
       {isLoading && (
@@ -201,16 +147,42 @@ export const CustomAnalysisForm: React.FC<CustomAnalysisFormProps> = ({
           <span>Submitting analysis…</span>
         </div>
       )}
-
+      {/* Analysis Name Input */}
+      <div className="space-y-0.5">
+        <label htmlFor="analysis-name" className="block text-sm font-medium">
+          Analysis Name (optional)
+        </label>
+        <Input
+          id="analysis-name"
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          maxLength={120}
+          disabled={isLoading}
+          placeholder="e.g. Improve safety focus perspective"
+          aria-label="Analysis Name (optional)"
+          aria-describedby="analysis-name-hint"
+        />
+        {/* Privacy hint — always visible */}
+        <small id="analysis-name-hint" className="text-xs text-gray-500">
+          Do not include names, emails, or other identifying information.
+        </small>
+        {nameError && (
+          <p className="text-sm text-danger" role="alert">
+            {nameError}
+          </p>
+        )}
+      </div>
       {/* Submit Button */}
-      <button
+      <RButton
+        variant="primary"
         type="submit"
         disabled={isLoading}
         aria-label="Run Custom Analysis"
-        className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+        className="w-full"
       >
         {isLoading ? "Submitting…" : "Run Custom Analysis"}
-      </button>
+      </RButton>
     </form>
   );
 };

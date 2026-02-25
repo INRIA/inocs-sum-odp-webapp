@@ -28,23 +28,25 @@ export class JobRunsService {
    * Trigger a custom MCDA analysis job by proxying to the external analysis API.
    * @param name - User-provided analysis name
    * @param goalsWeights - Map of goal label to normalized weight
-   * @returns Promise resolving to { job_id }
+   * @returns Promise resolving to IJobRun
    * @throws ConfigurationError if JOB_RUN_IMPACT_ASSESS_ROUTE is not set
    * @throws UpstreamError if the external API returns a non-2xx response or is unreachable
    */
   async triggerCustomAnalysis(
     name: string,
     goalsWeights: Record<string, number>,
-  ): Promise<{ job_id: string }> {
+  ): Promise<IJobRun> {
     const route = process.env.JOB_RUN_IMPACT_ASSESS_ROUTE;
     if (!route) {
       const err = new ConfigurationError(
         "JOB_RUN_IMPACT_ASSESS_ROUTE environment variable is not set",
       );
-      console.error("Configuration error in triggerCustomAnalysis:", err.message);
+      console.error(
+        "Configuration error in triggerCustomAnalysis:",
+        err.message,
+      );
       throw err;
     }
-
     let res: Response;
     try {
       res = await fetch(route, {
@@ -67,11 +69,13 @@ export class JobRunsService {
       console.error(
         `Upstream error in triggerCustomAnalysis: external API responded with status ${res.status}`,
       );
-      throw new UpstreamError(`External analysis API returned status ${res.status}`);
+      throw new UpstreamError(
+        `External analysis API returned status ${res.status}`,
+      );
     }
 
-    const data = (await res.json()) as { job_id: string };
-    return { job_id: data.job_id };
+    const data = (await res.json()) as IJobRun;
+    return data;
   }
 
   /**
@@ -84,7 +88,7 @@ export class JobRunsService {
       }
 
       return await this.jobRunsRepository.findLatestSuccessfulByJobName(
-        jobName
+        jobName,
       );
     } catch (error) {
       console.error("Error in getLatestSuccessfulJobRun service:", error);

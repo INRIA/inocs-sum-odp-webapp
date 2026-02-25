@@ -90,7 +90,10 @@ export default class ApiClient {
         return res.json() as Promise<T>;
       }
     } catch (error) {
-      console.error(`Error during API request to ${url}:`, error);
+      console.error(
+        `Error during API request to ${options?.method} ${url}:`,
+        error,
+      );
       if (throwOnError) {
         throw new Error(error instanceof Error ? error.message : String(error));
       }
@@ -238,6 +241,20 @@ export default class ApiClient {
   async getAllJobRuns(status?: string): Promise<IJobRun[] | null> {
     const params = status ? new URLSearchParams({ status }) : "";
     return this.request<IJobRun[]>(`/job-runs${params ? `?${params}` : ""}`);
+  }
+
+  async triggerJobRun(
+    name: string,
+    goalsWeights: Record<string, number>,
+  ): Promise<IJobRun | null> {
+    return this.request<IJobRun>(
+      `/job-runs`,
+      {
+        method: "POST",
+        body: JSON.stringify({ name, goals_weights: goalsWeights }),
+      },
+      true,
+    );
   }
 
   /**

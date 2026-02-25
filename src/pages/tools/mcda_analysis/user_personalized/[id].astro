@@ -1,15 +1,21 @@
 ---
 import Layout from "../../../../layouts/Layout.astro";
-import { MCDADashboard } from "../../../../components/react/MCDAAnalysis";
 import { JobResultStatus } from "../../../../components/react/MCDAAnalysis";
 import { JobRunsService } from "../../../../bff/services/job-runs.service";
 import { JobStatus } from "../../../../types/JobRun";
-import type { IJobRun, MCDAGoal, McdaResults, OutrankingGraphData, McdaKeyInsightCard } from "../../../../types";
+import type {
+  IJobRun,
+  MCDAGoal,
+  McdaResults,
+  OutrankingGraphData,
+  McdaKeyInsightCard,
+} from "../../../../types";
 import {
   buildOutrankingGraphData,
   buildMcdaKeyInsights,
   formatDateWithTime,
 } from "../../../../lib/helpers";
+import MCDAADashboardPage from "../../../../components/MCDAADashboardPage.astro";
 
 const { id } = Astro.params;
 
@@ -37,7 +43,7 @@ if (isValidIdFormat) {
 }
 
 // Resolve display data for SUCCESS status
-const analysisName: string | null = jobRun?.input_data?.params?.name ?? null;
+const analysisName: string | null = jobRun?.input_data?.name ?? null;
 const completedAt: string | null = jobRun?.completed_at
   ? formatDateWithTime(jobRun.completed_at)
   : null;
@@ -58,7 +64,9 @@ if (jobRun?.status === JobStatus.SUCCESS) {
 
 {
   /* Not found state: no valid format, fetch error, or jobRun === null */
-  (!isValidIdFormat || fetchError || (isValidIdFormat && !fetchError && jobRun === null)) && (
+  (!isValidIdFormat ||
+    fetchError ||
+    (isValidIdFormat && !fetchError && jobRun === null)) && (
     <Layout title="Job Not Found — MCDA Analysis">
       <div class="mx-auto max-w-2xl px-4 py-16 text-center">
         <h1 class="text-2xl font-bold text-gray-900">Analysis Not Found</h1>
@@ -78,33 +86,18 @@ if (jobRun?.status === JobStatus.SUCCESS) {
 
 {
   jobRun?.status === JobStatus.SUCCESS && (
-    <Layout title={`${analysisName ?? "Custom Analysis"} — MCDA Results`}>
-      <div class="mx-auto max-w-7xl px-4 py-8 space-y-4">
-        <div class="flex items-start justify-between gap-4">
-          <div>
-            <h1 class="text-xl font-bold text-gray-900">
-              {analysisName ?? "Custom Analysis Results"}
-            </h1>
-            {completedAt && (
-              <p class="text-sm text-gray-500 mt-1">Completed: {completedAt}</p>
-            )}
-          </div>
-          <a
-            href="/tools/mcda_analysis"
-            class="shrink-0 text-sm text-blue-600 hover:underline"
-          >
-            ← Back to MCDA Analysis
-          </a>
-        </div>
-        <MCDADashboard
-          goals={goals}
-          mcdaResults={mcdaResults}
-          outrankingGraphData={outrankingGraphData}
-          mcdaKeyInsights={mcdaKeyInsights}
-          client:load
-        />
-      </div>
-    </Layout>
+    <MCDAADashboardPage
+      perspective="user_personalized"
+      enableCustomAnalysis={true}
+      name={analysisName ?? "Custom Analysis"}
+      jobId={id}
+      breadcrumbs={[
+        { label: "Home", href: "/" },
+        { label: "Tools" },
+        { label: "MCDA Analysis", href: "/tools/mcda_analysis" },
+      ]}
+      backHref="/tools/mcda_analysis"
+    />
   )
 }
 
@@ -135,7 +128,10 @@ if (jobRun?.status === JobStatus.SUCCESS) {
     jobRun?.status === JobStatus.STARTED) && (
     <Layout title="Analysis In Progress — MCDA Analysis">
       <div class="mx-auto max-w-2xl px-4 py-8">
-        <JobResultStatus status={jobRun.status as "PENDING" | "STARTED"} client:load />
+        <JobResultStatus
+          status={jobRun.status as "PENDING" | "STARTED"}
+          client:load
+        />
         <div class="mt-6">
           <a
             href="/tools/mcda_analysis"

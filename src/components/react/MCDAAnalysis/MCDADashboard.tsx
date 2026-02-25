@@ -40,7 +40,6 @@ export const MCDADashboard: React.FC<MCDADashboardProps> = ({
   enableCustomAnalysis = false,
 }) => {
   const [isConfigDrawerOpen, setIsConfigDrawerOpen] = useState(false);
-  const [isCustomMode, setIsCustomMode] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigationSections = [
     { id: "how-to", label: "Information about the tool" },
@@ -67,8 +66,8 @@ export const MCDADashboard: React.FC<MCDADashboardProps> = ({
   };
 
   const configurationContent = (
-    <div className="space-y-8">
-      <section id="perspectives">
+    <div className="space-y-4">
+      <section id="perspectives" className="space-y-1">
         <AnalysisSectionDivider
           step={1}
           title="Perspectives"
@@ -82,29 +81,14 @@ export const MCDADashboard: React.FC<MCDADashboardProps> = ({
         />
       </section>
 
-      <section id="goals">
-        <div className="flex items-center justify-between">
-          <AnalysisSectionDivider
-            step={2}
-            title="Goals"
-            // subtitle="Observe the goals and their priorities"
-            description="See the list of project goals and how important each one is for your selected perspective"
-          />
-          {enableCustomAnalysis && (
-            <button
-              type="button"
-              onClick={() => setIsCustomMode((prev) => !prev)}
-              className={`shrink-0 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors ${
-                isCustomMode
-                  ? "border-blue-600 bg-blue-600 text-white hover:bg-blue-700"
-                  : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-              }`}
-            >
-              {isCustomMode ? "✓ Custom Analysis" : "Custom Analysis"}
-            </button>
-          )}
-        </div>
-        {enableCustomAnalysis && isCustomMode ? (
+      <section id="goals" className="space-y-1">
+        <AnalysisSectionDivider
+          step={2}
+          title="Goals"
+          // subtitle="Observe the goals and their priorities"
+          description="How important each goal is for your selected perspective"
+        />
+        {enableCustomAnalysis ? (
           <CustomAnalysisForm goals={goals} onLoadingChange={setIsSubmitting} />
         ) : selectedPerspective ? (
           <GoalsSection goals={goals} editable={false} />
@@ -158,12 +142,15 @@ export const MCDADashboard: React.FC<MCDADashboardProps> = ({
         </div>
       )}
 
-      <div id="mcda-results" className="grid grid-cols-1 gap-6 lg:grid-cols-[350px_minmax(0,1fr)]">
+      <div
+        id="mcda-results"
+        className="grid grid-cols-1 gap-6 lg:grid-cols-[350px_minmax(0,1fr)]"
+      >
         <aside className="hidden lg:block lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto pr-2">
           {configurationContent}
         </aside>
 
-        <section id="results" className="space-y-6 min-w-0">
+        <section className="space-y-6 min-w-0">
           <AnalysisSectionDivider
             step={3}
             title="Results"
