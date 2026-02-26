@@ -13,37 +13,10 @@ const modalSplitKpis = (await api.getKPIs({ kpi_number: "15" }))?.filter(
   (kpi) => kpi.parent_kpi_id,
 );
 const livingLabData = await api.getLivingLab(labId);
-const modalSplitResults = livingLabData?.kpi_results?.filter((result) =>
-  modalSplitKpis?.some((mk) => mk.id === result.kpidefinition_id),
-);
-
-const valueBeforeDate = modalSplitResults?.reduce(
-  (minDate, result) => {
-    const dateStr = result.result_before?.date;
-    if (dateStr) {
-      const date = new Date(dateStr);
-      if (!minDate || date < minDate) {
-        return date;
-      }
-    }
-    return minDate;
-  },
-  null as Date | null,
-);
-
-const valueAfterDate = modalSplitResults?.reduce(
-  (maxDate, result) => {
-    const dateStr = result.result_after?.date;
-    if (dateStr) {
-      const date = new Date(dateStr);
-      if (!maxDate || date > maxDate) {
-        return date;
-      }
-    }
-    return maxDate;
-  },
-  null as Date | null,
-);
+const kpiResults =
+  livingLabData?.kpi_results?.filter((result) =>
+    modalSplitKpis?.some((mk) => mk.id === result.kpidefinition_id),
+  ) ?? [];
 ---
 
 <Layout
@@ -56,7 +29,9 @@ const valueAfterDate = modalSplitResults?.reduce(
   backHref="/lab-admin"
 >
   <div class="mx-auto px-4 py-8 flex flex-col gap-8">
-    <h2 class="text-2xl font-bold mb-4">Modal split KPI</h2>
+    <h2 class="text-2xl font-bold mb-4 px-2 md:px-5 lg:px-10">
+      Modal split KPI
+    </h2>
 
     <InfoAlert
       title="Why are transport modes status important?"
@@ -86,21 +61,15 @@ const valueAfterDate = modalSplitResults?.reduce(
         collection plan page.
       </p>
     </InfoAlert>
-  </div>
 
-  <LivingLabModalSplit
-    modes={transportModes ?? []}
-    kpis={modalSplitKpis ?? []}
-    livingLabId={labId}
-    livingLabTransportModes={livingLabData?.transport_mode_living_lab_implementation ||
-      []}
-    kpiResults={modalSplitResults ?? []}
-    valueAfterDate={valueAfterDate
-      ? valueAfterDate.toISOString().slice(0, 10)
-      : undefined}
-    valueBeforeDate={valueBeforeDate
-      ? valueBeforeDate.toISOString().slice(0, 10)
-      : undefined}
-    client:load
-  />
+    <LivingLabModalSplit
+      modes={transportModes ?? []}
+      kpis={modalSplitKpis ?? []}
+      livingLabId={labId}
+      livingLabTransportModes={livingLabData?.transport_mode_living_lab_implementation ||
+        []}
+      kpiResults={kpiResults}
+      client:load
+    />
+  </div>
 </Layout>
