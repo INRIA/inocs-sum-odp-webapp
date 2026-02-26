@@ -7,8 +7,8 @@ import {
   TableHeader,
   TableRow,
 } from "../react-catalyst-ui-kit";
-import type { IKpi, IIKpiResultBeforeAfter } from "../../types";
-import { BeforeAndAfterDates, LivingLabKpiResultsForm } from "./form";
+import type { IKpi, IKpiResultGroup } from "../../types";
+import { DefaultCollectionDate, KpiResultList } from "./form";
 import { KpiTypeBadge } from "./KpiTypeBadge";
 import { Badge, ExpansionPanel, Tooltip } from "./ui";
 import type { ICategory } from "../../types/Category";
@@ -16,10 +16,9 @@ import type { ICategory } from "../../types/Category";
 type Props = {
   kpis: IKpi[];
   livingLabId: number;
-  kpiResults: IIKpiResultBeforeAfter[];
+  kpiResults: IKpiResultGroup[];
   categories: ICategory[];
-  valueBeforeDate?: string;
-  valueAfterDate?: string;
+  defaultDate?: string;
 };
 
 export function LivingLabKPIsEdition({
@@ -27,8 +26,7 @@ export function LivingLabKPIsEdition({
   livingLabId,
   kpiResults = [],
   categories = [],
-  valueBeforeDate,
-  valueAfterDate,
+  defaultDate: initialDefaultDate,
 }: Props) {
   if (!kpis || kpis.length === 0) {
     return <div>No KPIs available.</div>;
@@ -39,11 +37,8 @@ export function LivingLabKPIsEdition({
   );
   // Data collection date input state (YYYY-MM-DD)
   const today = new Date().toISOString().slice(0, 10);
-  const [beforeDate, setBeforeDate] = useState<string>(
-    valueBeforeDate ?? today
-  );
-  const [afterDate, setAfterDate] = useState<string | undefined>(
-    valueAfterDate
+  const [defaultDate, setDefaultDate] = useState<string>(
+    initialDefaultDate ?? today
   );
 
   const getKpiRow = (kpiId: number) => {
@@ -77,13 +72,11 @@ export function LivingLabKPIsEdition({
         </TableCell>
         <TableCell className="w-20">
           {!hasChildren && (
-            <LivingLabKpiResultsForm
+            <KpiResultList
               livingLabId={livingLabId}
               kpi={kpi}
-              initialBefore={livingLabKpiMap.get(kpi.id)?.result_before}
-              initialAfter={livingLabKpiMap.get(kpi.id)?.result_after}
-              defaultBeforeDate={beforeDate}
-              defaultAfterDate={afterDate}
+              initialResults={livingLabKpiMap.get(kpi.id)?.results ?? []}
+              defaultDate={defaultDate}
             />
           )}
         </TableCell>
@@ -92,12 +85,10 @@ export function LivingLabKPIsEdition({
   };
 
   return (
-    <div className="flex flex-col gap-8 mx-auto">
-      <BeforeAndAfterDates
-        valueBeforeDate={beforeDate}
-        valueAfterDate={afterDate}
-        onChangeBeforeDate={setBeforeDate}
-        onChangeAfterDate={setAfterDate}
+    <div className="flex flex-col gap-6 mx-auto">
+      <DefaultCollectionDate
+        value={defaultDate}
+        onChange={setDefaultDate}
       />
       {categories.map(({ id, name, kpis }, index) => (
         <ExpansionPanel
@@ -124,7 +115,7 @@ export function LivingLabKPIsEdition({
                   <TableHeader>KPI Number</TableHeader>
                   <TableHeader>Name</TableHeader>
                   <TableHeader>Metric unit</TableHeader>
-                  <TableHeader>Value Before vs After</TableHeader>
+                  <TableHeader>Values</TableHeader>
                 </TableRow>
               </TableHead>
 
