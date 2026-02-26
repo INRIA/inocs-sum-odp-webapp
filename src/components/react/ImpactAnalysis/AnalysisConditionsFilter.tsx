@@ -25,7 +25,7 @@ export const AnalysisConditionsFilter: React.FC<
     <div>
       <AnalysisSectionDivider
         step={1}
-        title="Analysis Conditions"
+        title="Interest Domain for Analysis"
         // subtitle="Select the analysis conditions: KPI group"
         description="The KPIs have been grouped by scope of interest"
       />

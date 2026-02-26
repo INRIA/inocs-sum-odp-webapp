@@ -27,7 +27,7 @@ export const MeasureImpactCard: React.FC<MeasureImpactCardProps> = ({
 
   const iconClasses = isPositive ? "text-secondary" : "text-danger";
 
-  const cardSize = size === "large" ? "p-6" : "p-4";
+  const cardSize = size === "large" ? "p-6" : "p-2";
   const coefficientSize = size === "large" ? "text-xl" : "text-lg";
 
   return (
@@ -36,63 +36,62 @@ export const MeasureImpactCard: React.FC<MeasureImpactCardProps> = ({
     >
       {/* Ranking Badge */}
       <div
-        className={`absolute top-3 right-3 ${badgeClasses} rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm shadow-sm`}
+        className={`absolute top-2 left-2 ${badgeClasses} rounded-full w-6 h-6 flex items-center justify-center font-bold text-sm shadow-sm`}
       >
         {rank}
       </div>
+      <div className="flex flex-row">
+        {/* Measure Name */}
+        <h6 className={`w-2/3 font-bold pl-7 leading-tight`}>{measure.name}</h6>
 
-      {/* Measure Name */}
-      <h6 className={`font-bold mb-2 pr-5 leading-tight`}>{measure.name}</h6>
-
-      {/* Coefficient Value */}
-      <div className="flex items-baseline gap-2 mb-2">
-        <span className={`${coefficientSize} font-extrabold ${iconClasses}`}>
-          {formatCoefficient(coefficient)}
-        </span>
-        <span className="text-sm text-dark">level of contribution to KPIs</span>
-      </div>
-
-      {/* Impact Direction Indicator */}
-      <div className="flex items-center gap-2 text-sm">
-        {isPositive ? (
-          <>
-            <svg
-              className={`w-5 h-5 ${iconClasses}`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+        {/* Coefficient Value */}
+        <div className="w-1/3 flex flex-col items-start">
+          <div className="flex flex-col items-baseline mb-2">
+            <span
+              className={`${coefficientSize} font-extrabold ${iconClasses} flex flex-row justify-center items-center gap-1`}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-              />
-            </svg>
-            <span className="font-medium">Positive contribution</span>
-          </>
-        ) : (
-          <>
-            <svg
-              className={`w-5 h-5 ${iconClasses}`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"
-              />
-            </svg>
-            <span className="font-medium">Negative contribution</span>
-          </>
-        )}
+              {isPositive ? (
+                <>
+                  <svg
+                    className={`w-5 h-5 ${iconClasses}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                    />
+                  </svg>
+                </>
+              ) : (
+                <>
+                  <svg
+                    className={`w-5 h-5 ${iconClasses}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"
+                    />
+                  </svg>
+                </>
+              )}
+              {formatCoefficient(coefficient)}
+            </span>
+            <small className="text-sm text-dark">
+              level of contribution to KPIs{" "}
+              {isPositive ? "improvement" : "decline"}
+            </small>
+          </div>
+        </div>
       </div>
-
-      {/* Hover Effect Overlay */}
-      <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-5 rounded-xl transition-opacity duration-200"></div>
     </div>
   );
 };

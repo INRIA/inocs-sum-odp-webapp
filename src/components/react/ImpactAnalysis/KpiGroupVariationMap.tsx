@@ -22,8 +22,8 @@ interface KpiGroupVariationMapProps {
  * Get status label based on marker color
  */
 function getStatusLabel(color: string): string {
-  if (color === COLOR_GREEN) return "All KPIs Improved";
-  if (color === COLOR_RED) return "All KPIs Regressed";
+  if (color === COLOR_GREEN) return "Overall KPI Improvement";
+  if (color === COLOR_RED) return "Overall KPI Regression";
   return "Mixed Results";
 }
 
@@ -141,14 +141,14 @@ export const KpiGroupVariationMap: React.FC<KpiGroupVariationMapProps> = ({
             className="w-4 h-4 rounded-full"
             style={{ backgroundColor: COLOR_GREEN }}
           />
-          <span className="text-sm text-gray-600">All KPIs improved</span>
+          <span className="text-sm text-gray-600">Overall KPIs improved</span>
         </div>
         <div className="flex items-center gap-2">
           <span
             className="w-4 h-4 rounded-full"
             style={{ backgroundColor: COLOR_RED }}
           />
-          <span className="text-sm text-gray-600">All KPIs regressed</span>
+          <span className="text-sm text-gray-600">Overall KPIs regressed</span>
         </div>
         <div className="flex items-center gap-2">
           <span

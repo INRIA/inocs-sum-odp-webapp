@@ -5,6 +5,7 @@ import type {
   IKpi,
   IIKpiResultBeforeAfter,
   IKpiResult,
+  IKpiResultGroup,
 } from "../../types";
 import type { SplitItem } from "../../components/react/KpiCards/ModalSplitChart";
 import type { MarkerData } from "../../components/react/MapViewer";
@@ -243,7 +244,7 @@ export function getModalSplitDataForDashboard(
       .filter((lab): lab is IModalSplitLabData => lab !== null);
 
     return {
-      kpiId: kpi.id,
+      kpiId: String(kpi.id),
       kpiNumber: kpi.kpi_number,
       kpiName: kpi.name,
       labs: labsData,
@@ -357,15 +358,19 @@ export function getKpiResultsProgress(
       {
         label: "Global KPIs",
         value: `${
-          uniqueCompletedKpis.filter((id) => uniqueGlobalIds.includes(id || ""))
-            .length
+          uniqueCompletedKpis.filter(
+            (id): id is number =>
+              typeof id === "number" && uniqueGlobalIds.includes(id),
+          ).length
         } / ${uniqueGlobalIds.length}`,
       },
       {
         label: "Local KPIs",
         value: `${
-          uniqueCompletedKpis.filter((id) => uniqueLocalIds.includes(id || ""))
-            .length
+          uniqueCompletedKpis.filter(
+            (id): id is number =>
+              typeof id === "number" && uniqueLocalIds.includes(id),
+          ).length
         } / ${uniqueLocalIds.length}`,
       },
     ],
@@ -380,7 +385,7 @@ export function getKpiResultsModalSplitProgress(
   progress: number;
   details: { label: string; value: string }[];
 } {
-  const totalByKpi = new Map<string, number>();
+  const totalByKpi = new Map<number, number>();
   let valueTotal = 0;
 
   kpiResults.forEach((kpiResult) => {
@@ -406,6 +411,185 @@ export function getKpiResultsModalSplitProgress(
         value: `${Math.round(total) * 100}%`,
       };
     }),
+  };
+}
+
+function formatPercentage(value: number): string {
+  return Number.isInteger(value) ? `${value}` : `${value.toFixed(2)}`;
+}
+
+export function getModalSplitCardMetrics(
+  modalSplitResultGroups: IKpiResultGroup[],
+  transportModes: ITransportMode[],
+): {
+  value: string;
+  details: { label: string; value: string }[];
+} {
+  const totalResults = modalSplitResultGroups.reduce(
+    (acc, group) => acc + (group.results?.length ?? 0),
+    0,
+  );
+
+  const years = modalSplitResultGroups
+    .flatMap((group) => group.results ?? [])
+    .map((result) => new Date(result.date).getFullYear())
+    .filter((year) => !Number.isNaN(year));
+  const minYear = years.length > 0 ? Math.min(...years) : null;
+  const maxYear = years.length > 0 ? Math.max(...years) : null;
+  const valueLabel =
+    minYear !== null && maxYear !== null
+      ? `${totalResults} values from ${minYear} to ${maxYear}`
+      : `${totalResults} values`;
+
+  if (modalSplitResultGroups.length === 0) {
+    return {
+      value: valueLabel,
+      details: [],
+    };
+  }
+
+  const transportModeTypeById = new Map(
+    transportModes.map((mode) => [mode.id, mode.type]),
+  );
+
+  const totalsByModeType = new Map<string, { first: number; last: number }>();
+
+  modalSplitResultGroups.forEach((group) => {
+    const results = [...(group.results ?? [])].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    );
+
+    if (results.length === 0) return;
+
+    const firstResult = results[0];
+    const lastResult = results[results.length - 1];
+
+    if (!notNullOrUndefined(firstResult?.value)) return;
+    if (!notNullOrUndefined(lastResult?.value)) return;
+
+    const transportModeId =
+      group.transport_mode_id ?? firstResult.transport_mode_id;
+    if (!transportModeId) return;
+
+    const transportModeType = transportModeTypeById.get(transportModeId);
+    if (!transportModeType) return;
+
+    const current = totalsByModeType.get(transportModeType) ?? {
+      first: 0,
+      last: 0,
+    };
+    totalsByModeType.set(transportModeType, {
+      first: current.first + firstResult.value,
+      last: current.last + lastResult.value,
+    });
+  });
+
+  const modeTypeLabels: Record<string, string> = {
+    NSM: "NSM modes",
+    PUBLIC_TRANSPORT: "PT modes",
+    PRIVATE: "PRIVATE mode",
+  };
+  const orderedModeTypes = ["NSM", "PUBLIC_TRANSPORT", "PRIVATE"];
+
+  const details = orderedModeTypes
+    .map((modeType) => {
+      const totals = totalsByModeType.get(modeType);
+      if (!totals) return null;
+
+      const delta = totals.last - totals.first;
+      const variation = totals.first === 0 ? 0 : (delta / totals.first) * 100;
+      const absVariation = Math.abs(variation);
+      const sign = variation > 0 ? "+" : variation < 0 ? "-" : "";
+      const direction =
+        variation > 0 ? "Increase" : variation < 0 ? "Decrease" : "Change";
+
+      return {
+        label: `${direction} in ${modeTypeLabels[modeType]} use`,
+        value: `${sign}${formatPercentage(absVariation)}%`,
+      };
+    })
+    .filter(
+      (detail): detail is { label: string; value: string } => detail !== null,
+    );
+  return {
+    value: valueLabel,
+    details,
+  };
+}
+
+export function getKpiResultsCardMetrics(
+  allKpis: IKpi[],
+  kpiResultGroups: IKpiResultGroup[],
+): {
+  value: string;
+  details: { label: string; value: string }[];
+} {
+  const kpiById = new Map(allKpis.map((kpi) => [kpi.id, kpi]));
+  const nonModalSplitKpis = allKpis.filter(
+    (kpi) => !kpi.kpi_number.startsWith("15"),
+  );
+  const nonModalSplitParentKpiIds = new Set(
+    nonModalSplitKpis.map((kpi) => kpi.parent_kpi_id ?? kpi.id),
+  );
+
+  const getParentKpiId = (kpiDefinitionId: number): number | null => {
+    const definition = kpiById.get(kpiDefinitionId);
+    if (!definition) return null;
+    return definition.parent_kpi_id ?? definition.id;
+  };
+
+  const filteredGroups = kpiResultGroups.filter((group) =>
+    nonModalSplitParentKpiIds.has(getParentKpiId(group.kpidefinition_id) ?? -1),
+  );
+
+  const allResults = filteredGroups.flatMap((group) => group.results ?? []);
+  const totalResults = allResults.length;
+
+  const valuesByYear = new Map<number, number>();
+  allResults.forEach((result) => {
+    const year = new Date(result.date).getFullYear();
+    if (Number.isNaN(year)) return;
+    valuesByYear.set(year, (valuesByYear.get(year) ?? 0) + 1);
+  });
+
+  const kpisWithRecordedData = new Set(
+    filteredGroups
+      .filter((group) => (group.results?.length ?? 0) > 0)
+      .map((group) => getParentKpiId(group.kpidefinition_id))
+      .filter(
+        (id): id is number => id !== null && nonModalSplitParentKpiIds.has(id),
+      ),
+  );
+
+  const kpisWithRecordedDataCount = kpisWithRecordedData.size;
+  const missingKpisCount = Math.max(
+    nonModalSplitParentKpiIds.size - kpisWithRecordedDataCount,
+    0,
+  );
+
+  const yearDetails = Array.from(valuesByYear.entries())
+    .sort(([yearA], [yearB]) => yearA - yearB)
+    .map(([year, count]) => ({
+      label: `Values recorded for ${year}`,
+      value: `${count}`,
+    }));
+
+  const minYear = Math.min(...valuesByYear.keys());
+  const maxYear = Math.max(...valuesByYear.keys());
+
+  return {
+    value: `${totalResults} values from ${minYear} to ${maxYear}`,
+    details: [
+      ...yearDetails,
+      {
+        label: `Recorded KPIs`,
+        value: `${kpisWithRecordedDataCount}/${nonModalSplitParentKpiIds.size}`,
+      },
+      {
+        label: `Missing KPIs`,
+        value: `${missingKpisCount}/${nonModalSplitParentKpiIds.size}`,
+      },
+    ],
   };
 }
 

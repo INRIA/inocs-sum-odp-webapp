@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { KpiVariationCard } from "./KpiVariationCard";
 import { KpiVariationsTable } from "./KpiVariationsTable";
 import type { ILivingLabVariation, IKpiVariation } from "../../../types";
+import { InfoAlert } from "../ui";
 
 interface KpiGroupVariationCardProps {
   livingLabVariations: ILivingLabVariation[];
@@ -133,7 +134,7 @@ export const KpiGroupVariationDataTable: React.FC<
 
       {/* Total Variation for Selected Lab/Global */}
       <div className="p-6 bg-gray-50 border-b border-gray-200">
-        <div className="max-w-md">
+        <div className="">
           <KpiVariationCard
             title={displayData.name}
             subtitle={`General variation for ${groupName} KPIs`}
@@ -159,6 +160,13 @@ export const KpiGroupVariationDataTable: React.FC<
           Individual KPI Variations
         </h5>
         <KpiVariationsTable kpis={displayData.kpis} />
+
+        <InfoAlert variant="warning" title="Data information" className="mt-6">
+          <p>
+            Small inconsistencies might come from rounding errors (rounded to 2
+            decimals by default)
+          </p>
+        </InfoAlert>
       </div>
     </div>
   );

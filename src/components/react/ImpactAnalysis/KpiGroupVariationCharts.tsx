@@ -171,45 +171,6 @@ export const KpiGroupVariationCharts: React.FC<
 
   return (
     <div>
-      {/* Filters Section */}
-      <div className=" bg-gray-50 rounded-lg border border-gray-200 p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-semibold text-gray-700">
-            Filter by Living Lab
-          </h4>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={selectAllLabs}
-              className="text-xs text-primary hover:underline font-medium"
-            >
-              Select All
-            </button>
-            <span className="text-xs text-gray-500 ml-2">
-              {selectedLabIds.length}/{labs.length} selected
-            </span>
-          </div>
-        </div>
-        <div className="flex justify-center flex-wrap gap-2">
-          {labs.map((lab) => {
-            const isSelected = selectedLabIds.includes(lab.id);
-            const displayName =
-              lab.name.length > 10
-                ? lab.name.substring(0, 10) + "..."
-                : lab.name;
-            return (
-              <Badge
-                key={lab.id}
-                size="sm"
-                color={isSelected ? "primary" : "light"}
-                className="cursor-pointer border transition-all hover:shadow-md"
-                onClick={() => toggleLab(lab.id)}
-              >
-                {displayName}
-              </Badge>
-            );
-          })}
-        </div>
-      </div>
       <div className="grid grid-cols-2 gap-4 mt-4">
         {Array.from(chartsByName.entries()).map(([name, data], index) =>
           index === 0 ? (

@@ -135,7 +135,9 @@ export function getTopMeasures(
   measures: IMeasureCoefficient[],
   count: number = 3,
 ): IMeasureCoefficient[] {
-  return sortMeasuresByCoefficient(measures, false).slice(0, count);
+  return sortMeasuresByCoefficient(measures, false)
+    .filter((m) => m.coefficient > 0)
+    .slice(0, count);
 }
 
 /**
@@ -145,7 +147,9 @@ export function getBottomMeasures(
   measures: IMeasureCoefficient[],
   count: number = 3,
 ): IMeasureCoefficient[] {
-  return sortMeasuresByCoefficient(measures, true).slice(0, count);
+  return sortMeasuresByCoefficient(measures, true)
+    .filter((m) => m.coefficient < 0)
+    .slice(0, count);
 }
 
 /**

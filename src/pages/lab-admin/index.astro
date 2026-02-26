@@ -7,6 +7,8 @@ import {
   getLivingLabInfoProgress,
   getKpiResultsProgress,
   getKpiResultsModalSplitProgress,
+  getModalSplitCardMetrics,
+  getKpiResultsCardMetrics,
   getMeasuresProgress,
 } from "../../lib/helpers";
 import type { IKpiResult } from "../../types";
@@ -25,56 +27,41 @@ const modalSplitKpis =
   kpis?.filter((kpi) =>
     [kpi.id, kpi.parent_kpi_id].includes(modalSplitKpi?.id),
   ) ?? [];
+const modalSplitKpiIds = new Set(modalSplitKpis.map((kpi) => kpi.id));
+const nonModalSplitKpis =
+  kpis?.filter((kpi) => !kpi.kpi_number.startsWith("15")) ?? [];
+const modalSplitResultGroups =
+  livingLab?.kpi_results?.filter((result) =>
+    modalSplitKpiIds.has(result.kpidefinition_id),
+  ) ?? [];
+const nonModalSplitResultGroups =
+  livingLab?.kpi_results?.filter(
+    (result) => !modalSplitKpiIds.has(result.kpidefinition_id),
+  ) ?? [];
 
 const labInfoProgress = getLivingLabInfoProgress(livingLab);
-const modalSplitBeforeProgress = getKpiResultsModalSplitProgress(
-  modalSplitKpis,
-  livingLab?.kpi_results
-    ?.filter(
-      (r) =>
-        r.result_before &&
-        modalSplitKpis.find((k) => k.id === r?.kpidefinition_id),
-    )
-    ?.map((r) => r.result_before as IKpiResult) ?? [],
+const modalSplitMetrics = getModalSplitCardMetrics(
+  modalSplitResultGroups,
+  livingLab?.transport_modes ?? [],
 );
-const modalSplitAfterProgress = getKpiResultsModalSplitProgress(
-  modalSplitKpis,
-  livingLab?.kpi_results
-    ?.filter(
-      (r) =>
-        r.result_after &&
-        modalSplitKpis.find((k) => k.id === r?.kpidefinition_id),
-    )
-    ?.map((r) => r.result_after as IKpiResult) ?? [],
-);
-const kpisBeforeProgress = getKpiResultsProgress(
+const kpisMetrics = getKpiResultsCardMetrics(
   kpis ?? [],
-  livingLab?.kpi_results
-    ?.filter((r) => r.result_before)
-    ?.map((r) => r.result_before as IKpiResult) ?? [],
-);
-const kpisAfterProgress = getKpiResultsProgress(
-  kpis ?? [],
-  livingLab?.kpi_results
-    ?.filter((r) => r.result_after)
-    ?.map((r) => r.result_after as IKpiResult) ?? [],
+  nonModalSplitResultGroups,
 );
 const measuresProgress = getMeasuresProgress(livingLab?.projects ?? []);
 const stepsCTA = [
   {
     id: "lab-info",
     title: "Lab information",
-    description: "",
     ctaLabel: "Update living lab",
     ctaLink: getUrl("/lab-admin/lab/edit"),
     progress: labInfoProgress.progress,
-    value: labInfoProgress.value,
+    value: `${labInfoProgress.value}`,
     details: labInfoProgress.details,
   },
   {
     id: "measures",
     title: "Measures implemented",
-    description: "",
     ctaLabel: "Edit measures",
     ctaLink: getUrl("/lab-admin/measures"),
     progress: measuresProgress.progress,
@@ -82,44 +69,20 @@ const stepsCTA = [
     details: measuresProgress.details,
   },
   {
-    id: "modal-split-before",
-    title: "Modal split (before)",
-    description: "",
+    id: "modal-split",
+    title: "Modal split results",
     ctaLabel: "Edit modal split",
     ctaLink: getUrl("/lab-admin/modal-split"),
-    progress:
-      (modalSplitBeforeProgress.progress + modalSplitAfterProgress.progress) /
-      2,
-    value: `${modalSplitBeforeProgress.value} baseline modal split \n ${modalSplitAfterProgress.value} 2nd round modal split`,
-    details: [
-      ...(modalSplitBeforeProgress.details?.map((d) => ({
-        ...d,
-        label: `Baseline ${d.label}`,
-      })) ?? []),
-      ...(modalSplitAfterProgress.details?.map((d) => ({
-        ...d,
-        label: `2nd round ${d.label}`,
-      })) ?? []),
-    ],
+    value: modalSplitMetrics.value,
+    details: modalSplitMetrics.details,
   },
   {
-    id: "kpis-before",
-    title: "Baseline KPIs (before)",
-    description: "",
+    id: "kpis",
+    title: "KPIs results",
     ctaLabel: "Edit KPIs",
     ctaLink: getUrl("/lab-admin/kpis"),
-    progress: (kpisBeforeProgress.progress + kpisAfterProgress.progress) / 2,
-    value: `${kpisBeforeProgress.value} baseline KPIs \n ${kpisAfterProgress.value} 2nd round KPIs`,
-    details: [
-      ...(kpisBeforeProgress.details?.map((d) => ({
-        ...d,
-        label: `Baseline ${d.label}`,
-      })) ?? []),
-      ...(kpisAfterProgress.details?.map((d) => ({
-        ...d,
-        label: `2nd round ${d.label}`,
-      })) ?? []),
-    ],
+    value: kpisMetrics.value,
+    details: kpisMetrics.details,
   },
 ];
 ---
@@ -154,7 +117,6 @@ const stepsCTA = [
             stepsCTA.map((step, i) => (
               <TaskCard
                 title={step.title}
-                description={step.description}
                 ctaLabel={step.ctaLabel}
                 ctaLink={step.ctaLink}
                 progress={step.progress}

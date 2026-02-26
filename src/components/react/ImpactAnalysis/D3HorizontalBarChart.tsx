@@ -1,21 +1,16 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import type { IMeasureCoefficient, ILivingLabAnalysis } from "../../../types";
-import { Badge } from "../ui";
 import {
   coefficientToPercentage,
   formatCoefficient,
   findImplementingLabs,
 } from "../../../lib/helpers/impact-analysis-format";
 import {
-  COLOR_BLUE,
   COLOR_GRAY,
   COLOR_LIGHT_BLUE,
-  COLOR_LIGHT_GRAY,
   COLORS_BASELINE,
 } from "../../../styles/constants";
-
-const MAX_BADGES_COUNT = 3;
 interface D3HorizontalBarChartProps {
   measures: IMeasureCoefficient[];
   livingLabsAnalysis: ILivingLabAnalysis[];
@@ -29,6 +24,30 @@ interface TooltipData {
   y: number;
 }
 
+function splitLabelIntoTwoLines(
+  text: string,
+  maxCharsPerLine: number,
+): string[] {
+  if (text.length <= maxCharsPerLine) {
+    return [text];
+  }
+
+  const breakBeforeLimit = text.lastIndexOf(" ", maxCharsPerLine);
+  const breakAfterLimit = text.indexOf(" ", maxCharsPerLine);
+
+  const splitIndex =
+    breakBeforeLimit > 0
+      ? breakBeforeLimit
+      : breakAfterLimit > 0
+        ? breakAfterLimit
+        : maxCharsPerLine;
+
+  const firstLine = text.slice(0, splitIndex).trim();
+  const secondLine = text.slice(splitIndex).trim();
+
+  return secondLine ? [firstLine, secondLine] : [firstLine];
+}
+
 export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
   measures,
   livingLabsAnalysis,
@@ -38,53 +57,6 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [tooltip, setTooltip] = useState<TooltipData | null>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height });
-
-  // Extract unique labs and initialize with all selected
-  const allLabs = useMemo(
-    () => livingLabsAnalysis.map((lab) => ({ id: lab.id, name: lab.name })),
-    [livingLabsAnalysis],
-  );
-
-  const [selectedLabIds, setSelectedLabIds] = useState<string[]>(
-    allLabs.map((lab) => lab.id),
-  );
-
-  // Update selected labs when livingLabsAnalysis changes
-  useEffect(() => {
-    setSelectedLabIds(allLabs.map((lab) => lab.id));
-  }, [allLabs]);
-
-  // Toggle lab selection (must keep at least one selected)
-  const toggleLab = (labId: string) => {
-    setSelectedLabIds((prev) => {
-      if (prev.includes(labId)) {
-        // Prevent deselecting if it's the last selected lab
-        if (prev.length === 1) return prev;
-        return prev.filter((id) => id !== labId);
-      }
-      return [...prev, labId];
-    });
-  };
-
-  // Filter measures based on selected labs
-  const filteredMeasures = useMemo(() => {
-    if (selectedLabIds.length === 0) return [];
-
-    return measures.filter((measure) => {
-      const implementingLabs = findImplementingLabs(
-        measure.id,
-        livingLabsAnalysis,
-      );
-      const implementingLabsData = livingLabsAnalysis.filter((lab) =>
-        implementingLabs.includes(lab.name),
-      );
-
-      // Show measure if ANY selected lab implements it
-      return implementingLabsData.some((lab) =>
-        selectedLabIds.includes(lab.id),
-      );
-    });
-  }, [measures, livingLabsAnalysis, selectedLabIds]);
 
   // Handle responsive sizing
   useEffect(() => {
@@ -104,19 +76,18 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
 
   // Render D3 chart
   useEffect(() => {
-    if (!svgRef.current || filteredMeasures.length === 0) return;
+    if (!svgRef.current || measures.length === 0) return;
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove(); // Clear previous render
 
-    // Responsive margins based on screen width
+    // Keep labels around 1/3 of total width and chart around 2/3
     const isMobile = dimensions.width < 640;
-    const isTablet = dimensions.width >= 640 && dimensions.width < 1024;
     const margin = {
       top: 20,
-      right: isMobile ? 10 : isTablet ? 40 : 80,
+      right: isMobile ? 20 : 60,
       bottom: isMobile ? 40 : 50,
-      left: isMobile ? 10 : isTablet ? 100 : 180,
+      left: Math.floor(dimensions.width / 4),
     };
     const width = dimensions.width - margin.left - margin.right;
     const chartHeight = dimensions.height - margin.top - margin.bottom;
@@ -126,7 +97,7 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
     // Prepare data - convert coefficients to percentages
-    const data = filteredMeasures.map((m) => ({
+    const data = measures.map((m) => ({
       ...m,
       percentValue: coefficientToPercentage(m.coefficient),
     }));
@@ -233,11 +204,11 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
     // Add Y axis with custom labels
     const yAxis = g.append("g").attr("class", "y-axis");
 
-    // Responsive label truncation
-    const maxLabelLength = isMobile ? 10 : isTablet ? 20 : 30;
+    // Full y-axis labels
+    const maxCharsPerLine = isMobile ? 18 : 32;
     const labelFontSize = isMobile ? "10px" : "12px";
-    const labelXOffset = isMobile ? 0 : 10;
-    const labelAnchor = isMobile ? "start" : "end";
+    const labelXOffset = -12;
+    const labelAnchor = "end";
 
     // Add measure names with tooltip
     yAxis
@@ -247,17 +218,24 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
       .append("text")
       .attr("class", "measure-name")
       .attr("x", labelXOffset)
-      .attr("y", (d) => (yScale(d.name) || 0) + yScale.bandwidth() / 3)
+      .attr("y", (d) => (yScale(d.name) || 0) + yScale.bandwidth() * 0.12)
       .attr("text-anchor", labelAnchor)
+      .attr("dominant-baseline", "hanging")
       .attr("fill", COLOR_GRAY)
       .attr("font-size", labelFontSize)
       .attr("font-weight", "600")
       .attr("cursor", "pointer")
-      .text((d) => {
-        const text = d.name;
-        return text.length > maxLabelLength
-          ? text.substring(0, maxLabelLength - 3) + "..."
-          : text;
+      .each(function (d) {
+        const lines = splitLabelIntoTwoLines(d.name, maxCharsPerLine);
+        const textElement = d3.select(this);
+
+        lines.forEach((line, lineIndex) => {
+          textElement
+            .append("tspan")
+            .attr("x", labelXOffset)
+            .attr("dy", lineIndex === 0 ? 0 : "1.1em")
+            .text(line);
+        });
       })
       .on("mouseenter", function (event, d) {
         d3.select(this).attr("fill", COLOR_LIGHT_BLUE);
@@ -279,145 +257,23 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
         setTooltip(null);
       });
 
-    // Add living lab badges under measure names
+    // Add implementing labs count under measure names
     yAxis
-      .selectAll(".lab-badges")
+      .selectAll(".implementing-count")
       .data(data)
       .enter()
       .each(function (d) {
         const labs = findImplementingLabs(d.id, livingLabsAnalysis);
-        const yPos = (yScale(d.name) || 0) + (yScale.bandwidth() * 2) / 3;
+        const yPos = (yScale(d.name) || 0) + yScale.bandwidth() * 0.82;
 
-        // Hide badges on mobile to save space
-        if (isMobile) return;
-
-        if (labs.length === 0) {
-          d3.select(this)
-            .append("text")
-            .attr("x", -10)
-            .attr("y", yPos)
-            .attr("text-anchor", "end")
-            .attr("fill", "#9ca3af")
-            .attr("font-size", "9px")
-            .attr("font-style", "italic")
-            .attr("cursor", "pointer")
-            .text("Not implemented")
-            .on("mouseenter", function (event) {
-              d3.select(this).attr("fill", "#6b7280");
-              setTooltip({
-                measure: d,
-                labs: [],
-                x: event.clientX,
-                y: event.clientY,
-              });
-            })
-            .on("mousemove", function (event) {
-              setTooltip((prev) =>
-                prev ? { ...prev, x: event.clientX, y: event.clientY } : null,
-              );
-            })
-            .on("mouseleave", function () {
-              d3.select(this).attr("fill", "#9ca3af");
-              setTooltip(null);
-            });
-        } else {
-          const maxLabsToShow = MAX_BADGES_COUNT;
-          const displayLabs = labs.slice(0, maxLabsToShow);
-          const remainingCount = labs.length - maxLabsToShow;
-
-          // Create a group for badges
-          const badgeGroup = d3.select(this);
-          let xOffset = -10;
-
-          // Add badges from right to left
-          [...displayLabs].reverse().forEach((lab, idx) => {
-            const badgeG = badgeGroup
-              .append("g")
-              .attr("class", "lab-badge")
-              .attr("cursor", "pointer");
-
-            const text = badgeG
-              .append("text")
-              .attr("y", yPos)
-              .attr("font-size", "8px")
-              .attr("fill", COLOR_BLUE)
-              .attr("font-weight", "500")
-              .text(lab.length > 8 ? lab.substring(0, 6) + ".." : lab);
-
-            const bbox = (text.node() as SVGTextElement).getBBox();
-            const padding = 4;
-
-            const rect = badgeG
-              .insert("rect", "text")
-              .attr("x", xOffset - bbox.width - padding * 2)
-              .attr("y", yPos - bbox.height + 2)
-              .attr("width", bbox.width + padding * 2)
-              .attr("height", bbox.height + 2)
-              .attr("rx", 3)
-              .attr("fill", COLOR_LIGHT_GRAY)
-              .attr("stroke", COLOR_BLUE)
-              .attr("stroke-width", 0.5);
-
-            text
-              .attr("x", xOffset - bbox.width / 2 - padding)
-              .attr("text-anchor", "middle");
-
-            // Add tooltip handlers to the badge group
-            badgeG
-              .on("mouseenter", function (event) {
-                rect.attr("fill", COLOR_LIGHT_BLUE).attr("stroke", COLOR_BLUE);
-                setTooltip({
-                  measure: d,
-                  labs,
-                  x: event.clientX,
-                  y: event.clientY,
-                });
-              })
-              .on("mousemove", function (event) {
-                setTooltip((prev) =>
-                  prev ? { ...prev, x: event.clientX, y: event.clientY } : null,
-                );
-              })
-              .on("mouseleave", function () {
-                rect.attr("fill", COLOR_LIGHT_GRAY).attr("stroke", COLOR_BLUE);
-                setTooltip(null);
-              });
-
-            xOffset -= bbox.width + padding * 2 + 3;
-          });
-
-          // Add "+N more" if needed
-          if (remainingCount > 0) {
-            const moreText = badgeGroup
-              .append("text")
-              .attr("x", xOffset)
-              .attr("y", yPos)
-              .attr("text-anchor", "end")
-              .attr("font-size", "8px")
-              .attr("fill", COLOR_BLUE)
-              .attr("font-weight", "500")
-              .attr("cursor", "pointer")
-              .text(`+${remainingCount}`)
-              .on("mouseenter", function (event) {
-                d3.select(this).attr("fill", "#374151");
-                setTooltip({
-                  measure: d,
-                  labs,
-                  x: event.clientX,
-                  y: event.clientY,
-                });
-              })
-              .on("mousemove", function (event) {
-                setTooltip((prev) =>
-                  prev ? { ...prev, x: event.clientX, y: event.clientY } : null,
-                );
-              })
-              .on("mouseleave", function () {
-                d3.select(this).attr("fill", "#6b7280");
-                setTooltip(null);
-              });
-          }
-        }
+        d3.select(this)
+          .append("text")
+          .attr("x", -12)
+          .attr("y", yPos)
+          .attr("text-anchor", "end")
+          .attr("fill", "#6b7280")
+          .attr("font-size", "9px")
+          .text(`${labs.length} labs implementing`);
       });
 
     // Add value labels on bars
@@ -458,7 +314,7 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
       .attr("font-size", titleFontSize)
       .attr("font-weight", "600")
       .text("Contribution levels by Policy measure");
-  }, [filteredMeasures, livingLabsAnalysis, dimensions]);
+  }, [measures, livingLabsAnalysis, dimensions]);
 
   if (measures.length === 0) {
     return (
@@ -470,110 +326,15 @@ export const D3HorizontalBarChart: React.FC<D3HorizontalBarChartProps> = ({
     );
   }
 
-  if (filteredMeasures.length === 0) {
-    return (
-      <div className="w-full">
-        {/* Living Lab Filters */}
-        <div className="mb-6 bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="text-sm font-semibold text-gray-700">
-              Filter by Living Lab
-            </h4>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setSelectedLabIds(allLabs.map((l) => l.id))}
-                className="text-xs text-primary hover:underline font-medium"
-              >
-                Select All
-              </button>
-              <span className="text-xs text-gray-500 ml-2">
-                {selectedLabIds.length}/{allLabs.length} selected
-              </span>
-            </div>
-          </div>
-          <div className="flex justify-center flex-wrap gap-2">
-            {allLabs.map((lab) => {
-              const isSelected = selectedLabIds.includes(lab.id);
-              const displayName =
-                lab.name.length > 10
-                  ? lab.name.substring(0, 10) + "..."
-                  : lab.name;
-              return (
-                <Badge
-                  key={lab.id}
-                  size="sm"
-                  color={isSelected ? "primary" : "light"}
-                  className="cursor-pointer border transition-all hover:shadow-md"
-                  onClick={() => toggleLab(lab.id)}
-                  title={lab.name}
-                >
-                  {displayName}
-                </Badge>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-          <p className="text-gray-600">
-            No measures match the selected living labs. Try selecting different
-            labs.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="w-full">
-      {/* Living Lab Filters */}
-      <div className="mb-6 bg-white rounded-lg border border-gray-200 p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-semibold text-gray-700">
-            Filter by Living Lab
-          </h4>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setSelectedLabIds(allLabs.map((l) => l.id))}
-              className="text-xs text-primary hover:underline font-medium"
-            >
-              Select All
-            </button>
-            <span className="text-xs text-gray-500 ml-2">
-              {selectedLabIds.length}/{allLabs.length} selected
-            </span>
-          </div>
-        </div>
-        <div className="flex justify-center flex-wrap gap-2">
-          {allLabs.map((lab) => {
-            const isSelected = selectedLabIds.includes(lab.id);
-            const displayName =
-              lab.name.length > 10
-                ? lab.name.substring(0, 10) + "..."
-                : lab.name;
-            return (
-              <Badge
-                key={lab.id}
-                size="sm"
-                color={isSelected ? "primary" : "light"}
-                className="cursor-pointer border transition-all hover:shadow-md"
-                onClick={() => toggleLab(lab.id)}
-                title={lab.name}
-              >
-                {displayName}
-              </Badge>
-            );
-          })}
-        </div>
-      </div>
-
       {/* Chart Container */}
-      <div ref={containerRef} className="relative w-full">
+      <div ref={containerRef} className="relative w-full px-2 md:px-4">
         <svg
           ref={svgRef}
           width={dimensions.width}
           height={dimensions.height}
-          className="bg-white rounded-lg shadow-sm border border-gray-200"
+          className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
         />
 
         {/* Tooltip */}

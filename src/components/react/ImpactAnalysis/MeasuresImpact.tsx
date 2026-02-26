@@ -79,62 +79,155 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
   const sortedMeasures = sortMeasuresByCoefficient(measures);
   const stats = calculateStatistics(measures);
 
+  const renderStatCard = ({
+    title,
+    value,
+    containerClass = "bg-white border border-gray-200 rounded-lg p-4",
+    titleClass = "text-sm text-gray-600 mb-1",
+    valueClass = "text-2xl font-bold text-gray-900",
+  }: {
+    title: React.ReactNode;
+    value: React.ReactNode;
+    containerClass?: string;
+    titleClass?: string;
+    valueClass?: string;
+  }) => (
+    <div className={containerClass}>
+      <div className={titleClass}>{title}</div>
+      <div className={valueClass}>{value}</div>
+    </div>
+  );
+
   return (
     <div>
       {divider}
 
       {/* Statistics Summary */}
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <div className="text-sm text-gray-600 mb-1">Total Measures</div>
-          <div className="text-2xl font-bold text-gray-900">
-            {measures.length}
+      <div className="mt-6 grid grid-cols-2 gap-4 mx-auto w-full md:w-2/3">
+        {renderStatCard({
+          title: (
+            <>
+              Policy Measures estimated to have contributed to{" "}
+              <span className="text-secondary font-bold">
+                KPIs improvements
+              </span>
+            </>
+          ),
+          value: stats.positiveCount,
+          containerClass:
+            "bg-secondary/10 border border-secondary/40 rounded-lg p-4",
+          valueClass: "text-2xl font-bold text-secondary",
+        })}
+        {renderStatCard({
+          title: (
+            <>
+              Policy Measures estimated to have contributed to{" "}
+              <span className="text-danger font-bold">
+                KPI decline or had adverse effects
+              </span>
+            </>
+          ),
+          value: stats.negativeCount,
+          containerClass: "bg-danger/10 border border-danger/40 rounded-lg p-4",
+          valueClass: "text-2xl font-bold text-danger",
+        })}
+      </div>
+      <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2">
+        {renderStatCard({
+          title: "Total Policy Measures",
+          value: measures.length,
+        })}
+        {renderStatCard({
+          title: "Total Living Labs Compared",
+          value: analysisResult.living_labs_analysis.length,
+        })}
+        {renderStatCard({
+          title: "Total KPIs metrics compared",
+          value: kpiCount,
+        })}
+        {renderStatCard({
+          title: "Model Quality (MSQE)",
+          value: analysisResult.msqe.toExponential(2),
+        })}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-6">
+        {/* Top Impactful Measures */}
+        <div className="mt-8">
+          <div className="flex items-center gap-3 mb-4">
+            <svg
+              className="w-16 h-16 text-secondary"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <h5>
+              Policy Measures driving improvements for KPIs in group{" "}
+              <strong>{selectedGroup.name}</strong>{" "}
+            </h5>
+          </div>
+          <p className="text-dark mb-4 h-10">
+            Top {topMeasures.length} policy measures estimated to have
+            contributed to KPI improvements
+          </p>
+          <div className="grid grid-cols-1 gap-3">
+            {topMeasures.map((measure, index) => (
+              <MeasureImpactCard
+                key={measure.id}
+                measure={measure}
+                rank={index + 1}
+                size="small"
+              />
+            ))}
           </div>
         </div>
-        <div className="bg-secondary/10 border border-secondary/40 rounded-lg p-4">
-          <div className="text-sm text-gray-600 mb-1">
-            Measures with positive Impact
+
+        {/* Bottom Impactful Measures */}
+        <div className="mt-8">
+          <div className="flex items-center gap-3 mb-4">
+            <svg
+              className="w-16 h-16 text-danger"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <h5>
+              Policy Measures associated with decline for KPIs in group{" "}
+              <strong>{selectedGroup.name}</strong>
+            </h5>
           </div>
-          <div className="text-2xl font-bold text-secondary">
-            {stats.positiveCount}
-          </div>
-        </div>
-        <div className="bg-danger/10 border border-danger/40 rounded-lg p-4">
-          <div className="text-sm text-gray-600 mb-1">
-            Measures with negative Impact
-          </div>
-          <div className="text-2xl font-bold text-danger">
-            {stats.negativeCount}
-          </div>
-        </div>
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <div className="text-sm text-gray-600 mb-1">
-            Total Living labs compared
-          </div>
-          <div className="text-2xl font-bold text-gray-900">
-            {analysisResult.living_labs_analysis.length}
-          </div>
-        </div>
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <div className="text-sm text-gray-600 mb-1">
-            Total KPIs metrics compared
-          </div>
-          <div className="text-2xl font-bold text-gray-900">{kpiCount}</div>
-        </div>
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <div className="text-sm text-gray-600 mb-1">Model Quality (MSQE)</div>
-          <div className="text-2xl font-bold text-gray-900">
-            {analysisResult.msqe.toExponential(2)}
+          <p className="text-dark mb-4 h-10">
+            Bottom {bottomMeasures.length} policy measures estimated to have
+            contributed negatively or had adverse effects
+          </p>
+          <div className="grid grid-cols-1 gap-3">
+            {bottomMeasures.map((measure, index) => (
+              <MeasureImpactCard
+                key={measure.id}
+                measure={measure}
+                rank={measures.length - bottomMeasures.length + index + 1}
+                size="small"
+              />
+            ))}
           </div>
         </div>
       </div>
-
       {/* Horizontal Bar Chart */}
       <div className="mt-12">
         <p className="text-dark mb-6">
-          Comprehensive view of all {measures.length} measures ranked by their
-          contribution coefficient. Hover over bars to see detailed information
-          and implementing cities.
+          Comprehensive view of all {measures.length} policy measures ranked by
+          their contribution coefficient. Hover over bars to see detailed
+          information and implementing cities.
         </p>
         <D3HorizontalBarChart
           measures={sortedMeasures}
@@ -171,76 +264,6 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
           </li>
         </ul>
       </InfoAlert>
-
-      {/* Top Impactful Measures */}
-      <div className="mt-8">
-        <div className="flex items-center gap-3 mb-4">
-          <svg
-            className="w-8 h-8 text-secondary"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
-          <h3>
-            High contribution measures to <strong>{selectedGroup.name}</strong>{" "}
-            KPIs
-          </h3>
-        </div>
-        <p className="text-dark mb-4">
-          Top {topMeasures.length} measures estimated to have contributed the
-          most positively to KPI improvements
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {topMeasures.map((measure, index) => (
-            <MeasureImpactCard
-              key={measure.id}
-              measure={measure}
-              rank={index + 1}
-              size="small"
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Bottom Impactful Measures */}
-      <div className="mt-8">
-        <div className="flex items-center gap-3 mb-4">
-          <svg
-            className="w-8 h-8 text-danger"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z"
-              clipRule="evenodd"
-            />
-          </svg>
-          <h3>
-            Low contribution measures to <strong>{selectedGroup.name}</strong>{" "}
-            KPIs
-          </h3>
-        </div>
-        <p className="text-dark mb-4">
-          Bottom {bottomMeasures.length} policy measures estimated to have
-          contributed negatively or had adverse effects
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {bottomMeasures.map((measure, index) => (
-            <MeasureImpactCard
-              key={measure.id}
-              measure={measure}
-              rank={measures.length - bottomMeasures.length + index + 1}
-              size="small"
-            />
-          ))}
-        </div>
-      </div>
     </div>
   );
 };

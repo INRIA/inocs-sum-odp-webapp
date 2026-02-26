@@ -27,18 +27,20 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col justify-between h-full">
       {/* Top part: Title & value */}
       <div>
-        <h4 className="text-lg font-semibold text-gray-900 mb-1 xl:min-h-20">
+        <h3 className="text-lg font-semibold text-gray-900 mb-1 xl:min-h-20">
           {title}
-        </h4>
+        </h3>
         <div className="flex flex-row justify-between items-center  mb-4">
-          <h3 className="text-secondary text-left whitespace-pre-line">{value}</h3>
-          <div
-            className={`text-sm font-medium text-gray-700 ${
-              progress > 50 ? "text-success" : "text-warning"
-            }`}
-          >
-            {progress}%
-          </div>
+          <h4 className="text-left whitespace-pre-line">{value}</h4>
+          {progress > 0 && (
+            <div
+              className={`text-sm font-medium text-gray-700 ${
+                progress > 50 ? "text-success" : "text-warning"
+              }`}
+            >
+              {progress}%
+            </div>
+          )}
         </div>
       </div>
 
@@ -62,7 +64,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       <RButton
         href={ctaLink}
         className="mx-auto text-center w-fit"
-        variant={progress > 90 ? "secondary" : "warning"}
+        variant="primary"
       >
         {ctaLabel}
       </RButton>
