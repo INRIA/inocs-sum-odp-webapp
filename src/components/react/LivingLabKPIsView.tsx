@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { IKpi, IIKpiResultBeforeAfter } from "../../types";
+import type { IKpi, IKpiResultGroup } from "../../types";
 import { Badge, ExpansionPanel, Tabs } from "./ui";
 import type { ICategory } from "../../types/Category";
 import { KpiCard, KpiMultiple } from "./KpiCards";
@@ -11,7 +11,7 @@ import {
 import { ChartPieIcon, ChartBarIcon } from "@heroicons/react/24/outline";
 
 interface IKpiResultsByCategory extends ICategory {
-  kpiResults: IIKpiResultBeforeAfter[];
+  kpiResults: IKpiResultGroup[];
 }
 type Props = {
   kpis?: IKpi[];
@@ -19,8 +19,9 @@ type Props = {
 
   modalSplitKpis?: {
     kpiName: string;
-    before: { label: string; data: SplitItem[] };
-    after: { label: string; data: SplitItem[] };
+    entries: { label: string; data: SplitItem[] }[];
+    before?: { label: string; data: SplitItem[] };
+    after?: { label: string; data: SplitItem[] };
   }[];
 };
 
@@ -33,7 +34,7 @@ export function LivingLabKPIsView({
 
   const getKpiSection = (
     parentKpi: IKpi,
-    resultKpis: IIKpiResultBeforeAfter[] = [],
+    resultKpis: IKpiResultGroup[] = [],
   ) => {
     if (resultKpis.length === 1) {
       return (
@@ -55,9 +56,9 @@ export function LivingLabKPIsView({
       );
     }
   };
-  const getCategorySection = (kpiResults: IIKpiResultBeforeAfter[]) => {
+  const getCategorySection = (kpiResults: IKpiResultGroup[]) => {
     const parentKpis = new Map<number, IKpi>();
-    const kpiResultsMap = new Map<number, IIKpiResultBeforeAfter[]>();
+    const kpiResultsMap = new Map<number, IKpiResultGroup[]>();
     kpiResults?.forEach((kpi) => {
       const kpiData = kpis?.find((k) => k.id === kpi.kpidefinition_id);
       if (!kpiData) return;
@@ -103,20 +104,32 @@ export function LivingLabKPIsView({
       {modalSplitKpis &&
         modalSplitKpis.length > 0 &&
         modalSplitKpis.map(
-          ({ kpiName, before, after }) =>
-            before.data.length > 0 &&
-            after.data.length > 0 && (
+            ({ kpiName, entries, before, after }) => {
+              const chartEntries =
+                entries?.length > 0
+                  ? entries
+                  : [before, after].filter(
+                      (
+                        entry,
+                      ): entry is { label: string; data: SplitItem[] } =>
+                        Boolean(entry),
+                    );
+
+              return (
+                chartEntries.length > 0 && (
               <div key={kpiName} className="flex flex-col gap-4">
                 <h5 className="text-center mt-4">{kpiName}</h5>
                 <div className="bg-white p-6 rounded-lg shadow-md">
                   <ModalSplitChart
-                    data={[before, after]}
+                      data={chartEntries}
                     view={chartView}
                     orientation="vertical"
                   />
                 </div>
               </div>
-            ),
+                )
+              );
+            },
         )}
     </>
   );

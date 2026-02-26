@@ -11,30 +11,27 @@ import type { ModalSplitChartDataset } from "../KpiCards/ModalSplitChart";
 export const ModalSplitLivingLabsCard: React.FC<
   ModalSplitLivingLabsCardProps
 > = ({ kpiId, kpiNumber, kpiName, labs, filter }) => {
+  const selectedLabIds = filter.selectedLabIds ?? [];
+  const selectedYears = filter.selectedYears ?? [];
+
   // Filter labs based on selected lab IDs
   const filteredLabs = labs.filter((lab) =>
-    filter.selectedLabIds.includes(lab.labId),
+    selectedLabIds.some((selectedLabId) => String(selectedLabId) === String(lab.labId)),
   );
 
   // Filter by selected years
   const labsWithFilteredYears = filteredLabs
     .map((lab) => {
-      const beforeYear = lab.before.label;
-      const afterYear = lab.after.label;
+      const filteredEntries = lab.entries.filter((entry) =>
+        selectedYears.includes(entry.year),
+      );
 
-      const hasBeforeInRange =
-        beforeYear && filter.selectedYears.includes(parseInt(beforeYear, 10));
-      const hasAfterInRange =
-        afterYear && filter.selectedYears.includes(parseInt(afterYear, 10));
-
-      // Only include data that matches the year filter
       return {
         ...lab,
-        before: hasBeforeInRange ? lab.before : { ...lab.before, data: [] },
-        after: hasAfterInRange ? lab.after : { ...lab.after, data: [] },
+        entries: filteredEntries,
       };
     })
-    .filter((lab) => lab.before.data.length > 0 || lab.after.data.length > 0);
+    .filter((lab) => lab.entries.length > 0);
 
   if (labsWithFilteredYears.length === 0) {
     return null;
@@ -68,15 +65,7 @@ export const ModalSplitLivingLabsCard: React.FC<
         {/* Living Labs List - Each lab in a column */}
         <div className="flex flex-col gap-1 mt-4">
           {labsWithFilteredYears.map((lab) => {
-            // Prepare chart data: before and after as separate datasets
-            const chartData: ModalSplitChartDataset[] = [];
-
-            if (lab.before.data.length > 0) {
-              chartData.push(lab.before);
-            }
-            if (lab.after.data.length > 0) {
-              chartData.push(lab.after);
-            }
+            const chartData: ModalSplitChartDataset[] = lab.entries;
 
             return (
               <div

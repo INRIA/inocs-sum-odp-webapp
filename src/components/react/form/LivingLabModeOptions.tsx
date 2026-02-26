@@ -82,7 +82,7 @@ export function LivingLabModeOptions({
         <RadioGroup
           name="labMode"
           value={mode}
-          onChange={(v: LivingLabMode) => onModeChange(v)}
+          onChange={(v) => onModeChange(v as LivingLabMode)}
           aria-label="Living lab mode"
           disabled={isLoading}
         >

@@ -1,6 +1,6 @@
 import type {
   EnumKpiMetricType,
-  IIKpiResultBeforeAfter,
+  IKpiResultGroup,
 } from "../../../types/KPIs";
 import {
   Chart as ChartJS,
@@ -39,7 +39,7 @@ ChartJS.register(
 );
 
 type Props = {
-  kpiResults: IIKpiResultBeforeAfter;
+  kpiResults: IKpiResultGroup;
   metricType: EnumKpiMetricType;
   progressionTarget: number;
 };
@@ -49,8 +49,18 @@ export function KpiDefault({
   metricType,
   progressionTarget,
 }: Props) {
-  const before = kpiResults?.result_before ?? null;
-  const after = kpiResults?.result_after ?? null;
+  const sortedResults = [...(kpiResults?.results ?? [])].sort(
+    (a, b) => Date.parse(a.date) - Date.parse(b.date),
+  );
+
+  if (sortedResults.length === 0) {
+    return (
+      <div className="py-8 text-center text-muted">No data to display</div>
+    );
+  }
+
+  const before = sortedResults[0] ?? null;
+  const after = sortedResults[sortedResults.length - 1] ?? null;
 
   const currentValue = formatValue(
     after?.value ?? before?.value ?? null,
@@ -69,16 +79,12 @@ export function KpiDefault({
   );
 
   //Chartjs data
-  const chartDatasets: number[] = [];
-  const chartLabels: string[] = [];
-  if (before && beforeValue !== undefined && beforeValue !== null) {
-    chartDatasets.push(beforeValue);
-    chartLabels.push(before.date ? formatMonthYear(before.date) : "?");
-  }
-  if (after && currentValue !== undefined && currentValue !== null) {
-    chartDatasets.push(currentValue);
-    chartLabels.push(after.date ? formatMonthYear(after.date) : "?");
-  }
+  const chartDatasets = sortedResults.map((result) =>
+    formatValue(result.value, metricType),
+  );
+  const chartLabels = sortedResults.map((result) =>
+    result.date ? formatMonthYear(result.date) : "?",
+  );
   const backgroundColor = change?.startsWith("+")
     ? COLOR_GREEN_OPACITY_50
     : COLOR_ORANGE_OPACITY_50;

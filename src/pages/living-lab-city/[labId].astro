@@ -14,6 +14,7 @@ import {
   LivingLabKPIsView,
   LivingLabMeasures,
 } from "../../components/react";
+import type { IKpiResultGroup } from "../../types";
 
 const api = new ApiClient(Astro.request);
 
@@ -42,13 +43,13 @@ const { pushMeasures, pullMeasures } = separateMeasures(
 const modalSplitKpis = getModalSplitKpiResults(
   allKpis,
   allTransportModes,
-  livingLabData?.kpi_results ?? [],
+  (livingLabData?.kpi_results ?? []) as IKpiResultGroup[],
 );
 
 const mapMarker = createMapMarker(livingLabData);
 const kpiResultsByCategory = categories.map((category) => ({
   ...category,
-  kpiResults: livingLabData?.kpi_results?.filter((kpiResult) =>
+  kpiResults: (livingLabData?.kpi_results as IKpiResultGroup[] | undefined)?.filter((kpiResult) =>
     category.kpis?.some((kpi) => kpi.id === kpiResult.kpidefinition_id),
   ),
 }));

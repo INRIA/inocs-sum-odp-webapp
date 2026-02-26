@@ -23,8 +23,8 @@ export const D3FacetedTimelineChart: React.FC<D3FacetedTimelineChartProps> = ({
   // Collect all unique labs across all facets for a shared legend
   const allLabs = useMemo(() => {
     const labMap = new Map<
-      string,
-      { labId: string; labName: string; color: string }
+      number,
+      { labId: number; labName: string; color: string }
     >();
     facets.forEach((facet) => {
       facet.labTimelines.forEach((lab) => {

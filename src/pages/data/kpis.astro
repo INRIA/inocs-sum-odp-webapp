@@ -27,18 +27,15 @@ const filteredLivingLabs = livingLabsData.filter(
 
 filteredLivingLabs.forEach((lab) => {
   lab.kpi_results?.forEach((result) => {
-    if (
-      result.result_before?.date &&
-      nonModalSplitKpis.some((k) => k.id === result.kpidefinition_id)
-    ) {
-      allYears.add(new Date(result.result_before.date).getFullYear());
+    if (!nonModalSplitKpis.some((k) => k.id === result.kpidefinition_id)) {
+      return;
     }
-    if (
-      result.result_after?.date &&
-      nonModalSplitKpis.some((k) => k.id === result.kpidefinition_id)
-    ) {
-      allYears.add(new Date(result.result_after.date).getFullYear());
-    }
+
+    result.results?.forEach((entry) => {
+      if (entry.date) {
+        allYears.add(new Date(entry.date).getFullYear());
+      }
+    });
   });
 });
 const sortedYears = Array.from(allYears).sort((a, b) => a - b);

@@ -1,7 +1,22 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { ResourcesMetrics } from "./ResourcesMetrics";
-import type { IResourceCategory, ResourcesMetricsProps } from "./types";
+import type { ResourcesMetricsProps } from "./types";
+import type { IResourceCategory } from "../../../types";
+
+const createMockResource = (
+  id: number,
+  categoryId: number,
+  categoryName: string,
+  name: string,
+) => ({
+  id,
+  name,
+  description: null,
+  url: null,
+  category_id: categoryId,
+  category: { id: categoryId, name: categoryName, type: "RESOURCES" as const },
+});
 
 // ============================================================================
 // Test Fixtures
@@ -12,24 +27,18 @@ const createMockCategories = (): IResourceCategory[] => [
     id: 1,
     name: "Research & Innovation",
     resources: Array.from({ length: 10 }, (_, i) => ({
-      id: `r${i + 1}`,
-      name: `Research ${i + 1}`,
+      ...createMockResource(i + 1, 1, "Research & Innovation", `Research ${i + 1}`),
       description: `Research description ${i + 1}`,
       url: `https://example.com/research${i + 1}`,
-      categoryId: 1,
-      categoryName: "Research & Innovation",
     })),
   },
   {
     id: 2,
     name: "Data",
     resources: Array.from({ length: 5 }, (_, i) => ({
-      id: `d${i + 1}`,
-      name: `Dataset ${i + 1}`,
+      ...createMockResource(i + 100, 2, "Data", `Dataset ${i + 1}`),
       description: `Data description ${i + 1}`,
       url: `https://example.com/data${i + 1}`,
-      categoryId: 2,
-      categoryName: "Data",
     })),
   },
 ];
@@ -69,12 +78,16 @@ describe("ResourcesMetrics", () => {
             name: "Research & Innovation",
             resources: [
               {
-                id: "1",
+                id: 1,
                 name: "Single Research",
                 description: "The only research",
                 url: "https://example.com/research",
-                categoryId: 1,
-                categoryName: "Research & Innovation",
+                category_id: 1,
+                category: {
+                  id: 1,
+                  name: "Research & Innovation",
+                  type: "RESOURCES",
+                },
               },
             ],
           },
@@ -98,36 +111,21 @@ describe("ResourcesMetrics", () => {
             id: 1,
             name: "Research & Innovation",
             resources: Array.from({ length: 3 }, (_, i) => ({
-              id: `r${i}`,
-              name: `Research ${i}`,
-              description: null,
-              url: null,
-              categoryId: 1,
-              categoryName: "Research & Innovation",
+              ...createMockResource(i + 1, 1, "Research & Innovation", `Research ${i}`),
             })),
           },
           {
             id: 2,
             name: "Data",
             resources: Array.from({ length: 7 }, (_, i) => ({
-              id: `d${i}`,
-              name: `Data ${i}`,
-              description: null,
-              url: null,
-              categoryId: 2,
-              categoryName: "Data",
+              ...createMockResource(i + 100, 2, "Data", `Data ${i}`),
             })),
           },
           {
             id: 3,
             name: "Tools",
             resources: Array.from({ length: 2 }, (_, i) => ({
-              id: `t${i}`,
-              name: `Tool ${i}`,
-              description: null,
-              url: null,
-              categoryId: 3,
-              categoryName: "Tools",
+              ...createMockResource(i + 200, 3, "Tools", `Tool ${i}`),
             })),
           },
         ],

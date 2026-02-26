@@ -1,7 +1,6 @@
 import React from "react";
-import { Badge, type BadgeSize } from "./ui/Badge";
+import { Badge, type BadgeColor, type BadgeSize } from "./ui/Badge";
 import { EnumTransportModeType } from "../../types";
-import { desc, label } from "motion/react-client";
 
 type TransportModeType = keyof typeof EnumTransportModeType;
 export interface TransportTypeBadgeProps {
@@ -13,14 +12,14 @@ export function TransportTypeBadge({
   type = "PUBLIC_TRANSPORT",
   size = "sm",
 }: TransportTypeBadgeProps) {
-  const config = {
+  const config: Record<EnumTransportModeType, { color: BadgeColor; shortLabel: string; description: string }> = {
     [EnumTransportModeType.NSM]: {
       color: "success",
       shortLabel: "NSM",
       description: "New Mobility Service",
     },
     [EnumTransportModeType.PUBLIC_TRANSPORT]: {
-      color: "primary-light",
+      color: "info",
       shortLabel: "PT",
       description: "Public Transport",
     },

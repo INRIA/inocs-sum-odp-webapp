@@ -1,5 +1,6 @@
 import React from "react";
 import { Badge } from "./ui/Badge";
+import type { BadgeColor } from "./ui/Badge";
 import { getUrl } from "../../lib/helpers";
 
 export type TransportType =
@@ -22,13 +23,7 @@ export interface TransportBadgeProps {
   iconSrc?: string; // string path fallback
   size?: "sm" | "md" | "lg" | "xl"; // controls padding/text/icon size
   className?: string;
-  color?:
-    | "primary-light"
-    | "secondary"
-    | "warning"
-    | "dark"
-    | "light"
-    | "transparent";
+  color?: BadgeColor;
 }
 
 const DEFAULT_ICONS: Record<string, string> = {
@@ -117,70 +112,70 @@ export function TransportBadge({
   );
 }
 
-const transportModes = [
+const transportModes: Array<{ name: string; color: BadgeColor; icon: string }> = [
   {
     name: "Private Car",
-    color: "#004494",
+    color: "secondary",
     icon: "car",
   },
   {
     name: "Motorcycle / Scooter",
-    color: "#FF632F",
+    color: "warning",
     icon: "scooter",
   },
   {
     name: "Carsharing",
-    color: "#6FAE24",
+    color: "success",
     icon: "car-sharing",
   },
   {
     name: "Bicycle",
-    color: "#81BF2D",
+    color: "success",
     icon: "bike",
   },
   {
     name: "E-scooter",
-    color: "#98C33A",
+    color: "success",
     icon: "e-scooter",
   },
   {
     name: "Walking",
-    color: "#DADADA",
+    color: "light",
     icon: "walking",
   },
   {
     name: "Micromobility",
-    color: "#B4D952",
+    color: "success",
     icon: "bike",
   },
   {
     name: "Ride hailing",
-    color: "#D0F06A",
+    color: "warning",
     icon: "car-sharing",
   },
   {
     name: "Taxi",
-    color: "#55910b",
+    color: "warning",
     icon: "car-sharing",
   },
   {
     name: "Train",
-    color: "#f97448",
+    color: "warning",
     icon: "metro",
   },
   {
     name: "Bus",
-    color: "#4797d8",
+    color: "info",
     icon: "bus",
   },
   {
     name: "Metro / Subway",
-    color: "#75BDFB",
+    color: "info",
     icon: "metro",
   },
   {
     name: "Other",
-    color: "#606060",
+    color: "dark",
     icon: "walking",
   },
 ];

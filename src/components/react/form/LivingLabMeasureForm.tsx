@@ -17,7 +17,7 @@ const api = new ApiClient();
 
 type Props = {
   living_lab_id?: string;
-  livingLabId: string;
+  livingLabId: number;
   measure: IProject;
   value?: Partial<LivingLabProjectsImplementationInput>;
   isEditable?: boolean;
@@ -59,10 +59,8 @@ export function LivingLabMeasureForm({
         living_lab_id: livingLabId,
         project_id: measure.id,
         description: description?.length ? description : undefined,
-        start_at: startAt?.length
-          ? (new Date(startAt) as unknown as Date)
-          : undefined,
-      } as LivingLabProjectsImplementationInput;
+        start_at: startAt?.length ? startAt : undefined,
+      };
       const response = await api.updateLivingLabMeasure(payload);
 
       if (response) {

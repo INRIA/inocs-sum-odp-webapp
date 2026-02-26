@@ -184,8 +184,11 @@ export const DataDashboardFilter: React.FC<DataDashboardFilterProps> = ({
   );
 
   // Memoized selected items with defaults
-  const selectedLabIds = useMemo(
-    () => filter.selectedLabIds ?? [],
+  const selectedLabIds = useMemo<number[]>(
+    () =>
+      (filter.selectedLabIds ?? [])
+        .map((id) => Number(id))
+        .filter((id) => Number.isFinite(id)),
     [filter.selectedLabIds],
   );
   const selectedYears = useMemo(

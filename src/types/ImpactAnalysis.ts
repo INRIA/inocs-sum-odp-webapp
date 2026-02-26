@@ -58,7 +58,7 @@ export interface IKpiDefinition extends IKpi {
   value_type: string; // Type of the values: percentage, ratio, custom_unit, score
   value_min?: number | null;
   value_max?: number | null;
-  parent_kpi_id?: string | null;
+  parent_kpi_id?: number | null;
   parent_kpi_name?: string | null;
   parent_kpi_number?: string | null;
   [key: string]: any;

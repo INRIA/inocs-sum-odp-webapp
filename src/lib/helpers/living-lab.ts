@@ -3,13 +3,13 @@ import type {
   ITransportMode,
   IProject,
   IKpi,
-  IIKpiResultBeforeAfter,
-  IKpiResult,
   IKpiResultGroup,
+  IKpiResult,
 } from "../../types";
 import type { SplitItem } from "../../components/react/KpiCards/ModalSplitChart";
 import type { MarkerData } from "../../components/react/MapViewer";
 import { notNullOrUndefined } from "./format";
+import { normalizeKpiResultGroup } from "../utils/kpis";
 
 /**
  * Filter transport modes that are of type "NSM" (New Mobility Service)
@@ -50,11 +50,12 @@ export function separateMeasures(measures: IProject[]): {
 export function getModalSplitKpiResults(
   kpiDefinitions: IKpi[],
   allTransportModes: ITransportMode[],
-  kpiResults: IIKpiResultBeforeAfter[],
+  kpiResults: IKpiResultGroup[],
 ): {
   kpiName: string;
-  before: { label: string; data: SplitItem[] };
-  after: { label: string; data: SplitItem[] };
+  entries: { label: string; data: SplitItem[] }[];
+  before?: { label: string; data: SplitItem[] };
+  after?: { label: string; data: SplitItem[] };
 }[] {
   if (!kpiDefinitions || !allTransportModes || !kpiResults.length) {
     return [];
@@ -77,13 +78,14 @@ export function getModalSplitKpiResults(
 }
 
 function prepareModalSplitData(
-  kpiResults: IIKpiResultBeforeAfter[],
+  kpiResults: IKpiResultGroup[],
   allTransportModes: ITransportMode[],
   parentKpiDefinition?: IKpi,
 ): {
   kpiName: string;
-  before: { label: string; data: SplitItem[] };
-  after: { label: string; data: SplitItem[] };
+  entries: { label: string; data: SplitItem[] }[];
+  before?: { label: string; data: SplitItem[] };
+  after?: { label: string; data: SplitItem[] };
 } {
   if (
     kpiResults?.length === 0 ||
@@ -92,49 +94,73 @@ function prepareModalSplitData(
   ) {
     return {
       kpiName: "Modal Split",
-      before: { label: "Before", data: [] },
-      after: { label: "After", data: [] },
+      entries: [],
     };
   }
 
-  const beforeData: SplitItem[] = [];
-  const afterData: SplitItem[] = [];
-  const beforeLabelWithMinYear = kpiResults[0].result_before?.date
-    ? `Before (${new Date(kpiResults[0].result_before.date).getFullYear()})`
-    : "Before";
-  const afterLabelWithMinYear = kpiResults[0].result_after?.date
-    ? `After (${new Date(kpiResults[0].result_after.date).getFullYear()})`
-    : "After";
+  const groupedByDate = new Map<
+    string,
+    Array<SplitItem & { itemId: number }>
+  >();
 
-  kpiResults.forEach((kpi) => {
-    // Find the transport mode for this KPI result
-    const transportMode = allTransportModes.find(
-      (tm) => tm.id === kpi.result_before?.transport_mode_id,
-    );
+  kpiResults.forEach((group) => {
+    const normalized = normalizeKpiResultGroup(group);
+    const transportModeId =
+      normalized.transport_mode_id ?? normalized.results[0]?.transport_mode_id;
 
-    if (transportMode) {
-      if (notNullOrUndefined(kpi.result_before?.value)) {
-        beforeData.push({
-          label: transportMode.name,
-          value: kpi.result_before.value,
-          color: transportMode.color || "#cccccc",
-        });
-      }
-
-      if (notNullOrUndefined(kpi.result_after?.value)) {
-        afterData.push({
-          label: transportMode.name,
-          value: kpi.result_after.value,
-          color: transportMode.color || "#cccccc",
-        });
-      }
+    const transportMode = allTransportModes.find((tm) => tm.id === transportModeId);
+    if (!transportMode) {
+      return;
     }
+
+    normalized.results.forEach((result) => {
+      if (!result?.date || !notNullOrUndefined(result.value)) {
+        return;
+      }
+
+      if (!groupedByDate.has(result.date)) {
+        groupedByDate.set(result.date, []);
+      }
+
+      groupedByDate.get(result.date)?.push({
+        itemId: result.id,
+        label: transportMode.name,
+        value: result.value,
+        color: transportMode.color || "#cccccc",
+      });
+    });
   });
+
+  const entries = Array.from(groupedByDate.entries())
+    .map(([date, data]) => ({
+      date,
+      label: `${new Date(date).getFullYear()}`,
+      year: new Date(date).getFullYear(),
+      data: [...data]
+        .sort((a, b) => a.itemId - b.itemId)
+        .map(({ itemId: _itemId, ...item }) => item),
+    }))
+    .filter((entry) => Number.isFinite(entry.year) && entry.data.length > 0)
+    .sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+
+  const before = entries[0]
+    ? { label: entries[0].label, data: entries[0].data }
+    : undefined;
+  const after = entries[entries.length - 1]
+    ? {
+        label: entries[entries.length - 1].label,
+        data: entries[entries.length - 1].data,
+      }
+    : undefined;
 
   return {
     kpiName: parentKpiDefinition?.name || "Modal Split",
-    before: { label: beforeLabelWithMinYear, data: beforeData },
-    after: { label: afterLabelWithMinYear, data: afterData },
+    entries: entries.map((entry) => ({
+      label: entry.label,
+      data: entry.data,
+    })),
+    before,
+    after,
   };
 }
 
@@ -144,8 +170,9 @@ function prepareModalSplitData(
 export interface IModalSplitLabData {
   labId: string;
   labName: string;
-  before: { label: string; data: SplitItem[] };
-  after: { label: string; data: SplitItem[] };
+  entries: { label: string; date: string; year: number; data: SplitItem[] }[];
+  before?: { label: string; date: string; year: number; data: SplitItem[] };
+  after?: { label: string; date: string; year: number; data: SplitItem[] };
 }
 
 /**
@@ -168,7 +195,7 @@ export function getModalSplitDataForDashboard(
   livingLabs: {
     id: string;
     name: string;
-    kpiResults: IIKpiResultBeforeAfter[];
+    kpiResults: IKpiResultGroup[];
   }[],
 ): IModalSplitKpiData[] {
   if (!kpiDefinitions || !allTransportModes || livingLabs.length === 0) {
@@ -182,7 +209,7 @@ export function getModalSplitDataForDashboard(
 
   return modalSplitKpis.map((kpi) => {
     // Process each living lab's data for this KPI
-    const labsData: IModalSplitLabData[] = livingLabs
+    const labsData = livingLabs
       .map((lab) => {
         const labKpiResults = lab.kpiResults.filter(
           (result) => result.kpidefinition_id === kpi.id,
@@ -192,56 +219,75 @@ export function getModalSplitDataForDashboard(
           return null;
         }
 
-        const beforeData: SplitItem[] = [];
-        const afterData: SplitItem[] = [];
+        const groupedByDate = new Map<
+          string,
+          Array<SplitItem & { itemId: number }>
+        >();
 
-        // Build label with year from first result
-        const beforeLabelWithYear = labKpiResults[0]?.result_before?.date
-          ? `${new Date(labKpiResults[0].result_before.date).getFullYear()}`
-          : "Before";
-        const afterLabelWithYear = labKpiResults[0]?.result_after?.date
-          ? `${new Date(labKpiResults[0].result_after.date).getFullYear()}`
-          : "After";
-
-        labKpiResults.forEach((kpiResult) => {
+        labKpiResults.forEach((group) => {
+          const normalized = normalizeKpiResultGroup(group);
+          const transportModeId =
+            normalized.transport_mode_id ?? normalized.results[0]?.transport_mode_id;
           const transportMode = allTransportModes.find(
-            (tm) =>
-              tm.id === kpiResult.result_before?.transport_mode_id ||
-              tm.id === kpiResult.result_after?.transport_mode_id,
+            (tm) => tm.id === transportModeId,
           );
 
-          if (transportMode) {
-            if (kpiResult.result_before?.value) {
-              beforeData.push({
-                label: transportMode.name,
-                value: kpiResult.result_before.value,
-                color: transportMode.color || "#cccccc",
-              });
+          if (!transportMode) {
+            return;
+          }
+
+          normalized.results.forEach((result) => {
+            if (!result?.date || !notNullOrUndefined(result.value)) {
+              return;
             }
 
-            if (kpiResult.result_after?.value) {
-              afterData.push({
-                label: transportMode.name,
-                value: kpiResult.result_after.value,
-                color: transportMode.color || "#cccccc",
-              });
+            if (!groupedByDate.has(result.date)) {
+              groupedByDate.set(result.date, []);
             }
-          }
+
+            groupedByDate.get(result.date)?.push({
+              itemId: result.id,
+              label: transportMode.name,
+              value: result.value,
+              color: transportMode.color || "#cccccc",
+            });
+          });
         });
 
-        // Only include labs that have data
-        if (beforeData.length === 0 && afterData.length === 0) {
+        const entries = Array.from(groupedByDate.entries())
+          .map(([date, data]) => ({
+            date,
+            label: `${new Date(date).getFullYear()}`,
+            year: new Date(date).getFullYear(),
+            data: [...data]
+              .sort((a, b) => a.itemId - b.itemId)
+              .map(({ itemId: _itemId, ...item }) => item),
+          }))
+          .filter((entry) => Number.isFinite(entry.year) && entry.data.length > 0)
+          .sort((a, b) => {
+            const byDate = Date.parse(a.date) - Date.parse(b.date);
+            if (byDate !== 0) {
+              return byDate;
+            }
+            return 0;
+          });
+
+        if (entries.length === 0) {
           return null;
         }
+
+        const before = entries[0];
+        const after = entries[entries.length - 1];
 
         return {
           labId: lab.id,
           labName: lab.name,
-          before: { label: beforeLabelWithYear, data: beforeData },
-          after: { label: afterLabelWithYear, data: afterData },
+          entries,
+          before,
+          after,
         };
       })
-      .filter((lab): lab is IModalSplitLabData => lab !== null);
+      .filter((lab): lab is Exclude<typeof lab, null> => lab !== null);
 
     return {
       kpiId: String(kpi.id),
@@ -345,12 +391,15 @@ export function getKpiResultsProgress(
   });
 
   const uniqueCompletedKpis = Array.from(new Set(uniqueIds));
+  const completedKpiIds = uniqueCompletedKpis.filter(
+    (id): id is number => typeof id === "number",
+  );
 
   if (kpis.length === 0) return { value: 0, progress: 0, details: [] };
   return {
-    value: uniqueCompletedKpis.length,
+    value: completedKpiIds.length,
     progress: Math.round(
-      (uniqueCompletedKpis.length /
+      (completedKpiIds.length /
         (uniqueGlobalIds.length + uniqueLocalIds.length)) *
         100,
     ),
@@ -358,19 +407,13 @@ export function getKpiResultsProgress(
       {
         label: "Global KPIs",
         value: `${
-          uniqueCompletedKpis.filter(
-            (id): id is number =>
-              typeof id === "number" && uniqueGlobalIds.includes(id),
-          ).length
+          completedKpiIds.filter((id) => uniqueGlobalIds.includes(id)).length
         } / ${uniqueGlobalIds.length}`,
       },
       {
         label: "Local KPIs",
         value: `${
-          uniqueCompletedKpis.filter(
-            (id): id is number =>
-              typeof id === "number" && uniqueLocalIds.includes(id),
-          ).length
+          completedKpiIds.filter((id) => uniqueLocalIds.includes(id)).length
         } / ${uniqueLocalIds.length}`,
       },
     ],

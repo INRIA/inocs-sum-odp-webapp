@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { DataDashboardFilter } from "./DataDashboardFilter";
@@ -15,31 +15,29 @@ import type { IProject } from "../../../types/Project";
 // ============================================================================
 
 const createMockLivingLabs = (): ILivingLabKpiData[] => [
-  { id: "lab-1", name: "Geneva Living Lab", kpis: [] },
-  { id: "lab-2", name: "Paris Living Lab", kpis: [] },
+  { id: 1, name: "Geneva Living Lab", kpiResults: [] },
+  { id: 2, name: "Paris Living Lab", kpiResults: [] },
 ];
 
 const createMockYears = (): number[] => [2023, 2024, 2025];
 
 const createMockCategories = (): ICategory[] => [
-  { id: 1, name: "Research & Innovation" },
-  { id: 2, name: "Data" },
+  { id: 1, name: "Research & Innovation", type: "RESOURCES" },
+  { id: 2, name: "Data", type: "RESOURCES" },
 ];
 
 const createMockProjects = (): IProject[] => [
   {
-    id: "project-1",
+    id: 1,
     name: "Urban Mobility Project",
     description: "A project about urban mobility",
     type: "research",
-    image_url: null,
   },
   {
-    id: "project-2",
+    id: 2,
     name: "Green Transport Initiative",
     description: "Sustainable transport solutions",
     type: "policy",
-    image_url: null,
   },
 ];
 
@@ -50,7 +48,7 @@ const createMockTags = (): { id: number; name: string; color: string }[] => [
 ];
 
 const createDefaultFilter = (): KpiLivingLabsCardsFilter => ({
-  selectedLabIds: ["lab-1", "lab-2"],
+  selectedLabIds: [1, 2],
   selectedYears: [2023, 2024, 2025],
   selectedCategoryIds: [1, 2],
 });
@@ -255,7 +253,7 @@ describe("DataDashboardFilter", () => {
         projects,
         filter: {
           ...createDefaultFilter(),
-          selectedProjectIds: ["project-1"], // Only first project selected
+          selectedProjectIds: [1], // Only first project selected
         },
         onFilterChange: () => {},
       };
@@ -332,7 +330,7 @@ describe("DataDashboardFilter", () => {
       const props: DataDashboardFilterProps = {
         livingLabs: createMockLivingLabs(),
         filter: {
-          selectedLabIds: ["lab-1", "lab-2"],
+          selectedLabIds: [1, 2],
         },
         onFilterChange: () => {},
       };
@@ -442,7 +440,7 @@ describe("DataDashboardFilter", () => {
       // Assert - onFilterChange called with lab-1 removed from selectedLabIds
       expect(onFilterChange).toHaveBeenCalledWith(
         expect.objectContaining({
-          selectedLabIds: ["lab-2"],
+          selectedLabIds: [2],
         }),
       );
     });
@@ -454,7 +452,7 @@ describe("DataDashboardFilter", () => {
       const props: DataDashboardFilterProps = {
         ...createDefaultProps(),
         filter: {
-          selectedLabIds: ["lab-2"], // Only lab-2 selected initially
+          selectedLabIds: [2], // Only lab-2 selected initially
           selectedYears: [2023, 2024, 2025],
           selectedCategoryIds: [1, 2],
         },
@@ -471,7 +469,7 @@ describe("DataDashboardFilter", () => {
       // Assert - onFilterChange called with lab-1 added to selectedLabIds
       expect(onFilterChange).toHaveBeenCalledWith(
         expect.objectContaining({
-          selectedLabIds: expect.arrayContaining(["lab-1", "lab-2"]),
+          selectedLabIds: expect.arrayContaining([1, 2]),
         }),
       );
     });
@@ -481,9 +479,9 @@ describe("DataDashboardFilter", () => {
       const user = userEvent.setup();
       const onFilterChange = vi.fn();
       const props: DataDashboardFilterProps = {
-        livingLabs: [{ id: "lab-1", name: "Geneva Living Lab", kpis: [] }],
+        livingLabs: [{ id: 1, name: "Geneva Living Lab", kpiResults: [] }],
         filter: {
-          selectedLabIds: ["lab-1"],
+          selectedLabIds: [1],
         },
         onFilterChange,
       };
@@ -530,7 +528,7 @@ describe("DataDashboardFilter", () => {
       const props: DataDashboardFilterProps = {
         ...createDefaultProps(),
         filter: {
-          selectedLabIds: ["lab-1", "lab-2"],
+          selectedLabIds: [1, 2],
           selectedYears: [2024, 2025], // 2023 not selected initially
           selectedCategoryIds: [1, 2],
         },
@@ -604,7 +602,7 @@ describe("DataDashboardFilter", () => {
       const props: DataDashboardFilterProps = {
         ...createDefaultProps(),
         filter: {
-          selectedLabIds: ["lab-1", "lab-2"],
+          selectedLabIds: [1, 2],
           selectedYears: [2023, 2024, 2025],
           selectedCategoryIds: [2], // Only category 2 selected initially
         },
@@ -631,7 +629,7 @@ describe("DataDashboardFilter", () => {
       const user = userEvent.setup();
       const onFilterChange = vi.fn();
       const props: DataDashboardFilterProps = {
-        categories: [{ id: 1, name: "Research & Innovation" }],
+        categories: [{ id: 1, name: "Research & Innovation", type: "RESOURCES" }],
         filter: {
           selectedCategoryIds: [1],
         },
@@ -660,7 +658,7 @@ describe("DataDashboardFilter", () => {
         projects: createMockProjects(),
         filter: {
           ...createDefaultFilter(),
-          selectedProjectIds: ["project-1", "project-2"],
+          selectedProjectIds: [1, 2],
         },
         onFilterChange,
       };
@@ -675,7 +673,7 @@ describe("DataDashboardFilter", () => {
       // Assert - onFilterChange called with project-1 removed from selectedProjectIds
       expect(onFilterChange).toHaveBeenCalledWith(
         expect.objectContaining({
-          selectedProjectIds: ["project-2"],
+          selectedProjectIds: [2],
         }),
       );
     });
@@ -689,7 +687,7 @@ describe("DataDashboardFilter", () => {
         projects: createMockProjects(),
         filter: {
           ...createDefaultFilter(),
-          selectedProjectIds: ["project-2"], // Only project-2 selected initially
+          selectedProjectIds: [2], // Only project-2 selected initially
         },
         onFilterChange,
       };
@@ -704,10 +702,7 @@ describe("DataDashboardFilter", () => {
       // Assert - onFilterChange called with project-1 added to selectedProjectIds
       expect(onFilterChange).toHaveBeenCalledWith(
         expect.objectContaining({
-          selectedProjectIds: expect.arrayContaining([
-            "project-1",
-            "project-2",
-          ]),
+          selectedProjectIds: expect.arrayContaining([1, 2]),
         }),
       );
     });
