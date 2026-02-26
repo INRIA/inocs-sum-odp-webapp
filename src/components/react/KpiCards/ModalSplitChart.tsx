@@ -81,8 +81,8 @@ export function ModalSplitChart({
     return (
       <div className="flex flex-col gap-2 w-full">
         <h5>{dataset.label}</h5>
-        <div className="flex flex-row gap-2">
-          <div className="h-60 w-2/3">
+        <div className="flex flex-col gap-2">
+          <div className="h-60 w-full mx-auto">
             {view === "doughnut" && (
               <Doughnut data={chartData} options={options} />
             )}
@@ -95,7 +95,7 @@ export function ModalSplitChart({
               />
             )}
           </div>
-          <div className="w-1/3 flex flex-col h-60 gap-0">
+          <div className="w-full lg:w-2/3 flex flex-col gap-0 px-2 mx-auto justify-center">
             {sortedData.map(({ label, value, color }, i) => (
               <li
                 key={label}
@@ -149,7 +149,7 @@ export function ModalSplitChart({
 
   // Doughnut view (default)
   return (
-    <div className="flex flex-col lg:flex-row gap-8">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       {data.map((dataset, i) => (
         <div
           key={i}

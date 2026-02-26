@@ -69,7 +69,10 @@ export function LivingLabModalSplit({
         .filter((r) => r.kpidefinition_id === kpi.id)
         .forEach((r) => {
           r.results?.forEach((result) => {
-            const v = typeof result.value === "number" ? result.value : Number(result.value ?? 0);
+            const v =
+              typeof result.value === "number"
+                ? result.value
+                : Number(result.value ?? 0);
             if (!isNaN(v)) sum += v;
           });
         });
@@ -125,11 +128,8 @@ export function LivingLabModalSplit({
 
   return (
     <div className="bg-white shadow rounded-md flex flex-col gap-6">
-      <DefaultCollectionDate
-        value={defaultDate}
-        onChange={setDefaultDate}
-      />
       {getTabs()}
+      <DefaultCollectionDate value={defaultDate} onChange={setDefaultDate} />
       <div className="p-4 overflow-x-auto">
         <Table
           grid
@@ -202,8 +202,8 @@ export function LivingLabModalSplit({
                           livingLabId={livingLabId}
                           kpi={kpi}
                           initialResults={
-                            livingLabKpiMap.get(`${kpi.id}_${m.id}`)
-                              ?.results ?? []
+                            livingLabKpiMap.get(`${kpi.id}_${m.id}`)?.results ??
+                            []
                           }
                           defaultDate={defaultDate}
                           changeDateAllowed={false}

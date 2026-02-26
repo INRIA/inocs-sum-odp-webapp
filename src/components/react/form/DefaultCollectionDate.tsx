@@ -4,6 +4,7 @@ import {
   CheckCircleIcon,
   PencilSquareIcon,
   XMarkIcon,
+  CalendarIcon,
 } from "@heroicons/react/24/solid";
 import {
   formatDateToMonthYear,
@@ -37,17 +38,27 @@ export function DefaultCollectionDate({ value, onChange }: Props) {
   };
 
   return (
-    <div className="mb-4 flex flex-col items-start">
-      <Field>
-        <Label htmlFor="default-collection-date-input">
-          Default collection date (optional)
+    <div className="flex flex-col items-end w-full ">
+      <Field className="flex flex-row justify-center items-center p-2 border-warning border-2 rounded-md bg-white gap-2">
+        <Label
+          htmlFor="default-collection-date-input"
+          className="bg-warning/40 p-3 rounded-md text-center text-white"
+        >
+          <p className=" text-warning">Default collection date</p>
         </Label>
-        <small>New entries will use this date. Leave blank to use today.</small>
-        <div className="flex flex-row my-auto items-center gap-2">
+        <CalendarIcon className="h-5 w-5" />
+        <div className="flex flex-row my-auto items-center gap-2 rounded-md">
           {!isEditing ? (
             <>
-              <span className="text-base font-medium" aria-label="Default collection date">
-                {value ? formatDateToMonthYear(value) : <span className="text-gray-400">Not set</span>}
+              <span
+                className="text-base font-medium"
+                aria-label="Default collection date"
+              >
+                {value ? (
+                  formatDateToMonthYear(value)
+                ) : (
+                  <span className="text-gray-400">Not set</span>
+                )}
               </span>
               <button
                 type="button"
@@ -55,7 +66,7 @@ export function DefaultCollectionDate({ value, onChange }: Props) {
                 onClick={handleEdit}
                 className="inline-flex items-center"
               >
-                <PencilSquareIcon className="h-6 w-6 text-gray-600 cursor-pointer hover:text-gray-800" />
+                <PencilSquareIcon className="h-6 w-6 text-success cursor-pointer hover:text-warning" />
               </button>
             </>
           ) : (
@@ -88,6 +99,7 @@ export function DefaultCollectionDate({ value, onChange }: Props) {
           )}
         </div>
       </Field>
+      <small>New entries will use this date. Leave blank to use today.</small>
     </div>
   );
 }

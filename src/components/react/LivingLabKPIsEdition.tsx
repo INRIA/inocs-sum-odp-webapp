@@ -85,7 +85,7 @@ export function LivingLabKPIsEdition({
   };
 
   return (
-    <div className="flex flex-col gap-8 mx-auto">
+    <div className="flex flex-col gap-6 mx-auto">
       <DefaultCollectionDate
         value={defaultDate}
         onChange={setDefaultDate}
