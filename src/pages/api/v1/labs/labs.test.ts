@@ -275,7 +275,7 @@ describe("POST /api/v1/labs - Create new lab", () => {
 
     it("should return 401 when user is null", async () => {
       mockContext.locals = {
-        user: null,
+        user: null as any,
       };
 
       mockContext.request = new Request("http://localhost:3000/api/v1/labs", {

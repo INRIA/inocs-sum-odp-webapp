@@ -6,7 +6,8 @@ import type {
   IKpiGroup,
 } from "./types";
 import type { IKpi } from "../../../types";
-import type { IKpiResult } from "../../../types/KPIs";
+import type { IKpiResult, IKpiResultGroup } from "../../../types/KPIs";
+import { normalizeKpiResultGroup } from "../../../lib/utils/kpis";
 
 /**
  * Creates a timeline data point from a KPI result if it matches the selected years
@@ -16,11 +17,16 @@ function createTimelineDataPoint(
   result: IKpiResult | null | undefined,
   selectedYears: number[],
 ): ITimelineDataPoint | null {
-  if (!result?.date || result.value === undefined) {
+  if (!result?.date || !Number.isFinite(result.value)) {
     return null;
   }
 
-  const year = new Date(result.date).getFullYear();
+  const parsedDate = new Date(result.date);
+  const year = parsedDate.getFullYear();
+  if (!Number.isFinite(year)) {
+    return null;
+  }
+
   if (!selectedYears.includes(year)) {
     return null;
   }
@@ -37,29 +43,20 @@ function createTimelineDataPoint(
  * Filters by selected years
  */
 export function processKpiResults(
-  kpiResult: {
-    result_before?: IKpiResult | null;
-    result_after?: IKpiResult | null;
-  },
+  kpiResult: Partial<IKpiResultGroup>,
   selectedYears: number[],
 ): ITimelineDataPoint[] {
-  const dataPoints: ITimelineDataPoint[] = [];
-
-  const beforePoint = createTimelineDataPoint(
-    kpiResult.result_before,
-    selectedYears,
-  );
-  if (beforePoint) {
-    dataPoints.push(beforePoint);
+  if (!Array.isArray(selectedYears)) {
+    return [];
   }
 
-  const afterPoint = createTimelineDataPoint(
-    kpiResult.result_after,
-    selectedYears,
+  const normalizedGroup = normalizeKpiResultGroup(
+    kpiResult as IKpiResultGroup,
   );
-  if (afterPoint) {
-    dataPoints.push(afterPoint);
-  }
+
+  const dataPoints: ITimelineDataPoint[] = normalizedGroup.results
+    .map((result) => createTimelineDataPoint(result, selectedYears))
+    .filter((point): point is ITimelineDataPoint => point !== null);
 
   return dataPoints;
 }
@@ -146,10 +143,10 @@ export function buildKpiDataMap(
  */
 export function groupKpisByParentChild(kpis: IKpi[]): IKpiGroup[] {
   const groups: IKpiGroup[] = [];
-  const processedKpiIds = new Set<string>();
+  const processedKpiIds = new Set<number>();
 
   // First, identify all parent KPIs and group their children
-  const parentKpiMap = new Map<string, IKpi[]>(); // Map parent ID to child KPIs
+  const parentKpiMap = new Map<number, IKpi[]>(); // Map parent ID to child KPIs
 
   kpis.forEach((kpi) => {
     if (kpi.parent_kpi_id) {

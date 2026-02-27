@@ -1,4 +1,4 @@
-import type { IIKpiResultBeforeAfter, IKpi } from "../../../types/KPIs";
+import type { IKpi, IKpiResultGroup } from "../../../types/KPIs";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -34,7 +34,7 @@ ChartJS.register(
 type Props = {
   parentKpi: IKpi;
   kpis: IKpi[];
-  results: IIKpiResultBeforeAfter[];
+  results: IKpiResultGroup[];
 };
 
 export function KpiMultiple({ parentKpi, kpis, results }: Props) {
@@ -45,8 +45,11 @@ export function KpiMultiple({ parentKpi, kpis, results }: Props) {
   // Get unique dates for labels
   const dates = new Set<string>();
   results.forEach((kpi) => {
-    if (kpi.result_before?.date) dates.add(kpi.result_before.date);
-    if (kpi.result_after?.date) dates.add(kpi.result_after.date);
+    kpi.results.forEach((result) => {
+      if (result.date) {
+        dates.add(result.date);
+      }
+    });
   });
   const sortedDates = Array.from(dates).sort();
   chartLabels.push(...sortedDates.map((date) => formatMonthYear(date)));
@@ -55,17 +58,9 @@ export function KpiMultiple({ parentKpi, kpis, results }: Props) {
   results.forEach((kpiRes, index) => {
     const kpiData = kpis.find((item) => item.id === kpiRes.kpidefinition_id);
     const data: (number | null)[] = sortedDates.map((date) => {
-      if (
-        kpiRes.result_before?.date === date &&
-        kpiRes.result_before?.value !== null
-      ) {
-        return formatValue(kpiRes.result_before.value, kpiData?.metric);
-      }
-      if (
-        kpiRes.result_after?.date === date &&
-        kpiRes.result_after?.value !== null
-      ) {
-        return formatValue(kpiRes.result_after.value, kpiData?.metric);
+      const matchedResult = kpiRes.results.find((result) => result.date === date);
+      if (matchedResult?.value !== null && matchedResult?.value !== undefined) {
+        return formatValue(matchedResult.value, kpiData?.metric);
       }
       return null;
     });
@@ -132,8 +127,8 @@ export function KpiMultiple({ parentKpi, kpis, results }: Props) {
               (item) => item.id === kpiRes.kpidefinition_id,
             );
 
-            const before = kpiRes.result_before ?? null;
-            const after = kpiRes.result_after ?? null;
+            const before = kpiRes.results[0] ?? null;
+            const after = kpiRes.results[kpiRes.results.length - 1] ?? null;
 
             const currentValue = formatValue(
               after?.value ?? before?.value ?? null,

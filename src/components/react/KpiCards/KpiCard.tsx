@@ -1,10 +1,10 @@
-import { type IIKpiResultBeforeAfter, type IKpi } from "../../../types";
+import { type IKpi, type IKpiResultGroup } from "../../../types";
 import { Badge, Tooltip } from "../ui";
 import KpiDefault from "./KpiDefault";
 
 type Props = {
   kpi: IKpi;
-  kpiResults?: IIKpiResultBeforeAfter;
+  kpiResults?: IKpiResultGroup;
 };
 
 export function KpiCard({ kpi, kpiResults }: Props) {

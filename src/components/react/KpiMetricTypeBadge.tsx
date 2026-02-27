@@ -1,5 +1,5 @@
 import { EnumKpiMetricType } from "../../types";
-import { Badge, type BadgeSize } from "./ui/Badge";
+import { Badge, type BadgeColor, type BadgeSize } from "./ui/Badge";
 
 export interface KpiMetricTypeBadgeProps {
   //aligns with EnumKpiMetricType
@@ -14,7 +14,7 @@ export interface KpiMetricTypeBadgeProps {
   size?: BadgeSize;
 }
 
-const colorsByType = {
+const colorsByType: Record<EnumKpiMetricType, BadgeColor> = {
   [EnumKpiMetricType.PERCENTAGE]: "primary",
   [EnumKpiMetricType.RATIO]: "secondary",
   [EnumKpiMetricType.ABSOLUTE]: "warning",

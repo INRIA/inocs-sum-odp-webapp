@@ -10,11 +10,11 @@ const api = new ApiClient();
 
 interface Props {
   value?: ITransportModeLivingLabImplementation;
-  transportModeId: string;
-  livingLabId: string;
+  transportModeId: number;
+  livingLabId: number;
   onCancel?: () => void;
   onChange?: (data: ITransportModeLivingLabImplementation) => void;
-  onDelete?: (id: string) => void;
+  onDelete?: (id: number) => void;
 }
 
 export function LivingLabTransportModeForm({
@@ -30,7 +30,7 @@ export function LivingLabTransportModeForm({
     value?.status ?? EnumTransportModeStatus.NOT_AVAILABLE
   );
   const prevStatusRef = useRef<EnumTransportModeStatus>(status);
-  const [id, setId] = useState<string | undefined>(value?.id);
+  const [id, setId] = useState<number | undefined>(value?.id);
 
   const badgeConfig = {
     [EnumTransportModeStatus.NOT_AVAILABLE]: {
@@ -84,12 +84,14 @@ export function LivingLabTransportModeForm({
       setId(_id);
     }
 
-    onChange?.({
-      id: _id,
-      status,
-      transport_mode_id: transportModeId,
-      living_lab_id: livingLabId,
-    });
+    if (_id !== undefined) {
+      onChange?.({
+        id: _id,
+        status,
+        transport_mode_id: transportModeId,
+        living_lab_id: livingLabId,
+      });
+    }
     setEditing(false);
   };
 

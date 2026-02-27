@@ -1,4 +1,4 @@
-import { type IIKpiResultBeforeAfter, type IKpiResult, type IKpiResultGroup } from "./KPIs";
+import { type IKpiResult, type IKpiResultGroup } from "./KPIs";
 import type { IProject, LivingLabProjectsImplementation } from "./Project";
 import type {
   ITransportMode,

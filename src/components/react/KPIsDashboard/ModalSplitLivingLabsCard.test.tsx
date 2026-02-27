@@ -38,8 +38,43 @@ const createMockLabs = () => [
   {
     labId: "lab-1",
     labName: "Geneva Lab",
+    entries: [
+      {
+        label: "2022",
+        date: "2022-01-01",
+        year: 2022,
+        data: [
+          { label: "Car", value: 0.45, color: "#ff0000" },
+          { label: "Public Transit", value: 0.25, color: "#00ff00" },
+        ],
+      },
+      {
+        label: "2023",
+        date: "2023-01-01",
+        year: 2023,
+        data: [
+          { label: "Car", value: 0.4, color: "#ff0000" },
+          { label: "Public Transit", value: 0.3, color: "#00ff00" },
+          { label: "Bicycle", value: 0.2, color: "#0000ff" },
+          { label: "Walking", value: 0.1, color: "#ffff00" },
+        ],
+      },
+      {
+        label: "2024",
+        date: "2024-01-01",
+        year: 2024,
+        data: [
+          { label: "Car", value: 0.3, color: "#ff0000" },
+          { label: "Public Transit", value: 0.35, color: "#00ff00" },
+          { label: "Bicycle", value: 0.25, color: "#0000ff" },
+          { label: "Walking", value: 0.1, color: "#ffff00" },
+        ],
+      },
+    ],
     before: {
       label: "2023",
+      date: "2023-01-01",
+      year: 2023,
       data: [
         { label: "Car", value: 0.4, color: "#ff0000" },
         { label: "Public Transit", value: 0.3, color: "#00ff00" },
@@ -49,6 +84,8 @@ const createMockLabs = () => [
     },
     after: {
       label: "2024",
+      date: "2024-01-01",
+      year: 2024,
       data: [
         { label: "Car", value: 0.3, color: "#ff0000" },
         { label: "Public Transit", value: 0.35, color: "#00ff00" },
@@ -60,8 +97,43 @@ const createMockLabs = () => [
   {
     labId: "lab-2",
     labName: "Lyon Lab",
+    entries: [
+      {
+        label: "2022",
+        date: "2022-01-01",
+        year: 2022,
+        data: [
+          { label: "Car", value: 0.55, color: "#ff0000" },
+          { label: "Public Transit", value: 0.2, color: "#00ff00" },
+        ],
+      },
+      {
+        label: "2023",
+        date: "2023-01-01",
+        year: 2023,
+        data: [
+          { label: "Car", value: 0.5, color: "#ff0000" },
+          { label: "Public Transit", value: 0.25, color: "#00ff00" },
+          { label: "Bicycle", value: 0.15, color: "#0000ff" },
+          { label: "Walking", value: 0.1, color: "#ffff00" },
+        ],
+      },
+      {
+        label: "2024",
+        date: "2024-01-01",
+        year: 2024,
+        data: [
+          { label: "Car", value: 0.4, color: "#ff0000" },
+          { label: "Public Transit", value: 0.3, color: "#00ff00" },
+          { label: "Bicycle", value: 0.2, color: "#0000ff" },
+          { label: "Walking", value: 0.1, color: "#ffff00" },
+        ],
+      },
+    ],
     before: {
       label: "2023",
+      date: "2023-01-01",
+      year: 2023,
       data: [
         { label: "Car", value: 0.5, color: "#ff0000" },
         { label: "Public Transit", value: 0.25, color: "#00ff00" },
@@ -71,6 +143,8 @@ const createMockLabs = () => [
     },
     after: {
       label: "2024",
+      date: "2024-01-01",
+      year: 2024,
       data: [
         { label: "Car", value: 0.4, color: "#ff0000" },
         { label: "Public Transit", value: 0.3, color: "#00ff00" },
@@ -225,9 +299,21 @@ describe("ModalSplitLivingLabsCard", () => {
       render(<ModalSplitLivingLabsCard {...createDefaultProps()} />);
 
       const charts = screen.getAllByTestId("stacked-bar-chart");
-      // Each chart should have 2 datasets (before and after)
+      // selectedYears default is [2023, 2024], so each chart has 2 datasets
       charts.forEach((chart) => {
         expect(chart).toHaveTextContent("2 datasets");
+      });
+    });
+
+    it("should pass all matching entries datasets to chart", () => {
+      const props = createDefaultProps({
+        filter: createMockFilter({ selectedYears: [2022, 2023, 2024] }),
+      });
+      render(<ModalSplitLivingLabsCard {...props} />);
+
+      const charts = screen.getAllByTestId("stacked-bar-chart");
+      charts.forEach((chart) => {
+        expect(chart).toHaveTextContent("3 datasets");
       });
     });
   });

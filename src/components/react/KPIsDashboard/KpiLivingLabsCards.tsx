@@ -119,7 +119,7 @@ export const KpiLivingLabsCards: React.FC<KpiLivingLabsCardsProps> = ({
     return livingLabs
       .filter((lab) => filter.selectedLabIds?.includes(lab.id))
       .map((lab) => ({
-        id: lab.id,
+        id: String(lab.id),
         label: lab.name,
         color: colorMap.get(lab.id) || COLOR_GRAY,
       }));

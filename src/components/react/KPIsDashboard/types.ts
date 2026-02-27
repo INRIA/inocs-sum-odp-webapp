@@ -1,6 +1,6 @@
 import type {
-  IIKpiResultBeforeAfter,
   IKpi,
+  IKpiResultGroup,
   ITransportMode,
 } from "../../../types";
 import type { ICategory } from "../../../types/Category";
@@ -11,7 +11,7 @@ import type { ICategory } from "../../../types/Category";
 export interface ILivingLabKpiData {
   id: number;
   name: string;
-  kpiResults: IIKpiResultBeforeAfter[];
+  kpiResults: IKpiResultGroup[];
 }
 
 /**
@@ -46,7 +46,7 @@ export interface ILabColorAssignment {
  * Filter options for KPI cards
  */
 export interface KpiLivingLabsCardsFilter {
-  selectedLabIds?: number[];
+  selectedLabIds?: Array<number | string>;
   selectedYears?: number[];
   selectedCategoryIds?: number[];
   selectedProjectIds?: number[];
@@ -56,7 +56,7 @@ export interface KpiLivingLabsCardsFilter {
 /**
  * Map of KPI IDs to their lab timelines
  */
-export type IKpiTimelineMap = Map<string, ILabKpiTimeline[]>;
+export type IKpiTimelineMap = Map<number, ILabKpiTimeline[]>;
 
 /**
  * Represents a single KPI (no parent-child relationship)
@@ -84,14 +84,24 @@ export type IKpiGroup = ISingleKpiGroup | IParentKpiGroup;
  * Modal split data for a single living lab (used by ModalSplitLivingLabsCard)
  */
 export interface IModalSplitLabData {
-  labId: string;
+  labId: string | number;
   labName: string;
-  before: {
+  entries: {
     label: string;
+    date: string;
+    year: number;
+    data: { label: string; value: number; color: string }[];
+  }[];
+  before?: {
+    label: string;
+    date: string;
+    year: number;
     data: { label: string; value: number; color: string }[];
   };
-  after: {
+  after?: {
     label: string;
+    date: string;
+    year: number;
     data: { label: string; value: number; color: string }[];
   };
 }
@@ -163,7 +173,7 @@ export interface D3TimelineChartProps {
  * Each facet represents a child KPI's timeline
  */
 export interface IFacetData {
-  kpiId: string;
+  kpiId: number;
   kpiName: string;
   labTimelines: ILabKpiTimeline[];
 }
@@ -188,14 +198,24 @@ export interface ModalSplitLivingLabsCardProps {
   kpiNumber: string;
   kpiName: string;
   labs: {
-    labId: string;
+    labId: string | number;
     labName: string;
-    before: {
+    entries: {
       label: string;
+      date: string;
+      year: number;
+      data: { label: string; value: number; color: string }[];
+    }[];
+    before?: {
+      label: string;
+      date: string;
+      year: number;
       data: { label: string; value: number; color: string }[];
     };
-    after: {
+    after?: {
       label: string;
+      date: string;
+      year: number;
       data: { label: string; value: number; color: string }[];
     };
   }[];

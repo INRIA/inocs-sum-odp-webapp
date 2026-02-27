@@ -25,19 +25,18 @@ const filteredLivingLabs = livingLabsData.filter(
 
 filteredLivingLabs.forEach((lab) => {
   lab.kpi_results?.forEach((result) => {
-    if (result.result_before?.date) {
-      allYears.add(new Date(result.result_before.date).getFullYear());
-    }
-    if (result.result_after?.date) {
-      allYears.add(new Date(result.result_after.date).getFullYear());
-    }
+    result.results?.forEach((entry) => {
+      if (entry.date) {
+        allYears.add(new Date(entry.date).getFullYear());
+      }
+    });
   });
 });
 const sortedYears = Array.from(allYears).sort((a, b) => a - b);
 
 // Prepare living labs data for the dashboard
 const livingLabsForDashboard = filteredLivingLabs.map((lab) => ({
-  id: lab.id,
+  id: Number(lab.id),
   name: lab.name,
   kpiResults: lab.kpi_results ?? [],
 }));

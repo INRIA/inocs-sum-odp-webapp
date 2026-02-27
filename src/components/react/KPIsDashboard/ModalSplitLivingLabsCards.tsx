@@ -36,7 +36,7 @@ export const ModalSplitLivingLabsCards: React.FC<
         id="modal-split-legend"
         title="Transport Modes:"
         items={transportModes.map((mode) => ({
-          id: mode.id,
+          id: String(mode.id),
           label: mode.name,
           color: mode.color ?? "#999999",
         }))}

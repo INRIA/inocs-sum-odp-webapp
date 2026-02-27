@@ -320,7 +320,7 @@ describe("ResourcesDashboard", () => {
       // Assert - category options from props are displayed (within the filter section)
       const filterSection = document.getElementById("data-dashboard-filters");
       expect(filterSection).not.toBeNull();
-      props.categories.forEach((category) => {
+      props.categories?.forEach((category) => {
         expect(
           within(filterSection!).getByRole("button", {
             name: new RegExp(`^${category.name}$`, "i"),

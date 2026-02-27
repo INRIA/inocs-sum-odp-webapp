@@ -25,6 +25,8 @@ export interface BadgeProps {
   displayTooltipIcon?: boolean;
   inline?: boolean;
   onClick?: () => void;
+  style?: React.CSSProperties;
+  title?: string;
 }
 
 const COLOR_CLASSES: Record<BadgeColor, string> = {
@@ -68,6 +70,7 @@ export function Badge({
   inline = true,
   onClick,
   style,
+  title,
 }: BadgeProps) {
   const colorClass = COLOR_CLASSES[color] ?? COLOR_CLASSES.secondary;
   const sizeClass = SIZE_CLASSES[size] ?? SIZE_CLASSES.md;
@@ -83,6 +86,7 @@ export function Badge({
       <span
         className={`items-center gap-2 rounded-full font-medium ${colorClass} ${sizeClass} ${className} ${displayStyle} border`}
         style={style}
+        title={title}
         role={role}
         aria-label={ariaLabel}
         onMouseEnter={() => setDisplayTooltip(true)}

@@ -14,6 +14,8 @@ export interface RButtonProps {
   defaultArrow?: boolean;
   type?: "button" | "submit" | "reset";
   disabled?: boolean;
+  target?: string;
+  rel?: string;
 }
 
 export function RButton({
@@ -26,6 +28,8 @@ export function RButton({
   className = "",
   defaultArrow = false,
   type,
+  target,
+  rel,
   ...props
 }: RButtonProps) {
   const sizeClasses = {
@@ -59,7 +63,7 @@ export function RButton({
 
   if (href) {
     return (
-      <a href={href} className={actionClassName} {...props}>
+      <a href={href} className={actionClassName} target={target} rel={rel} {...props}>
         {text}
         {children}
         {defaultArrow && <span aria-hidden="true">→</span>}

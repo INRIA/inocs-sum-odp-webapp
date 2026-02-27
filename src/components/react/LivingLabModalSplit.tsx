@@ -126,6 +126,63 @@ export function LivingLabModalSplit({
     return <Tabs align="right" tabs={tabs}></Tabs>;
   };
 
+  const onKpiValuesChange = (
+    kpiId: number,
+    transportModeId: number,
+    before: number | null,
+    after: number | null,
+  ) => {
+    const key = `${kpiId}_${transportModeId}`;
+    // previous entry for this KPI+mode
+    const prevEntry = livingLabKpiMap.get(key);
+
+    const prevBefore = prevEntry?.result_before?.value ?? null;
+    const prevAfter = prevEntry?.result_after?.value ?? null;
+
+    // compute deltas (treat null as 0 for totals adjustment)
+    const deltaBefore = (before ?? 0) - (prevBefore ?? 0);
+    const deltaAfter = (after ?? 0) - (prevAfter ?? 0);
+
+    setLivingLabKpiMap((prevMap) => {
+      const updatedMap = new Map(prevMap);
+      updatedMap.set(key, {
+        ...prevEntry,
+        living_lab_id: livingLabId,
+        kpidefinition_id: kpiId,
+        transport_mode_id: transportModeId,
+        result_before: {
+          id: prevEntry?.result_before?.id ?? Date.now(),
+          kpidefinition_id: kpiId,
+          living_lab_id: livingLabId,
+          transport_mode_id: transportModeId,
+          value: Number(before ?? 0),
+          date: prevEntry?.result_before?.date ?? beforeDate,
+        },
+        result_after: {
+          id: prevEntry?.result_after?.id ?? Date.now() + 1,
+          kpidefinition_id: kpiId,
+          living_lab_id: livingLabId,
+          transport_mode_id: transportModeId,
+          value: Number(after ?? 0),
+          date: prevEntry?.result_after?.date ?? afterDate ?? beforeDate,
+        },
+      });
+      return updatedMap;
+    });
+    // update totals for this KPI
+    setKpiTotals((prev) => {
+      const updated = new Map(prev);
+      const existingTotals = updated.get(kpiId) ?? {
+        before: 0,
+        after: 0,
+      };
+      existingTotals.before = (existingTotals.before ?? 0) + deltaBefore;
+      existingTotals.after = (existingTotals.after ?? 0) + deltaAfter;
+      updated.set(kpiId, existingTotals);
+      return updated;
+    });
+  };
+
   return (
     <div className="bg-white shadow rounded-md flex flex-col gap-6">
       {getTabs()}

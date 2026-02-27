@@ -63,11 +63,11 @@ describe("D3FacetedTimelineChart", () => {
 
   const mockFacets: IFacetData[] = [
     {
-      kpiId: "child-1",
+      kpiId: 1,
       kpiName: "Bicycle Safety",
       labTimelines: [
         {
-          labId: "lab-1",
+          labId: 1,
           labName: "Geneva",
           color: "#3b82f6",
           dataPoints: [
@@ -78,11 +78,11 @@ describe("D3FacetedTimelineChart", () => {
       ],
     },
     {
-      kpiId: "child-2",
+      kpiId: 2,
       kpiName: "Public Transport Safety",
       labTimelines: [
         {
-          labId: "lab-1",
+          labId: 1,
           labName: "Geneva",
           color: "#3b82f6",
           dataPoints: [
@@ -91,7 +91,7 @@ describe("D3FacetedTimelineChart", () => {
           ],
         },
         {
-          labId: "lab-2",
+          labId: 2,
           labName: "Paris",
           color: "#10b981",
           dataPoints: [{ year: 2023, value: 88, date: "2023-01-01" }],
@@ -184,11 +184,11 @@ describe("D3FacetedTimelineChart", () => {
     it("handles single facet correctly", () => {
       const singleFacet: IFacetData[] = [
         {
-          kpiId: "child-1",
+          kpiId: 1,
           kpiName: "Bicycle Safety",
           labTimelines: [
             {
-              labId: "lab-1",
+              labId: 1,
               labName: "Geneva",
               color: "#3b82f6",
               dataPoints: [{ year: 2023, value: 75, date: "2023-01-01" }],
@@ -213,7 +213,7 @@ describe("D3FacetedTimelineChart", () => {
     it("handles facets with empty lab timelines", () => {
       const facetsWithEmpty: IFacetData[] = [
         {
-          kpiId: "child-1",
+          kpiId: 1,
           kpiName: "Empty Facet",
           labTimelines: [],
         },

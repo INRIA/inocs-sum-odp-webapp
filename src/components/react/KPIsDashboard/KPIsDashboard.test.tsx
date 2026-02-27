@@ -30,17 +30,59 @@ const createMockLivingLabs = (): ILivingLabKpiData[] => [
   {
     id: 1,
     name: "Geneva Lab",
-    kpiResults: [],
+    kpiResults: [
+      {
+        living_lab_id: 1,
+        kpidefinition_id: 1,
+        results: [
+          {
+            id: 1,
+            kpidefinition_id: 1,
+            living_lab_id: 1,
+            value: 42,
+            date: "2024-01-01",
+          },
+        ],
+      },
+    ],
   },
   {
     id: 2,
     name: "Lyon Lab",
-    kpiResults: [],
+    kpiResults: [
+      {
+        living_lab_id: 2,
+        kpidefinition_id: 2,
+        results: [
+          {
+            id: 2,
+            kpidefinition_id: 2,
+            living_lab_id: 2,
+            value: 30,
+            date: "2023-01-01",
+          },
+        ],
+      },
+    ],
   },
   {
     id: 3,
     name: "Barcelona Lab",
-    kpiResults: [],
+    kpiResults: [
+      {
+        living_lab_id: 3,
+        kpidefinition_id: 1,
+        results: [
+          {
+            id: 3,
+            kpidefinition_id: 1,
+            living_lab_id: 3,
+            value: 55,
+            date: "2025-01-01",
+          },
+        ],
+      },
+    ],
   },
 ];
 

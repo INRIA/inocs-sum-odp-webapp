@@ -10,28 +10,28 @@ import type { IResource } from "../../../types";
 
 const createMockResources = (): IResource[] => [
   {
-    id: "1",
+    id: 1,
     name: "Research Paper Alpha",
     description: "A comprehensive study on urban mobility",
     url: "https://example.com/alpha",
-    categoryId: 1,
-    categoryName: "Research & Innovation",
+    category_id: 1,
+    category: { id: 1, name: "Research & Innovation", type: "RESOURCES" },
   },
   {
-    id: "2",
+    id: 2,
     name: "Research Paper Beta",
     description: "Analysis of transportation patterns",
     url: "https://example.com/beta",
-    categoryId: 1,
-    categoryName: "Research & Innovation",
+    category_id: 1,
+    category: { id: 1, name: "Research & Innovation", type: "RESOURCES" },
   },
   {
-    id: "3",
+    id: 3,
     name: "Research Paper Gamma",
     description: "Study of electric vehicles adoption",
     url: "https://example.com/gamma",
-    categoryId: 1,
-    categoryName: "Research & Innovation",
+    category_id: 1,
+    category: { id: 1, name: "Research & Innovation", type: "RESOURCES" },
   },
 ];
 
@@ -144,12 +144,12 @@ describe("ResourcesCategoryGroup", () => {
         categoryName: "Data",
         resources: [
           {
-            id: "1",
+            id: 1,
             name: "Single Dataset",
             description: "The only dataset",
             url: "https://example.com/dataset",
-            categoryId: 2,
-            categoryName: "Data",
+            category_id: 2,
+            category: { id: 2, name: "Data", type: "RESOURCES" },
           },
         ],
       };

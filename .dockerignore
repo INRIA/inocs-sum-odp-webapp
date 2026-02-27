@@ -15,6 +15,8 @@ dist
 .gitignore
 .vscode
 .DS_Store
+Dockerfile*
+.dockerignore
 
 # Prisma generated files can be regenerated
 prisma/*.db
@@ -22,6 +24,9 @@ prisma/*.db
 # Local env files (provide via secrets at runtime)
 .env
 .env.*
+
+# Coverage artifacts
+coverage/
 
 # Test files
 **/*.test.ts

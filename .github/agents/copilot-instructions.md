@@ -2,6 +2,8 @@
 
 Auto-generated from all feature plans. Last updated: 2026-02-24
 
+## Active Technologies
+
 - **Language**: TypeScript 5.x, strict mode — no `any`, no `@ts-ignore`, no weakening of tsconfig
 - **Frontend framework**: Astro 4 (SSR) + React 18 islands
 - **Styling**: Tailwind CSS + Catalyst UI Kit (no new UI libraries)
@@ -62,6 +64,7 @@ tests/
 ## Recent Changes
 
 - 001-kpi-multi-value-input: Replace fixed before/after KPI input with dynamic multi-value list; add DefaultCollectionDate; expose `results: IKpiResult[]` from BFF
+- 001-multi-entry-kpi-charts: Added TypeScript (Astro strict preset) + React 19 islands + Astro 5, React 19, D3 7, Chart.js 4, react-chartjs-2, Tailwind 4
 - 001-mcda-custom-analysis: Added TypeScript 5 (strict mode via `astro/tsconfigs/strict`) + Astro 5 (`@astrojs/node` SSR adapter), React 19, Prisma 6, Tailwind CSS 4, Vitest 4
 
 - 001-mcda-custom-analysis: Added
