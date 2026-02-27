@@ -14,6 +14,7 @@ import {
   LivingLabKPIsView,
   MobilityMeasures,
 } from "../../components/react";
+import { TriggerDownloadCsv } from "../../components/react/TriggerDownloadCsv/TriggerDownloadCsv";
 import type { IKpiResultGroup } from "../../types";
 
 const api = new ApiClient(Astro.request);
@@ -146,7 +147,15 @@ const kpiResultsByCategory = categories.map((category) => ({
       {
         (pushMeasures.length > 0 || pullMeasures.length > 0) && (
           <section class="flex flex-col gap-4">
-            <h3 class="text-center">Policy Measures</h3>
+            <div class="flex flex-row justify-center items-stretch gap-2">
+              <h3>Policy Measures</h3>
+              <TriggerDownloadCsv
+                type="projects-lab"
+                size="sm"
+                living_lab_id={Number(livingLabData.id)}
+                client:load
+              />
+            </div>
             <MobilityMeasures
               pushMeasures={pushMeasures}
               pullMeasures={pullMeasures}
@@ -166,7 +175,11 @@ const kpiResultsByCategory = categories.map((category) => ({
           <h3 class="text-center">Key Performance Indicators (KPIs)</h3>
 
           <div class="flex flex-wrap gap-0">
-            <LivingLabKPIsView modalSplitKpis={modalSplitKpis} client:load />
+            <LivingLabKPIsView
+              modalSplitKpis={modalSplitKpis}
+              living_lab_id={Number(livingLabData.id)}
+              client:load
+            />
           </div>
 
           <div class="flex flex-wrap gap-0">

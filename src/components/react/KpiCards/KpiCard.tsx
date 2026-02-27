@@ -1,6 +1,7 @@
 import { type IKpi, type IKpiResultGroup } from "../../../types";
 import { Badge, Tooltip } from "../ui";
 import KpiDefault from "./KpiDefault";
+import { TriggerDownloadCsv } from "../TriggerDownloadCsv";
 
 type Props = {
   kpi: IKpi;
@@ -37,11 +38,21 @@ export function KpiCard({ kpi, kpiResults }: Props) {
         </div>
 
         {kpiResults && (
-          <KpiDefault
-            kpiResults={kpiResults}
-            metricType={kpi.metric}
-            progressionTarget={kpi.progression_target}
-          />
+          <>
+            <KpiDefault
+              kpiResults={kpiResults}
+              metricType={kpi.metric}
+              progressionTarget={kpi.progression_target}
+            />
+            <div className="flex justify-end mt-2">
+              <TriggerDownloadCsv
+                type="kpi-results-lab"
+                size="sm"
+                living_lab_id={kpiResults.living_lab_id}
+                kpidefinition_id={kpi.id}
+              />
+            </div>
+          </>
         )}
       </div>
     </div>

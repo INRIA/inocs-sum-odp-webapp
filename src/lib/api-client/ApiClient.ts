@@ -271,4 +271,40 @@ export default class ApiClient {
   async getItemById(id: number): Promise<IResource | null> {
     return this.request<IResource | null>(`/items/${id}`);
   }
+
+  /**
+   * Download a CSV blob from the given path.
+   * Does NOT reuse request<T>() because that method discards non-JSON bodies.
+   * Throws ApiDownloadError on non-2xx responses.
+   */
+  async downloadCsvBlob(path: string): Promise<Blob> {
+    const url = `${this.baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
+
+    const headers: Record<string, string> = {};
+    if (this.token) {
+      headers["Authorization"] = `Bearer ${this.token}`;
+    }
+
+    const res = await fetch(url, { headers });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new ApiDownloadError(
+        `ApiDownloadError: status=${res.status} ${text}`,
+        res.status,
+      );
+    }
+
+    return res.blob();
+  }
+}
+
+export class ApiDownloadError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+  ) {
+    super(message);
+    this.name = "ApiDownloadError";
+  }
 }

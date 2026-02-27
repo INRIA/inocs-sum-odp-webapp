@@ -19,6 +19,7 @@ import {
 } from "../../../lib/helpers";
 import { Badge, Tooltip } from "../ui";
 import { COLORS } from "../../../styles/constants";
+import { TriggerDownloadCsv } from "../TriggerDownloadCsv/TriggerDownloadCsv";
 
 ChartJS.register(
   CategoryScale,
@@ -58,7 +59,9 @@ export function KpiMultiple({ parentKpi, kpis, results }: Props) {
   results.forEach((kpiRes, index) => {
     const kpiData = kpis.find((item) => item.id === kpiRes.kpidefinition_id);
     const data: (number | null)[] = sortedDates.map((date) => {
-      const matchedResult = kpiRes.results.find((result) => result.date === date);
+      const matchedResult = kpiRes.results.find(
+        (result) => result.date === date,
+      );
       if (matchedResult?.value !== null && matchedResult?.value !== undefined) {
         return formatValue(matchedResult.value, kpiData?.metric);
       }
@@ -197,6 +200,14 @@ export function KpiMultiple({ parentKpi, kpis, results }: Props) {
             data={chartData}
             className="w-full"
             height={200}
+          />
+        </div>
+        <div className="flex justify-end mt-2">
+          <TriggerDownloadCsv
+            type="kpi-results-lab"
+            size="sm"
+            living_lab_id={results[0]?.living_lab_id}
+            kpidefinition_id={parentKpi.id}
           />
         </div>
       </div>

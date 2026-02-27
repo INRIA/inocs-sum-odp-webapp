@@ -53,6 +53,7 @@ export function getModalSplitKpiResults(
   kpiResults: IKpiResultGroup[],
 ): {
   kpiName: string;
+  kpidefinition_id: number;
   entries: { label: string; data: SplitItem[] }[];
   before?: { label: string; data: SplitItem[] };
   after?: { label: string; data: SplitItem[] };
@@ -68,11 +69,14 @@ export function getModalSplitKpiResults(
           (result) => result.kpidefinition_id === kpi.id,
         );
 
-        return prepareModalSplitData(
-          modalSplitKpiResults,
-          allTransportModes,
-          kpi,
-        );
+        return {
+          kpidefinition_id: kpi.id,
+          ...prepareModalSplitData(
+            modalSplitKpiResults,
+            allTransportModes,
+            kpi,
+          ),
+        };
       }) || []
   );
 }
