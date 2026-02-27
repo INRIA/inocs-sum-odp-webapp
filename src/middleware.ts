@@ -1,5 +1,6 @@
 import { defineMiddleware } from "astro:middleware";
 import { getSession } from "auth-astro/server";
+import { rateLimiterController } from "./bff/controllers/rate-limiter.controller";
 import { getLivingLabCookie } from "./lib/utils/cookies";
 
 // Routes that require authentication
@@ -11,6 +12,16 @@ const PUBLIC_ROUTES = ["/lab-admin/login", "/lab-admin/signup"];
 export const onRequest = defineMiddleware(async (context, next) => {
   const { url, redirect, request } = context;
   const pathname = url.pathname;
+
+  const rateLimitResponse = rateLimiterController.enforceRateLimit({
+    request,
+    pathname,
+    search: url.search,
+    redirect,
+  });
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
 
   const session = await getSession(request);
   const user = session?.user as any;

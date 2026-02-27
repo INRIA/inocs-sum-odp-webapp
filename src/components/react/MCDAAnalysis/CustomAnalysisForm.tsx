@@ -92,7 +92,7 @@ export const CustomAnalysisForm: React.FC<CustomAnalysisFormProps> = ({
     } catch (networkErr) {
       console.error("Network error in CustomAnalysisForm:", networkErr);
       setError(
-        "A network error occurred. Please check your connection and try again.",
+        "An error occurred, most likely due to rate limiting. Please wait a moment and try again.",
       );
       setLoading(false);
     }

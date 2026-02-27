@@ -23,12 +23,15 @@ export default class ApiClient {
   };
 
   private token?: string;
+  private isServer: boolean;
+  private originalRequest?: Request;
 
   constructor(request?: Request) {
-    const isServer = typeof window === "undefined";
+    this.isServer = typeof window === "undefined";
+    this.originalRequest = request;
 
     // --- Determine base URL ---
-    if (isServer) {
+    if (this.isServer) {
       // SSR (Node)
       this.baseUrl = "http://localhost:4321/api/v1";
 
@@ -69,15 +72,40 @@ export default class ApiClient {
     const url = `${this.baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
 
     // Always include auth header if token is present
-    const headers: HeadersInit = {
-      ...(options?.headers ?? {}),
+    const headers: Record<string, string> = {
+      ...((options?.headers as Record<string, string>) ?? {}),
     };
     if (this.token) {
       headers["Authorization"] = `Bearer ${this.token}`;
     }
 
+    // Mark internal SSR requests to prevent self-rate-limiting
+    if (this.isServer) {
+      headers["X-Internal-Request"] = "true";
+    }
+
     try {
       const res = await fetch(url, { ...options, headers });
+
+      // Handle rate limiting (429) in SSR mode
+      if (!res.ok && res.status === 429 && this.isServer) {
+        const retryAfter = res.headers.get("Retry-After") || "300";
+        const currentPath = this.originalRequest
+          ? new URL(this.originalRequest.url).pathname +
+            new URL(this.originalRequest.url).search
+          : "/";
+        const redirectUrl = `/rate-limited?from=${encodeURIComponent(currentPath)}`;
+
+        // Throw a redirect response - Astro will catch and return this
+        const redirectResponse = new Response(null, {
+          status: 302,
+          headers: {
+            Location: redirectUrl,
+            "Retry-After": retryAfter,
+          },
+        });
+        throw redirectResponse;
+      }
 
       if (!res.ok) {
         const text = await res.text();
@@ -89,7 +117,14 @@ export default class ApiClient {
       if (contentType && contentType.includes("application/json")) {
         return res.json() as Promise<T>;
       }
+
+      return null;
     } catch (error) {
+      // Re-throw redirect responses (for rate limiting in SSR)
+      if (error instanceof Response) {
+        throw error;
+      }
+
       console.error(
         `Error during API request to ${options?.method} ${url}:`,
         error,
