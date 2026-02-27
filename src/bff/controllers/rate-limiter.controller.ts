@@ -10,8 +10,6 @@ export type RateLimiterRequestContext = {
   redirect: RedirectFn;
 };
 
-const DEFAULT_RETRY_AFTER_SECONDS = 300;
-
 const RATE_LIMIT_EXCLUDED_PREFIXES = [
   "/_astro/",
   "/assets/",
@@ -27,9 +25,14 @@ export class RateLimiterController {
   constructor(private readonly limiter: IRateLimiter = rateLimiter) {}
 
   enforceRateLimit(context: RateLimiterRequestContext): Response | null {
-    const { pathname } = context;
+    const { pathname, request } = context;
 
     if (this.isExcludedPath(pathname)) {
+      return null;
+    }
+
+    // Exclude internal SSR requests from rate limiting to prevent pages from blocking themselves
+    if (this.isInternalRequest(request)) {
       return null;
     }
 
@@ -39,10 +42,10 @@ export class RateLimiterController {
       return null;
     }
 
+    // retryAfterSeconds should always be set when blocked, but provide fallback from env
     const retryAfter = String(
-      limitResult.retryAfterSeconds ?? DEFAULT_RETRY_AFTER_SECONDS,
+      limitResult.retryAfterSeconds ?? this.getDefaultRetryAfter(),
     );
-
     if (this.isApiRoute(pathname)) {
       return this.buildApiBlockedResponse(retryAfter);
     }
@@ -54,6 +57,18 @@ export class RateLimiterController {
     return RATE_LIMIT_EXCLUDED_PREFIXES.some((prefix) =>
       pathname.startsWith(prefix),
     );
+  }
+
+  private isInternalRequest(request: Request): boolean {
+    return request.headers.get("X-Internal-Request") === "true";
+  }
+
+  private getDefaultRetryAfter(): number {
+    // Use the same block duration from env that the rate limiter uses
+    const blockDurationMinutes = process.env.RATE_LIMIT_BLOCK_DURATION_MINUTES
+      ? parseInt(process.env.RATE_LIMIT_BLOCK_DURATION_MINUTES, 10)
+      : 5;
+    return blockDurationMinutes * 60; // convert to seconds
   }
 
   private isApiRoute(pathname: string): boolean {
@@ -78,13 +93,16 @@ export class RateLimiterController {
   }
 
   private buildApiBlockedResponse(retryAfter: string): Response {
-    return new Response(JSON.stringify({ error: "Service currently unavailable" }), {
-      status: 429,
-      headers: {
-        "Content-Type": "application/json",
-        "Retry-After": retryAfter,
+    return new Response(
+      JSON.stringify({ error: "Service currently unavailable" }),
+      {
+        status: 429,
+        headers: {
+          "Content-Type": "application/json",
+          "Retry-After": retryAfter,
+        },
       },
-    });
+    );
   }
 
   private buildPageBlockedResponse(

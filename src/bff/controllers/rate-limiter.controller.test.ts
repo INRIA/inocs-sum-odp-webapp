@@ -122,4 +122,28 @@ describe("RateLimiterController", () => {
 
     expect(limiter.check).toHaveBeenCalledWith("192.0.2.55");
   });
+
+  it("returns null for internal SSR requests (X-Internal-Request header)", () => {
+    const limiter: IRateLimiter = {
+      check: vi.fn(() => ({ allowed: false, retryAfterSeconds: 60 })),
+    };
+    const controller = new RateLimiterController(limiter);
+    const redirect = createRedirect();
+
+    const response = controller.enforceRateLimit({
+      request: new Request("http://localhost:4321/api/v1/labs", {
+        headers: {
+          "X-Internal-Request": "true",
+          "x-forwarded-for": "203.0.113.10",
+        },
+      }),
+      pathname: "/api/v1/labs",
+      search: "",
+      redirect,
+    });
+
+    expect(response).toBeNull();
+    expect(limiter.check).not.toHaveBeenCalled();
+    expect(redirect).not.toHaveBeenCalled();
+  });
 });
