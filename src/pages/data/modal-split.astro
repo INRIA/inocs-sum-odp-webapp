@@ -36,7 +36,7 @@ const sortedYears = Array.from(allYears).sort((a, b) => a - b);
 
 // Prepare living labs data for the dashboard
 const livingLabsForDashboard = filteredLivingLabs.map((lab) => ({
-  id: lab.id,
+  id: Number(lab.id),
   name: lab.name,
   kpiResults: lab.kpi_results ?? [],
 }));

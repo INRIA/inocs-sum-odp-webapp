@@ -150,17 +150,17 @@ export function LivingLabMeasureForm({
               <img
                 alt={measure.name}
                 src={getUrl(measure.image_url as string)}
-                className="h-10 w-10"
+                className="h-14 w-14"
               />
             ) : null}
           </div>
 
-          <div className="min-w-0 flex-1 gap-y-1 text-center">
+          <div className="min-w-0 flex-1 gap-y-2 text-center">
             <span aria-hidden="true" className="absolute inset-0" />
-            <span className="font-semibold text-sm">{measure.name}</span>
+            <h5 className="font-bold">{measure.name}</h5>
             <br />
             {measure.description ? (
-              <small className="mt-0 leading-0 ">{measure.description}</small>
+              <p className="mt-0 leading-0 ">{measure.description}</p>
             ) : null}
           </div>
         </div>
@@ -233,10 +233,10 @@ export function LivingLabMeasureForm({
             {startAt ? (
               <div className="flex flex-row justify-center items-center gap-1">
                 <CalendarIcon className="h-5 w-5" />
-                <small>{formatDateToMonthYear(startAt)}</small>
+                <p>{formatDateToMonthYear(startAt)}</p>
               </div>
             ) : null}
-            <small style={{ whiteSpace: "pre-line" }}>{description}</small>
+            <p style={{ whiteSpace: "pre-line" }}>{description}</p>
           </div>
         ) : null}
       </div>

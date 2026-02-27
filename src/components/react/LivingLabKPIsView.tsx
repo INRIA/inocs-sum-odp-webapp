@@ -191,7 +191,10 @@ export function LivingLabKPIsView({
     <div className="flex flex-col gap-4 mx-auto w-full">
       {categories.map(
         ({ id, name, kpiResults }, index) =>
-          kpiResults?.length > 0 && (
+          kpiResults?.length > 0 &&
+          kpiResults.some((kr) =>
+            kpis?.some((k) => k.id === kr.kpidefinition_id),
+          ) && (
             <ExpansionPanel
               key={id}
               header={

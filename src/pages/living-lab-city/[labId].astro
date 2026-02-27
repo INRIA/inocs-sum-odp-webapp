@@ -12,7 +12,7 @@ import {
 import {
   DataDisplayCard,
   LivingLabKPIsView,
-  LivingLabMeasures,
+  MobilityMeasures,
 } from "../../components/react";
 import type { IKpiResultGroup } from "../../types";
 
@@ -36,9 +36,20 @@ const nsmTransportModes = getNSMTransportModes(
   allTransportModes,
 );
 
-const { pushMeasures, pullMeasures } = separateMeasures(
-  livingLabData?.projects ?? [],
-);
+// Reconstruct each project with its living_lab_projects_implementation so that
+// MobilityMeasures can show lab badges, start dates and implementation details.
+// livingLabData.projects strips the implementation off; we rebuild it here from
+// the raw implementation join table, injecting the known lab back in.
+const measuresWithImpl = (
+  livingLabData?.living_lab_projects_implementation ?? []
+)
+  .filter((impl) => impl.project)
+  .map((impl) => ({
+    ...impl.project!,
+    living_lab_projects_implementation: [{ ...impl, lab: livingLabData }],
+  }));
+
+const { pushMeasures, pullMeasures } = separateMeasures(measuresWithImpl);
 
 const modalSplitKpis = getModalSplitKpiResults(
   allKpis,
@@ -46,10 +57,16 @@ const modalSplitKpis = getModalSplitKpiResults(
   (livingLabData?.kpi_results ?? []) as IKpiResultGroup[],
 );
 
+const nonModalSplitKpis = allKpis.filter(
+  (kpi) => !kpi.kpi_number.startsWith("15"),
+);
+
 const mapMarker = createMapMarker(livingLabData);
 const kpiResultsByCategory = categories.map((category) => ({
   ...category,
-  kpiResults: (livingLabData?.kpi_results as IKpiResultGroup[] | undefined)?.filter((kpiResult) =>
+  kpiResults: (
+    livingLabData?.kpi_results as IKpiResultGroup[] | undefined
+  )?.filter((kpiResult) =>
     category.kpis?.some((kpi) => kpi.id === kpiResult.kpidefinition_id),
   ),
 }));
@@ -109,7 +126,9 @@ const kpiResultsByCategory = categories.map((category) => ({
       {
         nsmTransportModes.length > 0 && (
           <div class="flex flex-col gap-4">
-            <h3 class="text-center">Shared Mobility Services in this Living Lab</h3>
+            <h3 class="text-center">
+              Shared Mobility Services in this Living Lab
+            </h3>
             <div class="flex flex-wrap gap-2 mx-auto">
               {nsmTransportModes.map((mode) => (
                 <TransportBadge
@@ -126,37 +145,15 @@ const kpiResultsByCategory = categories.map((category) => ({
       <!-- Push & Pull Measures Section -->
       {
         (pushMeasures.length > 0 || pullMeasures.length > 0) && (
-          <section class="flex flex-col gap-8 items-start">
-            {pushMeasures.length > 0 && (
-              <div class="flex-1 grid grid-cols-1 gap-2">
-                <h3 class="text-center">🔴 Push measures</h3>
-                <LivingLabMeasures
-                  livingLabId={labId}
-                  measures={pushMeasures}
-                  isEditable={false}
-                  title=""
-                  implementedMeasures={
-                    livingLabData?.living_lab_projects_implementation ?? []
-                  }
-                  measuresGrids={2}
-                />
-              </div>
-            )}
-            {pullMeasures.length > 0 && (
-              <div class="flex-1 grid grid-cols-1 gap-2">
-                <h3 class="text-center">🟢 Pull measures</h3>
-                <LivingLabMeasures
-                  livingLabId={labId}
-                  measures={pullMeasures}
-                  isEditable={false}
-                  title=""
-                  implementedMeasures={
-                    livingLabData?.living_lab_projects_implementation ?? []
-                  }
-                  measuresGrids={2}
-                />
-              </div>
-            )}
+          <section class="flex flex-col gap-4">
+            <h3 class="text-center">Policy Measures</h3>
+            <MobilityMeasures
+              pushMeasures={pushMeasures}
+              pullMeasures={pullMeasures}
+              hideDescription={false}
+              style="card"
+              client:load
+            />
           </section>
         )
       }
@@ -175,7 +172,7 @@ const kpiResultsByCategory = categories.map((category) => ({
           <div class="flex flex-wrap gap-0">
             <LivingLabKPIsView
               categories={kpiResultsByCategory ?? []}
-              kpis={allKpis}
+              kpis={nonModalSplitKpis}
               client:load
             />
           </div>
