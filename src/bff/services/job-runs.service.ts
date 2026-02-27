@@ -51,7 +51,10 @@ export class JobRunsService {
     try {
       res = await fetch(route, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-Internal-API-Key": process.env.JOB_RUN_IMPACT_API_KEY,
+        },
         body: JSON.stringify({
           params: {
             perspective: "user_personalized",

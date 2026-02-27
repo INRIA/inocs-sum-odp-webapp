@@ -146,4 +146,133 @@ describe("RateLimiterController", () => {
     expect(limiter.check).not.toHaveBeenCalled();
     expect(redirect).not.toHaveBeenCalled();
   });
+
+  describe("Job run specific rate limiting", () => {
+    it("uses strict rate limiter for POST /api/v1/job-runs", () => {
+      const generalLimiter: IRateLimiter = {
+        check: vi.fn(() => ({ allowed: true })),
+      };
+      const jobRunLimiter: IRateLimiter = {
+        check: vi.fn(() => ({ allowed: false, retryAfterSeconds: 300 })),
+      };
+      const controller = new RateLimiterController(
+        generalLimiter,
+        jobRunLimiter,
+      );
+      const redirect = createRedirect();
+
+      const response = controller.enforceRateLimit({
+        request: new Request("http://localhost:4321/api/v1/job-runs", {
+          method: "POST",
+          headers: {
+            "x-forwarded-for": "198.51.100.1",
+          },
+        }),
+        pathname: "/api/v1/job-runs",
+        search: "",
+        redirect,
+      });
+
+      expect(jobRunLimiter.check).toHaveBeenCalledWith("198.51.100.1");
+      expect(generalLimiter.check).not.toHaveBeenCalled();
+      expect(response).not.toBeNull();
+      expect(response?.status).toBe(429);
+    });
+
+    it("uses general rate limiter for GET /api/v1/job-runs", () => {
+      const generalLimiter: IRateLimiter = {
+        check: vi.fn(() => ({ allowed: true })),
+      };
+      const jobRunLimiter: IRateLimiter = {
+        check: vi.fn(() => ({ allowed: false, retryAfterSeconds: 300 })),
+      };
+      const controller = new RateLimiterController(
+        generalLimiter,
+        jobRunLimiter,
+      );
+      const redirect = createRedirect();
+
+      const response = controller.enforceRateLimit({
+        request: new Request("http://localhost:4321/api/v1/job-runs", {
+          method: "GET",
+          headers: {
+            "x-forwarded-for": "198.51.100.1",
+          },
+        }),
+        pathname: "/api/v1/job-runs",
+        search: "",
+        redirect,
+      });
+
+      expect(generalLimiter.check).toHaveBeenCalledWith("198.51.100.1");
+      expect(jobRunLimiter.check).not.toHaveBeenCalled();
+      expect(response).toBeNull();
+    });
+
+    it("uses general rate limiter for POST to other endpoints", () => {
+      const generalLimiter: IRateLimiter = {
+        check: vi.fn(() => ({ allowed: true })),
+      };
+      const jobRunLimiter: IRateLimiter = {
+        check: vi.fn(() => ({ allowed: false, retryAfterSeconds: 300 })),
+      };
+      const controller = new RateLimiterController(
+        generalLimiter,
+        jobRunLimiter,
+      );
+      const redirect = createRedirect();
+
+      const response = controller.enforceRateLimit({
+        request: new Request("http://localhost:4321/api/v1/labs", {
+          method: "POST",
+          headers: {
+            "x-forwarded-for": "198.51.100.1",
+          },
+        }),
+        pathname: "/api/v1/labs",
+        search: "",
+        redirect,
+      });
+
+      expect(generalLimiter.check).toHaveBeenCalledWith("198.51.100.1");
+      expect(jobRunLimiter.check).not.toHaveBeenCalled();
+      expect(response).toBeNull();
+    });
+
+    it("returns 429 with correct retry-after header for blocked job run requests", async () => {
+      const generalLimiter: IRateLimiter = {
+        check: vi.fn(() => ({ allowed: true })),
+      };
+      const jobRunLimiter: IRateLimiter = {
+        check: vi.fn(() => ({ allowed: false, retryAfterSeconds: 300 })),
+      };
+      const controller = new RateLimiterController(
+        generalLimiter,
+        jobRunLimiter,
+      );
+      const redirect = createRedirect();
+
+      const response = controller.enforceRateLimit({
+        request: new Request("http://localhost:4321/api/v1/job-runs", {
+          method: "POST",
+          headers: {
+            "x-forwarded-for": "198.51.100.1",
+          },
+        }),
+        pathname: "/api/v1/job-runs",
+        search: "",
+        redirect,
+      });
+
+      expect(response).not.toBeNull();
+      expect(response?.status).toBe(429);
+      expect(response?.headers.get("Content-Type")).toContain(
+        "application/json",
+      );
+      expect(response?.headers.get("Retry-After")).toBe("300");
+      await expect(response?.json()).resolves.toEqual({
+        error: "Service currently unavailable",
+      });
+    });
+  });
 });

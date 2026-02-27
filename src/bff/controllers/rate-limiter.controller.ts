@@ -1,5 +1,6 @@
 import type { IRateLimiter } from "../../lib/utils/rateLimiter";
 import { rateLimiter } from "../../lib/utils/rateLimiter";
+import { jobRunRateLimiter } from "../../lib/utils/jobRunRateLimiter";
 
 type RedirectFn = (path: string) => Response;
 
@@ -22,7 +23,10 @@ const RATE_LIMIT_EXCLUDED_PREFIXES = [
 ];
 
 export class RateLimiterController {
-  constructor(private readonly limiter: IRateLimiter = rateLimiter) {}
+  constructor(
+    private readonly limiter: IRateLimiter = rateLimiter,
+    private readonly jobRunLimiter: IRateLimiter = jobRunRateLimiter,
+  ) {}
 
   enforceRateLimit(context: RateLimiterRequestContext): Response | null {
     const { pathname, request } = context;
@@ -37,7 +41,13 @@ export class RateLimiterController {
     }
 
     const clientIp = this.getClientIp(context.request);
-    const limitResult = this.limiter.check(clientIp);
+    
+    // Use stricter rate limit for job run creation
+    const limiter = this.isJobRunCreation(pathname, request.method)
+      ? this.jobRunLimiter
+      : this.limiter;
+
+    const limitResult = limiter.check(clientIp);
     if (limitResult.allowed) {
       return null;
     }
@@ -61,6 +71,10 @@ export class RateLimiterController {
 
   private isInternalRequest(request: Request): boolean {
     return request.headers.get("X-Internal-Request") === "true";
+  }
+
+  private isJobRunCreation(pathname: string, method: string): boolean {
+    return pathname === "/api/v1/job-runs" && method === "POST";
   }
 
   private getDefaultRetryAfter(): number {
