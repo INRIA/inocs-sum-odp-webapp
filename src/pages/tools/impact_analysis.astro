@@ -16,7 +16,10 @@ import type {
   IKpiVariationData,
   ILivingLab,
 } from "../../types";
-import { calculateKpiVariationsData } from "../../lib/helpers/impact-analysis-format";
+import {
+  calculateKpiVariationsData,
+  aggregateVariationsByKpis,
+} from "../../lib/helpers/impact-analysis-format";
 import { formatDateWithTime } from "../../lib/helpers";
 import { InfoCard, RButton } from "../../components/react";
 
@@ -25,9 +28,10 @@ const api = new ApiClient(Astro.request);
 // Fetch the latest successful job run for kpi_measures_analysis
 let jobRun: IJobRun | null = null;
 let kpiGroups: IKpiGroup[] = [];
-let kpiDefinitionsMap: Map<string, IKpiDefinition> = new Map();
-let livingLabsMap: Map<string, ILivingLab> = new Map();
-let kpiVariationsDataMap: Map<string, IKpiVariationData> = new Map();
+let kpiDefinitionsMap: Map<number, IKpiDefinition> = new Map();
+let livingLabsMap: Map<number, ILivingLab> = new Map();
+let kpiVariationsDataMap: Map<number, IKpiVariationData> = new Map();
+let variationsByKpisMap: Map<number, IKpiVariationData> = new Map();
 let errorMessage: string | null = null;
 let formattedDate: string | null = null;
 let jobRunOutput: IJobRunOutputData | null = null;
@@ -38,7 +42,7 @@ try {
   // Build living labs map for geolocation data
   if (livingLabsResponse) {
     livingLabsResponse.forEach((lab: ILivingLab) => {
-      livingLabsMap.set(String(lab.id), lab);
+      livingLabsMap.set(lab.id, lab);
     });
   }
   if (response) {
@@ -49,7 +53,7 @@ try {
       kpiGroups = jobRun.input_data.kpi_groups;
       kpiGroups?.forEach((_g) => {
         _g?.kpis?.forEach((kpiDef) => {
-          kpiDefinitionsMap.set(String(kpiDef.id), kpiDef);
+          kpiDefinitionsMap.set(kpiDef.id, kpiDef);
         });
       });
     }
@@ -80,7 +84,11 @@ try {
             kpiDefinitionsMap,
             livingLabsMap,
           );
-          kpiVariationsDataMap.set(String(successItem.group_id), variationData);
+          kpiVariationsDataMap.set(successItem.group_id, variationData);
+          variationsByKpisMap.set(
+            successItem.group_id,
+            aggregateVariationsByKpis(variationData, kpiDefinitionsMap),
+          );
         } catch (err) {
           console.error(
             `Error calculating variations for group ${successItem.group_id}:`,
@@ -98,7 +106,14 @@ try {
 }
 
 // Convert Map to plain object for JSON serialization
-const kpiVariationsData = Object.fromEntries(kpiVariationsDataMap);
+const kpiVariationsData = Object.fromEntries(kpiVariationsDataMap) as Record<
+  number,
+  IKpiVariationData
+>;
+const variationsByKpis = Object.fromEntries(variationsByKpisMap) as Record<
+  number,
+  IKpiVariationData
+>;
 
 // Define badge icon SVG
 const badgeIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
@@ -362,6 +377,7 @@ const howToUseSteps = [
             kpiGroups={kpiGroups}
             jobRunOutput={jobRunOutput}
             kpiVariationsData={kpiVariationsData}
+            variationsByKpis={variationsByKpis}
             client:load
           />
         </section>

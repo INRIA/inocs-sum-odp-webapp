@@ -239,8 +239,8 @@ export function getVariationColor(ratio: number | null): string {
  */
 export function calculateKpiVariationsData(
   analysisResult: IGroupAnalysisResult,
-  kpiDefinitionsMap: Map<string, IKpiDefinition>,
-  livingLabsMap?: Map<string, ILivingLab>,
+  kpiDefinitionsMap: Map<number, IKpiDefinition>,
+  livingLabsMap?: Map<number, ILivingLab>,
 ): IKpiVariationData {
   const livingLabVariations: ILivingLabVariation[] = [];
   const allKpiVariationsMap = new Map<string, IKpiVariation[]>();
@@ -252,7 +252,7 @@ export function calculateKpiVariationsData(
       if (analysisResult.kpi_ids.includes(kpi.id) === false) return;
       const kpiDef = kpiDefinitionsMap.get(kpi.id) ?? kpi;
       const variation: IKpiVariation = {
-        kpiId: String(kpiDef.id),
+        kpiId: kpiDef.id,
         kpiName: kpiDef.name,
         kpiParentId: kpiDef.parent_kpi_id || null,
         kpiParentName: kpiDef.parent_kpi_name || null,
@@ -267,12 +267,12 @@ export function calculateKpiVariationsData(
 
       // Track all variations per KPI for aggregation
       const kpiTransportKey =
-        String(kpi.id) +
+        `${kpi.id}` +
         (kpi.transport_mode_id ? `_${kpi.transport_mode_id}` : "");
-      if (!allKpiVariationsMap.has(String(kpiTransportKey))) {
-        allKpiVariationsMap.set(String(kpiTransportKey), []);
+      if (!allKpiVariationsMap.has(kpiTransportKey)) {
+        allKpiVariationsMap.set(kpiTransportKey, []);
       }
-      allKpiVariationsMap.get(String(kpiTransportKey))!.push(variation);
+      allKpiVariationsMap.get(kpiTransportKey)!.push(variation);
     });
 
     // Calculate average variation for this living lab
@@ -286,13 +286,13 @@ export function calculateKpiVariationsData(
         : null;
 
     // Get geolocation from living labs map if available
-    const livingLabData = livingLabsMap?.get(String(lab.id));
+    const livingLabData = livingLabsMap?.get(lab.id);
     const lat = livingLabData?.lat ? parseFloat(livingLabData.lat) : null;
     const lng = livingLabData?.lng ? parseFloat(livingLabData.lng) : null;
     const radius = livingLabData?.radius ?? null;
 
     livingLabVariations.push({
-      labId: String(lab.id),
+      labId: lab.id,
       labName: lab.name,
       totalVariation: labAverage,
       totalVariationPercentage: ratioToPercentage(labAverage),
@@ -344,7 +344,7 @@ export function calculateKpiVariationsData(
     return bVal - aVal;
   });
   return {
-    groupId: String(analysisResult.id),
+    groupId: analysisResult.id,
     groupName: analysisResult.name,
     totalVariation,
     totalVariationPercentage: ratioToPercentage(totalVariation),
@@ -353,11 +353,143 @@ export function calculateKpiVariationsData(
   };
 }
 
+export function aggregateVariationsByKpis(
+  variationData: IKpiVariationData,
+  kpiDefinitionsMap: Map<number, IKpiDefinition>,
+): IKpiVariationData {
+  const aggregatedByKpiId = new Map<
+    number,
+    {
+      source: IKpiVariation;
+      ratioSum: number;
+      ratioCount: number;
+    }
+  >();
+
+  variationData.allKpiVariations.forEach((variation) => {
+    const key = variation.kpiId;
+    const current = aggregatedByKpiId.get(key) ?? {
+      source: variation,
+      ratioSum: 0,
+      ratioCount: 0,
+    };
+
+    if (
+      variation.ratioVariation !== null &&
+      variation.ratioVariation !== undefined
+    ) {
+      current.ratioSum += variation.ratioVariation;
+      current.ratioCount += 1;
+    }
+
+    aggregatedByKpiId.set(key, current);
+  });
+
+  const byKpi = Array.from(aggregatedByKpiId.values()).map((item) => {
+    const ratioVariation =
+      item.ratioCount > 0 ? item.ratioSum / item.ratioCount : null;
+
+    return {
+      ...item.source,
+      ratioVariation,
+      ratioVariationPercentage: ratioToPercentage(ratioVariation),
+      absVariation: null,
+      valueBefore: null,
+      valueAfter: null,
+      transportModeName: null,
+    } as IKpiVariation;
+  });
+
+  const aggregatedByParent = new Map<
+    string,
+    {
+      source: IKpiVariation;
+      ratioSum: number;
+      ratioCount: number;
+    }
+  >();
+
+  byKpi.forEach((variation) => {
+    const kpiDef = kpiDefinitionsMap.get(variation.kpiId);
+    const isModalSplitParent =
+      kpiDef?.parent_kpi_number?.startsWith("15") ?? false;
+
+    const key =
+      kpiDef?.parent_kpi_id && !isModalSplitParent
+        ? `parent:${kpiDef.parent_kpi_id}`
+        : `kpi:${variation.kpiId}`;
+
+    const sourceForAggregate =
+      kpiDef?.parent_kpi_id && !isModalSplitParent
+        ? {
+            ...variation,
+            kpiId: kpiDef.parent_kpi_id,
+            kpiName:
+              kpiDef?.parent_kpi_name ?? kpiDef?.name ?? variation.kpiName,
+            kpiParentId: null,
+            kpiParentName: null,
+            transportModeName: null,
+          }
+        : variation;
+
+    const current = aggregatedByParent.get(key) ?? {
+      source: sourceForAggregate,
+      ratioSum: 0,
+      ratioCount: 0,
+    };
+
+    if (
+      variation.ratioVariation !== null &&
+      variation.ratioVariation !== undefined
+    ) {
+      current.ratioSum += variation.ratioVariation;
+      current.ratioCount += 1;
+    }
+
+    aggregatedByParent.set(key, current);
+  });
+
+  const allKpiVariations = Array.from(aggregatedByParent.values())
+    .map((item) => {
+      const ratioVariation =
+        item.ratioCount > 0 ? item.ratioSum / item.ratioCount : null;
+      return {
+        ...item.source,
+        ratioVariation,
+        ratioVariationPercentage: ratioToPercentage(ratioVariation),
+        absVariation: null,
+        valueBefore: null,
+        valueAfter: null,
+      } as IKpiVariation;
+    })
+    .sort((a, b) => {
+      const aVal = a.ratioVariation !== null ? a.ratioVariation : -Infinity;
+      const bVal = b.ratioVariation !== null ? b.ratioVariation : -Infinity;
+      return bVal - aVal;
+    });
+
+  const validRatios = allKpiVariations
+    .map((kpi) => kpi.ratioVariation)
+    .filter((ratio): ratio is number => ratio !== null && ratio !== undefined);
+
+  const totalVariation =
+    validRatios.length > 0
+      ? validRatios.reduce((sum, value) => sum + value, 0) / validRatios.length
+      : null;
+
+  return {
+    ...variationData,
+    totalVariation,
+    totalVariationPercentage: ratioToPercentage(totalVariation),
+    allKpiVariations,
+  };
+}
+
 // ===== KPI Grouping and Sorting Helpers =====
 
 export interface IGroupedKpi {
   isParent: boolean;
-  parentId?: string;
+  parentId?: number;
   parentName?: string;
   childCount?: number;
   kpi: IKpiVariation;
@@ -369,7 +501,7 @@ export interface IGroupedKpi {
  * Ungrouped KPIs appear first, then grouped sections
  */
 export function groupKpisByParent(kpis: IKpiVariation[]): IGroupedKpi[] {
-  const parentMap = new Map<string, IKpiVariation[]>();
+  const parentMap = new Map<number, IKpiVariation[]>();
   const ungroupedKpis: IKpiVariation[] = [];
 
   // Separate ungrouped and grouped KPIs
@@ -377,10 +509,10 @@ export function groupKpisByParent(kpis: IKpiVariation[]): IGroupedKpi[] {
     if (!kpi.kpiParentId) {
       ungroupedKpis.push(kpi);
     } else {
-      if (!parentMap.has(String(kpi.kpiParentId))) {
-        parentMap.set(String(kpi.kpiParentId), []);
+      if (!parentMap.has(kpi.kpiParentId)) {
+        parentMap.set(kpi.kpiParentId, []);
       }
-      parentMap.get(String(kpi.kpiParentId))!.push(kpi);
+      parentMap.get(kpi.kpiParentId)!.push(kpi);
     }
   });
 
@@ -399,21 +531,18 @@ export function groupKpisByParent(kpis: IKpiVariation[]): IGroupedKpi[] {
   });
 
   // Add grouped KPIs: find parent KPIs and add them with children
-  const addedParentIds = new Set<string>();
+  const addedParentIds = new Set<number>();
 
   kpis.forEach((kpi) => {
     // Check if this KPI is a parent
-    if (
-      parentMap.has(String(kpi.kpiId)) &&
-      !addedParentIds.has(String(kpi.kpiId))
-    ) {
-      const children = parentMap.get(String(kpi.kpiId))!;
-      addedParentIds.add(String(kpi.kpiId));
+    if (parentMap.has(kpi.kpiId) && !addedParentIds.has(kpi.kpiId)) {
+      const children = parentMap.get(kpi.kpiId)!;
+      addedParentIds.add(kpi.kpiId);
 
       // Add parent row
       result.push({
         isParent: true,
-        parentId: String(kpi.kpiId),
+        parentId: kpi.kpiId,
         parentName: kpi.kpiName,
         childCount: children.length,
         kpi,
@@ -424,7 +553,7 @@ export function groupKpisByParent(kpis: IKpiVariation[]): IGroupedKpi[] {
       children.forEach((child) => {
         result.push({
           isParent: false,
-          parentId: String(kpi.kpiId),
+          parentId: kpi.kpiId,
           parentName: kpi.kpiName,
           kpi: child,
         });

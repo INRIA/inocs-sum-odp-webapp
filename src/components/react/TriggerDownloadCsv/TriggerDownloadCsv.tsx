@@ -21,6 +21,7 @@ export interface TriggerDownloadCsvProps {
   category_id?: number;
   kpidefinition_id?: number;
   disabled?: boolean;
+  className?: string;
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -28,9 +29,9 @@ export interface TriggerDownloadCsvProps {
 const LABEL_MAP: Record<DownloadType, string> = {
   "kpi-results-all": "All KPIs CSV",
   "kpi-results-lab": "CSV",
-  "kpi-results-definition": "KPIs CSV",
-  "kpi-results-category": "Group of KPIs CSV",
-  "projects-all": "All Measures CSV",
+  "kpi-results-definition": "CSV",
+  "kpi-results-category": "Download KPI results CSV",
+  "projects-all": "Download measures implemented CSV",
   "projects-lab": "Lab Measures CSV",
 };
 
@@ -90,15 +91,19 @@ export function buildFilename(props: TriggerDownloadCsvProps): string {
 
   if (props.type.startsWith("projects")) {
     const parts = ["projects"];
-    if (props.living_lab_id !== undefined) parts.push(`lab${props.living_lab_id}`);
+    if (props.living_lab_id !== undefined)
+      parts.push(`lab${props.living_lab_id}`);
     parts.push(date);
     return `${parts.join("_")}.csv`;
   }
 
   const parts = ["kpi-results"];
-  if (props.kpidefinition_id !== undefined) parts.push(`kpi${props.kpidefinition_id}`);
-  if (props.living_lab_id !== undefined) parts.push(`lab${props.living_lab_id}`);
-  if (props.category_id !== undefined) parts.push(`category${props.category_id}`);
+  if (props.kpidefinition_id !== undefined)
+    parts.push(`kpi${props.kpidefinition_id}`);
+  if (props.living_lab_id !== undefined)
+    parts.push(`lab${props.living_lab_id}`);
+  if (props.category_id !== undefined)
+    parts.push(`category${props.category_id}`);
   parts.push(date);
   return `${parts.join("_")}.csv`;
 }
@@ -152,13 +157,14 @@ export function TriggerDownloadCsv(props: TriggerDownloadCsvProps) {
   const label = LABEL_MAP[type];
 
   return (
-    <div className="inline-flex flex-col items-center justify-center gap-1">
+    <div className="inline-flex flex-col items-center justify-center gap-1 w-full">
       <RButton
         variant="secondary"
         size={rbuttonSize}
         onClick={handleClick}
         disabled={isDisabled}
         aria-label={label}
+        className={props.className}
       >
         {isLoading ? (
           <div className="flex items-center justify-center">

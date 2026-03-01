@@ -112,7 +112,9 @@ function prepareModalSplitData(
     const transportModeId =
       normalized.transport_mode_id ?? normalized.results[0]?.transport_mode_id;
 
-    const transportMode = allTransportModes.find((tm) => tm.id === transportModeId);
+    const transportMode = allTransportModes.find(
+      (tm) => tm.id === transportModeId,
+    );
     if (!transportMode) {
       return;
     }
@@ -172,7 +174,7 @@ function prepareModalSplitData(
  * Modal split data for a single living lab
  */
 export interface IModalSplitLabData {
-  labId: string;
+  labId: number;
   labName: string;
   entries: { label: string; date: string; year: number; data: SplitItem[] }[];
   before?: { label: string; date: string; year: number; data: SplitItem[] };
@@ -197,7 +199,7 @@ export function getModalSplitDataForDashboard(
   kpiDefinitions: IKpi[],
   allTransportModes: ITransportMode[],
   livingLabs: {
-    id: string;
+    id: number;
     name: string;
     kpiResults: IKpiResultGroup[];
   }[],
@@ -231,7 +233,8 @@ export function getModalSplitDataForDashboard(
         labKpiResults.forEach((group) => {
           const normalized = normalizeKpiResultGroup(group);
           const transportModeId =
-            normalized.transport_mode_id ?? normalized.results[0]?.transport_mode_id;
+            normalized.transport_mode_id ??
+            normalized.results[0]?.transport_mode_id;
           const transportMode = allTransportModes.find(
             (tm) => tm.id === transportModeId,
           );
@@ -267,7 +270,9 @@ export function getModalSplitDataForDashboard(
               .sort((a, b) => a.itemId - b.itemId)
               .map(({ itemId: _itemId, ...item }) => item),
           }))
-          .filter((entry) => Number.isFinite(entry.year) && entry.data.length > 0)
+          .filter(
+            (entry) => Number.isFinite(entry.year) && entry.data.length > 0,
+          )
           .sort((a, b) => {
             const byDate = Date.parse(a.date) - Date.parse(b.date);
             if (byDate !== 0) {

@@ -1,6 +1,7 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import { CTASection, MobilityMeasures } from "../../components/react";
+import { TriggerDownloadCsv } from "../../components/react/TriggerDownloadCsv/TriggerDownloadCsv";
 import ApiClient from "../../lib/api-client/ApiClient";
 import { FeaturesGrid } from "../../components/AnalysisPageSections";
 
@@ -79,6 +80,10 @@ const measuresFeatures = [
     <FeaturesGrid features={measuresFeatures} columns={4} />
 
     <CTASection title="Policy Measures implemented" order="center">
+      <div class="w-full flex justify-end">
+        <TriggerDownloadCsv type="projects-all" size="md" client:load />
+      </div>
+
       <MobilityMeasures
         pullMeasures={measures?.filter((m) => m.type === "PULL") ?? []}
         pushMeasures={measures?.filter((m) => m.type === "PUSH") ?? []}

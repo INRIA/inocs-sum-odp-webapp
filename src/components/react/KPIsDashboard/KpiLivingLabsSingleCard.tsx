@@ -2,6 +2,7 @@ import React from "react";
 import type { KpiLivingLabsCardProps } from "./types";
 import { Badge, Tooltip } from "../ui";
 import { D3TimelineChart } from "./D3TimelineChart";
+import { TriggerDownloadCsv } from "../TriggerDownloadCsv";
 
 export const KpiLivingLabsSingleCard: React.FC<KpiLivingLabsCardProps> = ({
   kpi,
@@ -57,11 +58,18 @@ export const KpiLivingLabsSingleCard: React.FC<KpiLivingLabsCardProps> = ({
         </div>
 
         {/* Summary footer */}
-        <div className="mt-2 pt-2 border-t border-gray-100 text-center">
-          <span className="text-sm text-gray-500">
+        <div className="mt-2 pt-2 border-t border-gray-100 flex w-full items-center justify-between">
+          <span className="text-sm text-gray-500 text-left">
             {labCount} living lab{labCount !== 1 ? "s" : ""} • {totalDataPoints}{" "}
             data point{totalDataPoints !== 1 ? "s" : ""}
           </span>
+          <div className="flex justify-end">
+            <TriggerDownloadCsv
+              type="kpi-results-definition"
+              size="sm"
+              kpidefinition_id={kpi.id}
+            />
+          </div>
         </div>
       </div>
     </div>

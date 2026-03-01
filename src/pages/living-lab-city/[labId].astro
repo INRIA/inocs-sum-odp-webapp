@@ -147,11 +147,11 @@ const kpiResultsByCategory = categories.map((category) => ({
       {
         (pushMeasures.length > 0 || pullMeasures.length > 0) && (
           <section class="flex flex-col gap-4">
-            <div class="flex flex-row justify-center items-stretch gap-2">
+            <div class="flex flex-col justify-center items-center gap-2">
               <h3>Policy Measures</h3>
               <TriggerDownloadCsv
                 type="projects-lab"
-                size="sm"
+                size="md"
                 living_lab_id={Number(livingLabData.id)}
                 client:load
               />
