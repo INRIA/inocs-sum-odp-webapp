@@ -1,18 +1,26 @@
 import React from "react";
-import type { IKpiGroup } from "../../../types";
+import type { IKpiGroup, IKpiVariationData } from "../../../types";
 import { CardFilter, Tooltip } from "../ui";
 import { AnalysisSectionDivider } from "../ui/AnalysisSectionDivider";
 import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 
 interface AnalysisConditionsFilterProps {
   kpiGroups: IKpiGroup[];
-  selectedGroupId?: string | number;
-  onGroupSelect: (groupId: string | number) => void;
+  selectedGroupId?: number;
+  onGroupSelect: (groupId: number) => void;
+  kpiVariationsData?: Record<number, IKpiVariationData>;
+  variationsByKpis?: Record<number, IKpiVariationData>;
 }
 
 export const AnalysisConditionsFilter: React.FC<
   AnalysisConditionsFilterProps
-> = ({ kpiGroups, selectedGroupId, onGroupSelect }) => {
+> = ({
+  kpiGroups,
+  selectedGroupId,
+  onGroupSelect,
+  kpiVariationsData,
+  variationsByKpis,
+}) => {
   if (!kpiGroups || kpiGroups.length === 0) {
     return (
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
@@ -39,6 +47,9 @@ export const AnalysisConditionsFilter: React.FC<
           }))}
           selectedGroupId={selectedGroupId}
           onGroupSelect={onGroupSelect}
+          variant={"detailed"}
+          kpiVariationsData={kpiVariationsData}
+          variationsByKpis={variationsByKpis}
         />
       </div>
     </div>

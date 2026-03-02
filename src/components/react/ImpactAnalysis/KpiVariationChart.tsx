@@ -6,13 +6,13 @@ import {
 import { COLORS } from "../../../styles/constants";
 
 export interface KpiVariationChartData {
-  labs: Array<{ id: string; name: string }>;
+  labs: Array<{ id: number | string; name: string }>;
   kpis: Array<{
     id: string;
     name: string;
     variation: {
       global: number; // All labs value for this KPI (%)
-      byLab: Record<string, number>; // Per lab value for this KPI (%)
+      byLab: Record<number | string, number>; // Per lab value for this KPI (%)
     };
   }>;
 }
@@ -20,7 +20,7 @@ export interface KpiVariationChartData {
 interface KpiVariationChartProps {
   title?: string;
   data: KpiVariationChartData;
-  selectedLabIds: string[];
+  selectedLabIds: (number | string)[];
   className?: string;
 }
 

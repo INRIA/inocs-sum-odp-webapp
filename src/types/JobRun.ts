@@ -39,13 +39,13 @@ export interface IJobRunOutputData {
 }
 
 export interface IJobRunImpactAnalysisSuccess {
-  group_id: string;
+  group_id: number;
   group_name: string;
   results: IGroupAnalysisResult;
 }
 
 export interface IJobRunError {
-  group_id: string;
+  group_id: number;
   group_name: string;
   error: string;
 }

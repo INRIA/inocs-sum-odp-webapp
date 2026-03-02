@@ -3,6 +3,7 @@ import type { KpiLivingLabsMultipleCardProps, IFacetData } from "./types";
 import { Badge, Tooltip } from "../ui";
 import { D3TimelineChart } from "./D3TimelineChart";
 import { D3FacetedTimelineChart } from "./D3FacetedTimelineChart";
+import { TriggerDownloadCsv } from "../TriggerDownloadCsv";
 
 export const KpiLivingLabsMultipleCard: React.FC<
   KpiLivingLabsMultipleCardProps
@@ -62,7 +63,6 @@ export const KpiLivingLabsMultipleCard: React.FC<
             </Tooltip>
           </Badge>
         </div>
-
         {/* Parent KPI Title */}
         <div className="flex flex-col text-center my-2 mb-4">
           <h6 className="text-center text-black font-semibold">
@@ -74,7 +74,6 @@ export const KpiLivingLabsMultipleCard: React.FC<
             </div>
           )}
         </div>
-
         {/* Parent KPI Chart (if data exists) */}
         {hasParentData && (
           <div className="mt-4">
@@ -89,7 +88,6 @@ export const KpiLivingLabsMultipleCard: React.FC<
             />
           </div>
         )}
-
         {/* Faceted Chart for Child KPIs - Side by side comparison */}
         {facets.length > 0 && (
           <div className="mt-4" data-testid="subindicators-chart">
@@ -101,14 +99,20 @@ export const KpiLivingLabsMultipleCard: React.FC<
             />
           </div>
         )}
-
         {/* Summary footer */}
-        <div className="mt-2 pt-2 border-t border-gray-100 text-center">
-          <span className="text-sm text-gray-500">
+        <div className="mt-2 pt-2 border-t border-gray-100 flex w-full items-center justify-between">
+          <span className="text-sm text-gray-500 text-left">
             {labCount} living lab{labCount !== 1 ? "s" : ""} • {facets.length}{" "}
             sub-indicator{facets.length !== 1 ? "s" : ""} • {totalDataPoints}{" "}
             data point{totalDataPoints !== 1 ? "s" : ""}
           </span>
+          <div className="flex justify-end">
+            <TriggerDownloadCsv
+              type="kpi-results-definition"
+              size="sm"
+              kpidefinition_id={parentKpi.id}
+            />
+          </div>
         </div>
       </div>
     </div>

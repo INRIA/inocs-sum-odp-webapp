@@ -9,6 +9,7 @@ import {
   type ModalSplitChartView,
 } from "./KpiCards";
 import { ChartPieIcon, ChartBarIcon } from "@heroicons/react/24/outline";
+import { TriggerDownloadCsv } from "./TriggerDownloadCsv/TriggerDownloadCsv";
 
 interface IKpiResultsByCategory extends ICategory {
   kpiResults: IKpiResultGroup[];
@@ -16,9 +17,11 @@ interface IKpiResultsByCategory extends ICategory {
 type Props = {
   kpis?: IKpi[];
   categories?: IKpiResultsByCategory[];
+  living_lab_id?: number;
 
   modalSplitKpis?: {
     kpiName: string;
+    kpidefinition_id?: number;
     entries: { label: string; data: SplitItem[] }[];
     before?: { label: string; data: SplitItem[] };
     after?: { label: string; data: SplitItem[] };
@@ -28,6 +31,7 @@ type Props = {
 export function LivingLabKPIsView({
   categories = [],
   kpis,
+  living_lab_id,
   modalSplitKpis,
 }: Props) {
   const [chartView, setChartView] = useState<ModalSplitChartView>("doughnut");
@@ -104,32 +108,38 @@ export function LivingLabKPIsView({
       {modalSplitKpis &&
         modalSplitKpis.length > 0 &&
         modalSplitKpis.map(
-            ({ kpiName, entries, before, after }) => {
-              const chartEntries =
-                entries?.length > 0
-                  ? entries
-                  : [before, after].filter(
-                      (
-                        entry,
-                      ): entry is { label: string; data: SplitItem[] } =>
-                        Boolean(entry),
-                    );
+          ({ kpiName, kpidefinition_id, entries, before, after }) => {
+            const chartEntries =
+              entries?.length > 0
+                ? entries
+                : [before, after].filter(
+                    (entry): entry is { label: string; data: SplitItem[] } =>
+                      Boolean(entry),
+                  );
 
-              return (
-                chartEntries.length > 0 && (
-              <div key={kpiName} className="flex flex-col gap-4">
-                <h5 className="text-center mt-4">{kpiName}</h5>
-                <div className="bg-white p-6 rounded-lg shadow-md">
-                  <ModalSplitChart
+            return (
+              chartEntries.length > 0 && (
+                <div key={kpiName} className="flex flex-col gap-4">
+                  <div className="flex flex-row items-center justify-between">
+                    <h5 className="text-center flex-1">{kpiName}</h5>
+                    <TriggerDownloadCsv
+                      type="kpi-results-lab"
+                      size="sm"
+                      living_lab_id={living_lab_id}
+                      kpidefinition_id={kpidefinition_id}
+                    />
+                  </div>
+                  <div className="bg-white p-6 rounded-lg shadow-md">
+                    <ModalSplitChart
                       data={chartEntries}
-                    view={chartView}
-                    orientation="vertical"
-                  />
+                      view={chartView}
+                      orientation="vertical"
+                    />
+                  </div>
                 </div>
-              </div>
-                )
-              );
-            },
+              )
+            );
+          },
         )}
     </>
   );

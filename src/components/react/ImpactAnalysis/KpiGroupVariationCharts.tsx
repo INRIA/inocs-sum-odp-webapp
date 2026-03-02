@@ -41,7 +41,7 @@ export const KpiGroupVariationCharts: React.FC<
     id: lab.labId,
     name: lab.labName,
   }));
-  const [selectedLabIds, setSelectedLabIds] = useState<string[]>(
+  const [selectedLabIds, setSelectedLabIds] = useState<(number | string)[]>(
     labs.map((l) => l.id),
   );
 
@@ -51,7 +51,10 @@ export const KpiGroupVariationCharts: React.FC<
     return trimmed.length > 0 ? trimmed : null;
   };
 
-  const buildKpiModeKey = (kpiId: string, mode?: string | null): string => {
+  const buildKpiModeKey = (
+    kpiId: number | string,
+    mode?: string | null,
+  ): string => {
     const normalizedMode = normalizeTransportMode(mode);
     return normalizedMode ? `${kpiId}__${normalizedMode}` : kpiId;
   };
@@ -119,7 +122,7 @@ export const KpiGroupVariationCharts: React.FC<
         const globalMode = normalizeTransportMode(globalKpi.transportModeName);
 
         // Build variation by lab for this KPI and transport mode
-        const byLab: Record<string, number> = {};
+        const byLab: Record<number | string, number> = {};
         for (const lab of livingLabVariations) {
           const labKpi = lab.kpis.find(
             (k) =>
@@ -156,7 +159,7 @@ export const KpiGroupVariationCharts: React.FC<
 
   //actions
 
-  const toggleLab = (labId: string) => {
+  const toggleLab = (labId: number | string) => {
     setSelectedLabIds((prev) => {
       if (prev.includes(labId)) {
         return prev.filter((id) => id !== labId);

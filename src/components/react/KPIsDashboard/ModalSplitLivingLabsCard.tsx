@@ -3,6 +3,7 @@ import type { ModalSplitLivingLabsCardProps } from "./types";
 import { Badge, Tooltip } from "../ui";
 import { ModalSplitStackedBarChart } from "../KpiCards/ModalSplitStackedBarChart";
 import type { ModalSplitChartDataset } from "../KpiCards/ModalSplitChart";
+import { TriggerDownloadCsv } from "../TriggerDownloadCsv";
 
 /**
  * ModalSplitLivingLabsCard displays modal split data for a single KPI
@@ -16,7 +17,9 @@ export const ModalSplitLivingLabsCard: React.FC<
 
   // Filter labs based on selected lab IDs
   const filteredLabs = labs.filter((lab) =>
-    selectedLabIds.some((selectedLabId) => String(selectedLabId) === String(lab.labId)),
+    selectedLabIds.some(
+      (selectedLabId) => String(selectedLabId) === String(lab.labId),
+    ),
   );
 
   // Filter by selected years
@@ -92,11 +95,18 @@ export const ModalSplitLivingLabsCard: React.FC<
         </div>
 
         {/* Summary footer */}
-        <div className="mt-4 pt-2 border-t border-gray-100 text-center">
-          <span className="text-sm text-gray-500">
+        <div className="mt-2 pt-2 border-t border-gray-100 flex w-full items-center justify-between">
+          <span className="text-sm text-gray-500 text-left">
             {labsWithFilteredYears.length} living lab
             {labsWithFilteredYears.length !== 1 ? "s" : ""}
           </span>
+          <div className="flex justify-end">
+            <TriggerDownloadCsv
+              type="kpi-results-definition"
+              size="sm"
+              kpidefinition_id={Number(kpiId)}
+            />
+          </div>{" "}
         </div>
       </div>
     </div>

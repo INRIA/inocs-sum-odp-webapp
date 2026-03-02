@@ -6,7 +6,7 @@ import type {
 } from "./TransportMode";
 
 export interface ILivingLab {
-  id: string;
+  id: number;
   name: string;
   country?: string | null;
   flag?: string | null;

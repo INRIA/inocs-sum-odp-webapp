@@ -1,9 +1,9 @@
 import type { IKpi } from "./KPIs";
 
 export interface IGroupAnalysisResult {
-  id: string;
+  id: number;
   name: string;
-  kpi_ids: string[];
+  kpi_ids: number[];
   kpis: IKpiDefinition[];
   msqe: number;
   variation_under_no_measures: number;
@@ -12,14 +12,14 @@ export interface IGroupAnalysisResult {
 }
 
 export interface IMeasureCoefficient {
-  id: string;
+  id: number;
   name: string;
   coefficient: number;
-  kpi_group_id: string;
+  kpi_group_id: number;
 }
 
 export interface ILivingLabAnalysis {
-  id: string;
+  id: number;
   name: string;
   kpis: IKpiResultData[];
   measures: ILivingLabMeasure[];
@@ -30,8 +30,8 @@ export interface IKpiResultData extends IKpiDefinition {
   value_after: number | null;
   abs_variation: number | null;
   ratio_variation: number | null;
-  living_lab_id: string;
-  transport_mode_id?: string | null;
+  living_lab_id: number;
+  transport_mode_id?: number | null;
   transport_mode_name?: string | null;
   value_type: string;
   value_min: number | null;
@@ -48,7 +48,7 @@ export interface ILivingLabMeasure {
 }
 
 export interface IKpiGroup {
-  id: number | string;
+  id: number;
   name: string;
   kpis?: IKpiDefinition[];
   [key: string]: any;
@@ -66,7 +66,7 @@ export interface IKpiDefinition extends IKpi {
 
 // KPI Variations Data Structures
 export interface IKpiVariationData {
-  groupId: string;
+  groupId: number;
   groupName: string;
   totalVariation: number | null; // Average ratio_variation across all labs and KPIs
   totalVariationPercentage: string; // Formatted percentage string
@@ -75,7 +75,7 @@ export interface IKpiVariationData {
 }
 
 export interface ILivingLabVariation {
-  labId: string;
+  labId: number;
   labName: string;
   totalVariation: number | null; // Average ratio_variation for this lab
   totalVariationPercentage: string;
@@ -87,9 +87,9 @@ export interface ILivingLabVariation {
 }
 
 export interface IKpiVariation {
-  kpiId: string;
+  kpiId: number;
   kpiName: string;
-  kpiParentId?: string | null;
+  kpiParentId?: number | null;
   kpiParentName?: string | null;
   ratioVariation: number | null;
   ratioVariationPercentage: string;
