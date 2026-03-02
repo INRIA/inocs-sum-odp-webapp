@@ -182,6 +182,10 @@ export const buildMcdaKeyInsights = (
   let conflictDetail =
     "Add at least two GAIA criteria vectors to estimate trade-off conflicts.";
 
+  let differentiatingCriteriaValue = "Not enough GAIA criteria";
+  let differentiatingCriteriaDetail =
+    "Add GAIA criteria vectors to identify the most differentiating criteria.";
+
   const gaiaCriteria = results.gaia_criteria ?? [];
   if (gaiaCriteria.length >= 2) {
     let bestPair: [string, string] | null = null;
@@ -216,6 +220,26 @@ export const buildMcdaKeyInsights = (
             ? "Moderate conflict detected in the GAIA plane."
             : "Limited direct conflict in the GAIA plane.";
     }
+  }
+
+  const criteriaByLength = gaiaCriteria
+    .map((criterion) => ({
+      key: criterion.key,
+      label: criteriaLabels[criterion.key] || criterion.key,
+      length: Math.hypot(criterion.x, criterion.y),
+    }))
+    .filter((criterion) => criterion.length > 0)
+    .sort((a, b) => b.length - a.length);
+
+  if (criteriaByLength.length > 0) {
+    const topDifferentiatingCriteria = criteriaByLength.slice(0, 3);
+    const topCount = topDifferentiatingCriteria.length;
+    differentiatingCriteriaValue = topDifferentiatingCriteria
+      .map((criterion) => criterion.label)
+      .join(", ");
+    differentiatingCriteriaDetail = `Top ${topCount} by vector length: ${topDifferentiatingCriteria
+      .map((criterion) => criterion.length.toFixed(2))
+      .join(", ")}.`;
   }
 
   let alignmentValue = "Not enough GAIA vectors";
@@ -303,6 +327,14 @@ export const buildMcdaKeyInsights = (
           : "No GAIA quality score available.",
       tooltip:
         "GAIA quality indicates how much decision information is preserved in the 2D plane.",
+    },
+    {
+      title: "Differentiating criteria",
+      description: "Most discriminating in the GAIA plane",
+      value: differentiatingCriteriaValue,
+      detail: differentiatingCriteriaDetail,
+      tooltip:
+        "Longer criterion vectors in the GAIA plane indicate stronger discrimination between alternatives.",
     },
     // {
     //   title: "Decision alignment",
