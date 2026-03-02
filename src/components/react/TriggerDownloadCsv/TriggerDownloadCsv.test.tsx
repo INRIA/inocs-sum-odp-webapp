@@ -59,13 +59,13 @@ describe("TriggerDownloadCsv", () => {
 
   it("renders 'KPIs CSV' label for kpi-results-definition type", () => {
     render(<TriggerDownloadCsv type="kpi-results-definition" />);
-    expect(screen.getByRole("button", { name: /kpis csv/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /csv/i })).toBeTruthy();
   });
 
   it("renders 'Group of KPIs CSV' label for kpi-results-category type", () => {
     render(<TriggerDownloadCsv type="kpi-results-category" />);
     expect(
-      screen.getByRole("button", { name: /group of kpis csv/i }),
+      screen.getByRole("button", { name: /Download KPI results CSV/i }),
     ).toBeTruthy();
   });
 
@@ -194,12 +194,12 @@ describe("TriggerDownloadCsv", () => {
 
   it("renders 'All Measures CSV' label for projects-all type", () => {
     render(<TriggerDownloadCsv type="projects-all" />);
-    expect(screen.getByRole("button", { name: /all measures csv/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Download measures implemented CSV/i })).toBeTruthy();
   });
 
   it("renders 'Lab Measures CSV' label for projects-lab type", () => {
     render(<TriggerDownloadCsv type="projects-lab" living_lab_id={2} />);
-    expect(screen.getByRole("button", { name: /lab measures csv/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Lab Measures CSV/i })).toBeTruthy();
   });
 
   it("calls downloadCsvBlob with /csv/projects for projects-all", async () => {
