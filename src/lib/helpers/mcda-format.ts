@@ -279,12 +279,12 @@ export const buildMcdaKeyInsights = (
         "Computed from criterion-vector directions in the GAIA plane using cosine similarity.",
     },
     {
-      title: "Average score",
-      description: "Mean net flow across alternatives",
-      value: formatPhi(average),
-      detail: `Score spread (max-min): ${formatPhi(spread)}.`,
+      title: "Score spread",
+      description: "The difference between the highest and lowest net flow",
+      value: formatPhi(spread),
+      detail: `(max-min) = (${formatPhi(maxScore)}) - (${formatPhi(minScore)}). How separated the alternatives are.`,
       tooltip:
-        "The net-flow mean is usually close to zero; spread indicates how separated the alternatives are.",
+        "Spread indicates how strongly the best alternative outperforms the worst and how clearly differentiated the options are.",
     },
     {
       title: "GAIA quality",
@@ -304,13 +304,13 @@ export const buildMcdaKeyInsights = (
       tooltip:
         "GAIA quality indicates how much decision information is preserved in the 2D plane.",
     },
-    {
-      title: "Decision alignment",
-      description: "Best aligned with GAIA decision stick",
-      value: alignmentValue,
-      detail: alignmentDetail,
-      tooltip:
-        "Alternative whose GAIA vector is most aligned with the decision stick direction.",
-    },
+    // {
+    //   title: "Decision alignment",
+    //   description: "Best aligned with GAIA decision stick",
+    //   value: alignmentValue,
+    //   detail: alignmentDetail,
+    //   tooltip:
+    //     "Alternative whose GAIA vector is most aligned with the decision stick direction.",
+    // },
   ];
 };
