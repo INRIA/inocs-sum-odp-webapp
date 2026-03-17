@@ -29,9 +29,9 @@ Based on plan.md structure - single Astro project:
 
 **Purpose**: Project initialization and component structure
 
-- [ ] T001 Create Analytics component directory at src/components/react/Analytics/
-- [ ] T002 [P] Create shared TypeScript interfaces in src/components/react/Analytics/types.ts
-- [ ] T003 [P] Create barrel export in src/components/react/Analytics/index.ts
+- [X] T001 Create Analytics component directory at src/components/react/Analytics/
+- [X] T002 [P] Create shared TypeScript interfaces in src/components/react/Analytics/types.ts
+- [X] T003 [P] Create barrel export in src/components/react/Analytics/index.ts
 
 ---
 
@@ -43,17 +43,17 @@ Based on plan.md structure - single Astro project:
 
 ### API Infrastructure
 
-- [ ] T004 Add getUsers() method to ApiClient in src/lib/api-client/ApiClient.ts (per research.md R-010)
-- [ ] T005 Update GET /api/v1/users route in src/pages/api/v1/users.ts to support no-filter all-users query
+- [X] T004 Add getUsers() method to ApiClient in src/lib/api-client/ApiClient.ts (per research.md R-010)
+- [X] T005 Update GET /api/v1/users route in src/pages/api/v1/users.ts to support no-filter all-users query
 
 ### Analytics Helper Module
 
-- [ ] T006 Create analytics helper module skeleton in src/lib/helpers/analytics.ts with exported function signatures
-- [ ] T007 [P] Create analytics helper test file in src/lib/helpers/analytics.test.ts with test stubs
+- [X] T006 Create analytics helper module skeleton in src/lib/helpers/analytics.ts with exported function signatures
+- [X] T007 [P] Create analytics helper test file in src/lib/helpers/analytics.test.ts with test stubs
 
 ### Page Foundation
 
-- [ ] T008 Create analytics.astro page skeleton at src/pages/lab-admin/analytics.astro with SSR data fetching via ApiClient
+- [X] T008 Create analytics.astro page skeleton at src/pages/lab-admin/analytics.astro with SSR data fetching via ApiClient
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -69,18 +69,18 @@ Based on plan.md structure - single Astro project:
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T009 [P] [US1] Add test for computeMetricCards() helper in src/lib/helpers/analytics.test.ts covering all 5 metrics
-- [ ] T010 [P] [US1] Add test for MetricCard component rendering in src/components/react/Analytics/MetricCard.test.tsx
-- [ ] T011 [P] [US1] Add edge-case tests for empty data (zero counts display) in analytics.test.ts
-- [ ] T012 [P] [US1] Add test for user count breakdown (active vs pending) computation
+- [X] T009 [P] [US1] Add test for computeMetricCards() helper in src/lib/helpers/analytics.test.ts covering all 5 metrics
+- [X] T010 [P] [US1] Add test for MetricCard component rendering in src/components/react/Analytics/MetricCard.test.tsx
+- [X] T011 [P] [US1] Add edge-case tests for empty data (zero counts display) in analytics.test.ts
+- [X] T012 [P] [US1] Add test for user count breakdown (active vs pending) computation
 
 ### Implementation for User Story 1
 
-- [ ] T013 [P] [US1] Implement MetricCardData interface in src/components/react/Analytics/types.ts
-- [ ] T014 [US1] Implement computeMetricCards() helper function in src/lib/helpers/analytics.ts
-- [ ] T015 [US1] Implement MetricCard React component (SSR-only, no client:*) in src/components/react/Analytics/MetricCard.tsx
-- [ ] T016 [US1] Integrate MetricCard components into analytics.astro page with computed data props
-- [ ] T017 [US1] Add styling for metric cards section using existing Tailwind classes
+- [X] T013 [P] [US1] Implement MetricCardData interface in src/components/react/Analytics/types.ts
+- [X] T014 [US1] Implement computeMetricCards() helper function in src/lib/helpers/analytics.ts
+- [X] T015 [US1] Implement MetricCard React component (SSR-only, no client:*) in src/components/react/Analytics/MetricCard.tsx
+- [X] T016 [US1] Integrate MetricCard components into analytics.astro page with computed data props
+- [X] T017 [US1] Add styling for metric cards section using existing Tailwind classes
 
 **Checkpoint**: User Story 1 complete - admin can view platform overview metrics independently
 
@@ -94,25 +94,25 @@ Based on plan.md structure - single Astro project:
 
 ### Tests for User Story 2 (MANDATORY) ⚠️
 
-- [ ] T018 [P] [US2] Add test for computeLabMetricsTable() helper in src/lib/helpers/analytics.test.ts
-- [ ] T019 [P] [US2] Add test for getMainKpis() helper to filter parent-only KPIs in analytics.test.ts
-- [ ] T020 [P] [US2] Add test for KPI result-to-parent mapping logic (per research.md R-004) in analytics.test.ts
-- [ ] T021 [P] [US2] Add test for LivingLabMetricsTable component rendering in src/components/react/Analytics/LivingLabMetricsTable.test.tsx
-- [ ] T022 [P] [US2] Add edge-case test for labs with zero KPI results displaying correctly
+- [X] T018 [P] [US2] Add test for computeLabMetricsTable() helper in src/lib/helpers/analytics.test.ts
+- [X] T019 [P] [US2] Add test for getMainKpis() helper to filter parent-only KPIs in analytics.test.ts
+- [X] T020 [P] [US2] Add test for KPI result-to-parent mapping logic (per research.md R-004) in analytics.test.ts
+- [X] T021 [P] [US2] Add test for LivingLabMetricsTable component rendering in src/components/react/Analytics/LivingLabMetricsTable.test.tsx
+- [X] T022 [P] [US2] Add edge-case test for labs with zero KPI results displaying correctly
 
 ### Implementation for User Story 2
 
-- [ ] T023 [P] [US2] Implement LivingLabMetricsRow interface in src/components/react/Analytics/types.ts
-- [ ] T024 [P] [US2] Implement getMainKpis() helper function in src/lib/helpers/analytics.ts
-- [ ] T025 [US2] Implement computeLabMetricsTable() helper function in src/lib/helpers/analytics.ts
-- [ ] T026 [US2] Implement LivingLabMetricsTable React component (SSR-only) in src/components/react/Analytics/LivingLabMetricsTable.tsx
-- [ ] T027 [US2] Integrate LivingLabMetricsTable into analytics.astro page with computed data props
-- [ ] T028 [P] [US2] Add test for computeLabKpiTimeline() helper for D3 line chart data in analytics.test.ts
-- [ ] T029 [P] [US2] Add test for D3LineChartLabKPIsOvertime component in src/components/react/Analytics/D3LineChartLabKPIsOvertime.test.tsx
-- [ ] T030 [P] [US2] Implement LabKpiTimelineSeries interface in src/components/react/Analytics/types.ts
-- [ ] T031 [US2] Implement computeLabKpiTimeline() helper function in src/lib/helpers/analytics.ts
-- [ ] T032 [US2] Implement D3LineChartLabKPIsOvertime React component (client:load) in src/components/react/Analytics/D3LineChartLabKPIsOvertime.tsx
-- [ ] T033 [US2] Integrate D3LineChartLabKPIsOvertime into analytics.astro page with client:load directive
+- [X] T023 [P] [US2] Implement LivingLabMetricsRow interface in src/components/react/Analytics/types.ts
+- [X] T024 [P] [US2] Implement getMainKpis() helper function in src/lib/helpers/analytics.ts
+- [X] T025 [US2] Implement computeLabMetricsTable() helper function in src/lib/helpers/analytics.ts
+- [X] T026 [US2] Implement LivingLabMetricsTable React component (SSR-only) in src/components/react/Analytics/LivingLabMetricsTable.tsx
+- [X] T027 [US2] Integrate LivingLabMetricsTable into analytics.astro page with computed data props
+- [X] T028 [P] [US2] Add test for computeLabKpiTimeline() helper for D3 line chart data in analytics.test.ts
+- [X] T029 [P] [US2] Add test for D3LineChartLabKPIsOvertime component in src/components/react/Analytics/D3LineChartLabKPIsOvertime.test.tsx
+- [X] T030 [P] [US2] Implement LabKpiTimelineSeries interface in src/components/react/Analytics/types.ts
+- [X] T031 [US2] Implement computeLabKpiTimeline() helper function in src/lib/helpers/analytics.ts
+- [X] T032 [US2] Implement D3LineChartLabKPIsOvertime React component (client:load) in src/components/react/Analytics/D3LineChartLabKPIsOvertime.tsx
+- [X] T033 [US2] Integrate D3LineChartLabKPIsOvertime into analytics.astro page with client:load directive
 
 **Checkpoint**: User Story 2 complete - admin can view KPI results breakdown per living lab and trends over time
 
@@ -126,16 +126,16 @@ Based on plan.md structure - single Astro project:
 
 ### Tests for User Story 3 (MANDATORY) ⚠️
 
-- [ ] T034 [P] [US3] Add test for computeLabMeasuresBar() helper in src/lib/helpers/analytics.test.ts
-- [ ] T035 [P] [US3] Add test for D3BarChartLabMeasures component rendering in src/components/react/Analytics/D3BarChartLabMeasures.test.tsx
-- [ ] T036 [P] [US3] Add edge-case test for labs with zero measures displaying correctly
+- [X] T034 [P] [US3] Add test for computeLabMeasuresBar() helper in src/lib/helpers/analytics.test.ts
+- [X] T035 [P] [US3] Add test for D3BarChartLabMeasures component rendering in src/components/react/Analytics/D3BarChartLabMeasures.test.tsx
+- [X] T036 [P] [US3] Add edge-case test for labs with zero measures displaying correctly
 
 ### Implementation for User Story 3
 
-- [ ] T037 [P] [US3] Implement LabMeasuresBarData interface in src/components/react/Analytics/types.ts
-- [ ] T038 [US3] Implement computeLabMeasuresBar() helper function in src/lib/helpers/analytics.ts
-- [ ] T039 [US3] Implement D3BarChartLabMeasures React component (client:load) in src/components/react/Analytics/D3BarChartLabMeasures.tsx
-- [ ] T040 [US3] Integrate D3BarChartLabMeasures into analytics.astro page with client:load directive
+- [X] T037 [P] [US3] Implement LabMeasuresBarData interface in src/components/react/Analytics/types.ts
+- [X] T038 [US3] Implement computeLabMeasuresBar() helper function in src/lib/helpers/analytics.ts
+- [X] T039 [US3] Implement D3BarChartLabMeasures React component (client:load) in src/components/react/Analytics/D3BarChartLabMeasures.tsx
+- [X] T040 [US3] Integrate D3BarChartLabMeasures into analytics.astro page with client:load directive
 
 **Checkpoint**: User Story 3 complete - admin can view measures adoption breakdown per living lab
 
@@ -149,16 +149,16 @@ Based on plan.md structure - single Astro project:
 
 ### Tests for User Story 4 (MANDATORY) ⚠️
 
-- [ ] T041 [P] [US4] Add test for computeKpiCoverageTable() helper in src/lib/helpers/analytics.test.ts
-- [ ] T042 [P] [US4] Add test for KPICoverageTable component rendering in src/components/react/Analytics/KPICoverageTable.test.tsx
-- [ ] T043 [P] [US4] Add edge-case test for KPI type filtering (only parent KPIs included)
+- [X] T041 [P] [US4] Add test for computeKpiCoverageTable() helper in src/lib/helpers/analytics.test.ts
+- [X] T042 [P] [US4] Add test for KPICoverageTable component rendering in src/components/react/Analytics/KPICoverageTable.test.tsx
+- [X] T043 [P] [US4] Add edge-case test for KPI type filtering (only parent KPIs included)
 
 ### Implementation for User Story 4
 
-- [ ] T044 [P] [US4] Implement KpiCoverageRow interface in src/components/react/Analytics/types.ts
-- [ ] T045 [US4] Implement computeKpiCoverageTable() helper function in src/lib/helpers/analytics.ts
-- [ ] T046 [US4] Implement KPICoverageTable React component (SSR-only) in src/components/react/Analytics/KPICoverageTable.tsx
-- [ ] T047 [US4] Integrate KPICoverageTable into analytics.astro page with computed data props
+- [X] T044 [P] [US4] Implement KpiCoverageRow interface in src/components/react/Analytics/types.ts
+- [X] T045 [US4] Implement computeKpiCoverageTable() helper function in src/lib/helpers/analytics.ts
+- [X] T046 [US4] Implement KPICoverageTable React component (SSR-only) in src/components/react/Analytics/KPICoverageTable.tsx
+- [X] T047 [US4] Integrate KPICoverageTable into analytics.astro page with computed data props
 
 **Checkpoint**: User Story 4 complete - admin can view KPI definitions summary with type breakdown
 
@@ -170,18 +170,18 @@ Based on plan.md structure - single Astro project:
 
 ### Tests (MANDATORY) ⚠️
 
-- [ ] T048 [P] Add test for computeAlerts() helper covering all alert types in src/lib/helpers/analytics.test.ts
-- [ ] T049 [P] Add test for AnalyticsAlerts component rendering by severity in src/components/react/Analytics/AnalyticsAlerts.test.tsx
-- [ ] T050 [P] Add edge-case test for platform with no living labs (empty state handling)
-- [ ] T051 [P] Add edge-case test for data retrieval failure (partial render with error message)
+- [X] T048 [P] Add test for computeAlerts() helper covering all alert types in src/lib/helpers/analytics.test.ts
+- [X] T049 [P] Add test for AnalyticsAlerts component rendering by severity in src/components/react/Analytics/AnalyticsAlerts.test.tsx
+- [X] T050 [P] Add edge-case test for platform with no living labs (empty state handling)
+- [X] T051 [P] Add edge-case test for data retrieval failure (partial render with error message)
 
 ### Implementation
 
-- [ ] T052 [P] Implement AlertCardData interface in src/components/react/Analytics/types.ts
-- [ ] T053 Implement computeAlerts() helper function in src/lib/helpers/analytics.ts
-- [ ] T054 Implement AnalyticsAlerts React component (SSR-only) in src/components/react/Analytics/AnalyticsAlerts.tsx
-- [ ] T055 Integrate AnalyticsAlerts into analytics.astro page with computed data props
-- [ ] T056 Add error boundary handling in analytics.astro for partial data fetch failures
+- [X] T052 [P] Implement AlertCardData interface in src/components/react/Analytics/types.ts
+- [X] T053 Implement computeAlerts() helper function in src/lib/helpers/analytics.ts
+- [X] T054 Implement AnalyticsAlerts React component (SSR-only) in src/components/react/Analytics/AnalyticsAlerts.tsx
+- [X] T055 Integrate AnalyticsAlerts into analytics.astro page with computed data props
+- [X] T056 Add error boundary handling in analytics.astro for partial data fetch failures
 
 ---
 
@@ -189,14 +189,14 @@ Based on plan.md structure - single Astro project:
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T057 [P] Update barrel export in src/components/react/Analytics/index.ts with all components
-- [ ] T058 [P] Add responsive design adjustments for metric cards and tables
-- [ ] T059 [P] Add breadcrumb navigation to analytics page using existing Layout component
-- [ ] T060 Verify page loads within 3 seconds for up to 50 living labs, 500 KPI results, 200 measures (SC-002)
-- [ ] T061 [P] Add hover tooltips to D3 charts for data point details
-- [ ] T062 Validate all displayed counts match underlying data (SC-003)
-- [ ] T063 Run quickstart.md validation - navigate to page and verify all sections render
-- [ ] T064 [P] Run full test suite: npx vitest run src/lib/helpers/analytics.test.ts && npx vitest run src/components/react/Analytics/
+- [X] T057 [P] Update barrel export in src/components/react/Analytics/index.ts with all components
+- [X] T058 [P] Add responsive design adjustments for metric cards and tables
+- [X] T059 [P] Add breadcrumb navigation to analytics page using existing Layout component
+- [X] T060 Verify page loads within 3 seconds for up to 50 living labs, 500 KPI results, 200 measures (SC-002)
+- [X] T061 [P] Add hover tooltips to D3 charts for data point details
+- [X] T062 Validate all displayed counts match underlying data (SC-003)
+- [X] T063 Run quickstart.md validation - navigate to page and verify all sections render
+- [X] T064 [P] Run full test suite: npx vitest run src/lib/helpers/analytics.test.ts && npx vitest run src/components/react/Analytics/
 
 ---
 

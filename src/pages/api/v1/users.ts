@@ -24,19 +24,31 @@ export const GET: APIRoute = async ({ request, url }) => {
         });
       }
     }
-    let data = await userService.findUsers({
-      id: id || undefined,
-      email: email || undefined,
-      status: status || undefined,
-      roleId: roleId || undefined,
-    });
 
-    if (!data.length) {
-      return new ApiResponse({
-        error: "User not found",
-        status: 404,
+    // Check if any filters are provided
+    const hasFilters = !!(id || email || status || roleId);
+
+    let data;
+    if (hasFilters) {
+      // Use findUsers when filters are present
+      data = await userService.findUsers({
+        id: id || undefined,
+        email: email || undefined,
+        status: status || undefined,
+        roleId: roleId || undefined,
       });
+
+      if (!data.length) {
+        return new ApiResponse({
+          error: "User not found",
+          status: 404,
+        });
+      }
+    } else {
+      // Return all users when no filters are provided (for analytics)
+      data = await userService.getAllUsers();
     }
+
     return new ApiResponse({
       data,
     });

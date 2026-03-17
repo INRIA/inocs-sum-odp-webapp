@@ -1,0 +1,143 @@
+---
+/**
+ * Platform Analytics Dashboard
+ * 
+ * Read-only page displaying platform-wide metrics for administrators.
+ * All data aggregation happens server-side in Astro frontmatter.
+ */
+import Layout from "../../layouts/Layout.astro";
+import ApiClient from "../../lib/api-client/ApiClient";
+import { getUrl } from "../../lib/helpers";
+import type { ILivingLabPopulated, IKpi, User } from "../../types";
+
+// Import analytics helpers
+import {
+  computeMetricCards,
+  computeLabMetricsTable,
+  computeLabKpiTimeline,
+  computeLabMeasuresBar,
+  computeKpiCoverageTable,
+  computeAlerts,
+} from "../../lib/helpers/analytics";
+
+// Import React components
+import { MetricCard } from "../../components/react/Analytics/MetricCard";
+import { LivingLabMetricsTable } from "../../components/react/Analytics/LivingLabMetricsTable";
+import { KPICoverageTable } from "../../components/react/Analytics/KPICoverageTable";
+import { AnalyticsAlerts } from "../../components/react/Analytics/AnalyticsAlerts";
+import { D3LineChartLabKPIsOvertime } from "../../components/react/Analytics/D3LineChartLabKPIsOvertime";
+import { D3BarChartLabMeasures } from "../../components/react/Analytics/D3BarChartLabMeasures";
+
+// Fetch all required data via ApiClient
+const api = new ApiClient(Astro.request);
+
+let labs: ILivingLabPopulated[] = [];
+let kpis: IKpi[] = [];
+let users: User[] = [];
+let fetchError: string | null = null;
+
+try {
+  // Fetch living labs with KPI results and measures
+  const labsResult = await api.getLivingLabs();
+  labs = (labsResult as ILivingLabPopulated[]) ?? [];
+  
+  // Fetch all KPI definitions
+  kpis = (await api.getKPIs({})) ?? [];
+  
+  // Fetch all users
+  users = (await api.getUsers()) ?? [];
+} catch (error) {
+  console.error("Error fetching analytics data:", error);
+  fetchError = error instanceof Error ? error.message : "Failed to load analytics data";
+}
+
+// Compute all analytics data server-side
+const metricCards = computeMetricCards(labs, kpis, users);
+const labMetricsTable = computeLabMetricsTable(labs, kpis);
+const labKpiTimeline = computeLabKpiTimeline(labs);
+const labMeasuresBar = computeLabMeasuresBar(labs);
+const kpiCoverageTable = computeKpiCoverageTable(labs, kpis);
+const alerts = computeAlerts(labs, kpis, users);
+---
+
+<Layout
+  role="admin"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Lab Admin", href: "/lab-admin" },
+    { label: "Platform Analytics" },
+  ]}
+  backHref="/lab-admin"
+>
+  <div class="mx-auto px-4 py-8 max-w-7xl">
+    <h1 class="text-3xl font-bold mb-8">Platform Analytics Dashboard</h1>
+    
+    {fetchError && (
+      <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
+        <p class="font-medium">Error loading data</p>
+        <p class="text-sm">{fetchError}</p>
+      </div>
+    )}
+
+    <!-- Section 1: Summary Metric Cards (SSR-only) -->
+    <section class="mb-12">
+      <h2 class="text-xl font-semibold mb-4">Platform Overview</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        {metricCards.map((card) => (
+          <MetricCard data={card} />
+        ))}
+      </div>
+    </section>
+
+    <!-- Section 2: Analytics Alerts (SSR-only) -->
+    {alerts.length > 0 && (
+      <section class="mb-12">
+        <h2 class="text-xl font-semibold mb-4">Alerts & Warnings</h2>
+        <AnalyticsAlerts alerts={alerts} />
+      </section>
+    )}
+
+    <!-- Section 3: D3 Charts (client:load required for D3 DOM access) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+      <!-- KPI Results Over Time Chart -->
+      <section class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold mb-4">KPI Results Over Time</h2>
+        <div class="h-80">
+          {labKpiTimeline.length > 0 ? (
+            <D3LineChartLabKPIsOvertime data={labKpiTimeline} client:load />
+          ) : (
+            <div class="h-full flex items-center justify-center text-gray-400">
+              <p class="text-sm">No KPI timeline data available</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <!-- Measures per Lab Chart -->
+      <section class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold mb-4">Measures by Living Lab</h2>
+        <div class="h-80">
+          {labMeasuresBar.length > 0 ? (
+            <D3BarChartLabMeasures data={labMeasuresBar} client:load />
+          ) : (
+            <div class="h-full flex items-center justify-center text-gray-400">
+              <p class="text-sm">No measures data available</p>
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+
+    <!-- Section 4: Living Lab Metrics Table (SSR-only) -->
+    <section class="mb-12">
+      <h2 class="text-xl font-semibold mb-4">KPI Results by Living Lab</h2>
+      <LivingLabMetricsTable rows={labMetricsTable} />
+    </section>
+
+    <!-- Section 5: KPI Coverage Table (SSR-only) -->
+    <section class="mb-12">
+      <h2 class="text-xl font-semibold mb-4">KPI Definitions Summary</h2>
+      <KPICoverageTable rows={kpiCoverageTable} />
+    </section>
+  </div>
+</Layout>
