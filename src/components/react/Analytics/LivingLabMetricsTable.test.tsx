@@ -34,8 +34,9 @@ describe("LivingLabMetricsTable component - User Story 2", () => {
     expect(screen.getByText("Living Lab")).toBeInTheDocument();
     expect(screen.getByText("KPI Results")).toBeInTheDocument();
     expect(screen.getByText("KPIs Covered")).toBeInTheDocument();
-    expect(screen.getByText("PUSH Measures")).toBeInTheDocument();
-    expect(screen.getByText("PULL Measures")).toBeInTheDocument();
+    expect(screen.getByText("Global KPIs Covered")).toBeInTheDocument();
+    expect(screen.getByText("Local KPIs Covered")).toBeInTheDocument();
+    expect(screen.getByText("Measures PUSH / PULL")).toBeInTheDocument();
     expect(screen.getByText("Last Updated")).toBeInTheDocument();
   });
 

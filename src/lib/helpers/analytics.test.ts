@@ -12,6 +12,7 @@ import {
 import type {
   IKpi,
   ILivingLabPopulated,
+  IProject,
   User,
   IKpiResultGroup,
   IKpiResult,
@@ -23,7 +24,7 @@ const createKpi = (
   kpi_number: string,
   name: string,
   type: "GLOBAL" | "LOCAL" = "GLOBAL",
-  parent_kpi_id: number | null = null
+  parent_kpi_id: number | null = null,
 ): IKpi => ({
   id,
   kpi_number,
@@ -39,7 +40,7 @@ const createResult = (
   kpidefinition_id: number,
   living_lab_id: number,
   date: string,
-  value: number = 100
+  value: number = 100,
 ): IKpiResult => ({
   id,
   kpidefinition_id,
@@ -52,7 +53,7 @@ const createLab = (
   id: number,
   name: string,
   kpiResults: IKpiResultGroup[] = [],
-  implementations: any[] = []
+  implementations: any[] = [],
 ): ILivingLabPopulated => ({
   id,
   name,
@@ -64,7 +65,7 @@ const createUser = (
   id: string,
   email: string,
   name: string,
-  status: "signup" | "active" | "disabled" = "active"
+  status: "signup" | "active" | "disabled" = "active",
 ): User =>
   ({
     id,
@@ -79,7 +80,7 @@ const createImplementation = (
   id: number,
   projectType: "PUSH" | "PULL" | "OTHER",
   start_at?: string,
-  updated_at?: string
+  updated_at?: string,
 ) => ({
   id,
   project_id: id,
@@ -87,6 +88,16 @@ const createImplementation = (
   project: { id, name: `Project ${id}`, type: projectType },
   start_at,
   updated_at,
+});
+
+const createMeasure = (
+  id: number,
+  name: string,
+  type: "PUSH" | "PULL" | "OTHER",
+): IProject => ({
+  id,
+  name,
+  type,
 });
 
 describe("getMainKpis", () => {
@@ -109,10 +120,7 @@ describe("getMainKpis", () => {
   });
 
   it("returns all KPIs when none have parents", () => {
-    const kpis = [
-      createKpi(1, "1", "KPI 1"),
-      createKpi(2, "2", "KPI 2"),
-    ];
+    const kpis = [createKpi(1, "1", "KPI 1"), createKpi(2, "2", "KPI 2")];
 
     expect(getMainKpis(kpis)).toHaveLength(2);
   });
@@ -135,7 +143,7 @@ describe("buildKpiParentMap", () => {
 });
 
 describe("computeMetricCards - User Story 1", () => {
-  it("computes all 5 metric cards correctly", () => {
+  it("computes expanded metric cards correctly", () => {
     const labs = [
       createLab(1, "Lab 1", [
         {
@@ -147,15 +155,18 @@ describe("computeMetricCards - User Story 1", () => {
           ],
         },
       ]),
-      createLab(2, "Lab 2", [], [
-        createImplementation(1, "PUSH"),
-        createImplementation(2, "PULL"),
-      ]),
+      createLab(
+        2,
+        "Lab 2",
+        [],
+        [createImplementation(1, "PUSH"), createImplementation(2, "PULL")],
+      ),
     ];
     const kpis = [
       createKpi(1, "1", "KPI 1"),
       createKpi(2, "2", "KPI 2"),
       createKpi(3, "2.1", "KPI 2.1", "GLOBAL", 2),
+      createKpi(4, "3", "KPI 3", "LOCAL"),
     ];
     const users = [
       createUser("1", "active@test.com", "Active User", "active"),
@@ -163,50 +174,84 @@ describe("computeMetricCards - User Story 1", () => {
       createUser("3", "another@test.com", "Another Active", "active"),
     ];
 
-    const cards = computeMetricCards(labs, kpis, users);
+    const measures = [
+      createMeasure(1, "Measure A", "PUSH"),
+      createMeasure(2, "Measure B", "PULL"),
+      createMeasure(3, "Measure C", "OTHER"),
+    ];
 
-    expect(cards).toHaveLength(5);
-    expect(cards[0]).toEqual({
+    const cards = computeMetricCards(labs, kpis, users, measures);
+    const byLabel = (label: string) => cards.find((c) => c.label === label);
+
+    expect(cards).toHaveLength(8);
+    expect(byLabel("Living Labs")).toEqual({
       label: "Living Labs",
       value: "2",
       icon: "building",
       color: "text-primary",
     });
-    expect(cards[1]).toEqual({
+    expect(byLabel("Users (active / pending)")).toEqual({
       label: "Users (active / pending)",
       value: "2 / 1",
       icon: "users",
-      color: "text-secondary",
+      color: "text-primary",
     });
-    expect(cards[2]).toEqual({
-      label: "KPI Definitions",
-      value: "2", // Only parent KPIs
-      icon: "chart",
-      color: "text-info",
+    expect(byLabel("Total measures identified")).toEqual({
+      label: "Total measures identified",
+      value: "3",
+      icon: "check",
+      color: "text-primary",
     });
-    expect(cards[3]).toEqual({
-      label: "KPI Results Submitted",
+    expect(byLabel("Total measures implemented")).toEqual({
+      label: "Total measures implemented",
+      value: "2",
+      icon: "check",
+      color: "text-success",
+    });
+    expect(byLabel("Total KPI results entries recorded")).toEqual({
+      label: "Total KPI results entries recorded",
       value: "2",
       icon: "clipboard",
       color: "text-success",
     });
-    expect(cards[4]).toEqual({
-      label: "Measures Adopted",
-      value: "2",
-      icon: "check",
-      color: "text-warning",
+    expect(byLabel("Total KPIs coverage")).toEqual({
+      label: "Total KPIs coverage",
+      value: "33% (1/3)",
+      icon: "chart",
+      color: "text-danger",
+    });
+    expect(byLabel("Global KPIs coverage")).toEqual({
+      label: "Global KPIs coverage",
+      value: "50% (1/2)",
+      icon: "chart",
+      color: "text-success",
+    });
+    expect(byLabel("Local KPIs coverage")).toEqual({
+      label: "Local KPIs coverage",
+      value: "0% (0/1)",
+      icon: "chart",
+      color: "text-danger",
     });
   });
 
   it("handles empty data (zero counts)", () => {
-    const cards = computeMetricCards([], [], []);
+    const kpis = [
+      createKpi(1, "1", "KPI 1", "GLOBAL"),
+      createKpi(2, "2", "KPI 2", "LOCAL"),
+    ];
 
-    expect(cards).toHaveLength(5);
-    expect(cards[0].value).toBe("0");
-    expect(cards[1].value).toBe("0 / 0");
-    expect(cards[2].value).toBe("0");
-    expect(cards[3].value).toBe("0");
-    expect(cards[4].value).toBe("0");
+    const cards = computeMetricCards([], kpis, [], []);
+    const byLabel = (label: string) => cards.find((c) => c.label === label);
+
+    expect(cards).toHaveLength(8);
+    expect(byLabel("Living Labs")?.value).toBe("0");
+    expect(byLabel("Users (active / pending)")?.value).toBe("0 / 0");
+    expect(byLabel("Total measures identified")?.value).toBe("0");
+    expect(byLabel("Total measures implemented")?.value).toBe("0");
+    expect(byLabel("Total KPI results entries recorded")?.value).toBe("0");
+    expect(byLabel("Total KPIs coverage")?.value).toBe("0% (0/2)");
+    expect(byLabel("Global KPIs coverage")?.value).toBe("0% (0/1)");
+    expect(byLabel("Local KPIs coverage")?.value).toBe("0% (0/1)");
   });
 
   it("counts active vs pending users correctly", () => {
@@ -217,10 +262,12 @@ describe("computeMetricCards - User Story 1", () => {
       createUser("4", "d@test.com", "D", "disabled"),
     ];
 
-    const cards = computeMetricCards([], [], users);
+    const cards = computeMetricCards([], [], users, []);
 
     // Should be "2 / 1" (2 active, 1 pending/signup, disabled not counted as pending)
-    expect(cards[1].value).toBe("2 / 1");
+    expect(cards.find((c) => c.label === "Users (active / pending)")?.value).toBe(
+      "2 / 1",
+    );
   });
 });
 
@@ -245,7 +292,7 @@ describe("computeLabMetricsTable - User Story 2", () => {
             ],
           },
         ],
-        [createImplementation(1, "PUSH"), createImplementation(2, "PULL")]
+        [createImplementation(1, "PUSH"), createImplementation(2, "PULL")],
       ),
     ];
 
@@ -285,7 +332,7 @@ describe("computeLabMetricsTable - User Story 2", () => {
             results: [createResult(1, 1, 1, "2023-06-15")],
           },
         ],
-        [createImplementation(1, "PUSH", "2024-01-01", "2024-03-15")]
+        [createImplementation(1, "PUSH", "2024-01-01", "2024-03-15")],
       ),
     ];
 
@@ -348,12 +395,17 @@ describe("computeLabKpiTimeline - User Story 2", () => {
 describe("computeLabMeasuresBar - User Story 3", () => {
   it("counts PUSH and PULL measures per lab", () => {
     const labs = [
-      createLab(1, "Lab 1", [], [
-        createImplementation(1, "PUSH"),
-        createImplementation(2, "PUSH"),
-        createImplementation(3, "PULL"),
-        createImplementation(4, "OTHER"),
-      ]),
+      createLab(
+        1,
+        "Lab 1",
+        [],
+        [
+          createImplementation(1, "PUSH"),
+          createImplementation(2, "PUSH"),
+          createImplementation(3, "PULL"),
+          createImplementation(4, "OTHER"),
+        ],
+      ),
       createLab(2, "Lab 2", [], [createImplementation(5, "PULL")]),
     ];
 
@@ -451,7 +503,7 @@ describe("computeAlerts - Phase 7", () => {
     const alerts = computeAlerts(labs, kpis, []);
 
     const labsNoKpisAlert = alerts.find(
-      (a) => a.label === "Labs with no KPI results"
+      (a) => a.label === "Labs with no KPI results",
     );
     expect(labsNoKpisAlert).toBeDefined();
     expect(labsNoKpisAlert!.value).toBe(1);
@@ -468,7 +520,7 @@ describe("computeAlerts - Phase 7", () => {
     const alerts = computeAlerts(labs, [], []);
 
     const labsNoMeasuresAlert = alerts.find(
-      (a) => a.label === "Labs with no measures"
+      (a) => a.label === "Labs with no measures",
     );
     expect(labsNoMeasuresAlert).toBeDefined();
     expect(labsNoMeasuresAlert!.value).toBe(1);
@@ -476,10 +528,7 @@ describe("computeAlerts - Phase 7", () => {
   });
 
   it("generates alert for KPIs with no results", () => {
-    const kpis = [
-      createKpi(1, "1", "KPI 1"),
-      createKpi(2, "2", "KPI 2"),
-    ];
+    const kpis = [createKpi(1, "1", "KPI 1"), createKpi(2, "2", "KPI 2")];
     const labs = [
       createLab(1, "Lab 1", [
         {
@@ -493,7 +542,7 @@ describe("computeAlerts - Phase 7", () => {
     const alerts = computeAlerts(labs, kpis, []);
 
     const kpisNoResultsAlert = alerts.find(
-      (a) => a.label === "KPIs with no results"
+      (a) => a.label === "KPIs with no results",
     );
     expect(kpisNoResultsAlert).toBeDefined();
     expect(kpisNoResultsAlert!.value).toBe(1);
@@ -509,9 +558,7 @@ describe("computeAlerts - Phase 7", () => {
 
     const alerts = computeAlerts([], [], users);
 
-    const pendingAlert = alerts.find(
-      (a) => a.label === "Pending user signups"
-    );
+    const pendingAlert = alerts.find((a) => a.label === "Pending user signups");
     expect(pendingAlert).toBeDefined();
     expect(pendingAlert!.value).toBe(1);
     expect(pendingAlert!.items).toContain("pending@test.com");
@@ -530,7 +577,7 @@ describe("computeAlerts - Phase 7", () => {
             results: [createResult(1, 1, 1, "2024-01-01")],
           },
         ],
-        [createImplementation(1, "PUSH")]
+        [createImplementation(1, "PUSH")],
       ),
     ];
     const users = [createUser("1", "active@test.com", "Active", "active")];
@@ -556,12 +603,12 @@ describe("computeAlerts - Phase 7", () => {
     const alerts = computeAlerts(labs, kpis, users);
 
     const labsNoKpisAlert = alerts.find(
-      (a) => a.label === "Labs with no KPI results"
+      (a) => a.label === "Labs with no KPI results",
     );
     const labsNoMeasuresAlert = alerts.find(
-      (a) => a.label === "Labs with no measures"
+      (a) => a.label === "Labs with no measures",
     );
-    
+
     expect(labsNoKpisAlert).toBeDefined();
     expect(labsNoKpisAlert!.value).toBe(2);
     expect(labsNoMeasuresAlert).toBeDefined();

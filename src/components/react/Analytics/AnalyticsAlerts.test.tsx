@@ -104,7 +104,7 @@ describe("AnalyticsAlerts component - Phase 7", () => {
     expect(screen.queryByText("View details")).not.toBeInTheDocument();
   });
 
-  it("truncates long item lists with 'and X more' message", () => {
+  it("renders all items for long item lists", () => {
     const manyItemsAlert: AlertCardData[] = [
       {
         label: "Many items",
@@ -116,6 +116,8 @@ describe("AnalyticsAlerts component - Phase 7", () => {
 
     render(<AnalyticsAlerts alerts={manyItemsAlert} />);
 
-    expect(screen.getByText(/and 5 more/)).toBeInTheDocument();
+    expect(screen.getByText("Item 1")).toBeInTheDocument();
+    expect(screen.getByText("Item 10")).toBeInTheDocument();
+    expect(screen.queryByText(/and 5 more/)).not.toBeInTheDocument();
   });
 });

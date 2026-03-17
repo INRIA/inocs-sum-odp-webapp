@@ -45,8 +45,8 @@ export function LivingLabMetricsTable({ rows }: LivingLabMetricsTableProps) {
               Global KPIs Covered
             </th>
             <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Lobal KPIs Covered
-            </th>{" "}
+              Local KPIs Covered
+            </th>
             <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
               Measures PUSH / PULL
             </th>
@@ -84,7 +84,7 @@ export function LivingLabMetricsTable({ rows }: LivingLabMetricsTableProps) {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                   {row.kpisGlobalCoveredCount}
                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                   {row.kpisLocalCoveredCount}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-center ">
