@@ -38,6 +38,8 @@ export interface LivingLabMetricsRow {
   totalResultEntries: number;
   /** Distinct main/parent KPIs with results */
   kpisCoveredCount: number;
+  kpisGlobalCoveredCount: number;
+  kpisLocalCoveredCount: number;
   /** Total main/parent KPI definitions */
   totalMainKpis: number;
   pushMeasuresCount: number;

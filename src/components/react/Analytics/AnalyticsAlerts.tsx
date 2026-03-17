@@ -1,9 +1,9 @@
 /**
  * AnalyticsAlerts Component
- * 
+ *
  * SSR-only React component that displays alert cards for platform anomalies.
  * Examples: labs with no KPI results, labs with no measures, pending users.
- * 
+ *
  * @module Phase 7 - Analytics Alerts
  */
 
@@ -44,7 +44,7 @@ export function AnalyticsAlerts({ alerts }: AnalyticsAlertsProps) {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 gap-4">
       {alerts.map((alert, index) => {
         const classes = getSeverityClasses(alert.severity);
         return (
@@ -57,14 +57,9 @@ export function AnalyticsAlerts({ alerts }: AnalyticsAlertsProps) {
                   View details
                 </summary>
                 <ul className="text-sm mt-1 list-disc list-inside">
-                  {alert.items.slice(0, 5).map((item, i) => (
+                  {alert.items.map((item, i) => (
                     <li key={i}>{item}</li>
                   ))}
-                  {alert.items.length > 5 && (
-                    <li className="text-gray-500">
-                      ...and {alert.items.length - 5} more
-                    </li>
-                  )}
                 </ul>
               </details>
             )}

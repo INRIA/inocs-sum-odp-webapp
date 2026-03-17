@@ -1,9 +1,9 @@
 /**
  * LivingLabMetricsTable Component
- * 
+ *
  * SSR-only React component that displays a table of per-lab KPI metrics.
  * Used in the Analytics Dashboard for User Story 2.
- * 
+ *
  * @module User Story 2
  */
 
@@ -42,10 +42,13 @@ export function LivingLabMetricsTable({ rows }: LivingLabMetricsTableProps) {
               KPIs Covered
             </th>
             <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-              PUSH Measures
+              Global KPIs Covered
             </th>
             <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-              PULL Measures
+              Lobal KPIs Covered
+            </th>{" "}
+            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Measures PUSH / PULL
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Last Updated
@@ -68,14 +71,24 @@ export function LivingLabMetricsTable({ rows }: LivingLabMetricsTableProps) {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">
                   {row.totalResultEntries}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">
+                <td
+                  className={
+                    "px-6 py-4 whitespace-nowrap text-sm text-center font-bold " +
+                    (row.kpisCoveredCount / row.totalMainKpis < 0.4
+                      ? "text-danger"
+                      : "text-success")
+                  }
+                >
                   {row.kpisCoveredCount} / {row.totalMainKpis}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">
-                  {row.pushMeasuresCount}
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                  {row.kpisGlobalCoveredCount}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">
-                  {row.pullMeasuresCount}
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                  {row.kpisLocalCoveredCount}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-center ">
+                  {row.pushMeasuresCount} / {row.pullMeasuresCount}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {formatDate(row.lastUpdatedAt)}

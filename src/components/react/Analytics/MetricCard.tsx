@@ -21,9 +21,9 @@ export function MetricCard({ data }: MetricCardProps) {
   const { label, value, icon, color } = data;
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 border-l-4 border-primary">
-      <p className="text-sm text-gray-500 mb-1">{label}</p>
-      <p className={`text-2xl font-bold ${color ?? "text-gray-900"}`}>{value}</p>
+    <div className="flex flex-col bg-white rounded-lg shadow p-6 border-l-4 border-primary">
+      <span className="text-xl text-gray-500 mb-1">{label}</span>
+      <span className={`text-3xl font-bold ${color ?? "text-gray-900"}`}>{value}</span>
     </div>
   );
 }

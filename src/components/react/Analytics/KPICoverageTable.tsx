@@ -1,9 +1,9 @@
 /**
  * KPICoverageTable Component
- * 
+ *
  * SSR-only React component that displays a table of KPI definitions
  * with coverage information (how many labs have submitted results).
- * 
+ *
  * @module User Story 4
  */
 
@@ -50,7 +50,9 @@ export function KPICoverageTable({ rows }: KPICoverageTableProps) {
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   {row.kpiNumber}
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-900">{row.kpiName}</td>
+                <td className="px-6 py-4 text-sm text-gray-900">
+                  {row.kpiName}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                   <span
                     className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -62,7 +64,15 @@ export function KPICoverageTable({ rows }: KPICoverageTableProps) {
                     {row.kpiType}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">
+                <td
+                  className={
+                    row.labsWithResultsCount === 0
+                      ? "px-6 py-4 whitespace-nowrap text-md text-center text-danger font-bold"
+                      : row.labsWithResultsCount === row.totalLabs
+                        ? "px-6 py-4 whitespace-nowrap text-md text-center text-success font-bold"
+                        : "px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900"
+                  }
+                >
                   {row.labsWithResultsCount} / {row.totalLabs}
                 </td>
               </tr>

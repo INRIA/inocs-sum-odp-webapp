@@ -1,6 +1,6 @@
 /**
  * Analytics computation helpers for the Platform Analytics Dashboard.
- * 
+ *
  * All functions are pure computations that transform raw API data
  * into display-ready structures for React components.
  * These run server-side in Astro frontmatter (SSR).
@@ -22,6 +22,7 @@ import type {
   KpiCoverageRow,
   AlertCardData,
 } from "../../components/react/Analytics/types";
+import { formatDateOToMonthYear } from "./format";
 
 /**
  * Safely parse a date string. Returns null if invalid.
@@ -67,7 +68,7 @@ export function buildKpiParentMap(kpis: IKpi[]): Map<number, number> {
 
 /**
  * Compute the 5 metric cards for the platform overview (User Story 1).
- * 
+ *
  * Cards:
  * 1. Living Labs count
  * 2. Users (active / pending)
@@ -79,27 +80,57 @@ export function computeMetricCards(
   labs: ILivingLabPopulated[],
   kpis: IKpi[],
   users: User[],
+  measures: IProject[],
 ): MetricCardData[] {
   const mainKpis = getMainKpis(kpis);
-  
+  const globalKpis = mainKpis.filter((k) => k.type === "GLOBAL");
+  const localKpis = mainKpis.filter((k) => k.type === "LOCAL");
+  const parentMap = buildKpiParentMap(kpis);
+
   // Count users by status
   const activeUsers = users.filter((u) => u.status === "active").length;
   const pendingUsers = users.filter((u) => u.status === "signup").length;
-  
+
   // Count total KPI results across all labs
   const totalKpiResults = labs.reduce((sum, lab) => {
-    const resultCount = lab.kpi_results?.reduce(
-      (groupSum, group) => groupSum + (group.results?.length ?? 0),
-      0
-    ) ?? 0;
+    const resultCount =
+      lab.kpi_results?.reduce(
+        (groupSum, group) => groupSum + (group.results?.length ?? 0),
+        0,
+      ) ?? 0;
     return sum + resultCount;
   }, 0);
-  
+
   // Count total measures adopted (living_lab_projects_implementation)
-  const totalMeasures = labs.reduce((sum, lab) => {
-    return sum + (lab.living_lab_projects_implementation?.length ?? 0);
-  }, 0);
-  
+  const uniqueMeasures: Set<number> = new Set();
+
+  labs.forEach((lab) =>
+    lab.living_lab_projects_implementation?.forEach((impl) =>
+      uniqueMeasures.add(impl.project_id),
+    ),
+  );
+  const coveredParentIds = new Set<number>();
+  const coveredGlobalKpi = new Set<number>();
+  const coveredLocalKpi = new Set<number>();
+
+  labs.forEach((lab) => {
+    // Count all KPI results for this lab
+    const allResults = lab.kpi_results?.flatMap((g) => g.results ?? []) ?? [];
+    // Find distinct parent KPIs covered
+
+    for (const result of allResults) {
+      const parentId = parentMap.get(result.kpidefinition_id);
+      const kpi = mainKpis.find((k) => k.id === parentId);
+      if (parentId !== undefined) {
+        coveredParentIds.add(parentId);
+        if (kpi?.type === "LOCAL") coveredLocalKpi.add(parentId);
+        if (kpi?.type === "GLOBAL") coveredGlobalKpi.add(parentId);
+      }
+    }
+  });
+  const kpiCoverage = coveredParentIds.size / mainKpis.length;
+  const kpiGlobalCoverage = coveredGlobalKpi.size / globalKpis.length;
+  const kpiLocalCoverage = coveredLocalKpi.size / localKpis.length;
   return [
     {
       label: "Living Labs",
@@ -111,29 +142,50 @@ export function computeMetricCards(
       label: "Users (active / pending)",
       value: `${activeUsers} / ${pendingUsers}`,
       icon: "users",
-      color: "text-secondary",
+      color: "text-primary",
     },
     {
-      label: "KPI Definitions",
-      value: String(mainKpis.length),
+      label: "Total measures identified",
+      value: String(measures.length),
+      icon: "check",
+      color: "text-primary",
+    },
+    {
+      label: "Total measures implemented",
+      value: String(uniqueMeasures.size),
+      icon: "check",
+      color: "text-success",
+    },
+    {
+      label: "Total KPIs coverage",
+      value: `${toPercentage(kpiCoverage)} (${coveredParentIds.size}/${mainKpis.length})`,
       icon: "chart",
-      color: "text-info",
+      color: kpiCoverage < 0.5 ? "text-danger" : "text-success",
     },
     {
-      label: "KPI Results Submitted",
+      label: "Global KPIs coverage",
+      value: `${toPercentage(kpiGlobalCoverage)} (${coveredGlobalKpi.size}/${globalKpis.length})`,
+      icon: "chart",
+      color: kpiGlobalCoverage < 0.5 ? "text-danger" : "text-success",
+    },
+    {
+      label: "Local KPIs coverage",
+      value: `${toPercentage(kpiLocalCoverage)} (${coveredLocalKpi.size}/${localKpis.length})`,
+      icon: "chart",
+      color: kpiLocalCoverage < 0.5 ? "text-danger" : "text-success",
+    },
+    {
+      label: "Total KPI results entries recorded",
       value: String(totalKpiResults),
       icon: "clipboard",
       color: "text-success",
     },
-    {
-      label: "Measures Adopted",
-      value: String(totalMeasures),
-      icon: "check",
-      color: "text-warning",
-    },
   ];
 }
 
+function toPercentage(value: number): string {
+  return String(Math.round(value * 100)) + "%";
+}
 /**
  * Compute the living lab metrics table rows (User Story 2).
  */
@@ -144,60 +196,69 @@ export function computeLabMetricsTable(
   const mainKpis = getMainKpis(kpis);
   const parentMap = buildKpiParentMap(kpis);
   const totalMainKpis = mainKpis.length;
-  
-  return labs.map((lab) => {
-    // Count all KPI results for this lab
-    const allResults = lab.kpi_results?.flatMap((g) => g.results ?? []) ?? [];
-    const totalResultEntries = allResults.length;
-    
-    // Find distinct parent KPIs covered
-    const coveredParentIds = new Set<number>();
-    for (const result of allResults) {
-      const parentId = parentMap.get(result.kpidefinition_id);
-      if (parentId !== undefined) {
-        coveredParentIds.add(parentId);
+
+  return labs
+    .map((lab) => {
+      // Count all KPI results for this lab
+      const allResults = lab.kpi_results?.flatMap((g) => g.results ?? []) ?? [];
+      const totalResultEntries = allResults.length;
+
+      // Find distinct parent KPIs covered
+      const coveredParentIds = new Set<number>();
+      const coveredGlobalKpi = new Set<number>();
+      const coveredLocalKpi = new Set<number>();
+      for (const result of allResults) {
+        const parentId = parentMap.get(result.kpidefinition_id);
+        const kpi = mainKpis.find((k) => k.id === parentId);
+        if (parentId !== undefined) {
+          coveredParentIds.add(parentId);
+          if (kpi?.type === "LOCAL") coveredLocalKpi.add(parentId);
+          if (kpi?.type === "GLOBAL") coveredGlobalKpi.add(parentId);
+        }
       }
-    }
-    const kpisCoveredCount = coveredParentIds.size;
-    
-    // Count measures by type
-    const implementations = lab.living_lab_projects_implementation ?? [];
-    const pushMeasuresCount = implementations.filter(
-      (impl) => impl.project?.type === "PUSH"
-    ).length;
-    const pullMeasuresCount = implementations.filter(
-      (impl) => impl.project?.type === "PULL"
-    ).length;
-    
-    // Find last updated date (max of all KPI result dates and measure dates)
-    const dates: Date[] = [];
-    
-    for (const result of allResults) {
-      const parsedDate = safeParseDate(result.date);
-      if (parsedDate) dates.push(parsedDate);
-    }
-    
-    for (const impl of implementations) {
-      const startDate = safeParseDate(impl.start_at);
-      const updateDate = safeParseDate(impl.updated_at);
-      if (startDate) dates.push(startDate);
-      if (updateDate) dates.push(updateDate);
-    }
-    
-    const maxDate = getMaxDate(dates);
-    const lastUpdatedAt = maxDate ? maxDate.toISOString() : null;
-    
-    return {
-      labId: lab.id,
-      labName: lab.name,
-      totalResultEntries,
-      kpisCoveredCount,
-      totalMainKpis,
-      pushMeasuresCount,
-      pullMeasuresCount,
-      lastUpdatedAt,
-    };
-  });
+      const kpisCoveredCount = coveredParentIds.size;
+
+      // Count measures by type
+      const implementations = lab.living_lab_projects_implementation ?? [];
+      const pushMeasuresCount = implementations.filter(
+        (impl) => impl.project?.type === "PUSH",
+      ).length;
+      const pullMeasuresCount = implementations.filter(
+        (impl) => impl.project?.type === "PULL",
+      ).length;
+
+      // Find last updated date (max of all KPI result dates and measure dates)
+      const dates: Date[] = [];
+
+      for (const result of allResults) {
+        const parsedDate = safeParseDate(
+          result.updated_at ?? result.created_at,
+        );
+        if (parsedDate) dates.push(parsedDate);
+      }
+
+      for (const impl of implementations) {
+        const updateDate = safeParseDate(impl.updated_at);
+        if (updateDate) dates.push(updateDate);
+      }
+
+      const maxDate = getMaxDate(dates);
+      const lastUpdatedAt = maxDate ? formatDateOToMonthYear(maxDate) : null;
+
+      return {
+        labId: lab.id,
+        labName: lab.name,
+        totalResultEntries,
+        kpisCoveredCount,
+        kpisGlobalCoveredCount: coveredGlobalKpi.size,
+        kpisLocalCoveredCount: coveredLocalKpi.size,
+        totalMainKpis,
+        pushMeasuresCount,
+        pullMeasuresCount,
+        lastUpdatedAt,
+      };
+    })
+    .sort((a, b) => b.totalResultEntries - a.totalResultEntries);
 }
 
 /**
@@ -217,11 +278,11 @@ export function computeLabKpiTimeline(
     "#F97316", // orange
     "#EC4899", // pink
   ];
-  
+
   return labs.map((lab, index) => {
     // Group results by year
     const yearCounts = new Map<number, number>();
-    
+
     const allResults = lab.kpi_results?.flatMap((g) => g.results ?? []) ?? [];
     for (const result of allResults) {
       const parsedDate = safeParseDate(result.date);
@@ -230,12 +291,12 @@ export function computeLabKpiTimeline(
         yearCounts.set(year, (yearCounts.get(year) ?? 0) + 1);
       }
     }
-    
+
     // Convert to sorted array of data points
     const dataPoints = Array.from(yearCounts.entries())
       .map(([year, count]) => ({ year, count }))
       .sort((a, b) => a.year - b.year);
-    
+
     return {
       labId: lab.id,
       labName: lab.name,
@@ -254,12 +315,12 @@ export function computeLabMeasuresBar(
   return labs.map((lab) => {
     const implementations = lab.living_lab_projects_implementation ?? [];
     const pushCount = implementations.filter(
-      (impl) => impl.project?.type === "PUSH"
+      (impl) => impl.project?.type === "PUSH",
     ).length;
     const pullCount = implementations.filter(
-      (impl) => impl.project?.type === "PULL"
+      (impl) => impl.project?.type === "PULL",
     ).length;
-    
+
     return {
       labName: lab.name,
       pushCount,
@@ -278,10 +339,10 @@ export function computeKpiCoverageTable(
   const mainKpis = getMainKpis(kpis);
   const parentMap = buildKpiParentMap(kpis);
   const totalLabs = labs.length;
-  
+
   // Build a map: parentKpiId -> Set of labIds that have results
   const kpiLabsMap = new Map<number, Set<number>>();
-  
+
   for (const lab of labs) {
     const allResults = lab.kpi_results?.flatMap((g) => g.results ?? []) ?? [];
     for (const result of allResults) {
@@ -294,15 +355,23 @@ export function computeKpiCoverageTable(
       }
     }
   }
-  
-  return mainKpis.map((kpi) => ({
-    kpiId: kpi.id,
-    kpiNumber: kpi.kpi_number,
-    kpiName: kpi.name,
-    kpiType: kpi.type as "GLOBAL" | "LOCAL",
-    labsWithResultsCount: kpiLabsMap.get(kpi.id)?.size ?? 0,
-    totalLabs,
-  }));
+
+  return mainKpis
+    .sort((a, b) => sortKpiNumbers(a.kpi_number, b.kpi_number))
+    .map((kpi) => ({
+      kpiId: kpi.id,
+      kpiNumber: kpi.kpi_number,
+      kpiName: kpi.name,
+      kpiType: kpi.type as "GLOBAL" | "LOCAL",
+      labsWithResultsCount: kpiLabsMap.get(kpi.id)?.size ?? 0,
+      totalLabs,
+    }));
+}
+
+function sortKpiNumbers(kpiA: string, kpiB: string) {
+  const a = kpiA?.includes(".") ? kpiA.split(".")[0] : kpiA;
+  const b = kpiB?.includes(".") ? kpiB.split(".")[0] : kpiB;
+  return Number(a) < Number(b) ? -1 : 1;
 }
 
 /**
@@ -316,7 +385,7 @@ export function computeAlerts(
   const alerts: AlertCardData[] = [];
   const mainKpis = getMainKpis(kpis);
   const parentMap = buildKpiParentMap(kpis);
-  
+
   // Labs with no KPI results
   const labsNoKpis = labs.filter((lab) => {
     const allResults = lab.kpi_results?.flatMap((g) => g.results ?? []) ?? [];
@@ -330,7 +399,7 @@ export function computeAlerts(
       items: labsNoKpis.map((l) => l.name),
     });
   }
-  
+
   // Labs with no measures
   const labsNoMeasures = labs.filter((lab) => {
     return (lab.living_lab_projects_implementation?.length ?? 0) === 0;
@@ -343,7 +412,7 @@ export function computeAlerts(
       items: labsNoMeasures.map((l) => l.name),
     });
   }
-  
+
   // KPIs with no results from any lab
   const coveredParentIds = new Set<number>();
   for (const lab of labs) {
@@ -364,7 +433,7 @@ export function computeAlerts(
       items: uncoveredKpis.map((k) => `${k.kpi_number}: ${k.name}`),
     });
   }
-  
+
   // Pending users
   const pendingUsers = users.filter((u) => u.status === "signup");
   if (pendingUsers.length > 0) {
@@ -375,6 +444,6 @@ export function computeAlerts(
       items: pendingUsers.map((u) => u.email),
     });
   }
-  
+
   return alerts;
 }

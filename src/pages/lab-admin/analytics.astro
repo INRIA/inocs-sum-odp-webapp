@@ -1,14 +1,13 @@
 ---
 /**
  * Platform Analytics Dashboard
- * 
+ *
  * Read-only page displaying platform-wide metrics for administrators.
  * All data aggregation happens server-side in Astro frontmatter.
  */
 import Layout from "../../layouts/Layout.astro";
 import ApiClient from "../../lib/api-client/ApiClient";
-import { getUrl } from "../../lib/helpers";
-import type { ILivingLabPopulated, IKpi, User } from "../../types";
+import type { ILivingLabPopulated, IKpi, User, IProject } from "../../types";
 
 // Import analytics helpers
 import {
@@ -34,6 +33,7 @@ const api = new ApiClient(Astro.request);
 let labs: ILivingLabPopulated[] = [];
 let kpis: IKpi[] = [];
 let users: User[] = [];
+let measures: IProject[] = [];
 let fetchError: string | null = null;
 let partialDataWarning: string | null = null;
 
@@ -45,29 +45,41 @@ try {
   } else {
     labs = labsResult as ILivingLabPopulated[];
   }
-  
+
   // Fetch all KPI definitions
   const kpisResult = await api.getKPIs({});
   if (!kpisResult) {
-    partialDataWarning = (partialDataWarning ?? "") + " Could not load KPI definitions.";
+    partialDataWarning =
+      (partialDataWarning ?? "") + " Could not load KPI definitions.";
   } else {
     kpis = kpisResult;
   }
-  
+
+  // Fetch all measures definitions
+  const projectsRes = await api.getMeasures();
+  if (!projectsRes) {
+    partialDataWarning =
+      (partialDataWarning ?? "") + " Could not load measures definitions.";
+  } else {
+    measures = projectsRes;
+  }
+
   // Fetch all users (null means fetch failed, empty array means zero users)
   const usersResult = await api.getUsers();
   if (usersResult === null) {
-    partialDataWarning = (partialDataWarning ?? "") + " Could not load users data.";
+    partialDataWarning =
+      (partialDataWarning ?? "") + " Could not load users data.";
   } else {
     users = usersResult;
   }
 } catch (error) {
   console.error("Error fetching analytics data:", error);
-  fetchError = error instanceof Error ? error.message : "Failed to load analytics data";
+  fetchError =
+    error instanceof Error ? error.message : "Failed to load analytics data";
 }
 
 // Compute all analytics data server-side
-const metricCards = computeMetricCards(labs, kpis, users);
+const metricCards = computeMetricCards(labs, kpis, users, measures);
 const labMetricsTable = computeLabMetricsTable(labs, kpis);
 const labKpiTimeline = computeLabKpiTimeline(labs);
 const labMeasuresBar = computeLabMeasuresBar(labs);
@@ -86,79 +98,85 @@ const alerts = computeAlerts(labs, kpis, users);
 >
   <div class="mx-auto px-4 py-8 max-w-7xl">
     <h1 class="text-3xl font-bold mb-8">Platform Analytics Dashboard</h1>
-    
-    {fetchError && (
-      <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
-        <p class="font-medium">Error loading data</p>
-        <p class="text-sm">{fetchError}</p>
-      </div>
-    )}
 
-    {partialDataWarning && !fetchError && (
-      <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded mb-6">
-        <p class="font-medium">Partial data loaded</p>
-        <p class="text-sm">{partialDataWarning} Some metrics may be incomplete.</p>
-      </div>
-    )}
+    {
+      fetchError && (
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
+          <p class="font-medium">Error loading data</p>
+          <p class="text-sm">{fetchError}</p>
+        </div>
+      )
+    }
+
+    {
+      partialDataWarning && !fetchError && (
+        <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded mb-6">
+          <p class="font-medium">Partial data loaded</p>
+          <p class="text-sm">
+            {partialDataWarning} Some metrics may be incomplete.
+          </p>
+        </div>
+      )
+    }
 
     <!-- Section 1: Summary Metric Cards (SSR-only) -->
     <section class="mb-12">
-      <h2 class="text-xl font-semibold mb-4">Platform Overview</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {metricCards.map((card) => (
-          <MetricCard data={card} />
-        ))}
+      <h4 class="font-semibold mb-4">Platform Overview</h4>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        {metricCards.map((card) => <MetricCard data={card} />)}
       </div>
     </section>
+    <div class="flex flex-row gap-1 md:gap-4">
+      <!-- Section 3: D3 Charts (client:load required for D3 DOM access) -->
+      <div class="w-2/3 grid grid-cols-1 gap-8 mb-12">
+        <!-- KPI Results Over Time Chart -->
+        <section class="bg-white rounded-lg shadow p-6">
+          <h4 class="font-semibold mb-4">KPI Results Over Time</h4>
+          <div class="h-80">
+            {
+              labKpiTimeline.length > 0 ? (
+                <D3LineChartLabKPIsOvertime data={labKpiTimeline} client:load />
+              ) : (
+                <div class="h-full flex items-center justify-center text-gray-400">
+                  <p class="text-sm">No KPI timeline data available</p>
+                </div>
+              )
+            }
+          </div>
+        </section>
+        <!-- Measures per Lab Chart -->
+        <section class="bg-white rounded-lg shadow p-6">
+          <h4 class="font-semibold mb-4">Measures by Living Lab</h4>
+          <div class="h-80">
+            {
+              labMeasuresBar.length > 0 ? (
+                <D3BarChartLabMeasures data={labMeasuresBar} client:load />
+              ) : (
+                <div class="h-full flex items-center justify-center text-gray-400">
+                  <p class="text-sm">No measures data available</p>
+                </div>
+              )
+            }
+          </div>
+        </section>
+      </div>
 
-    <!-- Section 2: Analytics Alerts (SSR-only) -->
-    {alerts.length > 0 && (
-      <section class="mb-12">
-        <h2 class="text-xl font-semibold mb-4">Alerts & Warnings</h2>
+      <!-- Section 2: Analytics Alerts (SSR-only) -->
+      <section class="w-1/3 p-1 lg:p-4 bg-white shadow rounded-lg">
+        <h4 class="font-semibold mb-4">Attention required</h4>
         <AnalyticsAlerts alerts={alerts} />
-      </section>
-    )}
-
-    <!-- Section 3: D3 Charts (client:load required for D3 DOM access) -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-      <!-- KPI Results Over Time Chart -->
-      <section class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-xl font-semibold mb-4">KPI Results Over Time</h2>
-        <div class="h-80">
-          {labKpiTimeline.length > 0 ? (
-            <D3LineChartLabKPIsOvertime data={labKpiTimeline} client:load />
-          ) : (
-            <div class="h-full flex items-center justify-center text-gray-400">
-              <p class="text-sm">No KPI timeline data available</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      <!-- Measures per Lab Chart -->
-      <section class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-xl font-semibold mb-4">Measures by Living Lab</h2>
-        <div class="h-80">
-          {labMeasuresBar.length > 0 ? (
-            <D3BarChartLabMeasures data={labMeasuresBar} client:load />
-          ) : (
-            <div class="h-full flex items-center justify-center text-gray-400">
-              <p class="text-sm">No measures data available</p>
-            </div>
-          )}
-        </div>
       </section>
     </div>
 
     <!-- Section 4: Living Lab Metrics Table (SSR-only) -->
     <section class="mb-12">
-      <h2 class="text-xl font-semibold mb-4">KPI Results by Living Lab</h2>
+      <h4 class="font-semibold mb-4">KPI Results by Living Lab</h4>
       <LivingLabMetricsTable rows={labMetricsTable} />
     </section>
 
     <!-- Section 5: KPI Coverage Table (SSR-only) -->
     <section class="mb-12">
-      <h2 class="text-xl font-semibold mb-4">KPI Definitions Summary</h2>
+      <h4 class="font-semibold mb-4">KPI Definitions Summary</h4>
       <KPICoverageTable rows={kpiCoverageTable} />
     </section>
   </div>
