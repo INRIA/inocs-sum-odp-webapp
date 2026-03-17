@@ -6,3 +6,4 @@ export * from "./living-lab";
 export * from "./impact-analysis-format";
 export * from "./colorUtils";
 export * from "./mcda-format";
+export * from "./analytics";

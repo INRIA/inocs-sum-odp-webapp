@@ -27,6 +27,8 @@ export interface IKpiResult {
   date: string;
   transport_mode_id?: number;
   transport_mode?: ITransportMode;
+  created_at?: Date | null;
+  updated_at?: Date | null;
 }
 
 export interface IKpiResultInput extends Pick<
