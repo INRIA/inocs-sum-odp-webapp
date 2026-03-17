@@ -24,6 +24,25 @@ import type {
 } from "../../components/react/Analytics/types";
 
 /**
+ * Safely parse a date string. Returns null if invalid.
+ */
+function safeParseDate(dateStr: string | null | undefined): Date | null {
+  if (!dateStr) return null;
+  const date = new Date(dateStr);
+  return isNaN(date.getTime()) ? null : date;
+}
+
+/**
+ * Get the maximum date from an array of dates.
+ * Returns null if array is empty.
+ */
+function getMaxDate(dates: Date[]): Date | null {
+  if (dates.length === 0) return null;
+  const maxTimestamp = Math.max(...dates.map((d) => d.getTime()));
+  return new Date(maxTimestamp);
+}
+
+/**
  * Filter to get only main/parent KPI definitions (those without a parent_kpi_id).
  */
 export function getMainKpis(kpis: IKpi[]): IKpi[] {
@@ -154,19 +173,19 @@ export function computeLabMetricsTable(
     const dates: Date[] = [];
     
     for (const result of allResults) {
-      if (result.date) {
-        dates.push(new Date(result.date));
-      }
+      const parsedDate = safeParseDate(result.date);
+      if (parsedDate) dates.push(parsedDate);
     }
     
     for (const impl of implementations) {
-      if (impl.start_at) dates.push(new Date(impl.start_at));
-      if (impl.updated_at) dates.push(new Date(impl.updated_at));
+      const startDate = safeParseDate(impl.start_at);
+      const updateDate = safeParseDate(impl.updated_at);
+      if (startDate) dates.push(startDate);
+      if (updateDate) dates.push(updateDate);
     }
     
-    const lastUpdatedAt = dates.length > 0
-      ? new Date(Math.max(...dates.map((d) => d.getTime()))).toISOString()
-      : null;
+    const maxDate = getMaxDate(dates);
+    const lastUpdatedAt = maxDate ? maxDate.toISOString() : null;
     
     return {
       labId: lab.id,
@@ -205,8 +224,9 @@ export function computeLabKpiTimeline(
     
     const allResults = lab.kpi_results?.flatMap((g) => g.results ?? []) ?? [];
     for (const result of allResults) {
-      if (result.date) {
-        const year = new Date(result.date).getFullYear();
+      const parsedDate = safeParseDate(result.date);
+      if (parsedDate) {
+        const year = parsedDate.getFullYear();
         yearCounts.set(year, (yearCounts.get(year) ?? 0) + 1);
       }
     }

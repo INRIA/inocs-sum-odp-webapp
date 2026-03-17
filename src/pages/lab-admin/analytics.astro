@@ -35,17 +35,32 @@ let labs: ILivingLabPopulated[] = [];
 let kpis: IKpi[] = [];
 let users: User[] = [];
 let fetchError: string | null = null;
+let partialDataWarning: string | null = null;
 
 try {
   // Fetch living labs with KPI results and measures
   const labsResult = await api.getLivingLabs();
-  labs = (labsResult as ILivingLabPopulated[]) ?? [];
+  if (!labsResult) {
+    partialDataWarning = "Could not load living labs data.";
+  } else {
+    labs = labsResult as ILivingLabPopulated[];
+  }
   
   // Fetch all KPI definitions
-  kpis = (await api.getKPIs({})) ?? [];
+  const kpisResult = await api.getKPIs({});
+  if (!kpisResult) {
+    partialDataWarning = (partialDataWarning ?? "") + " Could not load KPI definitions.";
+  } else {
+    kpis = kpisResult;
+  }
   
-  // Fetch all users
-  users = (await api.getUsers()) ?? [];
+  // Fetch all users (null means fetch failed, empty array means zero users)
+  const usersResult = await api.getUsers();
+  if (usersResult === null) {
+    partialDataWarning = (partialDataWarning ?? "") + " Could not load users data.";
+  } else {
+    users = usersResult;
+  }
 } catch (error) {
   console.error("Error fetching analytics data:", error);
   fetchError = error instanceof Error ? error.message : "Failed to load analytics data";
@@ -76,6 +91,13 @@ const alerts = computeAlerts(labs, kpis, users);
       <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
         <p class="font-medium">Error loading data</p>
         <p class="text-sm">{fetchError}</p>
+      </div>
+    )}
+
+    {partialDataWarning && !fetchError && (
+      <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded mb-6">
+        <p class="font-medium">Partial data loaded</p>
+        <p class="text-sm">{partialDataWarning} Some metrics may be incomplete.</p>
       </div>
     )}
 
