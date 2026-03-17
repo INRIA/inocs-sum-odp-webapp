@@ -62,11 +62,10 @@ tests/
 - Tailwind + Catalyst UI Kit only for styling
 
 ## Recent Changes
+- 002-admin-analytics-dashboard: Added [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
 - 001-csv-download: Added [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
 
 - 001-kpi-multi-value-input: Replace fixed before/after KPI input with dynamic multi-value list; add DefaultCollectionDate; expose `results: IKpiResult[]` from BFF
-- 001-multi-entry-kpi-charts: Added TypeScript (Astro strict preset) + React 19 islands + Astro 5, React 19, D3 7, Chart.js 4, react-chartjs-2, Tailwind 4
-- 001-mcda-custom-analysis: Added TypeScript 5 (strict mode via `astro/tsconfigs/strict`) + Astro 5 (`@astrojs/node` SSR adapter), React 19, Prisma 6, Tailwind CSS 4, Vitest 4
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
