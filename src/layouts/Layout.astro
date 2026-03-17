@@ -134,7 +134,7 @@ const footerMenuItems = [
       )
     }
     {
-      role === "editor" && (
+      ["editor", "admin"].includes(role) && (
         <SidebarMenu
           userInfo={userInfo}
           currentLivingLab={currentLivingLab}

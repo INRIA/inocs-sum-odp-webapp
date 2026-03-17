@@ -3,6 +3,8 @@
 Auto-generated from all feature plans. Last updated: 2026-02-24
 
 ## Active Technologies
+- TypeScript 5 (strict), Node.js 20, React 18 + Astro 4 (SSR), Prisma Client (MySQL), D3.js v7, `@testing-library/react`, Vitest (002-admin-analytics-dashboard)
+- MySQL (via Prisma) — constitution names PostgreSQL but production schema is MySQL (002-admin-analytics-dashboard)
 
 - **Language**: TypeScript 5.x, strict mode — no `any`, no `@ts-ignore`, no weakening of tsconfig
 - **Frontend framework**: Astro 4 (SSR) + React 18 islands
@@ -62,10 +64,8 @@ tests/
 - Tailwind + Catalyst UI Kit only for styling
 
 ## Recent Changes
-- 002-admin-analytics-dashboard: Added [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
-- 001-csv-download: Added [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
+- 002-admin-analytics-dashboard: Added Platform Analytics Dashboard with D3.js charts, React components (SSR + client:load), analytics helpers
 
-- 001-kpi-multi-value-input: Replace fixed before/after KPI input with dynamic multi-value list; add DefaultCollectionDate; expose `results: IKpiResult[]` from BFF
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->

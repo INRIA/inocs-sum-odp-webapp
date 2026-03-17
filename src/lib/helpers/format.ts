@@ -28,6 +28,10 @@ export function formatDateToMonthYear(date?: string): string {
   return d.toLocaleDateString("en-GB", { year: "numeric", month: "short" });
 }
 
+export function formatDateOToMonthYear(d: Date): string {
+  return d.toLocaleDateString("en-GB", { year: "numeric", month: "short" });
+}
+
 export function formatDate(date?: string | Date): string {
   if (!date) return "";
   const d = new Date(date);

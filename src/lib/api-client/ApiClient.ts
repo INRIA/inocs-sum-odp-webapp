@@ -308,6 +308,16 @@ export default class ApiClient {
   }
 
   /**
+   * Get users with optional status filter.
+   * Used by the analytics dashboard to count active vs pending users.
+   */
+  async getUsers(options?: { status?: string }): Promise<User[] | null> {
+    const params = new URLSearchParams();
+    if (options?.status) params.set("status", options.status);
+    return this.request<User[]>(`/users${params.toString() ? `?${params}` : ""}`);
+  }
+
+  /**
    * Download a CSV blob from the given path.
    * Does NOT reuse request<T>() because that method discards non-JSON bodies.
    * Throws ApiDownloadError on non-2xx responses.
