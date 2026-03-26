@@ -27,6 +27,7 @@ export type InfoAlertProps = {
   icon?: AlertIconVariant;
   actionText?: string;
   actionHref?: string;
+  actionNewTab?: boolean;
   onAction?: () => void;
   className?: string;
   hideIcon?: boolean;
@@ -90,6 +91,7 @@ export function InfoAlert({
   variant = "info",
   actionText,
   actionHref,
+  actionNewTab = false,
   onAction,
   className = "",
   hideIcon = false,
@@ -120,6 +122,8 @@ export function InfoAlert({
               variant="link"
               onClick={onAction}
               href={actionHref}
+              target={actionNewTab ? "_blank" : undefined}
+              rel={actionNewTab ? "noopener noreferrer" : undefined}
               className={`${v.buttonBg}`}
               text={actionText}
               defaultArrow

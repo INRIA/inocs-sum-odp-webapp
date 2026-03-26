@@ -23,57 +23,62 @@ const livinglab = await api.getLivingLab(labId, ["projects"]);
   backHref="/lab-admin"
 >
   <div class="mx-auto px-4 py-8 flex flex-col gap-8">
-    <h2>What measures is your living lab implementing ?</h2>
+    <h2>What policy measures is your living lab implementing ?</h2>
 
-    <InfoAlert title="What is a ‘measure’ ?" icon="question" variant="info">
-      <small
-        >A measure is a broad type of action that is implemented to contribute
-        to the achievement of one or more policy objectives in a SUMP, or to
-        overcome one or more identified problems. Examples range from land use,
-        infrastructure, regulation, management and service measures to
-        behavioural, information provision and pricing measures.
+    <InfoAlert
+      title="What is a policy measure ?"
+      icon="question"
+      variant="info"
+    >
+      <p>
+        A policy measure is a broad type of action that is implemented to
+        contribute to the achievement of one or more policy objectives in a
+        SUMP, or to overcome one or more identified problems. Examples range
+        from land use, infrastructure, regulation, management and service
+        measures to behavioural, information provision and pricing measures.
         <br />
         <strong
-          >In the context of the Open Data Platform, we focus on measures aiming
-          to introduce or improve the use of new shared mobility.</strong
+          >In the context of the Open Data Platform, we focus on policy measures
+          aiming to introduce or improve the use of new shared mobility with
+          public transport.</strong
         >
-      </small>
+      </p>
     </InfoAlert>
 
     <InfoAlert
-      title="What are PUSH measures ?"
+      title="What are PUSH policy measures ?"
       icon="question"
       variant="success"
     >
-      <small
-        >Measures that discourage private-car use through restrictive policies
-        or financial penalties
-      </small>
+      <p>
+        Policy measures that discourage private-car use through restrictive
+        policies or financial penalties
+      </p>
     </InfoAlert>
 
     <LivingLabMeasures
       livingLabId={labId}
       measures={measures?.filter((m) => m.type === "PUSH")}
-      title="Select the PUSH Measures to be implemented in your living lab"
+      title="Select the PUSH Policy Measures to be implemented in your living lab"
       implementedMeasures={livinglab?.living_lab_projects_implementation ?? []}
       isEditable={true}
       client:load
     />
 
     <InfoAlert
-      title="What are PULL measures ?"
+      title="What are PULL policy measures ?"
       icon="question"
       variant="success"
     >
       <small>
-        Measures that encourage users to switch to sustainable transport
+        Policy measures that encourage users to switch to sustainable transport
       </small>
     </InfoAlert>
 
     <LivingLabMeasures
       livingLabId={labId}
       measures={measures?.filter((m) => m.type === "PULL")}
-      title="Select the PULL Measures to be implemented in your living lab"
+      title="Select the PULL Policy Measures to be implemented in your living lab"
       implementedMeasures={livinglab?.living_lab_projects_implementation ?? []}
       isEditable={true}
       client:load

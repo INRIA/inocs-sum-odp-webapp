@@ -18,9 +18,10 @@ const filteredKpis = kpis.filter(
 const livingLabData = await api.getLivingLab(labId);
 const categories = await api.getCategories("KPI_SIEF");
 
-const kpiResults = livingLabData?.kpi_results?.filter((result) =>
-  filteredKpis?.some((mk) => mk.id === result.kpidefinition_id),
-) ?? [];
+const kpiResults =
+  livingLabData?.kpi_results?.filter((result) =>
+    filteredKpis?.some((mk) => mk.id === result.kpidefinition_id),
+  ) ?? [];
 ---
 
 <Layout
@@ -41,6 +42,7 @@ const kpiResults = livingLabData?.kpi_results?.filter((result) =>
       variant="success"
       actionText="See data collection plan"
       actionHref="/data/collection-plan"
+      actionNewTab={true}
     >
       <p>
         Find out how to calculate KPI values by reviewing the data collection

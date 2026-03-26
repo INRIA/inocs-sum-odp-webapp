@@ -85,7 +85,7 @@ export function LivingLabKPIsEdition({
   };
 
   return (
-    <div className="flex flex-col gap-6 mx-auto">
+    <div className="flex flex-col gap-6 mx-auto w-full xl:w-4/5">
       <DefaultCollectionDate
         value={defaultDate}
         onChange={setDefaultDate}
@@ -109,7 +109,7 @@ export function LivingLabKPIsEdition({
           arrow
           open={index === 0}
           content={
-            <Table dense className="lg:min-w-3xl max-w-5xl">
+            <Table dense className="mx-auto">
               <TableHead>
                 <TableRow>
                   <TableHeader>KPI Number</TableHeader>

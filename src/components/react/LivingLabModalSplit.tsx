@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { LivingLabTransportModeForm } from "./form/LivingLabTransportModeForm";
 import {
   type ITransportMode,
@@ -16,7 +16,7 @@ import {
   TableRow,
 } from "../react-catalyst-ui-kit";
 import { Tabs, Tooltip, type Tab } from "./ui";
-import { getKpiValueByMetricType, getYearFromDate } from "../../lib/helpers";
+import { getKpiValueByMetricType } from "../../lib/helpers";
 import { ModalSplitChart, type SplitItem } from "./KpiCards";
 
 interface Props {
@@ -49,7 +49,9 @@ export function LivingLabModalSplit({
     ),
   );
 
-  const [livingLabKpiMap] = useState<Map<string, IKpiResultGroup>>(
+  const [livingLabKpiMap, setLivingLabKpiMap] = useState<
+    Map<string, IKpiResultGroup>
+  >(
     new Map(
       kpiResults.map((resultKpi) => [
         `${resultKpi.kpidefinition_id}_${
@@ -60,11 +62,11 @@ export function LivingLabModalSplit({
     ),
   );
 
-  // compute totals per KPI id by summing all result values in the group
-  const computeTotals = () => {
-    const totals = new Map<number, number>();
+  // totals per KPI grouped by month-year — recomputed whenever results change
+  const kpiTotals = useMemo(() => {
+    const totals = new Map<number, Map<string, number>>();
     kpis.forEach((kpi) => {
-      let sum = 0;
+      const byDate = new Map<string, number>();
       Array.from(livingLabKpiMap.values())
         .filter((r) => r.kpidefinition_id === kpi.id)
         .forEach((r) => {
@@ -73,119 +75,62 @@ export function LivingLabModalSplit({
               typeof result.value === "number"
                 ? result.value
                 : Number(result.value ?? 0);
-            if (!isNaN(v)) sum += v;
+            if (isNaN(v)) return;
+            const label = result.date
+              ? new Date(result.date).toLocaleDateString("en-GB", {
+                  month: "short",
+                  year: "numeric",
+                })
+              : "—";
+            byDate.set(label, (byDate.get(label) ?? 0) + v);
           });
         });
-      totals.set(kpi.id, sum);
+      totals.set(kpi.id, byDate);
     });
     return totals;
-  };
+  }, [livingLabKpiMap, kpis]);
 
-  const [kpiTotals] = useState<Map<number, number>>(computeTotals);
-
-  const getChartValues = (kpiId: number) => {
-    const tabs: { label: string; data: SplitItem[] }[] = [];
-    // Collect all results for this KPI grouped by date year
-    const byYear = new Map<string, SplitItem[]>();
-    Array.from(livingLabKpiMap.values())
-      .filter((result) => result.kpidefinition_id === kpiId)
-      .forEach((result) => {
-        const transportModeId = result.transport_mode_id;
-        const mode = modes.find((m) => m.id === transportModeId);
-        result.results?.forEach((r) => {
-          const year = String(getYearFromDate(r.date) ?? r.date);
-          if (!byYear.has(year)) byYear.set(year, []);
-          byYear.get(year)!.push({
-            label: mode?.name || `Mode ${transportModeId}`,
-            value: r.value ?? 0,
-            color: mode?.color || "#ccc",
-          });
-        });
-      });
-    byYear.forEach((data, year) => {
-      tabs.push({
-        label: `${kpis.find((k) => k.id === kpiId)?.name} (${year})`,
-        data,
-      });
-    });
-    return tabs;
-  };
-
-  const getTabs = () => {
+  // chart tabs — one tab per KPI, all month-years shown together in the same chart
+  const chartTabs = useMemo(() => {
     const tabs: Tab[] = [];
     kpis.forEach((kpi) => {
-      const chartData = getChartValues(kpi.id);
-      if (chartData.length > 0) {
+      const byMonthYear = new Map<string, SplitItem[]>();
+      Array.from(livingLabKpiMap.values())
+        .filter((r) => r.kpidefinition_id === kpi.id)
+        .forEach((r) => {
+          const mode = modes.find((m) => m.id === r.transport_mode_id);
+          r.results?.forEach((result) => {
+            const label = result.date
+              ? new Date(result.date).toLocaleDateString("en-GB", {
+                  month: "short",
+                  year: "numeric",
+                })
+              : "—";
+            if (!byMonthYear.has(label)) byMonthYear.set(label, []);
+            byMonthYear.get(label)!.push({
+              label: mode?.name || `Mode ${r.transport_mode_id}`,
+              value: result.value ?? 0,
+              color: mode?.color || "#ccc",
+            });
+          });
+        });
+      if (byMonthYear.size > 0) {
+        const datasets = Array.from(byMonthYear.entries()).map(
+          ([monthYear, data]) => ({ label: monthYear, data }),
+        );
         tabs.push({
           id: `modal-split-${kpi.id}`,
           label: <p>{kpi.name}</p>,
-          content: <ModalSplitChart data={chartData} />,
+          content: <ModalSplitChart data={datasets} />,
         });
       }
     });
-    return <Tabs align="right" tabs={tabs}></Tabs>;
-  };
-
-  const onKpiValuesChange = (
-    kpiId: number,
-    transportModeId: number,
-    before: number | null,
-    after: number | null,
-  ) => {
-    const key = `${kpiId}_${transportModeId}`;
-    // previous entry for this KPI+mode
-    const prevEntry = livingLabKpiMap.get(key);
-
-    const prevBefore = prevEntry?.result_before?.value ?? null;
-    const prevAfter = prevEntry?.result_after?.value ?? null;
-
-    // compute deltas (treat null as 0 for totals adjustment)
-    const deltaBefore = (before ?? 0) - (prevBefore ?? 0);
-    const deltaAfter = (after ?? 0) - (prevAfter ?? 0);
-
-    setLivingLabKpiMap((prevMap) => {
-      const updatedMap = new Map(prevMap);
-      updatedMap.set(key, {
-        ...prevEntry,
-        living_lab_id: livingLabId,
-        kpidefinition_id: kpiId,
-        transport_mode_id: transportModeId,
-        result_before: {
-          id: prevEntry?.result_before?.id ?? Date.now(),
-          kpidefinition_id: kpiId,
-          living_lab_id: livingLabId,
-          transport_mode_id: transportModeId,
-          value: Number(before ?? 0),
-          date: prevEntry?.result_before?.date ?? beforeDate,
-        },
-        result_after: {
-          id: prevEntry?.result_after?.id ?? Date.now() + 1,
-          kpidefinition_id: kpiId,
-          living_lab_id: livingLabId,
-          transport_mode_id: transportModeId,
-          value: Number(after ?? 0),
-          date: prevEntry?.result_after?.date ?? afterDate ?? beforeDate,
-        },
-      });
-      return updatedMap;
-    });
-    // update totals for this KPI
-    setKpiTotals((prev) => {
-      const updated = new Map(prev);
-      const existingTotals = updated.get(kpiId) ?? {
-        before: 0,
-        after: 0,
-      };
-      existingTotals.before = (existingTotals.before ?? 0) + deltaBefore;
-      existingTotals.after = (existingTotals.after ?? 0) + deltaAfter;
-      updated.set(kpiId, existingTotals);
-      return updated;
-    });
-  };
+    return <Tabs align="right" tabs={tabs} />;
+  }, [livingLabKpiMap, kpis, modes]);
 
   return (
     <div className="bg-white shadow rounded-md flex flex-col gap-6">
-      {getTabs()}
+      {chartTabs}
       <DefaultCollectionDate value={defaultDate} onChange={setDefaultDate} />
       <div className="p-4 overflow-x-auto">
         <Table
@@ -207,15 +152,19 @@ export function LivingLabModalSplit({
                   key={kpi.id}
                   className="font-extrabold whitespace-normal break-words text-primary"
                 >
-                  <div className="flex flex-col">
+                  <div className="flex flex-col gap-1">
                     {kpi.name}
-                    <span className="text-sm font-normal text-gray-500">
-                      {!!kpiTotals.get(kpi.id) &&
-                        getKpiValueByMetricType(
-                          kpiTotals.get(kpi.id),
-                          kpi.metric,
-                        )}
-                    </span>
+                    {Array.from(kpiTotals.get(kpi.id)?.entries() ?? []).map(
+                      ([dateLabel, total]) => (
+                        <span
+                          key={dateLabel}
+                          className="text-sm font-normal text-gray-500"
+                        >
+                          {getKpiValueByMetricType(total, kpi.metric)} total —{" "}
+                          {dateLabel}
+                        </span>
+                      ),
+                    )}
                   </div>
                 </TableHeader>
               ))}
@@ -264,6 +213,17 @@ export function LivingLabModalSplit({
                           }
                           defaultDate={defaultDate}
                           changeDateAllowed={false}
+                          onChange={(newResults) => {
+                            setLivingLabKpiMap((prev) => {
+                              const updated = new Map(prev);
+                              const key = `${kpi.id}_${m.id}`;
+                              updated.set(key, {
+                                ...updated.get(key)!,
+                                results: newResults,
+                              });
+                              return updated;
+                            });
+                          }}
                         />
                       </div>
                     </TableCell>

@@ -157,7 +157,7 @@ export function TriggerDownloadCsv(props: TriggerDownloadCsvProps) {
   const label = LABEL_MAP[type];
 
   return (
-    <div className="inline-flex flex-col items-center justify-center gap-1 w-full">
+    <div className="inline-flex flex-col items-center justify-center gap-1">
       <RButton
         variant="secondary"
         size={rbuttonSize}

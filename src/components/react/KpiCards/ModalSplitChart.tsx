@@ -149,7 +149,7 @@ export function ModalSplitChart({
 
   // Doughnut view (default)
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 m-2 lg:m-4">
       {data.map((dataset, i) => (
         <div
           key={i}

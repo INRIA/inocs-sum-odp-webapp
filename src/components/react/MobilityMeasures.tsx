@@ -253,27 +253,31 @@ export function MobilityMeasures({
     <div
       className={`w-full flex flex-col gap-4 items-center my-4 mx-auto ${className}`}
     >
-      <MeasuresSection
-        heading="Push measures"
-        headingIcon={pushIcon}
-        smallText={`Push measures are restrictions designed to discourage private car use and reduce car dominance in urban environments.`}
-        paragraph={``}
-        measures={pushMeasures}
-        hideDescription={hideDescription}
-        cols={cols}
-        style={style}
-      />
+      {pushMeasures.length > 0 && (
+        <MeasuresSection
+          heading="Push measures"
+          headingIcon={pushIcon}
+          smallText={`Push measures are restrictions designed to discourage private car use and reduce car dominance in urban environments.`}
+          paragraph={``}
+          measures={pushMeasures}
+          hideDescription={hideDescription}
+          cols={cols}
+          style={style}
+        />
+      )}
 
-      <MeasuresSection
-        heading="Pull measures"
-        headingIcon={pullIcon}
-        smallText={`Pull measures are incentives and improvements that make shared mobility and public transport more attractive and accessible.`}
-        paragraph={``}
-        measures={pullMeasures}
-        hideDescription={hideDescription}
-        cols={cols}
-        style={style}
-      />
+      {pullMeasures.length > 0 && (
+        <MeasuresSection
+          heading="Pull measures"
+          headingIcon={pullIcon}
+          smallText={`Pull measures are incentives and improvements that make shared mobility and public transport more attractive and accessible.`}
+          paragraph={``}
+          measures={pullMeasures}
+          hideDescription={hideDescription}
+          cols={cols}
+          style={style}
+        />
+      )}
     </div>
   );
 }
