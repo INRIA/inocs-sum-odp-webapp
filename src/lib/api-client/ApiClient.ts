@@ -15,6 +15,7 @@ import type {
   IResource,
 } from "../../types";
 import type { ICategory } from "../../types/Category";
+import type { IGiscoSearchResult } from "../../types/Gisco";
 
 export default class ApiClient {
   private baseUrl: string;
@@ -315,6 +316,17 @@ export default class ApiClient {
     const params = new URLSearchParams();
     if (options?.status) params.set("status", options.status);
     return this.request<User[]>(`/users${params.toString() ? `?${params}` : ""}`);
+  }
+
+  async searchCities(query: string): Promise<IGiscoSearchResult[]> {
+    try {
+      const result = await this.request<IGiscoSearchResult[]>(
+        `/geocode?q=${encodeURIComponent(query)}`,
+      );
+      return result ?? [];
+    } catch {
+      return [];
+    }
   }
 
   /**

@@ -3,7 +3,9 @@ import { Input } from "../../react-catalyst-ui-kit/typescript/input";
 import { RButton } from "../ui/RButton";
 import { getUrl } from "../../../lib/helpers";
 import { MapViewer, type MarkerData } from "../MapViewer";
+import { CitySearchSelector } from "./CitySearchSelector";
 import type { ILivingLab } from "../../../types";
+import type { IGiscoSearchResult } from "../../../types/Gisco";
 import ApiClient from "../../../lib/api-client/ApiClient";
 const api = new ApiClient();
 
@@ -17,14 +19,17 @@ export default function LivingLabForm({ livingLab }: Props) {
   const [longitude, setLongitude] = useState(livingLab?.lng ?? "");
   const [radius, setRadius] = useState(`${livingLab?.radius ?? ""}`);
   const [area, setArea] = useState(`${livingLab?.area ?? ""}`);
+  const [countryCode, setCountryCode] = useState(
+    livingLab?.country_code2 ?? "",
+  );
+  const [country, setCountry] = useState(livingLab?.country ?? "");
   const [population, setPopulation] = useState(
     `${livingLab?.population ?? ""}`,
   );
   const [errorMessage, setErrorMessage] = useState("");
   const [isAreaManuallyEdited, setIsAreaManuallyEdited] = useState(false);
-  const [hasPlacedMarker, setHasPlacedMarker] = useState(
-    !!(livingLab?.lat && livingLab?.lng),
-  );
+  // In edit mode the search panel starts collapsed; in create mode it is open
+  const [showSearch, setShowSearch] = useState(!livingLab?.id);
 
   const [mapMarker, setMapMarker] = useState<MarkerData | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>([50, 10]);
@@ -37,7 +42,6 @@ export default function LivingLabForm({ livingLab }: Props) {
     const lngStr = lng.toFixed(5);
     setLatitude(latStr);
     setLongitude(lngStr);
-    setHasPlacedMarker(true);
   }
 
   function handleMarkerDrag(markerId: string, lat: number, lng: number) {
@@ -72,6 +76,14 @@ export default function LivingLabForm({ livingLab }: Props) {
     }
   }
 
+  function handleCitySelect(result: IGiscoSearchResult) {
+    setName(result.cityName);
+    setCountry(result.country);
+    setCountryCode(result.countryCode);
+    setLatitude(result.lat.toFixed(5));
+    setLongitude(result.lng.toFixed(5));
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErrorMessage("");
@@ -82,6 +94,8 @@ export default function LivingLabForm({ livingLab }: Props) {
       radius: radius ? parseFloat(radius) : 0,
       area: area ? parseInt(area, 10) : null,
       population: population ? parseInt(population, 10) : null,
+      country_code2: countryCode,
+      country,
     };
 
     try {
@@ -119,6 +133,39 @@ export default function LivingLabForm({ livingLab }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="flex flex-col lg:flex-row gap-4">
+        {/* City search panel — visible by default on create, collapsed on edit */}
+        {showSearch && (
+          <div className="lg:w-1/3 h-[400px] overflow-auto">
+            <CitySearchSelector onSelect={handleCitySelect} />
+          </div>
+        )}
+
+        {/* Map — takes full width when search is collapsed */}
+        <div className="flex-1 h-[400px] overflow-hidden">
+          {/* City Search Helper toggle (shown in edit mode as overlay button) */}
+          {!!livingLab?.id && (
+            <RButton
+              type="button"
+              variant="secondary"
+              onClick={() => setShowSearch((v) => !v)}
+              aria-expanded={showSearch}
+            >
+              🔍 {showSearch ? "Hide Search" : "Edit with City Search Helper"}
+            </RButton>
+          )}
+          <MapViewer
+            key={mapKey}
+            markers={mapMarker ? [mapMarker] : []}
+            center={mapCenter}
+            zoom={10}
+            className="h-full w-full z-0"
+            onMapClick={handleMapClick}
+            onMarkerDrag={handleMarkerDrag}
+          />
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label htmlFor="name" className="block text-sm font-medium mb-1">
@@ -132,21 +179,22 @@ export default function LivingLabForm({ livingLab }: Props) {
             required
           />
         </div>
-
         <div>
-          <label htmlFor="population" className="block text-sm font-medium mb-1">
-            Estimated Population
+          <label htmlFor="lat" className="block text-sm font-medium mb-1">
+            Country
           </label>
-          <Input
-            id="population"
-            type="number"
-            value={population}
-            onChange={(e: any) => setPopulation(e.target.value)}
-            placeholder="e.g. 500000"
-          />
+          <Input id="country" type="text" value={country} disabled />
         </div>
         <div className="hidden">
-          <label htmlFor="lat" className="block text-sm font-medium mb-1">Latitude</label>
+          <label htmlFor="lat" className="block text-sm font-medium mb-1">
+            Country code
+          </label>
+          <Input id="country_code2" type="text" value={countryCode} />
+        </div>
+        <div className="hidden">
+          <label htmlFor="lat" className="block text-sm font-medium mb-1">
+            Latitude
+          </label>
           <Input
             id="lat"
             type="number"
@@ -158,7 +206,9 @@ export default function LivingLabForm({ livingLab }: Props) {
         </div>
 
         <div className="hidden">
-          <label htmlFor="lng" className="block text-sm font-medium mb-1">Longitude</label>
+          <label htmlFor="lng" className="block text-sm font-medium mb-1">
+            Longitude
+          </label>
           <Input
             id="lng"
             type="number"
@@ -182,7 +232,9 @@ export default function LivingLabForm({ livingLab }: Props) {
           />
         </div>
         <div>
-          <label htmlFor="area" className="block text-sm font-medium mb-1">Area</label>
+          <label htmlFor="area" className="block text-sm font-medium mb-1">
+            Area
+          </label>
           <Input
             id="area"
             value={area}
@@ -203,88 +255,20 @@ export default function LivingLabForm({ livingLab }: Props) {
             </RButton>
           )}
         </div>
-      </div>
-
-      <div className="flex flex-col lg:flex-row gap-4">
-        {/* Instruction panel */}
-        <div className="lg:w-1/3 bg-gray-50 rounded shadow p-4 text-sm space-y-4">
-          <p className="font-semibold text-gray-800">
-            How to set your Living Lab location
-          </p>
-          <div className="flex gap-2">
-            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-info text-white flex items-center justify-center text-xs font-bold">
-              1
-            </span>
-            <div>
-              <p className="font-medium text-gray-700">
-                Place your lab on the map
-              </p>
-              <p className="text-gray-500 text-xs mt-0.5">
-                Click anywhere on the map to drop a marker. The latitude and
-                longitude fields will update automatically.
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-info text-white flex items-center justify-center text-xs font-bold">
-              2
-            </span>
-            <div>
-              <p className="font-medium text-gray-700">
-                Fine-tune the position
-              </p>
-              <p className="text-gray-500 text-xs mt-0.5">
-                Drag the marker to adjust the location precisely.
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-info text-white flex items-center justify-center text-xs font-bold">
-              3
-            </span>
-            <div>
-              <p className="font-medium text-gray-700">
-                Set the activity radius
-              </p>
-              <p className="text-gray-500 text-xs mt-0.5">
-                Enter the estimated radius (in km) of your lab's intervention
-                area. The circle on the map will update in real time.
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-info text-white flex items-center justify-center text-xs font-bold">
-              4
-            </span>
-            <div>
-              <p className="font-medium text-gray-700">Review the area</p>
-              <p className="text-gray-500 text-xs mt-0.5">
-                The area is automatically calculated from the radius. You can
-                edit it manually if needed.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Map with hint overlay */}
-        <div className="h-[400px] lg:h-auto relative lg:flex-1 rounded shadow overflow-hidden lg:w-2/3">
-          <MapViewer
-            key={mapKey}
-            markers={mapMarker ? [mapMarker] : []}
-            center={mapCenter}
-            zoom={9}
-            className="h-full w-full z-0"
-            onMapClick={handleMapClick}
-            onMarkerDrag={handleMarkerDrag}
+        <div>
+          <label
+            htmlFor="population"
+            className="block text-sm font-medium mb-1"
+          >
+            Estimated Population
+          </label>
+          <Input
+            id="population"
+            type="number"
+            value={population}
+            onChange={(e: any) => setPopulation(e.target.value)}
+            placeholder="e.g. 500000"
           />
-          {!hasPlacedMarker && (
-            <div
-              className="absolute bottom-3 right-3 z-10 bg-white/90 text-xs rounded px-2 py-1 shadow pointer-events-none"
-              aria-label="Click to place marker, drag to move"
-            >
-              🖱 Click to place · Drag to move
-            </div>
-          )}
         </div>
       </div>
 

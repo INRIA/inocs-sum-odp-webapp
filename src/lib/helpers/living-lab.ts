@@ -477,6 +477,12 @@ export function getModalSplitCardMetrics(
   value: string;
   details: { label: string; value: string }[];
 } {
+  if (modalSplitResultGroups.length === 0) {
+    return {
+      value: "No values recorded",
+      details: [],
+    };
+  }
   const totalResults = modalSplitResultGroups.reduce(
     (acc, group) => acc + (group.results?.length ?? 0),
     0,
@@ -492,13 +498,6 @@ export function getModalSplitCardMetrics(
     minYear !== null && maxYear !== null
       ? `${totalResults} values from ${minYear} to ${maxYear}`
       : `${totalResults} values`;
-
-  if (modalSplitResultGroups.length === 0) {
-    return {
-      value: valueLabel,
-      details: [],
-    };
-  }
 
   const transportModeTypeById = new Map(
     transportModes.map((mode) => [mode.id, mode.type]),
@@ -597,6 +596,13 @@ export function getKpiResultsCardMetrics(
   const allResults = filteredGroups.flatMap((group) => group.results ?? []);
   const totalResults = allResults.length;
 
+  if (totalResults === 0) {
+    return {
+      value: "No values recorded",
+      details: [],
+    };
+  }
+
   const valuesByYear = new Map<number, number>();
   allResults.forEach((result) => {
     const year = new Date(result.date).getFullYear();
@@ -650,7 +656,7 @@ export function getMeasuresProgress(measures: IProject[]): {
   progress?: number;
   details: { label: string; value: string }[];
 } {
-  if (measures.length === 0) return { value: "0", progress: 0, details: [] };
+  if (measures.length === 0) return { value: "No measures recorded", progress: 0, details: [] };
 
   return {
     value: `${measures.length} Measures`,

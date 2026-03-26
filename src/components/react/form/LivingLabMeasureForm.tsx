@@ -155,14 +155,13 @@ export function LivingLabMeasureForm({
             ) : null}
           </div>
 
-          <div className="min-w-0 flex-1 gap-y-2 text-center">
+            <div className="min-w-0 flex-1 gap-y-2 text-center">
             <span aria-hidden="true" className="absolute inset-0" />
-            <h5 className="font-bold">{measure.name}</h5>
-            <br />
+            <h5 className="font-bold text-sm">{measure.name}</h5>
             {measure.description ? (
-              <p className="mt-0 leading-0 ">{measure.description}</p>
+              <p className="mt-1 text-xs leading-relaxed line-clamp-3">{measure.description}</p>
             ) : null}
-          </div>
+            </div>
         </div>
       </div>
       {/* Inline subform */}

@@ -50,6 +50,31 @@ vi.mock("../MapViewer", () => {
   };
 });
 
+vi.mock("./CitySearchSelector", () => ({
+  CitySearchSelector: function MockCitySearchSelector({ onSelect }: any) {
+    return (
+      <div data-testid="mock-city-search-selector">
+        <button
+          type="button"
+          onClick={() =>
+            onSelect({
+              cityName: "Lille",
+              postalCode: "59000",
+              country: "France",
+              countryCode: "FRA",
+              lat: 50.62919,
+              lng: 3.05726,
+              label: "Lille, Hauts-de-France, France",
+            })
+          }
+        >
+          mock-city-select
+        </button>
+      </div>
+    );
+  },
+}));
+
 const getInput = (...labels: RegExp[]) => {
   for (const label of labels) {
     const el = screen.queryByLabelText(label);
@@ -121,19 +146,6 @@ describe("LivingLabForm", () => {
     expect(
       screen.getByRole("button", { name: /recalculate from radius/i }),
     ).toBeInTheDocument();
-  });
-
-  it("Given no marker, When mounted, Then map placement hint is visible", () => {
-    render(<LivingLabForm />);
-    expect(screen.getByText(/click to place/i)).toBeInTheDocument();
-  });
-
-  it("Given map click happens, When marker is placed, Then map hint is hidden", async () => {
-    render(<LivingLabForm />);
-    await userEvent.click(
-      screen.getByRole("button", { name: /mock-map-click/i }),
-    );
-    expect(screen.queryByText(/click to place/i)).not.toBeInTheDocument();
   });
 
   it("Given initial render, When not submitted, Then no error message is displayed", () => {
@@ -302,5 +314,129 @@ describe("LivingLabForm", () => {
     render(<LivingLabForm livingLab={baseLab as any} />);
     const cancelLink = screen.getByRole("link", { name: /cancel/i });
     expect(cancelLink).toHaveAttribute("href", "/lab-admin");
+  });
+
+  // --- CitySearchSelector integration ---
+
+  it("Given city selector, When a city is selected, Then name field is filled with cityName", async () => {
+    render(<LivingLabForm />);
+    await userEvent.click(
+      screen.getByRole("button", { name: /mock-city-select/i }),
+    );
+    const name = getInput(/living lab or city name/i, /name/i);
+    expect(name.value).toBe("Lille");
+  });
+
+  it("Given city selector, When a city is selected, Then country field is filled with country", async () => {
+    render(<LivingLabForm />);
+    await userEvent.click(
+      screen.getByRole("button", { name: /mock-city-select/i }),
+    );
+    const country = document.getElementById("country") as HTMLInputElement;
+    expect(country.value).toBe("France");
+  });
+
+  it("Given city selector, When a city is selected, Then hidden countryCode is updated", async () => {
+    render(<LivingLabForm />);
+    await userEvent.click(
+      screen.getByRole("button", { name: /mock-city-select/i }),
+    );
+    const countryCode = document.getElementById(
+      "country_code2",
+    ) as HTMLInputElement;
+    expect(countryCode.value).toBe("FRA");
+  });
+
+  it("Given city selector, When a city is selected, Then lat/lng hidden fields are updated", async () => {
+    render(<LivingLabForm />);
+    await userEvent.click(
+      screen.getByRole("button", { name: /mock-city-select/i }),
+    );
+    const lat = document.getElementById("lat") as HTMLInputElement;
+    const lng = document.getElementById("lng") as HTMLInputElement;
+    expect(lat.value).toBe("50.62919");
+    expect(lng.value).toBe("3.05726");
+  });
+
+  it("Given city selector, When a city is selected, Then map placement hint is hidden", async () => {
+    render(<LivingLabForm />);
+    await userEvent.click(
+      screen.getByRole("button", { name: /mock-city-select/i }),
+    );
+    expect(screen.queryByText(/click to place/i)).not.toBeInTheDocument();
+  });
+
+  it("Given city selector, When a city is selected, Then submit payload includes country and countryCode", async () => {
+    createLivingLabMock.mockResolvedValueOnce({ id: 1 });
+    render(<LivingLabForm />);
+
+    await userEvent.click(
+      screen.getByRole("button", { name: /mock-city-select/i }),
+    );
+
+    const form = screen
+      .getByRole("button", { name: /save/i })
+      .closest("form") as HTMLFormElement;
+    fireEvent.submit(form);
+
+    await waitFor(() => {
+      expect(createLivingLabMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          country: "France",
+          country_code2: "FRA",
+          lat: "50.62919",
+          lng: "3.05726",
+        }),
+      );
+    });
+  });
+
+  // --- Search panel visibility (edit vs create mode) ---
+
+  it("Given create mode (no id), When mounted, Then CitySearchSelector is visible", () => {
+    render(<LivingLabForm />);
+    expect(screen.getByTestId("mock-city-search-selector")).toBeInTheDocument();
+  });
+
+  it("Given edit mode (has id), When mounted, Then CitySearchSelector is collapsed", () => {
+    render(<LivingLabForm livingLab={{ ...baseLab, id: 99 } as any} />);
+    expect(
+      screen.queryByTestId("mock-city-search-selector"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("Given edit mode, When mounted, Then 'City Search Helper' button is visible", () => {
+    render(<LivingLabForm livingLab={{ ...baseLab, id: 99 } as any} />);
+    expect(
+      screen.getByRole("button", { name: /city search helper/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("Given edit mode, When 'City Search Helper' is clicked, Then CitySearchSelector appears", async () => {
+    render(<LivingLabForm livingLab={{ ...baseLab, id: 99 } as any} />);
+    await userEvent.click(
+      screen.getByRole("button", { name: /city search helper/i }),
+    );
+    expect(screen.getByTestId("mock-city-search-selector")).toBeInTheDocument();
+  });
+
+  it("Given edit mode with search open, When 'Hide Search' is clicked, Then CitySearchSelector collapses", async () => {
+    render(<LivingLabForm livingLab={{ ...baseLab, id: 99 } as any} />);
+    await userEvent.click(
+      screen.getByRole("button", { name: /city search helper/i }),
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: /hide search/i }),
+    );
+    expect(
+      screen.queryByTestId("mock-city-search-selector"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("Given create mode, Then 'City Search Helper' toggle button is not shown", () => {
+    render(<LivingLabForm />);
+    expect(
+      screen.queryByRole("button", { name: /city search helper/i }),
+    ).not.toBeInTheDocument();
   });
 });

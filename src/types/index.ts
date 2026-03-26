@@ -9,3 +9,4 @@ export * from "./JobRun";
 export * from "./ImpactAnalysis";
 export * from "./Items";
 export * from "./CsvExport";
+export * from "./Gisco";
