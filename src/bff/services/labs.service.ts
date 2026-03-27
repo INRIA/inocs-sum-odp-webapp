@@ -161,12 +161,19 @@ export class LabService {
         throw new Error("Invalid lab ID");
       if (!projectId || isNaN(Number(projectId)) || Number(projectId) <= 0)
         throw new Error("Invalid project ID");
-      // You may want to validate implementationData here
+
+      // Convert date-only string (YYYY-MM-DD) to a Date object for Prisma DateTime fields
+      const sanitizedData = { ...implementationData };
+      if (sanitizedData.start_at && typeof sanitizedData.start_at === "string") {
+        const parsed = new Date(sanitizedData.start_at);
+        if (isNaN(parsed.getTime())) throw new Error("Invalid start_at date");
+        sanitizedData.start_at = parsed;
+      }
 
       return await this.labRepository.upsertProjectImplementation(
         labId,
         projectId,
-        implementationData
+        sanitizedData
       );
     } catch (error) {
       console.error("Error in upsertLabProjectImplementation service:", error);
