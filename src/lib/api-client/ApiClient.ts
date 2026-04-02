@@ -13,6 +13,7 @@ import type {
   IJobRun,
   CreateLabInput,
   IResource,
+  CustomMCDAPayload,
 } from "../../types";
 import type { ICategory } from "../../types/Category";
 import type { IGiscoSearchResult } from "../../types/Gisco";
@@ -279,15 +280,14 @@ export default class ApiClient {
     return this.request<IJobRun[]>(`/job-runs${params ? `?${params}` : ""}`);
   }
 
-  async triggerJobRun(
-    name: string,
-    goalsWeights: Record<string, number>,
+  async triggerFullCustomMCDA(
+    payload: CustomMCDAPayload,
   ): Promise<IJobRun | null> {
     return this.request<IJobRun>(
       `/job-runs`,
       {
         method: "POST",
-        body: JSON.stringify({ name, goals_weights: goalsWeights }),
+        body: JSON.stringify(payload),
       },
       true,
     );

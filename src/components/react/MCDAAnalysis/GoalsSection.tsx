@@ -1,25 +1,41 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { InformationCircleIcon } from "@heroicons/react/20/solid";
 import type { MCDAGoal } from "../../../types";
 import { GoalWeightBar } from "./GoalWeightBar";
+import { DirectionToggle } from "./DirectionToggle";
 import { RButton } from "../ui";
 
 interface GoalsSectionProps {
   goals: MCDAGoal[];
   editable?: boolean;
   onWeightsUpdate?: (updatedGoals: MCDAGoal[]) => void;
+  showDirectionToggle?: boolean;
 }
 
 export const GoalsSection: React.FC<GoalsSectionProps> = ({
   goals,
   editable = false,
   onWeightsUpdate,
+  showDirectionToggle = false,
 }) => {
   // Local state for edited weights
   const [editedGoals, setEditedGoals] = useState<MCDAGoal[]>(goals);
   const [hasChanges, setHasChanges] = useState(false);
 
+  // Baseline goals for reset — updated only on external goal changes (e.g. stakeholder switch)
+  const originalGoalsRef = useRef<MCDAGoal[]>(goals);
+  // Flag to suppress useEffect reset when the goals prop change is our own echo-back
+  const isOwnUpdateRef = useRef(false);
+
   // Sync with props when goals change
   useEffect(() => {
+    if (isOwnUpdateRef.current) {
+      // This update is the parent echoing back our own onWeightsUpdate call — ignore it
+      isOwnUpdateRef.current = false;
+      return;
+    }
+    // Genuinely external change (e.g. stakeholder switch) — reset to new baseline
+    originalGoalsRef.current = goals;
     setEditedGoals(goals);
     setHasChanges(false);
   }, [goals]);
@@ -44,15 +60,26 @@ export const GoalsSection: React.FC<GoalsSectionProps> = ({
       return;
     }
 
+    isOwnUpdateRef.current = true;
     setEditedGoals(updatedGoals);
     setHasChanges(true);
     onWeightsUpdate?.(updatedGoals);
   };
 
   const handleReset = () => {
-    setEditedGoals(goals);
+    isOwnUpdateRef.current = true;
+    setEditedGoals(originalGoalsRef.current);
     setHasChanges(false);
-    onWeightsUpdate?.(goals);
+    onWeightsUpdate?.(originalGoalsRef.current);
+  };
+
+  const handleDirectionChange = (index: number, direction: "max" | "min") => {
+    const updatedGoals = [...editedGoals];
+    updatedGoals[index] = { ...updatedGoals[index], direction };
+    isOwnUpdateRef.current = true;
+    setEditedGoals(updatedGoals);
+    setHasChanges(true);
+    onWeightsUpdate?.(updatedGoals);
   };
 
   const currentSum = editedGoals.reduce((acc, goal) => acc + goal.weight, 0);
@@ -63,10 +90,8 @@ export const GoalsSection: React.FC<GoalsSectionProps> = ({
 
   if (!displayGoals || displayGoals.length === 0) {
     return (
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-        <p className="text-gray-700">
-          No goals available for this perspective.
-        </p>
+      <div className="bg-warning/10 border border-warning/30 rounded-lg p-6 text-center">
+        <p className="text-dark">No goals available for this perspective.</p>
       </div>
     );
   }
@@ -77,7 +102,7 @@ export const GoalsSection: React.FC<GoalsSectionProps> = ({
       <div>
         {/* Edit Mode Controls */}
         {editable && (
-          <div className="mt-3 pt-2 border-t border-gray-200">
+          <div className="mt-3 pt-2 border-t border-light">
             <div className="flex flex-col items-end justify-between gap-4">
               {/* Sum Display */}
               <div className="flex items-center gap-3">
@@ -101,33 +126,35 @@ export const GoalsSection: React.FC<GoalsSectionProps> = ({
         )}
         <div className="space-y-2">
           {displayGoals.map((goal, index) => (
-            <GoalWeightBar
-              key={`${goal.name}-${index}`}
-              goal={goal}
-              editable={editable}
-              value={goal.weight}
-              onChange={(newValue) => handleWeightChange(index, newValue)}
-            />
+            <div key={`${goal.name}-${index}`} className="space-y-2">
+              <GoalWeightBar
+                goal={goal}
+                editable={editable}
+                value={goal.weight}
+                onChange={(newValue) => handleWeightChange(index, newValue)}
+                directionControl={
+                  editable && showDirectionToggle ? (
+                    <DirectionToggle
+                      direction={goal.direction || "max"}
+                      onChange={(direction) =>
+                        handleDirectionChange(index, direction)
+                      }
+                    />
+                  ) : undefined
+                }
+              />
+            </div>
           ))}
         </div>
       </div>
       {/* Read-only info */}
       {!editable && (
-        <div className="text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-lg p-4">
+        <div className="text-sm text-dark bg-light/40 border border-light rounded-lg p-4">
           <div className="flex gap-2">
-            <svg
-              className="w-5 h-5 text-gray-500 shrink-0"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+            <InformationCircleIcon
+              className="w-5 h-5 text-dark shrink-0"
+              aria-hidden="true"
+            />
             <p>
               These weights represent the relative importance of each goal from
               the selected stakeholder's perspective. Total:{" "}

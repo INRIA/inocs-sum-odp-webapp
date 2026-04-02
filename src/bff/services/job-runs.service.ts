@@ -1,5 +1,5 @@
 import { JobRunsRepository } from "../repositories/job-runs.repository";
-import type { IJobRun } from "../../types";
+import type { CustomMCDAAlternative, IJobRun, MCDAGoal } from "../../types";
 
 /** Error thrown when JOB_RUN_IMPACT_ASSESS_ROUTE env var is not configured */
 export class ConfigurationError extends Error {
@@ -71,6 +71,58 @@ export class JobRunsService {
     if (!res.ok) {
       console.error(
         `Upstream error in triggerCustomAnalysis: external API responded with status ${res.status}`,
+      );
+      throw new UpstreamError(
+        `External analysis API returned status ${res.status}`,
+      );
+    }
+
+    const data = (await res.json()) as IJobRun;
+    return data;
+  }
+
+  async triggerFullCustomAnalysis(
+    name: string,
+    goals: MCDAGoal[],
+    alternatives: CustomMCDAAlternative[],
+  ): Promise<IJobRun> {
+    const route = process.env.JOB_RUN_IMPACT_ASSESS_ROUTE;// route is for /mcda_analysis_custom
+    if (!route) {
+      const err = new ConfigurationError(
+        "JOB_RUN_IMPACT_ASSESS_ROUTE environment variable is not set",
+      );
+      console.error(
+        "Configuration error in triggerFullCustomAnalysis:",
+        err.message,
+      );
+      throw err;
+    }
+
+    let res: Response;
+    try {
+      res = await fetch(route, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Internal-API-Key": process.env.JOB_RUN_IMPACT_API_KEY,
+        },
+        body: JSON.stringify({
+          params: {
+            perspective: "user_personalized",
+            name,
+            goals,
+            alternatives,
+          },
+        }),
+      });
+    } catch (networkError) {
+      console.error("Network error in triggerFullCustomAnalysis:", networkError);
+      throw new UpstreamError("External analysis API is unreachable");
+    }
+
+    if (!res.ok) {
+      console.error(
+        `Upstream error in triggerFullCustomAnalysis: external API responded with status ${res.status}`,
       );
       throw new UpstreamError(
         `External analysis API returned status ${res.status}`,

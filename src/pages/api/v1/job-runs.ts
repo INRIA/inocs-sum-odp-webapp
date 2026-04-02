@@ -5,6 +5,7 @@ import {
   UpstreamError,
 } from "../../../bff/services/job-runs.service";
 import ApiResponse from "../../../types/ApiResponse";
+import type { CustomMCDAAlternative, MCDAGoal } from "../../../types";
 
 const jobRunsService = new JobRunsService();
 
@@ -76,6 +77,104 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   // 3. Validate goals_weights
+  const goals = payload.goals;
+  const alternatives = payload.alternatives;
+
+  const hasFullCustomPayload = Array.isArray(goals) && Array.isArray(alternatives);
+
+  if (hasFullCustomPayload) {
+    const validGoals = goals as MCDAGoal[];
+    const validAlternatives = alternatives as CustomMCDAAlternative[];
+
+    if (validGoals.length === 0) {
+      return new ApiResponse(
+        { error: "At least one goal is required", status: 400 },
+        { status: 400 },
+      );
+    }
+
+    const hasPositiveWeight = validGoals.some(
+      (goal) => typeof goal?.weight === "number" && goal.weight > 0,
+    );
+
+    if (!hasPositiveWeight) {
+      return new ApiResponse(
+        {
+          error: "At least one goal must have a non-zero weight",
+          status: 400,
+        },
+        { status: 400 },
+      );
+    }
+
+    if (validAlternatives.length === 0) {
+      return new ApiResponse(
+        { error: "At least one alternative is required", status: 400 },
+        { status: 400 },
+      );
+    }
+
+    const goalNames = new Set(validGoals.map((goal) => goal.name));
+    const isMatrixValid = validAlternatives.every((alternative) => {
+      if (!alternative || typeof alternative.name !== "string" || !alternative.name.trim()) {
+        return false;
+      }
+      if (
+        typeof alternative.values !== "object" ||
+        alternative.values === null ||
+        Array.isArray(alternative.values)
+      ) {
+        return false;
+      }
+
+      return Array.from(goalNames).every((goalName) => {
+        const value = alternative.values[goalName];
+        return typeof value === "number" && Number.isFinite(value);
+      });
+    });
+
+    if (!isMatrixValid) {
+      return new ApiResponse(
+        {
+          error:
+            "Each alternative must define a numeric score for every selected goal",
+          status: 400,
+        },
+        { status: 400 },
+      );
+    }
+
+    try {
+      const result = await jobRunsService.triggerFullCustomAnalysis(
+        name.trim(),
+        validGoals,
+        validAlternatives,
+      );
+      return new ApiResponse({ data: result });
+    } catch (err) {
+      if (err instanceof ConfigurationError) {
+        return new ApiResponse(
+          { error: "Internal Server Error", status: 500 },
+          { status: 500 },
+        );
+      }
+      if (err instanceof UpstreamError) {
+        return new ApiResponse(
+          {
+            error: "Analysis service is unavailable. Please try again later.",
+            status: 502,
+          },
+          { status: 502 },
+        );
+      }
+      console.error("Unexpected error in POST /api/v1/job-runs:", err);
+      return new ApiResponse(
+        { error: "Internal Server Error", status: 500 },
+        { status: 500 },
+      );
+    }
+  }
+
   const goalsWeights = payload.goals_weights;
   if (
     typeof goalsWeights !== "object" ||
@@ -110,7 +209,7 @@ export const POST: APIRoute = async ({ request }) => {
     );
   }
 
-  // 4. Call service
+  // 4. Call service for legacy goals_weights payload
   try {
     const result = await jobRunsService.triggerCustomAnalysis(
       name.trim(),

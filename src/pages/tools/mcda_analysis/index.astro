@@ -1,15 +1,331 @@
 ---
-import MCDAADashboardPage from "../../../components/MCDAADashboardPage.astro";
-const { perspective } = Astro.params;
+import Layout from "../../../layouts/Layout.astro";
+import { CustomAnalysisForm } from "../../../components/react/MCDAAnalysis";
+import {
+  InfoSection,
+  FeaturesGrid,
+  HowToUseAccordion,
+  MethodologyAccordion,
+  AnalysisFeatureCard,
+} from "../../../components/AnalysisPageSections";
+import ApiClient from "../../../lib/api-client/ApiClient";
+import type {
+  MCDAGoal,
+  McdaKeyInsightCard,
+  McdaResults,
+  OutrankingGraphData,
+} from "../../../types";
+import {
+  buildMcdaKeyInsights,
+  buildOutrankingGraphData,
+  formatDateWithTime,
+  MCDA_PERSPECTIVES,
+  MCDA_DEFAULT_GOALS,
+  CUSTOM_MCDA_DEFAULT_GOALS,
+  CUSTOM_MCDA_DEFAULT_ACTIVITIES,
+  resolveMcdaPerspectiveLabel,
+} from "../../../lib/helpers";
+import {
+  FAQAccordion,
+  InfoAlert,
+  InfoCard,
+  RButton,
+} from "../../../components/react";
+
+// Define badge icon SVG
+const badgeIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8.25v-4.5m0 0a2.25 2.25 0 100 4.5m0-4.5a2.25 2.25 0 110 4.5m-9 6h18m-3-12.75h.008v.008h-.008v-.008zm0 0h.008v.008h-.008v-.008zm0 0h.008v.008h-.008v-.008zm0 6h.008v.008h-.008v-.008zm0 0h.008v.008h-.008v-.008zm0 0h.008v.008h-.008v-.008zm0 6h.008v.008h-.008v-.008zm0 0h.008v.008h-.008v-.008zm0 0h.008v.008h-.008v-.008z"></path>
+</svg>`;
+
+// Define features for MCDA grid
+const mcdaFeatures = [
+  {
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0 0 12 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52 2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 0 1-2.031.352 5.988 5.988 0 0 1-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971Zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0 2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 0 1-2.031.352 5.989 5.989 0 0 1-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971Z" />
+</svg>
+`,
+    title: "Compare Business Activities",
+    description:
+      "Explore regulatory, economic, and informative policy options ranked by effectiveness",
+  },
+  {
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
+</svg>
+`,
+    title: "Based on Expert Knowledge",
+    description:
+      "Drawing on surveys from city planners, transport operators, and researchers across multiple countries",
+  },
+  {
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M6 13.5V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m12-3V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m-6-9V3.75m0 3.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 9.75V10.5" />
+</svg>
+`,
+    title: "Customizable to Your Priorities",
+    description:
+      "Choose pre-defined stakeholder perspectives or adjust goal weights to match your city's unique priorities",
+  },
+];
+
+// Define how-to-use steps for MCDA
+const howToUseSteps = [
+  {
+    number: 1,
+    title: "Select analysis approach & data source",
+    description:
+      'Choose your data source: "Expert Survey Based" for insights from city planners and transport operators, "KPI & Policy Data" for real-world performance metrics, or "Custom Data" to input your own criteria and weights.',
+  },
+  {
+    number: 2,
+    title: "Configure stakeholder perspective",
+    description:
+      "Choose the perspective viewpoint you want the goals to reflect, or configure your own goals. Options include: Regulatory Authorities (policy makers), Public Transport Operators, New Shared Mobility Operators",
+  },
+  {
+    number: 3,
+    title: "Analyze rankings & visualization",
+    description:
+      "Examine the PROMETHEE scores, rankings, and GAIA plane visualization to understand trade-offs and recommendations.",
+  },
+  {
+    number: 4,
+    title: "Compare and decide",
+    description:
+      "Compare results to see how different perspectives and weightings impact the rankings. Adjust your inputs and re-run the analysis to explore different scenarios and find the best fit for your city's goals.",
+  },
+];
+
+const analysisApproaches = [
+  {
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+</svg>`,
+    title: "Expert Survey Based",
+    badges: [{ label: "Qualitative Data", color: "info" as const }],
+    features: [
+      "Based on expert opinion surveys and stakeholder interviews",
+      "Incorporates professional judgment and experience",
+      "Ideal when quantitative data is limited",
+    ],
+    bestFor: "Early Planning",
+    cta: {
+      label: "Launch Expert Version",
+      href: "/tools/mcda_analysis/mcda_analysis_qualitative/regulatory",
+      variant: "primary" as const,
+    },
+  },
+  {
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+</svg>`,
+    title: "KPI & Policy Data",
+    badges: [{ label: "Quantitative Data", color: "info" as const }],
+    features: [
+      "Real implemented policy measures in living labs",
+      "Actual performance metrics KPIs from living labs",
+      "Evidence-based decision making",
+    ],
+    bestFor: "Policy Review",
+    cta: {
+      label: "Launch KPI Version",
+      href: "#",
+      variant: "primary" as const,
+    },
+  },
+  {
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
+</svg>`,
+    title: "Custom Data",
+    badges: [{ label: "Your personalized data", color: "info" as const }],
+    features: [
+      "Interactive interface for custom criteria",
+      "Define your own weights and preferences",
+      "Real-time sensitivity analysis",
+    ],
+    bestFor: "Custom Analysis | Comparative Analysis",
+    cta: {
+      label: "Launch Custom Version",
+      href: "/tools/mcda_analysis/user_personalized",
+      variant: "primary" as const,
+    },
+  },
+];
+
+const methodologyQuestions = [
+  {
+    question: "What is PROMETHEE?",
+    answer: `PROMETHEE (Preference Ranking Organisation METHod for Enrichment
+              Evaluations) is a Multi-Criteria Decision Analysis (MCDA) method
+              used to evaluate and rank alternatives when multiple, and sometimes conflicting, criteria must be considered simultaneously.
+              It handles both quantitative data (e.g. costs, travel times) and qualitative
+              factors (e.g. environmental impact, social acceptability), making it
+              well-suited for complex decisions like urban transport policy evaluation.
+              It also incorporates the diverse perspectives of multiple stakeholders
+              (citizens, businesses, public authorities) by building preference relations
+              between alternatives based on how each group values the criteria.`,
+  },
+  {
+    question: "What is GAIA?",
+    answer: `GAIA (Graphical Analysis for Interactive Assistance) is the
+              visual, interactive companion to PROMETHEE. It displays evaluation
+              results graphically on a GAIA plane, mapping both the policy
+              alternatives and the evaluation criteria together. This visual
+              representation helps stakeholders (regardless of their technical
+              background) better understand the analysis, communicate results,
+              and identify trade-offs and areas where preferences converge or
+              conflict.`,
+  },
+  {
+    question: "How to read the PROMETHEE-GAIA results?",
+    answer: `PROMETHEE-GAIA results combine two complementary outputs: PROMETHEE and GAIA.
+              Together, they allow users to quickly identify the strongest
+              policy options, understand key trade-offs, and assess the overall
+              robustness and consensus behind the recommended solutions.`,
+  },
+];
 ---
 
-<MCDAADashboardPage
-  perspective={perspective}
-  enableCustomAnalysis={false}
+<Layout
+  role="visitor"
   breadcrumbs={[
     { label: "Home", href: "/" },
     { label: "Tools" },
-    { label: "MCDA Analysis" },
+    { label: "MCDA Analysis", href: "/tools/mcda_analysis" },
   ]}
   backHref="/"
-/>
+>
+  <div class="mx-auto px-1 py-8">
+    <section class="mx-auto px-1 py-8 gap-y-8 flex flex-col">
+      <!-- Info Section H1 -->
+      <InfoSection
+        badgeIcon={badgeIcon}
+        badgeText="Decision Support Tool"
+        title="Find the Right Policy Measures for Sustainable Shared Mobility in Your City"
+        highlightedText="Policy Measures for Sustainable Shared Mobility"
+        description="Evidence-based decision support using PROMETHEE-GAIA multi-criteria analysis and expert insights from cities across Europe"
+      />
+
+      <!-- Features Grid -->
+      <FeaturesGrid features={mcdaFeatures} />
+
+      <div class="flex flex-row justify-center gap-4">
+        <RButton variant="secondary" href="#how-to">
+          About the methodology
+        </RButton>
+        <RButton variant="primary" href="#choose-approach">
+          Start your analysis
+        </RButton>
+      </div>
+    </section>
+
+    <section id="choose-approach">
+      <div class="mx-auto px-1 py-12 border-t border-gray-200">
+        <div class="text-center mb-10">
+          <h2 class="text-gray-900">How to start your analysis?</h2>
+          <p class="text-gray-500 max-w-2xl mx-auto mt-3">
+            4 simple steps to get started with your MCDA analysis. Follow the
+            guide below.
+          </p>
+        </div>
+        <!-- How to Use Guide -->
+        <HowToUseAccordion
+          title="How to start your analysis?"
+          subtitle="4 simple steps to get started"
+          steps={howToUseSteps}
+          defaultOpen={true}
+          hideSummary
+        />
+      </div>
+      <div class="mx-auto px-1 py-12 border-t border-gray-200">
+        <div class="text-center mb-10">
+          <h2 class="text-gray-900">
+            Choose Your Analysis Approach & Data Source
+          </h2>
+          <p class="text-gray-500 max-w-2xl mx-auto mt-3">
+            Select the version that best fits your data availability and
+            analysis needs. Each version provides comprehensive insights using
+            the PROMETHEE GAIA methodology.
+          </p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {
+            analysisApproaches.map((approach) => (
+              <AnalysisFeatureCard {...approach} />
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <section
+      id="how-to"
+      class="mx-auto px-1 py-8 gap-y-0 flex flex-col border-t border-gray-200"
+    >
+      <div class="text-center mb-10">
+        <h2 class="text-gray-900">Understanding the Methodology</h2>
+      </div>
+      <!-- Methodology -->
+      <MethodologyAccordion
+        title="PROMETHEE-GAIA Multi-Criteria Analysis"
+        subtitle="Multi-criteria decision analysis approach with PROMETHEE and GAIA visualization"
+        content=""
+      >
+        <div class="grid grid-cols-1 gap-3 mt-2">
+          <FAQAccordion questions={methodologyQuestions} client:load />
+          <InfoAlert title="Pro tip for interpretation" variant="success">
+            <p>
+              Compare results across different perspectives to identify measures
+              that work well for multiple stakeholders.
+            </p>
+          </InfoAlert>
+        </div>
+      </MethodologyAccordion>
+
+      <MethodologyAccordion
+        title="How to interpret the results ?"
+        subtitle="Understanding Multi-Criteria Analysis outputs and model accuracy"
+        content=""
+      >
+        <p class="mb-4">
+          PROMETHEE-GAIA results combine two complementary outputs that work
+          together to support decision-making. PROMETHEE produces a ranked order
+          of the transport policy alternatives, reflecting how each city's
+          interventions perform across all weighted criteria and stakeholder
+          perspectives. A higher rank indicates a policy that better satisfies
+          the overall set of criteria as valued by the stakeholders involved.
+          The GAIA plane then brings a visual dimension to these rankings,
+          mapping both the policy alternatives and the evaluation criteria onto
+          a two-dimensional graph. On this plane, criteria pointing in similar
+          directions indicate aligned objectives, while criteria pointing in
+          opposite directions reveal trade-offs. Policies positioned close to a
+          criterion's axis perform well on that specific criterion. A decision
+          axis summarizes the overall PROMETHEE ranking direction, helping users
+          quickly identify the most globally preferred alternatives.
+        </p>
+        <p class="mb-6">Together, these two outputs allow users to:</p>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <InfoCard
+            title="Rank Alternatives"
+            description="Compare transport policies based on their overall performance across all criteria and stakeholder groups"
+            showIcon={false}
+            textAlign="center"
+          />
+          <InfoCard
+            title="Identify Trade-offs"
+            description="Spot tensions between competing objectives (e.g. cost reduction vs. environmental impact) that cannot be simultaneously optimized"
+            showIcon={false}
+            textAlign="center"
+          />
+          <InfoCard
+            title="Explore Consensus"
+            description="Identify areas where different stakeholders' preferences align, supporting more inclusive and robust decision-making"
+            showIcon={false}
+            textAlign="center"
+          />
+        </div>
+      </MethodologyAccordion>
+    </section>
+  </div>
+</Layout>

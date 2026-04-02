@@ -20,6 +20,8 @@ export interface IJobRun {
 export interface IJobRunInputData {
   kpi_groups?: IKpiGroup[];
   goals?: MCDAGoal[];
+  alternatives?: CustomMCDAAlternative[];
+  perspectives?: { labels: Record<string, string>};
   kpis: IKpiDefinition[];
   living_labs: ILivingLab[];
   params?: {
@@ -53,6 +55,18 @@ export interface IJobRunError {
 export interface MCDAGoal {
   name: string;
   weight: number;
+  direction?: "max" | "min";
+}
+
+export interface CustomMCDAAlternative {
+  name: string;
+  values: Record<string, number>;
+}
+
+export interface CustomMCDAPayload {
+  name: string;
+  goals: MCDAGoal[];
+  alternatives: CustomMCDAAlternative[];
 }
 
 export interface McdaPreferenceMatrix {

@@ -1,12 +1,5 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import { MCDADashboard } from "./react/MCDAAnalysis";
-import {
-  InfoSection,
-  FeaturesGrid,
-  HowToUseAccordion,
-  MethodologyAccordion,
-} from "./AnalysisPageSections";
+import { CustomAnalysisForm, MCDADashboard } from "./react/MCDAAnalysis";
 import ApiClient from "../lib/api-client/ApiClient";
 import type {
   MCDAGoal,
@@ -19,329 +12,69 @@ import {
   buildOutrankingGraphData,
   formatDateWithTime,
   MCDA_PERSPECTIVES,
-  MCDA_DEFAULT_GOALS,
   resolveMcdaPerspectiveLabel,
 } from "../lib/helpers";
-import { FAQAccordion, InfoAlert, InfoCard, RButton } from "./react";
 
-const {
-  perspective,
-  breadcrumbs,
-  backHref,
-  enableCustomAnalysis,
-  name,
-  jobId,
-} = Astro.props;
+const { perspective, name, jobId } = Astro.props;
 const api = new ApiClient(Astro.request);
 
-let pageBreadcrumbs = breadcrumbs ?? [];
 let formattedDate: string | null = null;
 let goals: MCDAGoal[] = [];
 let mcdaResults: McdaResults | undefined = undefined;
 let outrankingGraphData: OutrankingGraphData | undefined = undefined;
 let mcdaKeyInsights: McdaKeyInsightCard[] = [];
 let resultsTitle = name ?? "MCDA Analysis Results";
+let perspectives = MCDA_PERSPECTIVES;
 
-if (perspective === "user_personalized" && !jobId) {
-  goals = MCDA_DEFAULT_GOALS;
-} else if (perspective) {
-  try {
-    resultsTitle = resolveMcdaPerspectiveLabel(perspective, MCDA_PERSPECTIVES);
-    const latestRun = jobId
-      ? await api.getJobRunById(jobId)
-      : await api.getLatestJobRun(`mcda_analysis_qualitative_${perspective}`);
+try {
+  const latestRun = jobId
+    ? await api.getJobRunById(jobId)
+    : await api.getLatestJobRun(`mcda_analysis_qualitative_${perspective}`);
 
-    if (latestRun) {
-      formattedDate = formatDateWithTime(latestRun.created_at);
-      goals = latestRun.input_data?.goals || [];
-      mcdaResults = latestRun.output_data?.mcda_results;
-      outrankingGraphData = buildOutrankingGraphData(mcdaResults);
-      mcdaKeyInsights = buildMcdaKeyInsights(mcdaResults);
-    }
-  } catch (error) {
-    console.error("Error fetching job run data:", error);
+  if (latestRun) {
+    perspectives = latestRun.input_data?.perspectives?.labels ?? {
+      user_personalized: "User Personalized",
+    };
+    console.log("perspectives from API", perspectives);
+    resultsTitle = resolveMcdaPerspectiveLabel(perspective, perspectives);
+    formattedDate = formatDateWithTime(latestRun.created_at);
+    goals = latestRun.input_data?.goals || [];
+    mcdaResults = latestRun.output_data?.mcda_results;
+    outrankingGraphData = buildOutrankingGraphData(mcdaResults);
+    mcdaKeyInsights = buildMcdaKeyInsights(mcdaResults);
   }
+} catch (error) {
+  console.error("Error fetching job run data:", error);
 }
-pageBreadcrumbs.push({
-  label: resultsTitle,
-});
-// Define badge icon SVG
-const badgeIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8.25v-4.5m0 0a2.25 2.25 0 100 4.5m0-4.5a2.25 2.25 0 110 4.5m-9 6h18m-3-12.75h.008v.008h-.008v-.008zm0 0h.008v.008h-.008v-.008zm0 0h.008v.008h-.008v-.008zm0 6h.008v.008h-.008v-.008zm0 0h.008v.008h-.008v-.008zm0 0h.008v.008h-.008v-.008zm0 6h.008v.008h-.008v-.008zm0 0h.008v.008h-.008v-.008zm0 0h.008v.008h-.008v-.008z"></path>
-</svg>`;
-
-// Define features for MCDA grid
-const mcdaFeatures = [
-  {
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-  <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0 0 12 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52 2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 0 1-2.031.352 5.988 5.988 0 0 1-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971Zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0 2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 0 1-2.031.352 5.989 5.989 0 0 1-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971Z" />
-</svg>
-`,
-    title: "Compare Business Activities",
-    description:
-      "Explore regulatory, economic, and informative policy options ranked by effectiveness",
-  },
-  {
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-  <path stroke-linecap="round" stroke-linejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
-</svg>
-`,
-    title: "Based on Expert Knowledge",
-    description:
-      "Drawing on surveys from city planners, transport operators, and researchers across multiple countries",
-  },
-  {
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-  <path stroke-linecap="round" stroke-linejoin="round" d="M6 13.5V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m12-3V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m-6-9V3.75m0 3.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 9.75V10.5" />
-</svg>
-`,
-    title: "Customizable to Your Priorities",
-    description:
-      "Choose pre-defined stakeholder perspectives or adjust goal weights to match your city's unique priorities",
-  },
-];
-
-// Define how-to-use steps for MCDA
-const howToUseSteps = [
-  {
-    number: 1,
-    title: "Select a stakeholder perspective",
-    description:
-      'Choose the stakeholder group (e.g., "Municipality", "Finance") whose viewpoint you want the ranking to reflect. You can also customize weights for a tailored analysis.',
-  },
-  {
-    number: 2,
-    title: "Review or define analysis parameters",
-    description:
-      "Set criteria weights and thresholds to customize the multi-criteria analysis according to priorities and constraints.",
-  },
-  {
-    number: 3,
-    title: "Review rankings & visualization",
-    description:
-      "Examine the PROMETHEE scores, rankings, and GAIA plane visualization to understand trade-offs and recommendations.",
-  },
-];
-
-const methodologyQuestions = [
-  {
-    question: "What is PROMETHEE?",
-    answer: `PROMETHEE (Preference Ranking Organisation METHod for Enrichment
-              Evaluations) is a Multi-Criteria Decision Analysis (MCDA) method
-              used to evaluate and rank alternatives when multiple, and sometimes conflicting, criteria must be considered simultaneously.
-              It handles both quantitative data (e.g. costs, travel times) and qualitative
-              factors (e.g. environmental impact, social acceptability), making it
-              well-suited for complex decisions like urban transport policy evaluation.
-              It also incorporates the diverse perspectives of multiple stakeholders
-              (citizens, businesses, public authorities) by building preference relations
-              between alternatives based on how each group values the criteria.`,
-  },
-  {
-    question: "What is GAIA?",
-    answer: `GAIA (Graphical Analysis for Interactive Assistance) is the
-              visual, interactive companion to PROMETHEE. It displays evaluation
-              results graphically on a GAIA plane, mapping both the policy
-              alternatives and the evaluation criteria together. This visual
-              representation helps stakeholders (regardless of their technical
-              background) better understand the analysis, communicate results,
-              and identify trade-offs and areas where preferences converge or
-              conflict.`,
-  },
-  {
-    question: "How to read the PROMETHEE-GAIA results?",
-    answer: `PROMETHEE-GAIA results combine two complementary outputs: PROMETHEE and GAIA.
-              Together, they allow users to quickly identify the strongest
-              policy options, understand key trade-offs, and assess the overall
-              robustness and consensus behind the recommended solutions.`,
-  },
-];
 ---
 
-<Layout role="visitor" breadcrumbs={pageBreadcrumbs} backHref={backHref}>
-  <div class="mx-auto px-1 py-8">
-    <section class="mx-auto px-1 py-8 gap-y-8 flex flex-col">
-      <!-- Info Section -->
-      <InfoSection
-        badgeIcon={badgeIcon}
-        badgeText="Decision Support Tool"
-        title="Find the Right Policy Measures for Sustainable Shared Mobility in Your City"
-        highlightedText="Policy Measures for Sustainable Shared Mobility"
-        description="Evidence-based decision support using PROMETHEE-GAIA multi-criteria analysis and expert insights from cities across Europe"
-      />
+<div id="results" class="mx-auto px-1 space-y-4">
+  <h2 class="text-2xl font-bold text-gray-900 mb-3 text-center">
+    {resultsTitle}
+    {
+      name && (
+        <>
+          <br />
+          {name}
+        </>
+      )
+    }
+  </h2>
 
-      <!-- Features Grid -->
-      <FeaturesGrid features={mcdaFeatures} />
-
-      <div class="flex flex-row justify-center gap-4">
-        <RButton variant="secondary" href="#how-to">
-          Learn how it works
-        </RButton>
-        <RButton variant="primary" href="#mcda-results">
-          Start your analysis
-        </RButton>
-      </div>
-    </section>
-
-    <section
-      id="how-to"
-      class="mx-auto px-1 py-8 gap-y-0 flex flex-col border-t border-gray-200"
-    >
-      <!-- How to Use Guide -->
-      <HowToUseAccordion
-        title="How to use this tool ?"
-        subtitle="3 simple steps to get started"
-        steps={howToUseSteps}
-      />
-
-      <!-- Methodology -->
-      <MethodologyAccordion
-        title="Understanding the methodology"
-        subtitle="Multi-criteria decision analysis approach with PROMETHEE and GAIA visualization"
-        content=""
-      >
-        <div class="grid grid-cols-1 gap-3 mt-2">
-          <FAQAccordion questions={methodologyQuestions} client:load />
-          <InfoAlert title="Pro tip for interpretation" variant="success">
-            <p>
-              Compare results across different perspectives to identify measures
-              that work well for multiple stakeholders.
-            </p>
-          </InfoAlert>
-        </div>
-      </MethodologyAccordion>
-
-      <MethodologyAccordion
-        title="Data Collection & Expert Surveys"
-        subtitle="What data is this analysis based on?"
-        content=""
-      >
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
-          <InfoCard
-            title="2025-2026"
-            description="Survey period"
-            showIcon={false}
-            textAlign="center"
-          />
-          <InfoCard
-            title="24"
-            description="Experts participated in the survey"
-            showIcon={false}
-            textAlign="center"
-          />
-          <InfoCard
-            title="9"
-            description="Cities represented in the expert survey"
-            showIcon={false}
-            textAlign="center"
-          />
-          <InfoCard
-            title="10"
-            description="Business activities evaluated in the analysis"
-            showIcon={false}
-            textAlign="center"
-          />
-          <div class="col-span-2 lg:col-span-3">
-            <p>
-              The data used for this analysis was collected through expert
-              surveys. The participants included :
-              <ul class="list-disc list-inside my-2">
-                <li class="text-sm">New Shared Mobility provider</li>
-                <li class="text-sm">Public transport operators</li>
-                <li class="text-sm">Regulatory authorities</li>
-              </ul>
-            </p>
-            <p>
-              The survey is focused on understanding the effectiveness of
-              different policy measures for sustainable shared mobility
-              (identified in Business Activities), as perceived by these experts
-              based on their experience and knowledge of their respective
-              cities. The analysis is based on the responses collected from
-              these surveys, which were conducted between 2025 and 2026.
-            </p>
-          </div>
-        </div>
-      </MethodologyAccordion>
-
-      <MethodologyAccordion
-        title="How to interpret the results ?"
-        subtitle="Understanding Multi-Criteria Analysis outputs and model accuracy"
-        content=""
-      >
-        <p class="mb-4">
-          PROMETHEE-GAIA results combine two complementary outputs that work
-          together to support decision-making. PROMETHEE produces a ranked order
-          of the transport policy alternatives, reflecting how each city's
-          interventions perform across all weighted criteria and stakeholder
-          perspectives. A higher rank indicates a policy that better satisfies
-          the overall set of criteria as valued by the stakeholders involved.
-          The GAIA plane then brings a visual dimension to these rankings,
-          mapping both the policy alternatives and the evaluation criteria onto
-          a two-dimensional graph. On this plane, criteria pointing in similar
-          directions indicate aligned objectives, while criteria pointing in
-          opposite directions reveal trade-offs. Policies positioned close to a
-          criterion's axis perform well on that specific criterion. A decision
-          axis summarizes the overall PROMETHEE ranking direction, helping users
-          quickly identify the most globally preferred alternatives.
-        </p>
-        <p class="mb-6">Together, these two outputs allow users to:</p>
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <InfoCard
-            title="Rank Alternatives"
-            description="Compare transport policies based on their overall performance across all criteria and stakeholder groups"
-            showIcon={false}
-            textAlign="center"
-          />
-          <InfoCard
-            title="Identify Trade-offs"
-            description="Spot tensions between competing objectives (e.g. cost reduction vs. environmental impact) that cannot be simultaneously optimized"
-            showIcon={false}
-            textAlign="center"
-          />
-          <InfoCard
-            title="Explore Consensus"
-            description="Identify areas where different stakeholders' preferences align, supporting more inclusive and robust decision-making"
-            showIcon={false}
-            textAlign="center"
-          />
-        </div>
-      </MethodologyAccordion>
-    </section>
-
-    <!-- Dashboard Section -->
-    <div
-      id="results"
-      class="mx-auto px-1 py-8 border-t border-gray-200 mt-12 space-y-4"
-    >
-      <h2 class="text-2xl font-bold text-gray-900 mb-3 text-center">
-        {resultsTitle}
-        {
-          name && (
-            <>
-              <br />
-              {name}
-            </>
-          )
-        }
-      </h2>
-
-      {
-        formattedDate && (
-          <p class="text-sm text-gray-500 text-center">
-            Results were updated on {formattedDate}
-          </p>
-        )
-      }
-      <MCDADashboard
-        perspectives={MCDA_PERSPECTIVES}
-        selectedPerspective={perspective}
-        goals={goals}
-        mcdaResults={mcdaResults}
-        outrankingGraphData={outrankingGraphData}
-        mcdaKeyInsights={mcdaKeyInsights}
-        enableCustomAnalysis={enableCustomAnalysis === true &&
-          perspective === "user_personalized"}
-        client:load
-      />
-    </div>
-  </div>
-</Layout>
+  {
+    formattedDate && (
+      <p class="text-sm text-gray-500 text-center">
+        Results were updated on {formattedDate}
+      </p>
+    )
+  }
+  <MCDADashboard
+    perspectives={perspectives}
+    selectedPerspective={perspective}
+    goals={goals}
+    mcdaResults={mcdaResults}
+    outrankingGraphData={outrankingGraphData}
+    mcdaKeyInsights={mcdaKeyInsights}
+    client:load
+  />
+</div>

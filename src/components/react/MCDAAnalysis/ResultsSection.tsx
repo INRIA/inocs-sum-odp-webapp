@@ -43,7 +43,7 @@ export const ResultsSection: React.FC<ResultsSectionProps> = ({
   const hasGaiaData = gaiaAlternatives.length > 0 && gaiaCriteria.length > 0;
   const isPersonalizedAnalysis =
     typeof window !== "undefined" &&
-    window.location.pathname.includes("/mcda_analysis/user_personalized/");
+    window.location.pathname.includes("user_personalized");
 
   // Convert to sorted entries
   const flowEntries = Object.entries(netFlows).map(([key, value]) => ({

@@ -9,4 +9,7 @@ export { D3McdaNetFlowsChart } from "./D3McdaNetFlowsChart";
 export { D3McdaGaiaPlane } from "./D3McdaGaiaPlane";
 export { D3McdaNetworkChart } from "./D3McdaNetworkChart";
 export { CustomAnalysisForm } from "./CustomAnalysisForm";
+export { DirectionToggle } from "./DirectionToggle";
+export { ChipSelector } from "./ChipSelector";
+export { ScoreMatrix } from "./ScoreMatrix";
 export { JobResultStatus } from "./JobResultStatus";

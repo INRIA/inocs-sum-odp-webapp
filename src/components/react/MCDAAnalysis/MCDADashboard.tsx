@@ -8,7 +8,6 @@ import type {
 } from "../../../types";
 import { ResultsSection } from "./ResultsSection";
 import { GoalsSection } from "./GoalsSection";
-import { CustomAnalysisForm } from "./CustomAnalysisForm";
 import { AnalysisSectionDivider, CardFilter } from "../ui";
 import { PageNavigation } from "../ui/PageNavigation";
 
@@ -25,7 +24,8 @@ interface MCDADashboardProps {
 }
 
 type PerspectiveGroup = {
-  id: string | number;
+  id: number;
+  slug: string;
   name: string;
   kpis: IKpiDefinition[];
 };
@@ -37,31 +37,38 @@ export const MCDADashboard: React.FC<MCDADashboardProps> = ({
   mcdaResults,
   outrankingGraphData,
   mcdaKeyInsights,
-  enableCustomAnalysis = false,
 }) => {
   const [isConfigDrawerOpen, setIsConfigDrawerOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigationSections = [
     { id: "how-to", label: "Information about the tool" },
     { id: "mcda-results", label: "MCDA results and insights" },
   ];
   // Initialize with first group or empty
   const perspectivesGroups: PerspectiveGroup[] = perspectives
-    ? Object.entries(perspectives).map(([key, name]) => ({
-        id: key,
+    ? Object.entries(perspectives).map(([key, name], index) => ({
+        id: index + 1,
+        slug: key,
         name,
         kpis: [],
       }))
     : [];
+console.log('perspectivesGroups', perspectives, perspectivesGroups);
+  const selectedPerspectiveId = perspectivesGroups.find(
+    (group) => group.slug === selectedPerspective,
+  )?.id;
 
   const selectedGroup = perspectivesGroups.find(
-    (group) => group.id === selectedPerspective,
+    (group) => group.id === selectedPerspectiveId,
   );
 
-  const onGroupSelectRedirectToPerspective = (groupId: string | number) => {
-    const groupIdStr = String(groupId);
+  const onGroupSelectRedirectToPerspective = (groupId: number) => {
+    const selectedPerspectiveGroup = perspectivesGroups.find(
+      (group) => group.id === groupId,
+    );
+    if (!selectedPerspectiveGroup) return;
+
     // Redirect to the same page with the selected perspective
-    const newUrl = `/tools/mcda_analysis/${groupIdStr}#results`;
+    const newUrl = `/tools/mcda_analysis/mcda_analysis_qualitative/${selectedPerspectiveGroup.slug}#results`;
     window.location.href = newUrl;
   };
 
@@ -76,7 +83,7 @@ export const MCDADashboard: React.FC<MCDADashboardProps> = ({
         />
         <CardFilter
           groups={perspectivesGroups}
-          selectedGroupId={selectedPerspective}
+          selectedGroupId={selectedPerspectiveId}
           onGroupSelect={onGroupSelectRedirectToPerspective}
         />
       </section>
@@ -88,9 +95,7 @@ export const MCDADashboard: React.FC<MCDADashboardProps> = ({
           // subtitle="Observe the goals and their priorities"
           description="How important each goal is for your selected perspective"
         />
-        {enableCustomAnalysis ? (
-          <CustomAnalysisForm goals={goals} onLoadingChange={setIsSubmitting} />
-        ) : selectedPerspective ? (
+        {selectedPerspective ? (
           <GoalsSection goals={goals} editable={false} />
         ) : (
           <p className="text-gray-600 mt-4">
@@ -157,37 +162,7 @@ export const MCDADashboard: React.FC<MCDADashboardProps> = ({
             // subtitle="View analysis outcomes"
             description="Review the analysis outcomes and recommendations"
           />
-          {isSubmitting ? (
-            <div className="animate-pulse rounded-lg border border-gray-200 bg-white p-8 flex flex-col items-center gap-4">
-              <svg
-                className="h-10 w-10 animate-spin text-blue-500"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                aria-label="Loading analysis results"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                />
-              </svg>
-              <div className="space-y-3 w-full">
-                <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto" />
-                <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto" />
-                <div className="h-32 bg-gray-200 rounded w-full" />
-              </div>
-              <p className="text-sm text-gray-500">Submitting your analysis…</p>
-            </div>
-          ) : selectedPerspective && mcdaResults ? (
+          {selectedPerspective && mcdaResults ? (
             <ResultsSection
               selectedGroup={selectedGroup}
               mcdaResults={mcdaResults}

@@ -5,17 +5,17 @@ import { JobRunsService } from "../../../../bff/services/job-runs.service";
 import { JobStatus } from "../../../../types/JobRun";
 import type {
   IJobRun,
+  CustomMCDAAlternative,
   MCDAGoal,
   McdaResults,
-  OutrankingGraphData,
-  McdaKeyInsightCard,
 } from "../../../../types";
-import {
-  buildOutrankingGraphData,
-  buildMcdaKeyInsights,
-  formatDateWithTime,
-} from "../../../../lib/helpers";
+import { formatDateWithTime } from "../../../../lib/helpers";
 import MCDAADashboardPage from "../../../../components/MCDAADashboardPage.astro";
+import {
+  InfoSection,
+  MethodologyAccordion,
+} from "../../../../components/AnalysisPageSections";
+import { InfoCard, RButton } from "../../../../components/react";
 
 const { id } = Astro.params;
 
@@ -48,28 +48,144 @@ const completedAt: string | null = jobRun?.completed_at
   ? formatDateWithTime(jobRun.completed_at)
   : null;
 
-// Build dashboard data for SUCCESS status
-let goals: MCDAGoal[] = [];
-let mcdaResults: McdaResults | undefined = undefined;
-let outrankingGraphData: OutrankingGraphData | undefined = undefined;
-let mcdaKeyInsights: McdaKeyInsightCard[] = [];
+const goals: MCDAGoal[] = jobRun?.input_data?.goals ?? [];
+const alternatives: CustomMCDAAlternative[] =
+  jobRun?.input_data?.alternatives ?? [];
+const mcdaResults: McdaResults | undefined = jobRun?.output_data?.mcda_results;
 
-if (jobRun?.status === JobStatus.SUCCESS) {
-  goals = jobRun.input_data?.goals ?? [];
-  mcdaResults = jobRun.output_data?.mcda_results;
-  outrankingGraphData = buildOutrankingGraphData(mcdaResults);
-  mcdaKeyInsights = buildMcdaKeyInsights(mcdaResults);
-}
+const normalizedTopGoals = [...goals]
+  .filter((goal) => Number.isFinite(goal.weight))
+  .sort((a, b) => b.weight - a.weight)
+  .slice(0, 3);
+
+const formatWeightLabel = (weight: number): string => {
+  const percent = weight <= 1 ? weight * 100 : weight;
+  return `${Math.round(percent)}%`;
+};
+
+const topGoalsWithWeights = normalizedTopGoals.map(
+  (goal) => `${goal.name} (${formatWeightLabel(goal.weight)})`,
+);
+const topGoalsSummary =
+  topGoalsWithWeights.length > 0 ? topGoalsWithWeights.join(", ") : "N/A";
+
+const businessActivitiesCount =
+  alternatives.length > 0
+    ? alternatives.length
+    : (mcdaResults?.ranking?.length ?? 0);
+
+const gaiaQualityRaw = mcdaResults?.gaia_quality;
+const gaiaQualityLabel =
+  typeof gaiaQualityRaw === "number"
+    ? `${Math.round((gaiaQualityRaw <= 1 ? gaiaQualityRaw * 100 : gaiaQualityRaw) * 10) / 10}%`
+    : "N/A";
+
+const dataSourceSection = {
+  accordion: {
+    title: "Your Analysis Setup & Data",
+    subtitle:
+      "This result is generated from the goals, priorities, and business activity scores you provided.",
+    content: "",
+    defaultOpen: true,
+  },
+  ctaButton: {
+    href: "/tools/mcda_analysis",
+    label: "Change approach",
+  },
+  infoCards: [
+    {
+      title: String(goals.length),
+      description: "Goals defined for this analysis",
+    },
+    {
+      title: String(businessActivitiesCount),
+      description: "Business activities evaluated",
+    },
+    {
+      title: String(topGoalsWithWeights[0] ?? "N/A"),
+      description: "Top prioritized goal",
+    },
+    {
+      title: gaiaQualityLabel,
+      description: "GAIA plane quality",
+    },
+  ],
+  participantsIntro: "Highest-priority goals in your configuration:",
+  participants:
+    topGoalsWithWeights.length > 0
+      ? topGoalsWithWeights
+      : ["No prioritized goals available for this job."],
+  details: `This personalized MCDA result uses your own inputs: ${goals.length} goals and ${businessActivitiesCount} business activities. PROMETHEE-GAIA compares each activity across your weighted goals to produce rankings and trade-off insights.${
+    completedAt ? ` Analysis completed on ${completedAt}.` : ""
+  } The GAIA plane quality indicates how well the 2D GAIA view represents the full decision model.`,
+};
 ---
 
-{
-  /* Not found state: no valid format, fetch error, or jobRun === null */
-  (!isValidIdFormat ||
-    fetchError ||
-    (isValidIdFormat && !fetchError && jobRun === null)) && (
-    <Layout title="Job Not Found — MCDA Analysis">
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Tools" },
+    { label: "MCDA Analysis", href: "/tools/mcda_analysis" },
+  ]}
+  backHref="/tools/mcda_analysis"
+>
+  <InfoSection
+    title="Multi-Criteria Decision Analysis (MCDA) results for Your Personalized Data"
+    highlightedText="Your Personalized Data"
+    description="Decision support using PROMETHEE-GAIA multi-criteria analysis, based on your own insights and preferences. "
+  />
+  <section class="mx-auto px-1 py-8 gap-y-0 max-w-7xl">
+    <MethodologyAccordion
+      title={dataSourceSection.accordion.title}
+      subtitle={dataSourceSection.accordion.subtitle}
+      content={dataSourceSection.accordion.content}
+      defaultOpen={dataSourceSection.accordion.defaultOpen}
+      variant="info"
+    >
+      <div slot="cta" class="flex flex-row justify-center">
+        <RButton
+          variant="primary"
+          href={dataSourceSection.ctaButton.href}
+          size="xs"
+        >
+          {dataSourceSection.ctaButton.label}
+        </RButton>
+      </div>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+        {
+          dataSourceSection.infoCards.map((card) => (
+            <InfoCard
+              title={card.title}
+              description={card.description}
+              showIcon={false}
+              textAlign="center"
+            />
+          ))
+        }
+        <div class="col-span-2 lg:col-span-4">
+          <p>
+            {dataSourceSection.participantsIntro}
+            <ul class="list-disc list-inside my-2">
+              {
+                dataSourceSection.participants.map((participant) => (
+                  <li class="text-sm">{participant}</li>
+                ))
+              }
+            </ul>
+          </p>
+          <p>{dataSourceSection.details}</p>
+        </div>
+      </div>
+    </MethodologyAccordion>
+  </section>
+  {
+    /* Not found state: no valid format, fetch error, or jobRun === null */
+    (!isValidIdFormat ||
+      fetchError ||
+      (isValidIdFormat && !fetchError && jobRun === null)) && (
       <div class="mx-auto max-w-2xl px-4 py-16 text-center">
-        <h1 class="text-2xl font-bold text-gray-900">Analysis Not Found</h1>
+        <h2 class="text-2xl font-bold text-gray-900">Analysis Not Found</h2>
         <p class="mt-4 text-gray-600">
           No analysis job could be found for the requested ID.
         </p>
@@ -80,30 +196,33 @@ if (jobRun?.status === JobStatus.SUCCESS) {
           Back to MCDA Analysis
         </a>
       </div>
-    </Layout>
-  )
-}
+    )
+  }
 
-{
-  jobRun?.status === JobStatus.SUCCESS && (
-    <MCDAADashboardPage
-      perspective="user_personalized"
-      enableCustomAnalysis={true}
-      name={analysisName ?? "Custom Analysis"}
-      jobId={id}
-      breadcrumbs={[
-        { label: "Home", href: "/" },
-        { label: "Tools" },
-        { label: "MCDA Analysis", href: "/tools/mcda_analysis" },
-      ]}
-      backHref="/tools/mcda_analysis"
-    />
-  )
-}
+  {
+    jobRun?.status === JobStatus.SUCCESS && (
+      <div class="mx-auto px-1 py-8">
+        <MCDAADashboardPage
+          perspective="user_personalized"
+          name={analysisName ?? "Custom Analysis"}
+          jobId={id}
+          breadcrumbs={[
+            { label: "Home", href: "/" },
+            { label: "Tools" },
+            { label: "MCDA Analysis", href: "/tools/mcda_analysis" },
+            {
+              label: "Personalized",
+              href: "/tools/mcda_analysis/user_personalized",
+            },
+          ]}
+          backHref="/tools/mcda_analysis"
+        />
+      </div>
+    )
+  }
 
-{
-  jobRun?.status === JobStatus.FAILURE && (
-    <Layout title="Analysis Failed — MCDA Analysis">
+  {
+    jobRun?.status === JobStatus.FAILURE && (
       <div class="mx-auto max-w-2xl px-4 py-8">
         <JobResultStatus
           status="FAILURE"
@@ -119,14 +238,12 @@ if (jobRun?.status === JobStatus.SUCCESS) {
           </a>
         </div>
       </div>
-    </Layout>
-  )
-}
+    )
+  }
 
-{
-  (jobRun?.status === JobStatus.PENDING ||
-    jobRun?.status === JobStatus.STARTED) && (
-    <Layout title="Analysis In Progress — MCDA Analysis">
+  {
+    (jobRun?.status === JobStatus.PENDING ||
+      jobRun?.status === JobStatus.STARTED) && (
       <div class="mx-auto max-w-2xl px-4 py-8">
         <JobResultStatus
           status={jobRun.status as "PENDING" | "STARTED"}
@@ -141,6 +258,6 @@ if (jobRun?.status === JobStatus.SUCCESS) {
           </a>
         </div>
       </div>
-    </Layout>
-  )
-}
+    )
+  }
+</Layout>

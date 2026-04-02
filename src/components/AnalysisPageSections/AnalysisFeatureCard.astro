@@ -1,0 +1,80 @@
+---
+import { Badge } from "../react/ui";
+import { RButton } from "../react/ui";
+import type { BadgeColor } from "../react/ui/Badge";
+
+interface BadgeProp {
+  label: string;
+  color?: BadgeColor;
+}
+
+export interface AnalysisFeatureCardProps {
+  icon: string;
+  title: string;
+  badges: BadgeProp[];
+  features: string[];
+  bestFor: string;
+  cta: {
+    label: string;
+    href: string;
+    variant?: "primary" | "secondary" | "warning";
+  };
+}
+
+type Props = AnalysisFeatureCardProps;
+
+const { icon, title, badges, features, bestFor, cta } = Astro.props;
+
+const checkIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 shrink-0 text-secondary">
+  <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd" />
+</svg>`;
+---
+
+<div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col gap-4 h-full">
+  <!-- Icon -->
+  <div
+    class="w-16 h-16 rounded-full bg-linear-to-br from-primary/10 to-info/20 flex items-center justify-center text-primary mx-auto"
+  >
+    <Fragment set:html={icon} />
+  </div>
+
+  <!-- Title -->
+  <h5 class="font-bold text-center text-gray-900">{title}</h5>
+
+  <!-- Badges -->
+  <div class="flex flex-wrap gap-2 justify-center">
+    {badges.map((badge) => <Badge size="sm" color={badge.color ?? "light"}>{badge.label}</Badge>)}
+  </div>
+
+  <!-- Features -->
+  <ul class="flex flex-col gap-2 flex-1">
+    {
+      features.map((feature) => (
+        <li class="flex items-start gap-2 text-sm text-gray-600 leading-relaxed">
+          <Fragment set:html={checkIcon} />
+          <span>{feature}</span>
+        </li>
+      ))
+    }
+  </ul>
+
+  <!-- Divider -->
+  <div class="border-t border-gray-100"></div>
+
+  <!-- Best for -->
+  <div class="flex items-center justify-between text-sm text-gray-500">
+    <span>Best for:</span>
+    <span class="bg-gray-100 text-gray-600 rounded-full px-3 py-0.5 text-xs font-medium">
+      {bestFor}
+    </span>
+  </div>
+
+  <!-- CTA -->
+  <RButton
+    variant={cta.variant ?? "primary"}
+    href={cta.href}
+    className="w-full text-center"
+  >
+    {cta.label}
+  </RButton>
+</div>

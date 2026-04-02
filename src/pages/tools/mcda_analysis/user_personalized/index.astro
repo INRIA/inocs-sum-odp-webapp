@@ -1,0 +1,44 @@
+---
+import {
+  InfoSection,
+  MethodologyAccordion,
+} from "../../../../components/AnalysisPageSections";
+import { InfoCard } from "../../../../components/react";
+import { CustomAnalysisForm } from "../../../../components/react/MCDAAnalysis";
+import Layout from "../../../../layouts/Layout.astro";
+import {
+  CUSTOM_MCDA_DEFAULT_ACTIVITIES,
+  CUSTOM_MCDA_DEFAULT_GOALS,
+} from "../../../../lib/helpers";
+---
+
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Tools" },
+    { label: "MCDA Analysis", href: "/tools/mcda_analysis" },
+    {
+      label: "Personalized",
+    },
+  ]}
+  backHref="/tools/mcda_analysis"
+>
+  <div
+    id="personalized-analysis-form"
+    class="flex flex-col gap-y-8 mx-auto px-1 py-8 max-w-7xl"
+  >
+    <InfoSection
+      title="Multi-Criteria Decision Analysis (MCDA) for Your Personalized Data"
+      highlightedText="Your Personalized Data"
+      description="Decision support using PROMETHEE-GAIA multi-criteria analysis, based on your own insights and preferences. Get started by filling in the form below with your specific goals and activities."
+    />
+    <div id="personalized-analysis-form">
+      <CustomAnalysisForm
+        defaultGoals={CUSTOM_MCDA_DEFAULT_GOALS}
+        defaultActivities={CUSTOM_MCDA_DEFAULT_ACTIVITIES}
+        client:load
+      />
+    </div>
+  </div>
+</Layout>

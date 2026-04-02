@@ -11,7 +11,7 @@ export const MCDA_PERSPECTIVES: Record<string, string> = {
   regulatory: "Regulatory Authorities",
   pto: "Public Transport Operators",
   nsm_providers: "New Shared Mobility Providers",
-  user_personalized: "Custom user-personalized",
+  user_personalized: "User Personalized",
 };
 
 export const MCDA_DEFAULT_GOALS: MCDAGoal[] = [
@@ -43,10 +43,34 @@ export const MCDA_DEFAULT_GOALS: MCDAGoal[] = [
   { name: "Improve Safety", weight: 1 / 8 },
 ];
 
+export const CUSTOM_MCDA_DEFAULT_GOALS: string[] = [
+  "Improve Accessibility",
+  "Improve Mobility Service",
+  "Improve Multimodality",
+  "Noise Hinderance",
+  "Improve Public Transport",
+  "Reduction of Congestion",
+  "Reduction of Emission",
+  "Improve Safety",
+];
+
+export const CUSTOM_MCDA_DEFAULT_ACTIVITIES: string[] = [
+  "Integrated Mobility Service Platform (MaaS)",
+  "Demand-Responsive and On-Demand Mobility",
+  "Mobility Hub Development",
+  "Active Mobility Promotion",
+  "Incentive-Based Programs",
+  "NSM Integration into Mobility Ecosystem",
+  "Public Engagement and Awareness Initiatives",
+  "Enhanced Data Collection and Analysis",
+  "Electric and Low-Emission Infrastructure Expansion",
+  "PT Scheduling and Frequency Optimization",
+];
+
 export const resolveMcdaPerspectiveLabel = (
   perspective: string,
   perspectives: Record<string, string> = MCDA_PERSPECTIVES,
-): string => `${perspectives[perspective] || perspective} perspective`;
+): string => `${perspectives[perspective] ?? "User personalized "} perspective`;
 
 const hasPreferenceMatrixValues = (
   preferenceMatrix: NonNullable<McdaResults["preference_matrix"]>,

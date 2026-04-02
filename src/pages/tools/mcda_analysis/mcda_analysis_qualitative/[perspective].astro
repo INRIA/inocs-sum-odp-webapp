@@ -1,0 +1,125 @@
+---
+import MCDAADashboardPage from "../../../../components/MCDAADashboardPage.astro";
+import Layout from "../../../../layouts/Layout.astro";
+import {
+  InfoSection,
+  MethodologyAccordion,
+} from "../../../../components/AnalysisPageSections";
+import { InfoCard, RButton } from "../../../../components/react";
+import { MCDA_PERSPECTIVES } from "../../../../lib/helpers";
+const { perspective } = Astro.params;
+const perspectiveLabel = MCDA_PERSPECTIVES[perspective] ?? "Unknown";
+
+const methodologySection = {
+  accordion: {
+    title: "Analysis Approach & Data Source",
+    subtitle:
+      "This analysis is based on expert surveys (qualitative data) from mobility experts. Open to know more about the data.",
+    content: "",
+    defaultOpen: false,
+    variant: "info",
+  },
+  ctaButton: {
+    variant: "primary",
+    href: "/tools/mcda_analysis",
+    size: "xs",
+    label: "Change approach",
+  },
+  infoCards: [
+    {
+      title: "2025-2026",
+      description: "Survey period",
+      showIcon: false,
+      textAlign: "center",
+    },
+    {
+      title: "24",
+      description: "Experts participated in the survey",
+      showIcon: false,
+      textAlign: "center",
+    },
+    {
+      title: "9",
+      description: "Cities represented in the expert survey",
+      showIcon: false,
+      textAlign: "center",
+    },
+    {
+      title: "10",
+      description: "Business activities evaluated in the analysis",
+      showIcon: false,
+      textAlign: "center",
+    },
+  ],
+  participantsIntro:
+    "The data used for this analysis was collected through expert surveys. The participants included :",
+  participants: [
+    "New Shared Mobility provider",
+    "Public transport operators",
+    "Regulatory authorities",
+  ],
+  details:
+    "The survey is focused on understanding the effectiveness of different policy measures for sustainable shared mobility (identified in Business Activities), as perceived by these experts based on their experience and knowledge of their respective cities. The analysis is based on the responses collected from these surveys, which were conducted between 2025 and 2026.",
+};
+---
+
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Tools" },
+    { label: "MCDA Analysis", href: "/tools/mcda_analysis" },
+    {
+      label: "Qualitative Data",
+    },
+    {
+      label: "Results : " + perspectiveLabel,
+    },
+  ]}
+  backHref="/tools/mcda_analysis"
+>
+  <div class="mx-auto px-1 py-8">
+    <!-- Info Section H1 -->
+    <InfoSection
+      title="Multi-Criteria Decision Analysis (MCDA) results for Qualitative Data"
+      highlightedText="Qualitative Data"
+      description="Decision support using PROMETHEE-GAIA multi-criteria analysis, based on expert insights from participants across Europe"
+    />
+    <section class="mx-auto px-1 py-8 gap-y-0 max-w-7xl">
+      <MethodologyAccordion
+        title={methodologySection.accordion.title}
+        subtitle={methodologySection.accordion.subtitle}
+        content={methodologySection.accordion.content}
+        defaultOpen={methodologySection.accordion.defaultOpen}
+        variant={methodologySection.accordion.variant}
+      >
+        <div slot="cta" class="flex flex-row justify-center">
+          <RButton
+            variant={methodologySection.ctaButton.variant}
+            href={methodologySection.ctaButton.href}
+            size={methodologySection.ctaButton.size}
+          >
+            {methodologySection.ctaButton.label}
+          </RButton>
+        </div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+          {methodologySection.infoCards.map((card) => <InfoCard {...card} />)}
+          <div class="col-span-2 lg:col-span-3">
+            <p>
+              {methodologySection.participantsIntro}
+              <ul class="list-disc list-inside my-2">
+                {
+                  methodologySection.participants.map((participant) => (
+                    <li class="text-sm">{participant}</li>
+                  ))
+                }
+              </ul>
+            </p>
+            <p>{methodologySection.details}</p>
+          </div>
+        </div>
+      </MethodologyAccordion>
+    </section>
+    <MCDAADashboardPage perspective={perspective} />
+  </div>
+</Layout>

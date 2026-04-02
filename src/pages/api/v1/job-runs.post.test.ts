@@ -26,6 +26,33 @@ const validPayload = {
   goals_weights: validGoalsWeights,
 };
 
+const validFullCustomPayload = {
+  name: "Custom MCDA Run",
+  goals: [
+    { name: "Environmental Impact", weight: 0.35, direction: "max" },
+    { name: "Economic Cost", weight: 0.25, direction: "min" },
+    { name: "Social Acceptance", weight: 0.4, direction: "max" },
+  ],
+  alternatives: [
+    {
+      name: "Project A",
+      values: {
+        "Environmental Impact": 0.82,
+        "Economic Cost": 1200,
+        "Social Acceptance": 0.67,
+      },
+    },
+    {
+      name: "Project B",
+      values: {
+        "Environmental Impact": 0.75,
+        "Economic Cost": 980,
+        "Social Acceptance": 0.74,
+      },
+    },
+  ],
+};
+
 describe("POST /api/v1/job-runs", () => {
   beforeEach(() => {
     // Stub global fetch before each test
@@ -99,6 +126,40 @@ describe("POST /api/v1/job-runs", () => {
       expect(forwardedBody.params.perspective).toBe("user_personalized");
       expect(forwardedBody.params.name).toBe(validPayload.name);
       expect(forwardedBody.params.goals_weights).toEqual(validGoalsWeights);
+    });
+
+    it("forwards full custom goals and alternatives when using the extended payload", async () => {
+      const mockJobResponse = {
+        id: "custom-uuid-123",
+        job_name: "mcda_analysis_qualitative_user_personalized",
+        status: "PENDING",
+        message: null,
+        created_at: "2026-03-31T09:30:00",
+        started_at: null,
+        completed_at: null,
+      };
+
+      const fetchMock = vi
+        .mocked(fetch)
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify(mockJobResponse), { status: 200 }),
+        );
+
+      const req = makeRequest(validFullCustomPayload);
+      await POST({ request: req } as any);
+
+      expect(fetchMock).toHaveBeenCalledOnce();
+      const [_url, fetchInit] = fetchMock.mock.calls[0];
+      const forwardedBody = JSON.parse(
+        (fetchInit as RequestInit).body as string,
+      );
+
+      expect(forwardedBody.params.perspective).toBe("user_personalized");
+      expect(forwardedBody.params.name).toBe(validFullCustomPayload.name);
+      expect(forwardedBody.params.goals).toEqual(validFullCustomPayload.goals);
+      expect(forwardedBody.params.alternatives).toEqual(
+        validFullCustomPayload.alternatives,
+      );
     });
   });
 
@@ -185,6 +246,40 @@ describe("POST /api/v1/job-runs", () => {
       const body = await res.json();
       expect(body.error).toBe(
         "goals_weights must be provided with at least one non-zero weight",
+      );
+    });
+
+    it("returns 400 when full custom payload has no alternatives", async () => {
+      const req = makeRequest({
+        ...validFullCustomPayload,
+        alternatives: [],
+      });
+      const res = await POST({ request: req } as any);
+
+      expect(res.status).toBe(400);
+      const body = await res.json();
+      expect(body.error).toBe("At least one alternative is required");
+    });
+
+    it("returns 400 when any alternative misses a score for a selected goal", async () => {
+      const req = makeRequest({
+        ...validFullCustomPayload,
+        alternatives: [
+          {
+            name: "Project A",
+            values: {
+              "Environmental Impact": 0.82,
+              "Economic Cost": 1200,
+            },
+          },
+        ],
+      });
+      const res = await POST({ request: req } as any);
+
+      expect(res.status).toBe(400);
+      const body = await res.json();
+      expect(body.error).toBe(
+        "Each alternative must define a numeric score for every selected goal",
       );
     });
   });

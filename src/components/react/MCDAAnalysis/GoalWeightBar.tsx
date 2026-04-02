@@ -6,6 +6,7 @@ interface GoalWeightBarProps {
   editable: boolean;
   value: number; // 0-1 range
   onChange?: (value: number) => void;
+  directionControl?: React.ReactNode;
 }
 
 export const GoalWeightBar: React.FC<GoalWeightBarProps> = ({
@@ -13,6 +14,7 @@ export const GoalWeightBar: React.FC<GoalWeightBarProps> = ({
   editable,
   value,
   onChange,
+  directionControl,
 }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   const percentage = Math.round(value * 100);
@@ -25,10 +27,12 @@ export const GoalWeightBar: React.FC<GoalWeightBarProps> = ({
   return (
     <div className="flex flex-col gap-2">
       <div className="w-full flex items-center justify-between">
-        {/* Goal Name */}
-        <span className="font-medium text-gray-900 text-left capitalize">{goal.name}</span>
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-left capitalize">{goal.name}</span>
+          {directionControl}
+        </div>
         {/* Percentage Label */}
-        <span className="text-sm font-semibold text-gray-700 tabular-nums">
+        <span className="text-sm font-semibold text-dark tabular-nums">
           {percentage}%
         </span>
       </div>
@@ -50,20 +54,20 @@ export const GoalWeightBar: React.FC<GoalWeightBarProps> = ({
               step="0.01"
               value={value}
               onChange={handleSliderChange}
-              className="w-full h-4 bg-gray-200 rounded-lg appearance-none cursor-pointer range-slider"
+              className="w-full h-4 bg-light rounded-lg appearance-none cursor-pointer range-slider"
               aria-label={`Weight for ${goal.name}`}
               aria-valuemin={0}
               aria-valuemax={100}
               aria-valuenow={percentage}
               aria-valuetext={`${percentage}%`}
               style={{
-                background: `linear-gradient(to right, #F59E0B 0%, #F59E0B ${percentage}%, #E5E7EB ${percentage}%, #E5E7EB 100%)`,
+                background: `linear-gradient(to right, var(--color-warning) 0%, var(--color-warning) ${percentage}%, var(--color-light) ${percentage}%, var(--color-light) 100%)`,
               }}
             />
             {/* Tooltip showing exact value */}
             {showTooltip && (
               <div
-                className="absolute left-1/2 -translate-x-1/2 -top-10 bg-gray-900 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap z-10"
+                className="absolute left-1/2 -translate-x-1/2 -top-10 bg-dark text-light text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap z-10"
                 role="tooltip"
               >
                 {percentage}% ({value.toFixed(2)})
@@ -73,7 +77,7 @@ export const GoalWeightBar: React.FC<GoalWeightBarProps> = ({
           </div>
         ) : (
           <div
-            className="relative h-4 bg-gray-200 rounded-lg overflow-hidden"
+            className="relative h-4 bg-light rounded-lg overflow-hidden"
             role="progressbar"
             aria-label={`Weight for ${goal.name}`}
             aria-valuemin={0}
@@ -82,7 +86,7 @@ export const GoalWeightBar: React.FC<GoalWeightBarProps> = ({
             aria-valuetext={`${percentage}%`}
           >
             <div
-              className="h-full bg-gradient-to-r from-yellow-400 to-yellow-500 transition-all duration-300"
+              className="h-full bg-warning transition-all duration-300"
               style={{ width: `${percentage}%` }}
             ></div>
           </div>

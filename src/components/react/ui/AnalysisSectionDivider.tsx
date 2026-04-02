@@ -16,7 +16,7 @@ export function AnalysisSectionDivider({
         <div className="mt-1 flex items-center justify-center w-6 h-6 bg-info text-white rounded-full font-bold text-xl flex-shrink-0">
           {step}
         </div>
-        <h4 className="text-2xl font-bold text-gray-900 content-center">
+        <h4 className="content-center">
           {title}
         </h4>
       </div>
