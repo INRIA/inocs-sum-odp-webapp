@@ -1,0 +1,124 @@
+---
+import MCDAADashboardPage from "../../../../components/MCDAADashboardPage.astro";
+import { JobRunsService } from "../../../../bff/services/job-runs.service";
+import Layout from "../../../../layouts/Layout.astro";
+import {
+  InfoSection,
+  MethodologyAccordion,
+} from "../../../../components/AnalysisPageSections";
+import { InfoCard, RButton } from "../../../../components/react";
+import {
+  buildQuantitativeMethodologySection,
+  MCDA_PERSPECTIVES,
+} from "../../../../lib/helpers";
+import type { IJobRun } from "../../../../types";
+
+const { perspective } = Astro.params;
+
+if (!perspective) {
+  return Astro.redirect("/tools/mcda_analysis");
+}
+
+const perspectiveLabel = MCDA_PERSPECTIVES[perspective] ?? "Unknown";
+const jobName = `mcda_analysis_quantitative_${perspective}`;
+
+let jobRun: IJobRun | null = null;
+let fetchError = false;
+
+try {
+  const jobRunsService = new JobRunsService();
+  jobRun = await jobRunsService.getLatestSuccessfulJobRun(jobName);
+} catch (error) {
+  console.error("Error fetching quantitative MCDA job run:", error);
+  fetchError = true;
+}
+
+const methodologySection = buildQuantitativeMethodologySection(jobRun);
+---
+
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Tools" },
+    { label: "MCDA Analysis", href: "/tools/mcda_analysis" },
+    {
+      label: "Quantitative Data (KPIs/policy measures)",
+    },
+    {
+      label: "Results : " + perspectiveLabel,
+    },
+  ]}
+  backHref="/tools/mcda_analysis"
+>
+  <div class="mx-auto px-1 py-8">
+    <!-- Info Section H1 -->
+    <InfoSection
+      title="Multi-Criteria Decision Analysis (MCDA) results for Quantitative Data (KPIs/policy measures)"
+      highlightedText="Quantitative Data (KPIs/policy measures)"
+      description="Decision support using PROMETHEE-GAIA multi-criteria analysis, based on quantitative data such as KPIs and policy measures for sustainable shared mobility reported by living labs across Europe"
+    />
+    <section class="mx-auto px-1 py-8 gap-y-0 max-w-7xl">
+      <MethodologyAccordion
+        title={methodologySection.accordion.title}
+        subtitle={methodologySection.accordion.subtitle}
+        content={methodologySection.accordion.content}
+        defaultOpen={methodologySection.accordion.defaultOpen}
+        variant={methodologySection.accordion.variant}
+      >
+        <div slot="cta" class="flex flex-row justify-center">
+          <RButton
+            variant={methodologySection.ctaButton.variant}
+            href={methodologySection.ctaButton.href}
+            size={methodologySection.ctaButton.size}
+          >
+            {methodologySection.ctaButton.label}
+          </RButton>
+        </div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+          {methodologySection.infoCards.map((card) => <InfoCard {...card} />)}
+          <div class="col-span-2 lg:col-span-4">
+            <p>
+              {methodologySection.participantsIntro}
+              <ul class="list-disc list-inside my-2">
+                {
+                  methodologySection.participants.map((participant) => (
+                    <li class="text-sm">{participant}</li>
+                  ))
+                }
+              </ul>
+            </p>
+            <p>{methodologySection.details}</p>
+          </div>
+        </div>
+      </MethodologyAccordion>
+    </section>
+
+    {
+      jobRun ? (
+        <MCDAADashboardPage
+          perspective={perspective}
+          analysisType="mcda_analysis_quantitative"
+          jobRun={jobRun}
+        />
+      ) : (
+        <div class="mx-auto max-w-2xl px-4 py-12 text-center">
+          <h2 class="text-2xl font-bold text-gray-900">
+            Quantitative Analysis Unavailable
+          </h2>
+          <p class="mt-4 text-gray-600">
+            {fetchError
+              ? "The latest successful quantitative analysis could not be loaded for this perspective."
+              : "No successful quantitative analysis run is available for this perspective yet."}
+          </p>
+          <a
+            href="/tools/mcda_analysis"
+            class="mt-6 inline-block rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            Back to MCDA Analysis
+          </a>
+        </div>
+      )
+    }
+  </div>
+</Layout>

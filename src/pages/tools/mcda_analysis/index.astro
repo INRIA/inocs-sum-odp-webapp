@@ -1,6 +1,5 @@
 ---
 import Layout from "../../../layouts/Layout.astro";
-import { CustomAnalysisForm } from "../../../components/react/MCDAAnalysis";
 import {
   InfoSection,
   FeaturesGrid,
@@ -8,23 +7,6 @@ import {
   MethodologyAccordion,
   AnalysisFeatureCard,
 } from "../../../components/AnalysisPageSections";
-import ApiClient from "../../../lib/api-client/ApiClient";
-import type {
-  MCDAGoal,
-  McdaKeyInsightCard,
-  McdaResults,
-  OutrankingGraphData,
-} from "../../../types";
-import {
-  buildMcdaKeyInsights,
-  buildOutrankingGraphData,
-  formatDateWithTime,
-  MCDA_PERSPECTIVES,
-  MCDA_DEFAULT_GOALS,
-  CUSTOM_MCDA_DEFAULT_GOALS,
-  CUSTOM_MCDA_DEFAULT_ACTIVITIES,
-  resolveMcdaPerspectiveLabel,
-} from "../../../lib/helpers";
 import {
   FAQAccordion,
   InfoAlert,
@@ -129,7 +111,7 @@ const analysisApproaches = [
     bestFor: "Policy Review",
     cta: {
       label: "Launch KPI Version",
-      href: "#",
+      href: "/tools/mcda_analysis/mcda_analysis_quantitative/regulatory",
       variant: "primary" as const,
     },
   },

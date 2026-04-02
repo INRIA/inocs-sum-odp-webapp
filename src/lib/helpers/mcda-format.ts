@@ -1,4 +1,5 @@
 import type {
+  IJobRun,
   MCDAGoal,
   McdaKeyInsightCard,
   McdaResults,
@@ -6,12 +7,39 @@ import type {
   OutrankingGraphEdge,
   OutrankingGraphNode,
 } from "../../types";
+import { formatDateWithTime } from "./format";
+
+type MethodologyInfoCard = {
+  title: string;
+  description: string;
+  showIcon: false;
+  textAlign: "center";
+};
+
+type QuantitativeMethodologySection = {
+  accordion: {
+    title: string;
+    subtitle: string;
+    content: string;
+    defaultOpen: boolean;
+    variant: "info";
+  };
+  ctaButton: {
+    variant: "primary";
+    href: string;
+    size: "xs";
+    label: string;
+  };
+  infoCards: MethodologyInfoCard[];
+  participantsIntro: string;
+  participants: string[];
+  details: string;
+};
 
 export const MCDA_PERSPECTIVES: Record<string, string> = {
   regulatory: "Regulatory Authorities",
   pto: "Public Transport Operators",
   nsm_providers: "New Shared Mobility Providers",
-  user_personalized: "User Personalized",
 };
 
 export const MCDA_DEFAULT_GOALS: MCDAGoal[] = [
@@ -71,6 +99,127 @@ export const resolveMcdaPerspectiveLabel = (
   perspective: string,
   perspectives: Record<string, string> = MCDA_PERSPECTIVES,
 ): string => `${perspectives[perspective] ?? "User personalized "} perspective`;
+
+const formatMcdaPercent = (value: number | undefined): string | null => {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return null;
+  }
+
+  const normalizedValue = value <= 1 ? value * 100 : value;
+  return `${Math.round(normalizedValue * 10) / 10}%`;
+};
+
+const createCenteredInfoCard = (
+  title: string,
+  description: string,
+): MethodologyInfoCard => ({
+  title,
+  description,
+  showIcon: false,
+  textAlign: "center",
+});
+
+const uniqueLabels = (labels: Array<string | null | undefined>): string[] =>
+  Array.from(
+    new Set(
+      labels
+        .map((label) => label?.trim())
+        .filter((label): label is string => Boolean(label)),
+    ),
+  );
+
+export const buildQuantitativeMethodologySection = (
+  jobRun: IJobRun | null,
+): QuantitativeMethodologySection => {
+  const kpis = jobRun?.input_data?.kpis ?? [];
+  const kpiGroups = jobRun?.input_data?.kpi_groups ?? [];
+  const livingLabs = jobRun?.input_data?.living_labs ?? [];
+  const alternatives = jobRun?.input_data?.alternatives ?? [];
+  const mcdaResults = jobRun?.output_data?.mcda_results;
+
+  const kpiCount = kpis.length;
+  const kpiGroupCount = kpiGroups.length;
+  const livingLabCount = livingLabs.length;
+  const policyMeasureCount =
+    alternatives.length > 0
+      ? alternatives.length
+      : (mcdaResults?.ranking?.length ?? 0);
+
+  const topRankedKey = mcdaResults?.ranking?.[0];
+  const topRankedAlternative = topRankedKey
+    ? (mcdaResults?.alternative_labels?.[topRankedKey] ?? topRankedKey)
+    : null;
+  const gaiaQualityLabel = formatMcdaPercent(mcdaResults?.gaia_quality);
+  const completedAt = jobRun?.completed_at
+    ? formatDateWithTime(jobRun.completed_at)
+    : null;
+
+  const kpiGroupLabels = uniqueLabels(kpiGroups.map((group) => group.name));
+  const criteriaLabels = uniqueLabels(
+    Object.values(mcdaResults?.criteria_labels ?? {}),
+  );
+  const participants =
+    kpiGroupLabels.length > 0 ? kpiGroupLabels : criteriaLabels;
+
+  const summarySegments = [
+    `This quantitative MCDA result uses ${kpiCount} KPI indicators grouped into ${kpiGroupCount} criteria, data from ${livingLabCount} living labs, and ${policyMeasureCount} policy measures evaluated as alternatives.`,
+    "Policy measures are scored against KPI groups through a ridge regression model that estimates the positive or negative contribution of policy measures to KPI changes observed across living labs.",
+    "These estimated contributions form the input matrix for the PROMETHEE-GAIA analysis, which produces the final ranking of policy measures.",
+  ];
+
+  if (topRankedAlternative) {
+    summarySegments.push(`Top-ranked policy measure: ${topRankedAlternative}.`);
+  }
+
+  if (gaiaQualityLabel) {
+    summarySegments.push(`GAIA plane quality: ${gaiaQualityLabel}.`);
+  }
+
+  if (completedAt) {
+    summarySegments.push(`Analysis completed on ${completedAt}.`);
+  }
+
+  return {
+    accordion: {
+      title: "Analysis Approach & Data Source",
+      subtitle:
+        "This analysis is based on KPI indicators, KPI groups, living-lab submissions, and policy measures reported by cities across Europe.",
+      content: "",
+      defaultOpen: false,
+      variant: "info",
+    },
+    ctaButton: {
+      variant: "primary",
+      href: "/tools/mcda_analysis",
+      size: "xs",
+      label: "Change approach",
+    },
+    infoCards: [
+      createCenteredInfoCard(
+        String(kpiCount),
+        "KPI indicators included in this analysis",
+      ),
+      createCenteredInfoCard(
+        String(kpiGroupCount),
+        "KPI groups used as MCDA criteria",
+      ),
+      createCenteredInfoCard(
+        String(livingLabCount),
+        "Living labs contributing quantitative data",
+      ),
+      createCenteredInfoCard(
+        String(policyMeasureCount),
+        "Policy measures evaluated as alternatives",
+      ),
+    ],
+    participantsIntro: "KPI groups used as criteria in this run:",
+    participants:
+      participants.length > 0
+        ? participants
+        : ["No KPI groups are available for the latest successful run."],
+    details: summarySegments.join(" "),
+  };
+};
 
 const hasPreferenceMatrixValues = (
   preferenceMatrix: NonNullable<McdaResults["preference_matrix"]>,

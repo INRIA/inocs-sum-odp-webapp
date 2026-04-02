@@ -12,6 +12,7 @@ import { AnalysisSectionDivider, CardFilter } from "../ui";
 import { PageNavigation } from "../ui/PageNavigation";
 
 interface MCDADashboardProps {
+  analysisType: string;
   perspectives?: { [key: string]: string };
   selectedPerspective?: string;
   goals: MCDAGoal[];
@@ -31,6 +32,7 @@ type PerspectiveGroup = {
 };
 
 export const MCDADashboard: React.FC<MCDADashboardProps> = ({
+  analysisType,
   perspectives,
   selectedPerspective,
   goals,
@@ -52,7 +54,6 @@ export const MCDADashboard: React.FC<MCDADashboardProps> = ({
         kpis: [],
       }))
     : [];
-console.log('perspectivesGroups', perspectives, perspectivesGroups);
   const selectedPerspectiveId = perspectivesGroups.find(
     (group) => group.slug === selectedPerspective,
   )?.id;
@@ -68,7 +69,7 @@ console.log('perspectivesGroups', perspectives, perspectivesGroups);
     if (!selectedPerspectiveGroup) return;
 
     // Redirect to the same page with the selected perspective
-    const newUrl = `/tools/mcda_analysis/mcda_analysis_qualitative/${selectedPerspectiveGroup.slug}#results`;
+    const newUrl = `/tools/mcda_analysis/${analysisType}/${selectedPerspectiveGroup.slug}#results`;
     window.location.href = newUrl;
   };
 

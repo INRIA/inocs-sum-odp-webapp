@@ -1,5 +1,5 @@
 ---
-import { CustomAnalysisForm, MCDADashboard } from "./react/MCDAAnalysis";
+import { MCDADashboard } from "./react/MCDAAnalysis";
 import ApiClient from "../lib/api-client/ApiClient";
 import type {
   MCDAGoal,
@@ -15,7 +15,7 @@ import {
   resolveMcdaPerspectiveLabel,
 } from "../lib/helpers";
 
-const { perspective, name, jobId } = Astro.props;
+const { analysisType, perspective, name, jobId, jobRun } = Astro.props;
 const api = new ApiClient(Astro.request);
 
 let formattedDate: string | null = null;
@@ -24,18 +24,21 @@ let mcdaResults: McdaResults | undefined = undefined;
 let outrankingGraphData: OutrankingGraphData | undefined = undefined;
 let mcdaKeyInsights: McdaKeyInsightCard[] = [];
 let resultsTitle = name ?? "MCDA Analysis Results";
-let perspectives = MCDA_PERSPECTIVES;
+let perspectives = jobId
+  ? {
+      user_personalized: "User Personalized",
+    }
+  : MCDA_PERSPECTIVES;
 
 try {
-  const latestRun = jobId
-    ? await api.getJobRunById(jobId)
-    : await api.getLatestJobRun(`mcda_analysis_qualitative_${perspective}`);
+  const latestRun = jobRun
+    ? jobRun
+    : jobId
+      ? await api.getJobRunById(jobId)
+      : await api.getLatestJobRun(`${analysisType}_${perspective}`);
 
   if (latestRun) {
-    perspectives = latestRun.input_data?.perspectives?.labels ?? {
-      user_personalized: "User Personalized",
-    };
-    console.log("perspectives from API", perspectives);
+    perspectives = latestRun.input_data?.perspectives?.labels || perspectives;
     resultsTitle = resolveMcdaPerspectiveLabel(perspective, perspectives);
     formattedDate = formatDateWithTime(latestRun.created_at);
     goals = latestRun.input_data?.goals || [];
@@ -69,6 +72,7 @@ try {
     )
   }
   <MCDADashboard
+    analysisType={analysisType}
     perspectives={perspectives}
     selectedPerspective={perspective}
     goals={goals}
