@@ -40,6 +40,9 @@ export const CustomAnalysisForm: React.FC<CustomAnalysisFormProps> = ({
   const [scores, setScores] = useState<Record<string, Record<string, number>>>(
     {},
   );
+  const [goalMeasurementNotes, setGoalMeasurementNotes] = useState<
+    Record<string, string>
+  >({});
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -86,6 +89,22 @@ export const CustomAnalysisForm: React.FC<CustomAnalysisFormProps> = ({
     () => selectedGoals.map((goal) => goal.name),
     [selectedGoals],
   );
+  const selectedGoalNamesKey = useMemo(
+    () => selectedGoalNames.join("\u0000"),
+    [selectedGoalNames],
+  );
+
+  useEffect(() => {
+    setGoalMeasurementNotes((previousNotes) => {
+      const nextNotes: Record<string, string> = {};
+
+      selectedGoalNames.forEach((goalName) => {
+        nextNotes[goalName] = previousNotes[goalName] ?? "";
+      });
+
+      return nextNotes;
+    });
+  }, [selectedGoalNames, selectedGoalNamesKey]);
 
   const setLoading = (nextLoading: boolean) => {
     setIsLoading(nextLoading);
@@ -150,6 +169,13 @@ export const CustomAnalysisForm: React.FC<CustomAnalysisFormProps> = ({
         ...previous[activity],
         [goal]: value,
       },
+    }));
+  };
+
+  const handleGoalMeasurementNoteChange = (goal: string, value: string) => {
+    setGoalMeasurementNotes((previous) => ({
+      ...previous,
+      [goal]: value,
     }));
   };
 
@@ -280,12 +306,11 @@ export const CustomAnalysisForm: React.FC<CustomAnalysisFormProps> = ({
           >
             <p className="mb-2">
               A default list of goals from the SUM project assessment is
-              provided. Tick the boxes to select goals, add your own, or remove
-              ones you don&apos;t need.
+              provided. Tick the boxes to select goals or add your own.
             </p>
             <ul className="list-disc space-y-1 pl-4">
               <li>
-                Keep goals independent — avoid overlapping criteria such as
+                Keep goals independent, to avoid overlapping criteria such as
                 &ldquo;cost&rdquo; and &ldquo;budget impact&rdquo; unless both
                 are truly necessary.
               </li>
@@ -328,7 +353,7 @@ export const CustomAnalysisForm: React.FC<CustomAnalysisFormProps> = ({
           >
             <p className="mb-2">
               Use sliders to set the relative importance of each goal. Weights
-              must sum to 100% — to raise one, lower another first.
+              must sum to 100%, to raise one, lower another first.
             </p>
             <p className="mb-2">
               A goal with weight 0.30 influences the final ranking twice as much
@@ -336,15 +361,15 @@ export const CustomAnalysisForm: React.FC<CustomAnalysisFormProps> = ({
             </p>
             <ul className="list-disc space-y-1 pl-4">
               <li>
-                <strong>Equal weights</strong> — neutral starting point, no goal
+                <strong>Equal weights</strong> for neutral starting point, no goal
                 is prioritised.
               </li>
               <li>
-                <strong>Stakeholder-driven weights</strong> — reflect a specific
+                <strong>Stakeholder-driven weights</strong> for reflecting a specific
                 perspective or a group consensus.
               </li>
               <li>
-                <strong>Preset profiles</strong> — select a pre-configured set
+                <strong>Preset profiles</strong> for selecting a pre-configured set
                 built from interviews with SUM project stakeholders.
               </li>
             </ul>
@@ -383,7 +408,7 @@ export const CustomAnalysisForm: React.FC<CustomAnalysisFormProps> = ({
           >
             <p className="mb-2">
               Define what you want to compare. A default set of business
-              activities from the SUM project is provided — tick, add, or remove
+              activities from the SUM project is provided. Choose from the list, add, or remove
               entries as needed.
             </p>
             <p>
@@ -445,7 +470,9 @@ export const CustomAnalysisForm: React.FC<CustomAnalysisFormProps> = ({
           goals={selectedGoalNames}
           alternatives={selectedActivities}
           scores={scores}
+          goalMeasurementNotes={goalMeasurementNotes}
           onScoreChange={handleScoreChange}
+          onGoalMeasurementNoteChange={handleGoalMeasurementNoteChange}
           disabled={isLoading}
         />
         {scoresError && (

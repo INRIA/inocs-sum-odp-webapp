@@ -12,6 +12,20 @@ interface GoalsSectionProps {
   showDirectionToggle?: boolean;
 }
 
+const buildEqualWeightDistribution = (count: number): number[] => {
+  if (count === 0) {
+    return [];
+  }
+
+  const baseUnits = Math.floor(100 / count);
+  const remainderUnits = 100 % count;
+
+  return Array.from({ length: count }, (_, index) => {
+    const units = baseUnits + (index < remainderUnits ? 1 : 0);
+    return units / 100;
+  });
+};
+
 export const GoalsSection: React.FC<GoalsSectionProps> = ({
   goals,
   editable = false,
@@ -73,6 +87,19 @@ export const GoalsSection: React.FC<GoalsSectionProps> = ({
     onWeightsUpdate?.(originalGoalsRef.current);
   };
 
+  const handleEqualWeights = () => {
+    const equalWeights = buildEqualWeightDistribution(editedGoals.length);
+    const updatedGoals = editedGoals.map((goal, index) => ({
+      ...goal,
+      weight: equalWeights[index],
+    }));
+
+    isOwnUpdateRef.current = true;
+    setEditedGoals(updatedGoals);
+    setHasChanges(true);
+    onWeightsUpdate?.(updatedGoals);
+  };
+
   const handleDirectionChange = (index: number, direction: "max" | "min") => {
     const updatedGoals = [...editedGoals];
     updatedGoals[index] = { ...updatedGoals[index], direction };
@@ -87,6 +114,40 @@ export const GoalsSection: React.FC<GoalsSectionProps> = ({
   const isNormalized = Math.abs(currentSum - 1) < 0.01;
 
   const displayGoals = editable ? editedGoals : goals;
+
+  const renderDirectionControl = (goal: MCDAGoal, index: number) => {
+    if (!showDirectionToggle) {
+      return undefined;
+    }
+
+    const direction = goal.direction || "max";
+
+    if (editable) {
+      return (
+        <DirectionToggle
+          direction={direction}
+          onChange={(nextDirection) =>
+            handleDirectionChange(index, nextDirection)
+          }
+        />
+      );
+    }
+
+    return (
+      <span
+        className={`inline-flex items-center rounded-md border border-light px-2 py-1 text-xs font-medium whitespace-nowrap ${
+          direction === "max"
+            ? "bg-info/30 text-primary"
+            : "bg-warning/20 text-warning"
+        }`}
+        aria-label={`Goal direction: ${
+          direction === "max" ? "to maximize" : "to minimize"
+        }`}
+      >
+        {direction === "max" ? "To maximize" : "To minimize"}
+      </span>
+    );
+  };
 
   if (!displayGoals || displayGoals.length === 0) {
     return (
@@ -112,6 +173,11 @@ export const GoalsSection: React.FC<GoalsSectionProps> = ({
                   disabled={!hasChanges}
                   text="Reset"
                 ></RButton>
+                <RButton
+                  variant="link"
+                  onClick={handleEqualWeights}
+                  text="Equal weights"
+                ></RButton>
                 <p>Total :</p>
                 <span
                   className={`text-lg font-bold tabular-nums ${
@@ -132,16 +198,7 @@ export const GoalsSection: React.FC<GoalsSectionProps> = ({
                 editable={editable}
                 value={goal.weight}
                 onChange={(newValue) => handleWeightChange(index, newValue)}
-                directionControl={
-                  editable && showDirectionToggle ? (
-                    <DirectionToggle
-                      direction={goal.direction || "max"}
-                      onChange={(direction) =>
-                        handleDirectionChange(index, direction)
-                      }
-                    />
-                  ) : undefined
-                }
+                directionControl={renderDirectionControl(goal, index)}
               />
             </div>
           ))}
@@ -156,8 +213,10 @@ export const GoalsSection: React.FC<GoalsSectionProps> = ({
               aria-hidden="true"
             />
             <p>
-              These weights represent the relative importance of each goal from
-              the selected stakeholder's perspective. Total:{" "}
+              These weights
+              {showDirectionToggle ? " and optimization directions" : ""}{" "}
+              represent the relative importance of each goal from the selected
+              stakeholder's perspective. Total:{" "}
               <strong>{sumPercentage}%</strong>
             </p>
           </div>

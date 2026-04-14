@@ -97,7 +97,11 @@ export const MCDADashboard: React.FC<MCDADashboardProps> = ({
           description="How important each goal is for your selected perspective"
         />
         {selectedPerspective ? (
-          <GoalsSection goals={goals} editable={false} />
+          <GoalsSection
+            goals={goals}
+            editable={false}
+            showDirectionToggle={true}
+          />
         ) : (
           <p className="text-gray-600 mt-4">
             Please select a stakeholder perspective above to view their goals.

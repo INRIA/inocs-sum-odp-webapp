@@ -13,7 +13,9 @@ interface ScoreMatrixProps {
   goals: string[];
   alternatives: string[];
   scores: Record<string, Record<string, number>>;
+  goalMeasurementNotes: Record<string, string>;
   onScoreChange: (alternative: string, goal: string, value: number) => void;
+  onGoalMeasurementNoteChange: (goal: string, value: string) => void;
   disabled?: boolean;
 }
 
@@ -21,7 +23,9 @@ export const ScoreMatrix: React.FC<ScoreMatrixProps> = ({
   goals,
   alternatives,
   scores,
+  goalMeasurementNotes,
   onScoreChange,
+  onGoalMeasurementNoteChange,
   disabled = false,
 }) => {
   if (goals.length === 0 || alternatives.length === 0) {
@@ -39,7 +43,24 @@ export const ScoreMatrix: React.FC<ScoreMatrixProps> = ({
           <TableRow>
             <TableHeader>Business Activity</TableHeader>
             {goals.map((goal) => (
-              <TableHeader key={`head-${goal}`}>{goal}</TableHeader>
+              <TableHeader key={`head-${goal}`} className="align-top">
+                <div className="flex min-w-44 flex-col gap-2 whitespace-normal">
+                  <span className="text-sm font-medium leading-snug text-dark">
+                    {goal}
+                  </span>
+                  <Input
+                    className="block w-full"
+                    type="text"
+                    disabled={disabled}
+                    value={goalMeasurementNotes[goal] ?? ""}
+                    aria-label={`Measurement note for ${goal}`}
+                    placeholder="Unit or method (for your reference)"
+                    onChange={(event) =>
+                      onGoalMeasurementNoteChange(goal, event.target.value)
+                    }
+                  />
+                </div>
+              </TableHeader>
             ))}
           </TableRow>
         </TableHead>

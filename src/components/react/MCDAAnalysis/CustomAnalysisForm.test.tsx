@@ -59,11 +59,29 @@ describe("CustomAnalysisForm", () => {
       }),
     ).toBeInTheDocument();
 
+    expect(
+      screen.getByRole("textbox", {
+        name: /measurement note for cost reduction/i,
+      }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("textbox", {
+        name: /measurement note for sustainability/i,
+      }),
+    ).toBeInTheDocument();
+
     await user.click(screen.getByRole("button", { name: /remove sustainability/i }));
 
     expect(
       screen.queryByRole("spinbutton", {
         name: /score for e-bike sharing and sustainability/i,
+      }),
+    ).not.toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("textbox", {
+        name: /measurement note for sustainability/i,
       }),
     ).not.toBeInTheDocument();
   });
@@ -114,6 +132,20 @@ describe("CustomAnalysisForm", () => {
         name: /score for e-bike sharing and sustainability/i,
       }),
       "0.67",
+    );
+
+    await user.type(
+      screen.getByRole("textbox", {
+        name: /measurement note for cost reduction/i,
+      }),
+      "EUR per year",
+    );
+
+    await user.type(
+      screen.getByRole("textbox", {
+        name: /measurement note for sustainability/i,
+      }),
+      "Survey score 1 to 5",
     );
 
     await user.type(
