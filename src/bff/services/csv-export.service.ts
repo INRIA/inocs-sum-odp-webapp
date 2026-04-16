@@ -21,14 +21,15 @@ export { CsvSerializer, EmptyCsvError };
 // ── KPI Results headers ───────────────────────────────────────────────────────
 
 export const KPI_RESULTS_CSV_HEADERS: CsvHeaderDef[] = [
-  { key: "lab", label: "Lab" },
-  { key: "kpi_number", label: "KPI Number" },
-  { key: "kpi_name", label: "KPI Name" },
   { key: "kpi_group", label: "KPI Group" },
-  { key: "metric", label: "Metric" },
-  { key: "value", label: "Value" },
-  { key: "date", label: "Date" },
-  { key: "transport_mode", label: "Transport Mode" },
+  { key: "kpi_number", label: "KPI Number" },
+  { key: "kpi_name_parent", label: "KPI Name (parent)" },
+  { key: "kpi_subtitle_child", label: "KPI subtitle (child)" },
+  { key: "transport_mode", label: "Transport Mode (modal split)" },
+  { key: "metric", label: "Metric(unit)" },
+  { key: "lab", label: "Living Lab" },
+  { key: "value", label: "KPI result Value" },
+  { key: "date", label: "KPI result Date" },
 ];
 
 // ── Projects headers ──────────────────────────────────────────────────────────

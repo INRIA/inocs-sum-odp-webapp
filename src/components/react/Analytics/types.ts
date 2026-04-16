@@ -70,6 +70,10 @@ export interface KpiCoverageRow {
   labsWithResultsCount: number;
   /** Total number of labs as a reference */
   totalLabs: number;
+  /** Number of KPI result entries (single-lab mode) */
+  entriesCount?: number;
+  /** Years with recorded data (single-lab mode), e.g. [2022, 2023] */
+  yearsCovered?: number[];
 }
 
 /**

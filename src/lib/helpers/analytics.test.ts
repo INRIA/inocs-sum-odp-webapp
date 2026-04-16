@@ -8,6 +8,8 @@ import {
   computeLabMeasuresBar,
   computeKpiCoverageTable,
   computeAlerts,
+  computePerLabMetricCards,
+  computePerLabAlerts,
 } from "./analytics";
 import type {
   IKpi,
@@ -484,6 +486,48 @@ describe("computeKpiCoverageTable - User Story 4", () => {
     expect(rows).toHaveLength(1);
     expect(rows[0].kpiNumber).toBe("1");
   });
+
+  it("includes entriesCount and yearsCovered in single-lab mode", () => {
+    const lab = createLab(1, "Lab 1", [
+      {
+        living_lab_id: 1,
+        kpidefinition_id: 1,
+        transport_mode_id: null,
+        result_before: null,
+        result_after: null,
+        results: [
+          createResult(1, 1, 1, "2022-01-01"),
+          createResult(2, 1, 1, "2023-06-01"),
+        ],
+      },
+    ]);
+    const kpis = [
+      createKpi(1, "1", "KPI 1"),
+      createKpi(2, "2", "KPI 2"),
+    ];
+
+    const rows = computeKpiCoverageTable([lab], kpis);
+
+    const kpi1Row = rows.find((r) => r.kpiId === 1);
+    expect(kpi1Row?.entriesCount).toBe(2);
+    expect(kpi1Row?.yearsCovered).toEqual([2022, 2023]);
+
+    const kpi2Row = rows.find((r) => r.kpiId === 2);
+    expect(kpi2Row?.entriesCount).toBe(0);
+    expect(kpi2Row?.yearsCovered).toEqual([]);
+  });
+
+  it("does not include entriesCount in multi-lab mode", () => {
+    const labs = [
+      createLab(1, "Lab 1"),
+      createLab(2, "Lab 2"),
+    ];
+    const kpis = [createKpi(1, "1", "KPI 1")];
+
+    const rows = computeKpiCoverageTable(labs, kpis);
+    expect(rows[0].entriesCount).toBeUndefined();
+    expect(rows[0].yearsCovered).toBeUndefined();
+  });
 });
 
 describe("computeAlerts - Phase 7", () => {
@@ -613,5 +657,162 @@ describe("computeAlerts - Phase 7", () => {
     expect(labsNoKpisAlert!.value).toBe(2);
     expect(labsNoMeasuresAlert).toBeDefined();
     expect(labsNoMeasuresAlert!.value).toBe(2);
+  });
+});
+
+describe("computePerLabMetricCards", () => {
+  const kpis = [
+    createKpi(1, "1", "Global KPI 1", "GLOBAL"),
+    createKpi(2, "2", "Global KPI 2", "GLOBAL"),
+    createKpi(3, "3", "Local KPI 1", "LOCAL"),
+    createKpi(4, "3.1", "Local KPI 1 child", "LOCAL", 3),
+  ];
+
+  it("computes coverage and entries for a lab with full data", () => {
+    const lab = createLab(
+      1,
+      "Lab 1",
+      [
+        {
+          living_lab_id: 1,
+          kpidefinition_id: 1,
+          transport_mode_id: null,
+          result_before: null,
+          result_after: null,
+          results: [createResult(1, 1, 1, "2023-01-01")],
+        },
+        {
+          living_lab_id: 1,
+          kpidefinition_id: 3,
+          transport_mode_id: null,
+          result_before: null,
+          result_after: null,
+          results: [createResult(2, 3, 1, "2023-06-01")],
+        },
+      ],
+      [
+        createImplementation(1, "PUSH"),
+        createImplementation(2, "PULL"),
+      ],
+    );
+
+    const cards = computePerLabMetricCards(lab, kpis);
+
+    const entriesCard = cards.find((c) => c.label === "KPI result entries recorded");
+    expect(entriesCard?.value).toBe("2");
+
+    const overallCard = cards.find((c) => c.label === "Overall KPI coverage");
+    // 2 of 3 parent KPIs covered (KPI 1, KPI 3; not KPI 2)
+    expect(overallCard?.value).toContain("2/3");
+
+    const measuresCard = cards.find((c) => c.label === "Measures implemented (PUSH / PULL)");
+    expect(measuresCard?.value).toBe("1 / 1");
+  });
+
+  it("returns zero-value cards for a lab with no data", () => {
+    const lab = createLab(1, "Empty Lab");
+    const cards = computePerLabMetricCards(lab, kpis);
+
+    const entriesCard = cards.find((c) => c.label === "KPI result entries recorded");
+    expect(entriesCard?.value).toBe("0");
+
+    const overallCard = cards.find((c) => c.label === "Overall KPI coverage");
+    expect(overallCard?.value).toContain("0/3");
+    expect(overallCard?.color).toBe("text-danger");
+
+    const measuresCard = cards.find((c) => c.label === "Measures implemented (PUSH / PULL)");
+    expect(measuresCard?.value).toBe("0 / 0");
+    expect(measuresCard?.color).toBe("text-danger");
+  });
+
+  it("handles empty kpis list", () => {
+    const lab = createLab(1, "Lab 1");
+    const cards = computePerLabMetricCards(lab, []);
+    // With 0 KPIs, coverage cards show 0/0 and color is text-success (not danger since no deficit)
+    const overallCard = cards.find((c) => c.label === "Overall KPI coverage");
+    expect(overallCard?.value).toContain("0/0");
+  });
+
+  it("returns exactly 5 cards", () => {
+    const lab = createLab(1, "Lab 1");
+    const cards = computePerLabMetricCards(lab, kpis);
+    expect(cards).toHaveLength(5);
+  });
+});
+
+describe("computePerLabAlerts", () => {
+  const kpis = [
+    createKpi(1, "1", "Global KPI 1", "GLOBAL"),
+    createKpi(2, "2", "Global KPI 2", "GLOBAL"),
+    createKpi(3, "3", "Local KPI 1", "LOCAL"),
+  ];
+
+  it("reports missing KPIs and no measures for an empty lab", () => {
+    const lab = createLab(1, "Empty Lab");
+    const alerts = computePerLabAlerts(lab, kpis);
+
+    const missingKpisAlert = alerts.find((a) => a.label === "KPIs with no results");
+    expect(missingKpisAlert).toBeDefined();
+    expect(missingKpisAlert!.value).toBe(3);
+    expect(missingKpisAlert!.items).toHaveLength(3);
+
+    const noMeasuresAlert = alerts.find((a) => a.label === "No measures recorded");
+    expect(noMeasuresAlert).toBeDefined();
+    expect(noMeasuresAlert!.severity).toBe("warning");
+  });
+
+  it("reports only missing KPIs when measures exist", () => {
+    const lab = createLab(1, "Lab 1", [], [createImplementation(1, "PUSH")]);
+    const alerts = computePerLabAlerts(lab, kpis);
+
+    const noMeasuresAlert = alerts.find((a) => a.label === "No measures recorded");
+    expect(noMeasuresAlert).toBeUndefined();
+
+    const missingKpisAlert = alerts.find((a) => a.label === "KPIs with no results");
+    expect(missingKpisAlert).toBeDefined();
+  });
+
+  it("produces no alerts for a lab with full KPI coverage and measures", () => {
+    const lab = createLab(
+      1,
+      "Full Lab",
+      [
+        {
+          living_lab_id: 1,
+          kpidefinition_id: 1,
+          transport_mode_id: null,
+          result_before: null,
+          result_after: null,
+          results: [createResult(1, 1, 1, "2023-01-01")],
+        },
+        {
+          living_lab_id: 1,
+          kpidefinition_id: 2,
+          transport_mode_id: null,
+          result_before: null,
+          result_after: null,
+          results: [createResult(2, 2, 1, "2023-01-01")],
+        },
+        {
+          living_lab_id: 1,
+          kpidefinition_id: 3,
+          transport_mode_id: null,
+          result_before: null,
+          result_after: null,
+          results: [createResult(3, 3, 1, "2023-01-01")],
+        },
+      ],
+      [createImplementation(1, "PUSH")],
+    );
+
+    const alerts = computePerLabAlerts(lab, kpis);
+    expect(alerts).toHaveLength(0);
+  });
+
+  it("returns empty alerts for empty kpis list", () => {
+    const lab = createLab(1, "Lab 1", [], [createImplementation(1, "PUSH")]);
+    const alerts = computePerLabAlerts(lab, []);
+    // No KPIs defined → no missing KPIs alert; measures exist → no measures alert
+    expect(alerts).toHaveLength(0);
   });
 });

@@ -40,7 +40,7 @@ describe("GET /api/v1/csv/kpiresults", () => {
   });
 
   it("returns 200 with Content-Disposition: attachment and CSV header row when no filters supplied", async () => {
-    const expectedCsv = '"Lab","KPI Number","KPI Name","KPI Group","Metric","Value","Date","Transport Mode"\n"Geneva","1.1","KPI A","Group","count","5","2024-01-01",""';
+    const expectedCsv = '"KPI Group","KPI Number","KPI Name (parent)","KPI subtitle (child)","Transport Mode (modal split)","Metric(unit)","Lab","Value","Date"\n"Group","1.1","Parent KPI","KPI A","","count","Geneva","5","2024-01-01"';
     mockGetKpiResultsCsv.mockResolvedValueOnce(expectedCsv);
 
     const res = await GET({ url: makeUrl() } as never);

@@ -52,6 +52,7 @@ export class CsvExportRepository {
             kpidefinitions_category: {
               include: { category: true },
             },
+            parent_kpi: true,
           },
         },
         transport_mode: true,
@@ -60,10 +61,12 @@ export class CsvExportRepository {
 
     return rows.map((row) => {
       const firstCategory = row.kpidefinition?.kpidefinitions_category?.[0]?.category;
+      const parentKpi = row.kpidefinition?.parent_kpi;
       return {
         lab: row.living_lab?.name ?? "",
         kpi_number: row.kpidefinition?.kpi_number ?? "",
-        kpi_name: row.kpidefinition?.name ?? "",
+        kpi_name_parent: parentKpi?.name ?? row.kpidefinition?.name ?? "",
+        kpi_subtitle_child: parentKpi ? (row.kpidefinition?.name ?? "") : "",
         kpi_group: firstCategory?.name ?? "",
         metric: row.kpidefinition?.metric ?? "",
         value: row.value,

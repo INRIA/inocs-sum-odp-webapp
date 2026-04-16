@@ -356,16 +356,43 @@ export function computeKpiCoverageTable(
     }
   }
 
+  const isSingleLab = labs.length === 1;
+
   return mainKpis
     .sort((a, b) => sortKpiNumbers(a.kpi_number, b.kpi_number))
-    .map((kpi) => ({
-      kpiId: kpi.id,
-      kpiNumber: kpi.kpi_number,
-      kpiName: kpi.name,
-      kpiType: kpi.type as "GLOBAL" | "LOCAL",
-      labsWithResultsCount: kpiLabsMap.get(kpi.id)?.size ?? 0,
-      totalLabs,
-    }));
+    .map((kpi) => {
+      const base = {
+        kpiId: kpi.id,
+        kpiNumber: kpi.kpi_number,
+        kpiName: kpi.name,
+        kpiType: kpi.type as "GLOBAL" | "LOCAL",
+        labsWithResultsCount: kpiLabsMap.get(kpi.id)?.size ?? 0,
+        totalLabs,
+      };
+
+      if (!isSingleLab) return base;
+
+      // Single-lab mode: compute entries count and years covered for this KPI
+      const lab = labs[0];
+      const allResults = lab.kpi_results?.flatMap((g) => g.results ?? []) ?? [];
+      const kpiResults = allResults.filter((r) => {
+        const parentId = parentMap.get(r.kpidefinition_id);
+        return parentId === kpi.id;
+      });
+      const years = new Set<number>();
+      for (const r of kpiResults) {
+        const d = r.date ? new Date(r.date) : null;
+        if (d && !isNaN(d.getTime())) {
+          years.add(d.getFullYear());
+        }
+      }
+
+      return {
+        ...base,
+        entriesCount: kpiResults.length,
+        yearsCovered: Array.from(years).sort((a, b) => a - b),
+      };
+    });
 }
 
 function sortKpiNumbers(kpiA: string, kpiB: string) {
@@ -442,6 +469,141 @@ export function computeAlerts(
       value: pendingUsers.length,
       severity: "info",
       items: pendingUsers.map((u) => u.email),
+    });
+  }
+
+  return alerts;
+}
+
+/**
+ * Compute metric cards scoped to a single living lab.
+ *
+ * Cards:
+ * 1. Total KPI result entries recorded
+ * 2. Overall KPI coverage (parent KPIs with ≥1 result / total parent KPIs)
+ * 3. Global KPI coverage
+ * 4. Local KPI coverage
+ * 5. Measures implemented (PUSH count / PULL count)
+ */
+export function computePerLabMetricCards(
+  lab: ILivingLabPopulated,
+  kpis: IKpi[],
+): MetricCardData[] {
+  const mainKpis = getMainKpis(kpis);
+  const globalKpis = mainKpis.filter((k) => k.type === "GLOBAL");
+  const localKpis = mainKpis.filter((k) => k.type === "LOCAL");
+  const parentMap = buildKpiParentMap(kpis);
+
+  const allResults = lab.kpi_results?.flatMap((g) => g.results ?? []) ?? [];
+  const totalResultEntries = allResults.length;
+
+  const coveredParentIds = new Set<number>();
+  const coveredGlobalKpi = new Set<number>();
+  const coveredLocalKpi = new Set<number>();
+
+  for (const result of allResults) {
+    const parentId = parentMap.get(result.kpidefinition_id);
+    const kpi = mainKpis.find((k) => k.id === parentId);
+    if (parentId !== undefined) {
+      coveredParentIds.add(parentId);
+      if (kpi?.type === "LOCAL") coveredLocalKpi.add(parentId);
+      if (kpi?.type === "GLOBAL") coveredGlobalKpi.add(parentId);
+    }
+  }
+
+  const kpiCoverage =
+    mainKpis.length > 0 ? coveredParentIds.size / mainKpis.length : 0;
+  const kpiGlobalCoverage =
+    globalKpis.length > 0 ? coveredGlobalKpi.size / globalKpis.length : 0;
+  const kpiLocalCoverage =
+    localKpis.length > 0 ? coveredLocalKpi.size / localKpis.length : 0;
+
+  const implementations = lab.living_lab_projects_implementation ?? [];
+  const pushCount = implementations.filter(
+    (impl) => impl.project?.type === "PUSH",
+  ).length;
+  const pullCount = implementations.filter(
+    (impl) => impl.project?.type === "PULL",
+  ).length;
+
+  return [
+    {
+      label: "KPI result entries recorded",
+      value: String(totalResultEntries),
+      icon: "clipboard",
+      color: "text-success",
+    },
+    {
+      label: "Overall KPI coverage",
+      value: `${toPercentage(kpiCoverage)} (${coveredParentIds.size}/${mainKpis.length})`,
+      icon: "chart",
+      color: kpiCoverage < 0.5 ? "text-danger" : "text-success",
+    },
+    {
+      label: "Global KPI coverage",
+      value: `${toPercentage(kpiGlobalCoverage)} (${coveredGlobalKpi.size}/${globalKpis.length})`,
+      icon: "chart",
+      color: kpiGlobalCoverage < 0.5 ? "text-danger" : "text-success",
+    },
+    {
+      label: "Local KPI coverage",
+      value: `${toPercentage(kpiLocalCoverage)} (${coveredLocalKpi.size}/${localKpis.length})`,
+      icon: "chart",
+      color: kpiLocalCoverage < 0.5 ? "text-danger" : "text-success",
+    },
+    {
+      label: "Measures implemented (PUSH / PULL)",
+      value: `${pushCount} / ${pullCount}`,
+      icon: "check",
+      color: pushCount + pullCount === 0 ? "text-danger" : "text-success",
+    },
+  ];
+}
+
+/**
+ * Compute analytics alerts scoped to a single living lab.
+ *
+ * Alerts:
+ * - KPIs with no results for this lab
+ * - No measures recorded
+ */
+export function computePerLabAlerts(
+  lab: ILivingLabPopulated,
+  kpis: IKpi[],
+): AlertCardData[] {
+  const alerts: AlertCardData[] = [];
+  const mainKpis = getMainKpis(kpis);
+  const parentMap = buildKpiParentMap(kpis);
+
+  // Find covered parent KPI IDs for this lab
+  const allResults = lab.kpi_results?.flatMap((g) => g.results ?? []) ?? [];
+  const coveredParentIds = new Set<number>();
+  for (const result of allResults) {
+    const parentId = parentMap.get(result.kpidefinition_id);
+    if (parentId !== undefined) {
+      coveredParentIds.add(parentId);
+    }
+  }
+
+  // KPIs with no results for this lab
+  const missingKpis = mainKpis.filter((kpi) => !coveredParentIds.has(kpi.id));
+  if (missingKpis.length > 0) {
+    alerts.push({
+      label: "KPIs with no results",
+      value: missingKpis.length,
+      severity: missingKpis.length > mainKpis.length / 2 ? "warning" : "info",
+      items: missingKpis.map((k) => `${k.kpi_number}: ${k.name}`),
+    });
+  }
+
+  // No measures recorded
+  const implementationsCount =
+    lab.living_lab_projects_implementation?.length ?? 0;
+  if (implementationsCount === 0) {
+    alerts.push({
+      label: "No measures recorded",
+      value: 0,
+      severity: "warning",
     });
   }
 

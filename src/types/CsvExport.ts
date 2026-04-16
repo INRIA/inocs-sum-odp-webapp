@@ -4,7 +4,8 @@
 export interface KpiResultCsvRow {
   lab: string;
   kpi_number: string;
-  kpi_name: string;
+  kpi_name_parent: string;
+  kpi_subtitle_child: string;
   kpi_group: string;
   metric: string;
   value: number;

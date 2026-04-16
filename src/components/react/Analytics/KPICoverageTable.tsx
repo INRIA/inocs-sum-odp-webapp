@@ -2,7 +2,9 @@
  * KPICoverageTable Component
  *
  * SSR-only React component that displays a table of KPI definitions
- * with coverage information (how many labs have submitted results).
+ * with coverage information. Supports two modes:
+ * - Multi-lab (default): shows how many labs have submitted results per KPI.
+ * - Single-lab: shows entries count and years covered per KPI (when entriesCount is present).
  *
  * @module User Story 4
  */
@@ -18,6 +20,9 @@ export interface KPICoverageTableProps {
  * This component is rendered server-side without hydration (no client:* directive).
  */
 export function KPICoverageTable({ rows }: KPICoverageTableProps) {
+  const isSingleLab = rows.length > 0 && rows[0].entriesCount !== undefined;
+  const colSpan = isSingleLab ? 5 : 4;
+
   return (
     <div className="overflow-x-auto bg-white rounded-lg shadow">
       <table className="min-w-full divide-y divide-gray-200">
@@ -32,15 +37,26 @@ export function KPICoverageTable({ rows }: KPICoverageTableProps) {
             <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
               Type
             </th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Labs with Results
-            </th>
+            {isSingleLab ? (
+              <>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Entries
+                </th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Years Covered
+                </th>
+              </>
+            ) : (
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Labs with Results
+              </th>
+            )}
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {rows.length === 0 ? (
             <tr>
-              <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
+              <td colSpan={colSpan} className="px-6 py-4 text-center text-gray-500">
                 No KPI definitions found
               </td>
             </tr>
@@ -64,17 +80,36 @@ export function KPICoverageTable({ rows }: KPICoverageTableProps) {
                     {row.kpiType}
                   </span>
                 </td>
-                <td
-                  className={
-                    row.labsWithResultsCount === 0
-                      ? "px-6 py-4 whitespace-nowrap text-md text-center text-danger font-bold"
-                      : row.labsWithResultsCount === row.totalLabs
-                        ? "px-6 py-4 whitespace-nowrap text-md text-center text-success font-bold"
-                        : "px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900"
-                  }
-                >
-                  {row.labsWithResultsCount} / {row.totalLabs}
-                </td>
+                {isSingleLab ? (
+                  <>
+                    <td
+                      className={
+                        row.entriesCount === 0
+                          ? "px-6 py-4 whitespace-nowrap text-md text-center text-danger font-bold"
+                          : "px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900"
+                      }
+                    >
+                      {row.entriesCount}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">
+                      {row.yearsCovered && row.yearsCovered.length > 0
+                        ? row.yearsCovered.join(", ")
+                        : "\u2014"}
+                    </td>
+                  </>
+                ) : (
+                  <td
+                    className={
+                      row.labsWithResultsCount === 0
+                        ? "px-6 py-4 whitespace-nowrap text-md text-center text-danger font-bold"
+                        : row.labsWithResultsCount === row.totalLabs
+                          ? "px-6 py-4 whitespace-nowrap text-md text-center text-success font-bold"
+                          : "px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900"
+                    }
+                  >
+                    {row.labsWithResultsCount} / {row.totalLabs}
+                  </td>
+                )}
               </tr>
             ))
           )}
