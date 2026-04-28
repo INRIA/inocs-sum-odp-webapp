@@ -214,5 +214,6 @@ INSERT INTO `kpidefinitions_category` (`kpidefinition_id`, `category_id`) VALUES
 (67, 7),
 (68, 7),
 (69, 7),
-(70, 7);
+(70, 7),
+(71, 7);
 

@@ -16,6 +16,7 @@ export interface IMeasureCoefficient {
   name: string;
   coefficient: number;
   kpi_group_id: number;
+  times_implemented: number;
 }
 
 export interface ILivingLabAnalysis {

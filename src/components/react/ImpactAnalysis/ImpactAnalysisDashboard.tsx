@@ -31,6 +31,9 @@ export const ImpactAnalysisDashboard: React.FC<
   const handleGroupSelect = (groupId: number) => {
     setSelectedGroupId(groupId);
     setActiveTabId(MEASURES_TAB_ID);
+    if (typeof window !== "undefined") {
+      window.location.hash = "impact-results";
+    }
   };
 
   const resetGroupSelection = () => {

@@ -57,17 +57,24 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
     return (
       <div>
         {divider}
-        <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-          <div className="text-4xl mb-3">📊</div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            No analysis data available for this KPI group
-          </h3>
-          <p className="text-gray-600">
-            Analysis results for{" "}
-            <span className="font-semibold">{selectedGroup.name}</span> was not
-            possible due to insufficient data.
+        <InfoAlert
+          variant="warning"
+          title="Not enough data to estimate measure impact"
+          className="mt-6"
+        >
+          <p>
+            Impact coefficients could not be computed for the KPI group{" "}
+            <strong>{selectedGroup.name}</strong>. This typically occurs when
+            only one living lab has reported KPI results for this group — the
+            model requires data from at least two cities to attribute changes to
+            specific policy measures.
           </p>
-        </div>
+          <p className="mt-2">
+            To explore the underlying KPI values, switch to the{" "}
+            <strong>KPI Variations</strong> tab, where you can see how each KPI
+            evolved over time for the available living lab(s).
+          </p>
+        </InfoAlert>
       </div>
     );
   }
@@ -134,7 +141,7 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
       </div>
       <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2">
         {renderStatCard({
-          title: "Total Policy Measures",
+          title: "Total Policy Measures considered",
           value: measures.length,
         })}
         {renderStatCard({
