@@ -1,0 +1,25 @@
+SUM Open Data Platform — New User Registration (Existing Living Lab Editor Request)
+=====================================================================================
+
+A new user has signed up and is requesting to become an editor for an EXISTING living lab.
+The account is pending your validation before they can access the platform.
+
+User Details
+------------
+Name    : {{userName}}
+Email   : {{userEmail}}
+Signed up: {{when}}
+
+Requested Lab
+-------------
+Lab Name : {{labName}}
+Lab ID   : {{labId}}
+
+Next Steps
+----------
+Please log in to the admin panel to review and validate this account.
+Once validated, the user will be able to manage KPI results and measures for the requested lab.
+
+--
+This is an automated notification from the SUM ODP platform.
+Do not reply to this email.

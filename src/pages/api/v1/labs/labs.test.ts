@@ -94,6 +94,7 @@ describe("POST /api/v1/labs - Create new lab", () => {
         expect.objectContaining({
           name: newLabData.name,
         }),
+        expect.objectContaining({ email: expect.any(String) }),
       );
       expect(setUserLivingLabSpy).toHaveBeenCalledWith("1", "1");
     });

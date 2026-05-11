@@ -1,4 +1,8 @@
 import { LabRepository } from "../repositories/labs.repository";
+import {
+  notifyEntityChanged,
+  type ActingUser,
+} from "../email/admin-notifier.service";
 import type {
   ILivingLab,
   ILivingLabIncludeOptions,
@@ -69,13 +73,32 @@ export class LabService {
   /**
    * Create a new lab with validation
    */
-  async createLab(labData: UpdateLabInput): Promise<ILivingLab> {
+  async createLab(
+    labData: UpdateLabInput,
+    actor?: ActingUser,
+  ): Promise<ILivingLab> {
     try {
       this.validateCreateLabInput(labData);
       if (labData.id) {
         throw new Error("New lab cannot already have an ID");
       }
-      return await this.labRepository.create(labData);
+      const createdByUserId = actor ? BigInt(String(actor.id)) : undefined;
+      const newLab = await this.labRepository.create(labData, createdByUserId);
+
+      if (actor) {
+        notifyEntityChanged({
+          entity: "lab",
+          action: "created",
+          entityId: newLab.id ?? 0,
+          labId: newLab.id ?? 0,
+          labName: newLab.name,
+          actor,
+          before: null,
+          after: newLab as unknown as Record<string, unknown>,
+        });
+      }
+
+      return newLab;
     } catch (error) {
       console.error("Error in createLab service:", error);
       if (error instanceof Error) throw error;
@@ -86,7 +109,11 @@ export class LabService {
   /**
    * Update an existing lab with validation
    */
-  async updateLab(id: string, labData: UpdateLabInput): Promise<ILivingLab> {
+  async updateLab(
+    id: string,
+    labData: UpdateLabInput,
+    actor?: ActingUser,
+  ): Promise<ILivingLab> {
     try {
       if (!id || isNaN(Number(id)) || Number(id) <= 0) {
         throw new Error("Invalid lab ID provided");
@@ -98,7 +125,30 @@ export class LabService {
       }
 
       this.validateUpdateLabInput(labData);
-      return await this.labRepository.update(id, labData);
+
+      const lastUpdatedByUserId = actor
+        ? BigInt(String(actor.id))
+        : undefined;
+      const updatedLab = await this.labRepository.update(
+        id,
+        labData,
+        lastUpdatedByUserId,
+      );
+
+      if (actor) {
+        notifyEntityChanged({
+          entity: "lab",
+          action: "updated",
+          entityId: id,
+          labId: id,
+          labName: existing.name,
+          actor,
+          before: existing as unknown as Record<string, unknown>,
+          after: updatedLab as unknown as Record<string, unknown>,
+        });
+      }
+
+      return updatedLab;
     } catch (error) {
       console.error("Error in updateLab service:", error);
       if (error instanceof Error) throw error;
@@ -154,7 +204,8 @@ export class LabService {
   async upsertLabProjectImplementation(
     labId: string,
     projectId: string,
-    implementationData: any
+    implementationData: any,
+    actor?: ActingUser,
   ): Promise<any> {
     try {
       if (!labId || isNaN(Number(labId)) || Number(labId) <= 0)
@@ -170,11 +221,33 @@ export class LabService {
         sanitizedData.start_at = parsed;
       }
 
-      return await this.labRepository.upsertProjectImplementation(
-        labId,
-        projectId,
-        sanitizedData
-      );
+      const lastUpdatedByUserId = actor
+        ? BigInt(String(actor.id))
+        : undefined;
+
+      const { record, wasCreated, before } =
+        await this.labRepository.upsertProjectImplementation(
+          labId,
+          projectId,
+          sanitizedData,
+          lastUpdatedByUserId,
+        );
+
+      if (actor) {
+        const lab = await this.labRepository.findById(labId);
+        notifyEntityChanged({
+          entity: "lab_project",
+          action: wasCreated ? "created" : "updated",
+          entityId: record.id ?? 0,
+          labId,
+          labName: lab?.name,
+          actor,
+          before: wasCreated ? null : (before as Record<string, unknown>),
+          after: record as Record<string, unknown>,
+        });
+      }
+
+      return record;
     } catch (error) {
       console.error("Error in upsertLabProjectImplementation service:", error);
       throw new Error("Failed to upsert LabProjectImplementation");
@@ -186,7 +259,8 @@ export class LabService {
    */
   async deleteLabProjectImplementation(
     labId: string,
-    projectId: string
+    projectId: string,
+    actor?: ActingUser,
   ): Promise<void> {
     try {
       if (!labId || isNaN(Number(labId)) || Number(labId) <= 0)
@@ -194,7 +268,26 @@ export class LabService {
       if (!projectId || isNaN(Number(projectId)) || Number(projectId) <= 0)
         throw new Error("Invalid project ID");
 
-      await this.labRepository.deleteProjectImplementation(labId, projectId);
+      const deletedRows = await this.labRepository.deleteProjectImplementation(
+        labId,
+        projectId,
+      );
+
+      if (actor && deletedRows.length > 0) {
+        const lab = await this.labRepository.findById(labId);
+        deletedRows.forEach((row) => {
+          notifyEntityChanged({
+            entity: "lab_project",
+            action: "deleted",
+            entityId: row.id ?? 0,
+            labId,
+            labName: lab?.name,
+            actor: actor!,
+            before: row as Record<string, unknown>,
+            after: null,
+          });
+        });
+      }
     } catch (error) {
       console.error("Error in deleteLabProjectImplementation service:", error);
       throw new Error("Failed to delete LabProjectImplementation");

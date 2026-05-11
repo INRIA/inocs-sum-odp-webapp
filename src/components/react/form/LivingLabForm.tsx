@@ -13,6 +13,67 @@ type Props = {
   livingLab?: ILivingLab;
 };
 
+type LivingLabPayload = {
+  name: string;
+  lat: string;
+  lng: string;
+  radius: number;
+  area: number | null;
+  population: number | null;
+  country_code2: string;
+  country: string;
+};
+
+function normalizeCoordinate(value: string): number {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : 0;
+}
+
+function areNumbersEqual(a: number, b: number): boolean {
+  return a === b || (Number.isNaN(a) && Number.isNaN(b));
+}
+
+function areOptionalNumbersEqual(a: number | null, b: number | null): boolean {
+  if (a === null || b === null) {
+    return a === b;
+  }
+  return areNumbersEqual(a, b);
+}
+
+function buildInitialPayload(lab?: ILivingLab): LivingLabPayload {
+  return {
+    name: lab?.name ?? "",
+    lat: `${lab?.lat ?? "0"}`,
+    lng: `${lab?.lng ?? "0"}`,
+    radius: lab?.radius ?? 0,
+    area: lab?.area ?? null,
+    population: lab?.population ?? null,
+    country_code2: lab?.country_code2 ?? "",
+    country: lab?.country ?? "",
+  };
+}
+
+function hasPayloadChanged(
+  currentPayload: LivingLabPayload,
+  initialPayload: LivingLabPayload,
+): boolean {
+  return (
+    currentPayload.name !== initialPayload.name ||
+    normalizeCoordinate(currentPayload.lat) !==
+      normalizeCoordinate(initialPayload.lat) ||
+    normalizeCoordinate(currentPayload.lng) !==
+      normalizeCoordinate(initialPayload.lng) ||
+    !areNumbersEqual(currentPayload.radius, initialPayload.radius) ||
+    !areOptionalNumbersEqual(currentPayload.area, initialPayload.area) ||
+    !areOptionalNumbersEqual(
+      currentPayload.population,
+      initialPayload.population,
+    ) ||
+    currentPayload.country_code2 !== initialPayload.country_code2 ||
+    currentPayload.country !== initialPayload.country
+  );
+}
+
 export default function LivingLabForm({ livingLab }: Props) {
   const [name, setName] = useState(livingLab?.name ?? "");
   const [latitude, setLatitude] = useState(livingLab?.lat ?? "");
@@ -36,6 +97,19 @@ export default function LivingLabForm({ livingLab }: Props) {
 
   // derive a key from center so MapViewer remounts whenever center changes
   const mapKey = mapCenter ? `${mapCenter[0]},${mapCenter[1]}` : "no-center";
+  const isEditMode = Boolean(livingLab?.id);
+  const initialPayload = buildInitialPayload(livingLab);
+  const currentPayload: LivingLabPayload = {
+    name,
+    lat: `${latitude || "0"}`,
+    lng: `${longitude || "0"}`,
+    radius: radius ? parseFloat(radius) : 0,
+    area: area ? parseInt(area, 10) : null,
+    population: population ? parseInt(population, 10) : null,
+    country_code2: countryCode,
+    country,
+  };
+  const isDirty = hasPayloadChanged(currentPayload, initialPayload);
 
   function handleMapClick(lat: number, lng: number) {
     const latStr = lat.toFixed(5);
@@ -87,16 +161,11 @@ export default function LivingLabForm({ livingLab }: Props) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErrorMessage("");
-    const payload = {
-      name,
-      lat: latitude || "0",
-      lng: longitude || "0",
-      radius: radius ? parseFloat(radius) : 0,
-      area: area ? parseInt(area, 10) : null,
-      population: population ? parseInt(population, 10) : null,
-      country_code2: countryCode,
-      country,
-    };
+    const payload = currentPayload;
+
+    if (isEditMode && !hasPayloadChanged(payload, initialPayload)) {
+      return;
+    }
 
     try {
       if (livingLab?.id) {
@@ -286,6 +355,7 @@ export default function LivingLabForm({ livingLab }: Props) {
           variant="primary"
           text="Save Living Lab"
           href="#"
+          disabled={isEditMode && !isDirty}
         />
       </div>
     </form>

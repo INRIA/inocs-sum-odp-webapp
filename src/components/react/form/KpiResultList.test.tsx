@@ -100,6 +100,30 @@ describe("KpiResultList", () => {
     expect(document.querySelector('input[name="value"]')).toBeInTheDocument();
   });
 
+  it("new entry save is disabled until user provides a value", async () => {
+    const user = userEvent.setup();
+    render(
+      <KpiResultList
+        kpi={mockKpi}
+        livingLabId={42}
+        initialResults={[]}
+        defaultDate="2025-01-10"
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /add/i }));
+    const saveButton = screen.getByRole("button", { name: /save/i });
+    const valueInput = document.querySelector('input[name="value"]') as HTMLInputElement;
+
+    expect(saveButton).toBeDisabled();
+
+    fireEvent.change(valueInput, { target: { value: "55" } });
+    expect(saveButton).not.toBeDisabled();
+
+    fireEvent.change(valueInput, { target: { value: "" } });
+    expect(saveButton).toBeDisabled();
+  });
+
   it("cancelling new entry closes row; list unchanged", async () => {
     const user = userEvent.setup();
     render(
@@ -181,6 +205,49 @@ describe("KpiResultList", () => {
     });
   });
 
+  it("existing entry save is disabled while unchanged and re-disables after revert", async () => {
+    const user = userEvent.setup();
+    render(
+      <KpiResultList
+        kpi={mockKpi}
+        livingLabId={42}
+        initialResults={[mockResult1]}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /edit/i }));
+
+    const saveButton = screen.getByRole("button", { name: /save/i });
+    const valueInput = document.querySelector('input[name="value"]') as HTMLInputElement;
+
+    expect(saveButton).toBeDisabled();
+
+    fireEvent.change(valueInput, { target: { value: "999" } });
+    expect(saveButton).not.toBeDisabled();
+
+    fireEvent.change(valueInput, { target: { value: "100" } });
+    expect(saveButton).toBeDisabled();
+  });
+
+  it("existing entry unchanged save does not call API", async () => {
+    const user = userEvent.setup();
+    render(
+      <KpiResultList
+        kpi={mockKpi}
+        livingLabId={42}
+        initialResults={[mockResult1]}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /edit/i }));
+    const saveButton = screen.getByRole("button", { name: /save/i });
+
+    expect(saveButton).toBeDisabled();
+    await user.click(saveButton);
+
+    expect(upsertMock).not.toHaveBeenCalled();
+  });
+
   it("editing existing entry and cancelling restores original", async () => {
     const user = userEvent.setup();
     render(
@@ -231,7 +298,7 @@ describe("KpiResultList", () => {
     expect(deleteMock).not.toHaveBeenCalled();
   });
 
-  it("inline error shown for empty date on save", async () => {
+  it("save is disabled when date is empty", async () => {
     const user = userEvent.setup();
     render(
       <KpiResultList kpi={mockKpi} livingLabId={42} initialResults={[]} />,
@@ -242,9 +309,11 @@ describe("KpiResultList", () => {
     fireEvent.change(dateInput, { target: { value: "" } });
     const valueInput = document.querySelector('input[name="value"]') as HTMLInputElement;
     fireEvent.change(valueInput, { target: { value: "50" } });
-    await user.click(screen.getByRole("button", { name: /save/i }));
+    const saveButton = screen.getByRole("button", { name: /save/i });
+
+    expect(saveButton).toBeDisabled();
+    await user.click(saveButton);
     expect(upsertMock).not.toHaveBeenCalled();
-    expect(screen.getByText(/date/i)).toBeInTheDocument();
   });
 
   it("inline error shown for out-of-range percentage", async () => {

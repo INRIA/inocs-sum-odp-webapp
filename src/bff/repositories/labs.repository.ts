@@ -45,10 +45,16 @@ export class LabRepository {
   /**
    * Create a new lab
    */
-  async create(labData: UpdateLabInput): Promise<ILivingLab> {
+  async create(
+    labData: UpdateLabInput,
+    createdByUserId?: bigint,
+  ): Promise<ILivingLab> {
     try {
       const lab = await prisma.labs.create({
-        data: labData,
+        data: {
+          ...labData,
+          ...(createdByUserId != null ? { user_id: createdByUserId } : {}),
+        },
       });
       return this.mapPrismaLabToLab(lab);
     } catch (error) {
@@ -60,11 +66,20 @@ export class LabRepository {
   /**
    * Update an existing lab
    */
-  async update(id: string, labData: UpdateLabInput): Promise<ILivingLab> {
+  async update(
+    id: string,
+    labData: UpdateLabInput,
+    lastUpdatedByUserId?: bigint,
+  ): Promise<ILivingLab> {
     try {
       const lab = await prisma.labs.update({
         where: { id: BigInt(id) },
-        data: labData,
+        data: {
+          ...labData,
+          ...(lastUpdatedByUserId != null
+            ? { last_updated_by_user_id: lastUpdatedByUserId }
+            : {}),
+        },
       });
       return this.mapPrismaLabToLab(lab);
     } catch (error) {
@@ -139,15 +154,27 @@ export class LabRepository {
    * RELATION TABLE METHODS
    */
   /**
-   * Upsert a project implementation for a lab
+   * Upsert a project implementation for a lab.
+   * Returns { record, wasCreated } so the caller can build a diff for audit emails.
    */
   async upsertProjectImplementation(
     labId: string,
     projectId: string,
     updateData: Record<string, any>,
-  ): Promise<void> {
+    lastUpdatedByUserId?: bigint,
+  ): Promise<{ record: any; wasCreated: boolean; before: any | null }> {
     try {
-      return prisma.living_lab_projects_implementation.upsert({
+      const existing =
+        await prisma.living_lab_projects_implementation.findUnique({
+          where: {
+            living_lab_id_project_id: {
+              living_lab_id: BigInt(labId),
+              project_id: BigInt(projectId),
+            },
+          },
+        });
+
+      const record = await prisma.living_lab_projects_implementation.upsert({
         where: {
           living_lab_id_project_id: {
             living_lab_id: BigInt(labId),
@@ -158,13 +185,21 @@ export class LabRepository {
           ...updateData,
           living_lab_id: BigInt(labId),
           project_id: BigInt(projectId),
+          ...(lastUpdatedByUserId != null
+            ? { last_updated_by_user_id: lastUpdatedByUserId }
+            : {}),
         },
         create: {
           ...updateData,
           living_lab_id: BigInt(labId),
           project_id: BigInt(projectId),
+          ...(lastUpdatedByUserId != null
+            ? { last_updated_by_user_id: lastUpdatedByUserId }
+            : {}),
         },
       });
+
+      return { record, wasCreated: !existing, before: existing ?? null };
     } catch (error) {
       console.error(
         `Error upserting project implementation for lab ${labId} and project ${projectId}:`,
@@ -175,19 +210,30 @@ export class LabRepository {
   }
 
   /**
-   * Delete a project implementation from a lab
+   * Delete a project implementation from a lab.
+   * Returns the deleted records so the caller can build a diff for audit emails.
    */
   async deleteProjectImplementation(
     labId: string,
     projectId: string,
-  ): Promise<void> {
+  ): Promise<any[]> {
     try {
+      const existing =
+        await prisma.living_lab_projects_implementation.findMany({
+          where: {
+            living_lab_id: BigInt(labId),
+            project_id: BigInt(projectId),
+          },
+        });
+
       await prisma.living_lab_projects_implementation.deleteMany({
         where: {
           living_lab_id: BigInt(labId),
           project_id: BigInt(projectId),
         },
       });
+
+      return existing;
     } catch (error) {
       console.error(
         `Error deleting project implementation for lab ${labId} and project ${projectId}:`,

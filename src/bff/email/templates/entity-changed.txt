@@ -1,0 +1,17 @@
+SUM Open Data Platform — Data Change Notification
+==================================================
+
+Entity  : {{entity}}
+Action  : {{action}}
+Record ID: {{entityId}}
+Lab ID  : {{labId}}
+Actor   : {{actorName}} <{{actorEmail}}>
+When    : {{when}}
+
+Changes
+-------
+{{diff}}
+
+--
+This is an automated notification from the SUM ODP platform.
+Do not reply to this email.

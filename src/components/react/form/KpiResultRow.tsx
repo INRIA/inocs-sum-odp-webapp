@@ -32,6 +32,11 @@ export function KpiResultRow({ result, kpi, onSave, onDelete }: Props) {
   const [pendingDate, setPendingDate] = useState<string>(result.date);
   const [error, setError] = useState<string | null>(null);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const hasChanges =
+    pendingValue !== result.value ||
+    parseDateToInputHtml(pendingDate) !== parseDateToInputHtml(result.date);
+  const canSave = !isSaving && hasChanges;
 
   const validate = (val: number, date: string): boolean => {
     if (!date) {
@@ -61,8 +66,11 @@ export function KpiResultRow({ result, kpi, onSave, onDelete }: Props) {
   };
 
   const handleSave = async () => {
+    if (!canSave) return;
     if (!validate(pendingValue, pendingDate)) return;
+
     try {
+      setIsSaving(true);
       const updated = await api.upsertLivingLabKpiResults({
         id: result.id,
         kpidefinition_id: result.kpidefinition_id,
@@ -82,6 +90,8 @@ export function KpiResultRow({ result, kpi, onSave, onDelete }: Props) {
       setIsEditing(false);
     } catch {
       setError("Failed to save. Please try again.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -137,6 +147,7 @@ export function KpiResultRow({ result, kpi, onSave, onDelete }: Props) {
               name="value"
               value={pendingValue}
               onChange={(e) => setPendingValue(Number(e.target.value))}
+              disabled={isSaving}
               step={kpi.metric === EnumKpiMetricType.PERCENTAGE ? 0.01 : 0.1}
               min={kpi.metric === EnumKpiMetricType.PERCENTAGE ? 0 : undefined}
               max={kpi.metric === EnumKpiMetricType.PERCENTAGE ? 1 : undefined}
@@ -149,6 +160,7 @@ export function KpiResultRow({ result, kpi, onSave, onDelete }: Props) {
               name="date"
               value={parseDateToInputHtml(pendingDate)}
               onChange={(e) => setPendingDate(e.target.value)}
+              disabled={isSaving}
               className="mt-0"
             />
           </Field>
@@ -156,7 +168,10 @@ export function KpiResultRow({ result, kpi, onSave, onDelete }: Props) {
             type="button"
             aria-label="Save"
             onClick={handleSave}
-            className="inline-flex items-center"
+            disabled={!canSave}
+            className={`inline-flex items-center ${
+              canSave ? "cursor-pointer" : "cursor-not-allowed opacity-60"
+            }`}
           >
             <CheckCircleIcon className="h-4 w-4 text-success" />
           </button>
@@ -164,7 +179,10 @@ export function KpiResultRow({ result, kpi, onSave, onDelete }: Props) {
             type="button"
             aria-label="Cancel"
             onClick={handleCancel}
-            className="inline-flex items-center"
+            disabled={isSaving}
+            className={`inline-flex items-center ${
+              isSaving ? "cursor-not-allowed opacity-60" : "cursor-pointer"
+            }`}
           >
             <XMarkIcon className="h-4 w-4 text-dark" />
           </button>

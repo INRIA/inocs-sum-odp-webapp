@@ -109,22 +109,26 @@ model kpidefinitions_category {
 }
 
 model kpiresults {
-  id                  BigInt       @id @default(autoincrement()) @db.UnsignedBigInt 
-  kpidefinition_id    BigInt       @db.UnsignedBigInt     
-  living_lab_id       BigInt       @db.UnsignedBigInt     
-  transport_mode_id   BigInt?      @db.UnsignedBigInt     
-  value               Float        @db.Float
-  description         String?      @db.VarChar(5000)
-  date                DateTime     @db.Date
-  created_at          DateTime     @default(now()) @db.Timestamp(0)
-  updated_at          DateTime     @default(now()) @db.Timestamp(0)
-  user_id             BigInt?      @db.UnsignedBigInt
+  id                          BigInt       @id @default(autoincrement()) @db.UnsignedBigInt 
+  kpidefinition_id            BigInt       @db.UnsignedBigInt     
+  living_lab_id               BigInt       @db.UnsignedBigInt     
+  transport_mode_id           BigInt?      @db.UnsignedBigInt     
+  value                       Float        @db.Float
+  description                 String?      @db.VarChar(5000)
+  date                        DateTime     @db.Date
+  created_at                  DateTime     @default(now()) @db.Timestamp(0)
+  updated_at                  DateTime     @default(now()) @db.Timestamp(0) @updatedAt
+  user_id                     BigInt?      @db.UnsignedBigInt
+  last_updated_by_user_id     BigInt?      @db.UnsignedBigInt
 
-  kpidefinition       kpidefinitions   @relation(fields: [kpidefinition_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  living_lab          labs             @relation(fields: [living_lab_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  transport_mode      transport_mode?  @relation(fields: [transport_mode_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  user                users?           @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  messages            messages[]
+  kpidefinition               kpidefinitions   @relation(fields: [kpidefinition_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  living_lab                  labs             @relation(fields: [living_lab_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  transport_mode              transport_mode?  @relation(fields: [transport_mode_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user                        users?           @relation(name: "kpiresults_created_by", fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  last_updated_by             users?           @relation(name: "kpiresults_last_updated_by", fields: [last_updated_by_user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  messages                    messages[]
+
+  @@index([last_updated_by_user_id], map: "kpiresults_last_updated_by_user_id_index")
 }
 
 model labs {
@@ -140,13 +144,15 @@ model labs {
   lat                                String?                              @db.VarChar(25)
   lng                                String?                              @db.VarChar(25)
   created_at                         DateTime?                            @db.Timestamp(0)
-  updated_at                         DateTime?                            @db.Timestamp(0)
+  updated_at                         DateTime?                            @db.Timestamp(0) @updatedAt
   user_id                            BigInt?                              @db.UnsignedBigInt
   validated_at                       DateTime?                            @db.Timestamp(0)
   validated_by_user_id               BigInt?                              @db.UnsignedBigInt
+  last_updated_by_user_id            BigInt?                              @db.UnsignedBigInt
 
   created_by                         users?                               @relation(name: "created_by", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "labs_user_id_foreign")
   validated_by                       users?                               @relation(name: "validated_by", fields: [validated_by_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "labs_validated_by_user_id_foreign")
+  last_updated_by                    users?                               @relation(name: "labs_last_updated_by", fields: [last_updated_by_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "labs_last_updated_by_user_id_foreign")
   living_lab_projects_implementation        living_lab_projects_implementation[]
   transport_mode_living_lab_implementation  transport_mode_living_lab_implementation[]
   kpiresults                                kpiresults[]
@@ -156,6 +162,7 @@ model labs {
 
   @@index([validated_by_user_id], map: "labs_validated_by_user_id_foreign")
   @@index([user_id], map: "labs_user_id_foreign")
+  @@index([last_updated_by_user_id], map: "labs_last_updated_by_user_id_foreign")
 }
 
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
@@ -195,21 +202,24 @@ model projects {
 }
 
 model living_lab_projects_implementation {
-  id            BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
-  project_id    BigInt    @db.UnsignedBigInt
-  living_lab_id BigInt    @db.UnsignedBigInt
-  user_id       String?   @db.VarChar(255)
-  created_at    DateTime  @default(now()) @db.Timestamp(0)
-  updated_at    DateTime  @default(now()) @db.Timestamp(0)
-  start_at      DateTime? @db.Timestamp(0)
-  description   String?   @db.Text
+  id                          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  project_id                  BigInt    @db.UnsignedBigInt
+  living_lab_id               BigInt    @db.UnsignedBigInt
+  user_id                     String?   @db.VarChar(255)
+  created_at                  DateTime  @default(now()) @db.Timestamp(0)
+  updated_at                  DateTime  @default(now()) @db.Timestamp(0) @updatedAt
+  start_at                    DateTime? @db.Timestamp(0)
+  description                 String?   @db.Text
+  last_updated_by_user_id     BigInt?   @db.UnsignedBigInt
 
-  project   projects @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "lab_projects_project_id_foreign")
-  lab       labs     @relation(fields: [living_lab_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "lab_projects_living_lab_id_foreign")
-  messages  messages[]
+  project          projects @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "lab_projects_project_id_foreign")
+  lab              labs     @relation(fields: [living_lab_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "lab_projects_living_lab_id_foreign")
+  last_updated_by  users?   @relation(name: "lab_projects_last_updated_by", fields: [last_updated_by_user_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "lab_projects_last_updated_by_user_id_foreign")
+  messages         messages[]
 
   @@index([project_id], map: "lab_projects_project_id_foreign")
   @@index([living_lab_id], map: "lab_projects_living_lab_id_foreign")
+  @@index([last_updated_by_user_id], map: "lab_projects_last_updated_by_user_id_foreign")
   @@unique([living_lab_id, project_id], map: "uniq_lab_project")
 }
 
@@ -248,9 +258,12 @@ model users {
   updated_at                    DateTime? @db.Timestamp(0)
 
   role                          roles     @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  kpiresults                    kpiresults[]
+  kpiresults                    kpiresults[] @relation(name: "kpiresults_created_by")
+  kpiresults_last_updated       kpiresults[] @relation(name: "kpiresults_last_updated_by")
   created_labs                  labs[]    @relation(name: "created_by") @ignore
   validated_labs                labs[]    @relation(name: "validated_by") @ignore
+  last_updated_labs             labs[]    @relation(name: "labs_last_updated_by")
+  last_updated_lab_projects     living_lab_projects_implementation[] @relation(name: "lab_projects_last_updated_by")
   living_lab_user_relation      living_lab_user_relation[]
   messages_sent                 messages[] @relation(name: "from_user")
   messages_received             messages[] @relation(name: "to_user")

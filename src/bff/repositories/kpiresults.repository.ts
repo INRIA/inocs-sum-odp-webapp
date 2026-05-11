@@ -46,8 +46,12 @@ export class KpiResultsRepository {
 
   /**
    * Upsert a KPI result.
+   * Returns { result, wasCreated, before } so the caller can build audit diffs.
    */
-  async upsert(data: IKpiResultInput): Promise<IKpiResult> {
+  async upsert(
+    data: IKpiResultInput,
+    lastUpdatedByUserId?: bigint,
+  ): Promise<{ result: IKpiResult; wasCreated: boolean; before: any | null }> {
     try {
       const { id, ...updateData } = data;
       const existingResult = data.id
@@ -62,15 +66,35 @@ export class KpiResultsRepository {
         // Update existing record
         const updated = await prisma.kpiresults.update({
           where: { id: BigInt(existingResult.id) },
-          data: { ...updateData, date: new Date(updateData.date) },
+          data: {
+            ...updateData,
+            date: new Date(updateData.date),
+            ...(lastUpdatedByUserId != null
+              ? { last_updated_by_user_id: lastUpdatedByUserId }
+              : {}),
+          },
         });
-        return this.mapPrismaRowToIKpiResult(updated);
+        return {
+          result: this.mapPrismaRowToIKpiResult(updated),
+          wasCreated: false,
+          before: existingResult,
+        };
       }
       // Create new record
       const created = await prisma.kpiresults.create({
-        data: { ...updateData, date: new Date(updateData.date) },
+        data: {
+          ...updateData,
+          date: new Date(updateData.date),
+          ...(lastUpdatedByUserId != null
+            ? { last_updated_by_user_id: lastUpdatedByUserId }
+            : {}),
+        },
       });
-      return this.mapPrismaRowToIKpiResult(created);
+      return {
+        result: this.mapPrismaRowToIKpiResult(created),
+        wasCreated: true,
+        before: null,
+      };
     } catch (error) {
       console.error(
         `Error updating kpiresult with data ${JSON.stringify(data)}:`,
@@ -82,22 +106,25 @@ export class KpiResultsRepository {
 
   /**
    * Delete a KPI result by id.
+   * Returns the deleted record for audit purposes, or null if not found.
    */
   async delete(
     id?: string
-
-    //     criteria: {
-    //     id?: string;
-    //     kpidefinition_id?: string;
-    //     living_lab_id?: string;
-    //   }
-  ): Promise<boolean> {
+  ): Promise<{ deleted: boolean; before: any | null }> {
     try {
-      await prisma.kpiresults.delete({ where: { id: Number(id) } });
-      return true;
+      const existing = id
+        ? await prisma.kpiresults.findUnique({ where: { id: BigInt(id) } })
+        : null;
+
+      if (!existing) {
+        return { deleted: false, before: null };
+      }
+
+      await prisma.kpiresults.delete({ where: { id: BigInt(id!) } });
+      return { deleted: true, before: existing };
     } catch (error) {
       console.error(
-        `Error deleting kpiresult with criteria ${JSON.stringify(criteria)}:`,
+        `Error deleting kpiresult with id ${id}:`,
         error
       );
       throw new Error("Failed to delete KPI result");

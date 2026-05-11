@@ -5,8 +5,12 @@ import type { LivingLabProjectsImplementationInput } from "../../../types";
 
 const labService = new LabService();
 
-export const PUT: APIRoute = async ({ request, url }) => {
+export const PUT: APIRoute = async ({ request, url, locals }) => {
   try {
+    if (!locals.user) {
+      return new ApiResponse({ error: "Unauthorized", status: 401 });
+    }
+
     const data = await request.json();
     const { living_lab_id, project_id, ...updateData } =
       data as LivingLabProjectsImplementationInput;
@@ -25,10 +29,17 @@ export const PUT: APIRoute = async ({ request, url }) => {
       });
     }
 
+    const actor = {
+      id: locals.user.id,
+      name: locals.user.name,
+      email: locals.user.email,
+    };
+
     const updatedLab = await labService.upsertLabProjectImplementation(
       living_lab_id,
       project_id,
-      updateData
+      updateData,
+      actor,
     );
     return new ApiResponse({
       data: updatedLab,
@@ -43,8 +54,12 @@ export const PUT: APIRoute = async ({ request, url }) => {
   }
 };
 
-export const DELETE: APIRoute = async ({ request, url }) => {
+export const DELETE: APIRoute = async ({ request, url, locals }) => {
   try {
+    if (!locals.user) {
+      return new ApiResponse({ error: "Unauthorized", status: 401 });
+    }
+
     const data = await request.json();
     const labId = data.labId;
     const projectId = data.projectId;
@@ -63,7 +78,13 @@ export const DELETE: APIRoute = async ({ request, url }) => {
       });
     }
 
-    await labService.deleteLabProjectImplementation(labId, projectId);
+    const actor = {
+      id: locals.user.id,
+      name: locals.user.name,
+      email: locals.user.email,
+    };
+
+    await labService.deleteLabProjectImplementation(labId, projectId, actor);
     return ApiResponse.noContent();
   } catch (error) {
     console.error("Error in DELETE /api/v1/labs-projects:", error);

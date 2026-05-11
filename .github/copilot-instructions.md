@@ -138,6 +138,21 @@ AUTH_TRUST_HOST=true
 ODP_ADMIN_HOST_PUBLIC="http://localhost:4321"
 ```
 
+SMTP / admin email notification variables (all optional in dev — emails log to console when `SMTP_HOST` is unset):
+
+```
+SMTP_HOST="smtp.example.com"
+SMTP_PORT=587
+SMTP_SECURE="false"           # "true" for implicit TLS / port 465
+SMTP_USER="user@example.com"
+SMTP_PASSWORD="secret"
+SMTP_FROM="noreply@sum-odp.eu"
+ADMIN_EMAILS="admin@example.com"   # comma-separated list
+```
+
+See `.env.example` for the full list including rate-limiter and job-run variables.
+
+
 ## Pitfalls
 
 - **Astro + React hydration**: always pass serialisable props to React islands. Do not pass class instances, `Date` objects, or Prisma model instances directly — convert to plain objects first.

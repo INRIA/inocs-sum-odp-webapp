@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type {
   IProject,
   LivingLabProjectsImplementationInput,
@@ -24,6 +24,23 @@ type Props = {
   className?: string;
 };
 
+type MeasureSnapshot = {
+  checked: boolean;
+  startAt: string;
+  description: string;
+};
+
+function buildMeasureSnapshot(
+  value: Partial<LivingLabProjectsImplementationInput> | undefined,
+  measureId: number,
+): MeasureSnapshot {
+  return {
+    checked: value?.project_id === measureId,
+    startAt: parseDateToInputHtml(value?.start_at?.toString() || ""),
+    description: value?.description || "",
+  };
+}
+
 export function LivingLabMeasureForm({
   livingLabId,
   measure,
@@ -31,17 +48,33 @@ export function LivingLabMeasureForm({
   isEditable = false,
   className = "",
 }: Props) {
-  const [checked, setChecked] = useState<boolean>(
-    value?.project_id === measure.id
-  );
+  const propSnapshot = buildMeasureSnapshot(value, measure.id);
+  const [savedSnapshot, setSavedSnapshot] =
+    useState<MeasureSnapshot>(propSnapshot);
+  const [checked, setChecked] = useState<boolean>(propSnapshot.checked);
   const [isSaving, setIsSaving] = useState(false);
-  const [startAt, setStartAt] = useState<string>(
-    value?.start_at?.toString() || ""
-  );
+  const [startAt, setStartAt] = useState<string>(propSnapshot.startAt);
   const [description, setDescription] = useState<string>(
-    value?.description || ""
+    propSnapshot.description,
   );
   const [showSubform, setShowSubform] = useState<boolean>(false);
+
+  useEffect(() => {
+    setSavedSnapshot(propSnapshot);
+    setChecked(propSnapshot.checked);
+    setStartAt(propSnapshot.startAt);
+    setDescription(propSnapshot.description);
+  }, [propSnapshot.checked, propSnapshot.startAt, propSnapshot.description]);
+
+  const currentSnapshot: MeasureSnapshot = {
+    checked,
+    startAt: parseDateToInputHtml(startAt),
+    description,
+  };
+  const hasChanges =
+    currentSnapshot.checked !== savedSnapshot.checked ||
+    currentSnapshot.startAt !== savedSnapshot.startAt ||
+    currentSnapshot.description !== savedSnapshot.description;
 
   async function toggle(e?: React.MouseEvent) {
     if (!isEditable || isSaving) return;
@@ -53,6 +86,8 @@ export function LivingLabMeasureForm({
 
   async function handleSave() {
     if (isSaving || !isEditable) return;
+    if (!hasChanges) return;
+
     try {
       setIsSaving(true);
       const payload: LivingLabProjectsImplementationInput = {
@@ -64,6 +99,13 @@ export function LivingLabMeasureForm({
       const response = await api.updateLivingLabMeasure(payload);
 
       if (response) {
+        const nextSnapshot: MeasureSnapshot = {
+          checked: true,
+          startAt: parseDateToInputHtml(startAt),
+          description,
+        };
+
+        setSavedSnapshot(nextSnapshot);
         setChecked(true);
         setShowSubform(false);
       }
@@ -76,13 +118,28 @@ export function LivingLabMeasureForm({
 
   async function handleRemove() {
     if (isSaving || !isEditable) return;
+
+    const isPersistedMeasure = savedSnapshot.checked;
+    if (!isPersistedMeasure) {
+      setChecked(false);
+      setStartAt("");
+      setDescription("");
+      setShowSubform(false);
+      return;
+    }
+
     try {
       setIsSaving(true);
-      const response = await api.deleteLivingLabMeasure({
-        labId: livingLabId,
-        projectId: measure.id,
+      await api.deleteLivingLabMeasure({
+        labId: String(livingLabId),
+        projectId: String(measure.id),
       });
 
+      setSavedSnapshot({
+        checked: false,
+        startAt: "",
+        description: "",
+      });
       setChecked(false);
       setStartAt("");
       setDescription("");
@@ -98,9 +155,9 @@ export function LivingLabMeasureForm({
   async function handleClose() {
     if (isSaving || !isEditable) return;
     try {
-      setChecked(value?.project_id === measure.id);
-      setStartAt(value?.start_at?.toString() || "");
-      setDescription(value?.description || "");
+      setChecked(savedSnapshot.checked);
+      setStartAt(savedSnapshot.startAt);
+      setDescription(savedSnapshot.description);
 
       setShowSubform(false);
     } catch (error) {
@@ -220,7 +277,7 @@ export function LivingLabMeasureForm({
                 variant="secondary"
                 type="button"
                 onClick={handleSave}
-                disabled={isSaving}
+                disabled={isSaving || !hasChanges}
                 className="bg-primary text-white"
               >
                 {isSaving ? "Saving..." : "Validate"}

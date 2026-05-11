@@ -32,9 +32,14 @@ export function KpiNewEntryRow({
   onSave,
   onCancel,
 }: Props) {
+  const initialDate = defaultDate ?? todayISO();
   const [pendingValue, setPendingValue] = useState<string>("");
-  const [pendingDate, setPendingDate] = useState<string>(defaultDate ?? todayISO());
+  const [pendingDate, setPendingDate] = useState<string>(initialDate);
   const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const isDirty = pendingValue.trim() !== "" || pendingDate !== initialDate;
+  const canSave =
+    !isSaving && isDirty && pendingValue.trim() !== "" && !!pendingDate;
 
   // Update date when defaultDate prop changes (only while row is open/unsaved)
   useEffect(() => {
@@ -78,8 +83,11 @@ export function KpiNewEntryRow({
   };
 
   const handleSave = async () => {
+    if (!canSave) return;
     if (!validate(pendingValue, pendingDate)) return;
+
     try {
+      setIsSaving(true);
       const created = await api.upsertLivingLabKpiResults({
         kpidefinition_id: kpi.id,
         living_lab_id: livingLabId,
@@ -99,6 +107,8 @@ export function KpiNewEntryRow({
       }
     } catch {
       setError("Failed to save. Please try again.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -131,7 +141,10 @@ export function KpiNewEntryRow({
           type="button"
           aria-label="Save"
           onClick={handleSave}
-          className="inline-flex items-center"
+          disabled={!canSave}
+          className={`inline-flex items-center ${
+            canSave ? "cursor-pointer" : "cursor-not-allowed opacity-60"
+          }`}
         >
           <CheckCircleIcon className="h-4 w-4 text-success" />
         </button>

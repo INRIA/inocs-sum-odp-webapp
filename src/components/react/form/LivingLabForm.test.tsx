@@ -240,9 +240,49 @@ describe("LivingLabForm", () => {
     });
   });
 
+  it("Given existing lab with unchanged fields, Then save button is disabled", () => {
+    render(<LivingLabForm livingLab={{ ...baseLab, id: 99 } as any} />);
+
+    const saveButton = screen.getByRole("button", { name: /save living lab/i });
+    expect(saveButton).toBeDisabled();
+  });
+
+  it("Given existing lab, When user changes then reverts field, Then save button re-disables", async () => {
+    render(<LivingLabForm livingLab={{ ...baseLab, id: 99 } as any} />);
+
+    const saveButton = screen.getByRole("button", { name: /save living lab/i });
+    const nameInput = getInput(/living lab or city name/i, /name/i);
+
+    expect(saveButton).toBeDisabled();
+
+    await userEvent.type(nameInput, " Updated");
+    expect(saveButton).not.toBeDisabled();
+
+    await userEvent.clear(nameInput);
+    await userEvent.type(nameInput, "Lab A");
+    expect(saveButton).toBeDisabled();
+  });
+
+  it("Given existing lab with unchanged fields, When form is submitted programmatically, Then update is not called", async () => {
+    render(<LivingLabForm livingLab={{ ...baseLab, id: 99 } as any} />);
+
+    const form = screen
+      .getByRole("button", { name: /save|create|update/i })
+      .closest("form") as HTMLFormElement;
+
+    fireEvent.submit(form);
+
+    await waitFor(() => {
+      expect(updateLivingLabMock).not.toHaveBeenCalled();
+    });
+  });
+
   it("Given existing lab id, When submitted, Then updateLivingLab is called", async () => {
     updateLivingLabMock.mockResolvedValueOnce({ id: 99 });
     render(<LivingLabForm livingLab={{ ...baseLab, id: 99 } as any} />);
+
+    const name = getInput(/living lab or city name/i, /name/i);
+    await userEvent.type(name, " Updated");
 
     const form = screen
       .getByRole("button", { name: /save|create|update/i })

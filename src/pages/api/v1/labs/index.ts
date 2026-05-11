@@ -82,8 +82,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
     }
 
     const userId = String(locals.user.id);
+    const actor = {
+      id: locals.user.id,
+      name: locals.user.name,
+      email: locals.user.email,
+    };
 
-    const newLab = await labService.createLab(labData);
+    const newLab = await labService.createLab(labData, actor);
     const updatedUser = await userService.setUserLivingLab(
       userId,
       String(newLab.id),
@@ -130,8 +135,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
   }
 };
 
-export const PUT: APIRoute = async ({ request }) => {
+export const PUT: APIRoute = async ({ request, locals }) => {
   try {
+    if (!locals.user) {
+      return new ApiResponse({ error: "Unauthorized", status: 401 });
+    }
+
     const labData = (await request.json()) as ILivingLab;
     const { id, ...updatedData } = labData;
 
@@ -142,7 +151,13 @@ export const PUT: APIRoute = async ({ request }) => {
       });
     }
 
-    const updatedLab = await labService.updateLab(labData.id, updatedData);
+    const actor = {
+      id: locals.user.id,
+      name: locals.user.name,
+      email: locals.user.email,
+    };
+
+    const updatedLab = await labService.updateLab(labData.id, updatedData, actor);
     return new ApiResponse({
       data: updatedLab,
       message: "Lab updated successfully",

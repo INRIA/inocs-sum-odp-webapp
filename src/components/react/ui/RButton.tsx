@@ -28,6 +28,7 @@ export function RButton({
   className = "",
   defaultArrow = false,
   type,
+  disabled = false,
   target,
   rel,
   ...props
@@ -44,13 +45,18 @@ export function RButton({
     secondary: ` rounded-md border border-secondary ${sizeClasses[size]} text-sm font-semibold shadow-xs hover:bg-primary-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary `,
     warning: ` rounded-md bg-warning ${sizeClasses[size]} text-sm font-semibold text-white shadow-xs hover:bg-warning-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-warning `,
   };
-  const actionClassName = `cursor-pointer ${style[variant]} ${className}`;
+  const disabledClassName = disabled
+    ? "cursor-not-allowed opacity-60 pointer-events-none"
+    : "cursor-pointer";
+  const actionClassName = `${disabledClassName} ${style[variant]} ${className}`;
 
   if (type || onClick) {
     return (
       <button
         type={type ?? "button"}
         onClick={onClick}
+        disabled={disabled}
+        aria-disabled={disabled || undefined}
         className={actionClassName}
         {...props}
       >
@@ -63,7 +69,16 @@ export function RButton({
 
   if (href) {
     return (
-      <a href={href} className={actionClassName} target={target} rel={rel} {...props}>
+      <a
+        href={href}
+        className={actionClassName}
+        target={target}
+        rel={rel}
+        aria-disabled={disabled || undefined}
+        tabIndex={disabled ? -1 : undefined}
+        onClick={disabled ? (e) => e.preventDefault() : undefined}
+        {...props}
+      >
         {text}
         {children}
         {defaultArrow && <span aria-hidden="true">→</span>}

@@ -6,8 +6,12 @@ import type { IKpiResultInput } from "../../../../types";
 const service = new KpiResultsService();
 
 // DELETE /api/v1/kpiresults/:id
-export const DELETE: APIRoute = async ({ params }) => {
+export const DELETE: APIRoute = async ({ params, locals }) => {
   try {
+    if (!locals.user) {
+      return new ApiResponse({ error: "Unauthorized", status: 401 });
+    }
+
     const id = params.id;
 
     if (!id || id === "") {
@@ -18,7 +22,13 @@ export const DELETE: APIRoute = async ({ params }) => {
       });
     }
 
-    const deleted = await service.deleteKpiResult(id);
+    const actor = {
+      id: locals.user.id,
+      name: locals.user.name,
+      email: locals.user.email,
+    };
+
+    const deleted = await service.deleteKpiResult(id, actor);
     if (!deleted) {
       return new ApiResponse({ status: 404, error: "KPI result not found" });
     }
