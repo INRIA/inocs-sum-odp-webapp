@@ -1,6 +1,7 @@
 import { UserRepository } from "../repositories/user.repository";
 import type { User, UserDto } from "../../types";
 import PasswordUtils from "../../lib/utils/PasswordUtils";
+import { parseBigIntFields } from "../../lib/helpers/format";
 
 export interface LoginCredentials {
   email: string;
@@ -37,10 +38,9 @@ export class AuthService {
       const { email, password } = credentials;
 
       // Find user by email (get unsafe version with password)
-      const userData = (await this.userRepository.findByEmail(
-        email,
-        false
-      )) as UserDto;
+      const userData = parseBigIntFields(
+        (await this.userRepository.findByEmail(email, false)) as UserDto,
+      );
       if (!userData) {
         return {
           success: false,

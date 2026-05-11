@@ -28,6 +28,7 @@ import {
   ArrowRightStartOnRectangleIcon,
   QuestionMarkCircleIcon,
   EnvelopeIcon,
+  ArrowTopRightOnSquareIcon,
 } from "@heroicons/react/16/solid";
 import {
   GlobeEuropeAfricaIcon,
@@ -54,6 +55,10 @@ interface Props {
     avatar?: string;
   };
   currentLivingLab?: SessionLivingLabCookie;
+  /** When true, displays the "Admin actions" section at the top of the sidebar. */
+  isAdmin?: boolean;
+  /** URL of the external administration platform (ODP_ADMIN_HOST_PUBLIC). */
+  odpAdminHost?: string;
 }
 
 interface MenuItem {
@@ -122,7 +127,7 @@ const DEFAULT_USER_MENU_ITEMS = [
   },
 ];
 
-export function SidebarMenu({ children, userInfo, currentLivingLab }: Props) {
+export function SidebarMenu({ children, userInfo, currentLivingLab, isAdmin, odpAdminHost }: Props) {
   const navbarItems: MenuItem[] = [
     {
       label: userInfo ? HOME_ITEM.label : "Home",
@@ -253,6 +258,29 @@ export function SidebarMenu({ children, userInfo, currentLivingLab }: Props) {
           : getSidebarItem(sidebarHeader)}
       </SidebarHeader>
       <SidebarBody>
+        {isAdmin && odpAdminHost && (
+          <>
+            <SidebarSection>
+              <p className="px-2 pb-1 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                Admin actions
+              </p>
+              <SidebarItem
+                href={odpAdminHost}
+                // @ts-expect-error – SidebarItem forwards extra anchor attributes at runtime
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ArrowTopRightOnSquareIcon />
+                <SidebarLabel>Go to Administrator space</SidebarLabel>
+              </SidebarItem>
+              <SidebarItem href={getUrl("/lab-admin/analytics")}>
+                <PresentationChartLineIcon />
+                <SidebarLabel>Living Lab Analytics</SidebarLabel>
+              </SidebarItem>
+            </SidebarSection>
+            <SidebarDivider />
+          </>
+        )}
         <SidebarSection>
           {sidebarBodyItems?.length &&
             sidebarBodyItems?.length > 0 &&

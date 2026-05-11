@@ -42,16 +42,20 @@ export default defineConfig({
   },
   callbacks: {
     async jwt({ token, user }) {
-      // Add userId to token on sign in
+      // Add userId and role_id to token on sign in
       if (user) {
         token.userId = user.id;
+        token.role_id = (user as any).role_id;
       }
       return token;
     },
     async session({ session, token }) {
-      // Add userId to session object
+      // Add userId and role_id to session object
       if (token.userId) {
         session.user.id = token.userId as string;
+      }
+      if (token.role_id !== undefined) {
+        (session.user as any).role_id = token.role_id;
       }
       return session;
     },

@@ -1,5 +1,22 @@
 import { EnumKpiMetricType } from "../../types";
 
+/**
+ * Recursively converts any BigInt values in an object to Number.
+ * Useful when Prisma returns @db.UnsignedBigInt columns that need to be
+ * JSON-serialisable (JWT, API responses, etc.).
+ */
+export function parseBigIntFields<T>(obj: T): T {
+  if (obj === null || obj === undefined) return obj;
+  if (typeof obj === "bigint") return Number(obj) as unknown as T;
+  if (Array.isArray(obj)) return obj.map(parseBigIntFields) as unknown as T;
+  if (typeof obj === "object") {
+    return Object.fromEntries(
+      Object.entries(obj).map(([k, v]) => [k, parseBigIntFields(v)]),
+    ) as T;
+  }
+  return obj;
+}
+
 export function stripHtml(html: string): string {
   return html
     .replace(/<[^>]*>/g, "")

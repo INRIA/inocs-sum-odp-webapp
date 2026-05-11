@@ -3,7 +3,7 @@ import "../styles/global.css";
 import Footer from "../components/Footer.astro";
 import { SidebarMenu, SiteNavBar } from "../components/react/ui";
 import ApiClient from "../lib/api-client/ApiClient";
-import { getUrl } from "../lib/helpers";
+import { getUrl, isAdminUser } from "../lib/helpers";
 import type { BreadcrumbItem } from "../components/Breadcrumbs";
 import PageHeaderNavigation from "../components/PageHeaderNavigation.astro";
 
@@ -31,6 +31,8 @@ const userInfo = Astro.locals.user
   : undefined;
 
 const currentLivingLab = Astro.locals.livingLab;
+const isAdmin = isAdminUser(Astro.locals.user);
+const odpAdminHost = Astro.locals.odpAdminHost ?? "";
 
 const menuItems = [
   {
@@ -138,6 +140,8 @@ const footerMenuItems = [
         <SidebarMenu
           userInfo={userInfo}
           currentLivingLab={currentLivingLab}
+          isAdmin={isAdmin}
+          odpAdminHost={odpAdminHost}
           client:load
         >
           <PageHeaderNavigation breadcrumbs={breadcrumbs} backHref={backHref} />
