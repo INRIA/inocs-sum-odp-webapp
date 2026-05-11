@@ -1,4 +1,5 @@
 SELECT
+    c.type                                          AS `KPI Group Type`,
     c.name                                          AS `KPI Group`,
     kd.kpi_number                                   AS `KPI Number`,
     COALESCE(parent.name, kd.name)                  AS `KPI Name (parent)`,
@@ -19,11 +20,11 @@ JOIN kpidefinitions kd
 LEFT JOIN kpidefinitions parent
     ON parent.id = kd.parent_kpi_id
 
-LEFT JOIN kpidefinitions_category kdc
+INNER JOIN kpidefinitions_category kdc
     ON kdc.kpidefinition_id = kd.id
 
-LEFT JOIN categories c
-    ON c.id = kdc.category_id
+INNER JOIN categories c
+    ON c.id = kdc.category_id and c.type='KPI_SIEF'
 
 JOIN labs l
     ON l.id = kr.living_lab_id
