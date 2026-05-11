@@ -161,6 +161,3 @@ See `.env.example` for the full list including rate-limiter and job-run variable
 - **KPI parent/child hierarchy**: `kpidefinitions` has a self-referencing `parent_kpi_id`. Always check whether you need top-level or child KPIs for a given query.
 - **Tailwind v4**: class names and theme extension syntax differ from v3. Do not Google Tailwind v3 docs for config — use the v4 docs.
 
-## Spec & Planning
-
-Feature specs, plans, and tasks live in `specs/<feature-name>/`. Constitution and conventions are in `.specify/memory/constitution.md`. Follow TDD delivery workflow defined there.
