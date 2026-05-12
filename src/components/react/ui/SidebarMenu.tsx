@@ -67,6 +67,7 @@ interface MenuItem {
   icon?: React.ReactNode;
   separator?: Boolean;
   className?: string;
+  headerLabel?: string;
   subItems?: MenuItem[];
   dropdown?: Boolean;
   navbar?: Boolean;
@@ -85,17 +86,17 @@ const DEFAULT_MENU_ITEMS = [
     href: getUrl("/lab-admin"),
   },
   {
-    label: "Modal Split",
+    label: "Modal Split KPI",
     icon: <ChartPieIcon />,
     href: getUrl("/lab-admin/modal-split"),
   },
   {
-    label: "KPIs",
+    label: "All KPIs",
     icon: <ChartBarSquareIcon />,
     href: getUrl("/lab-admin/kpis"),
   },
   {
-    label: "Measures",
+    label: "Policy Measures",
     icon: <QueueListIcon />,
     href: getUrl("/lab-admin/measures"),
   },
@@ -127,7 +128,13 @@ const DEFAULT_USER_MENU_ITEMS = [
   },
 ];
 
-export function SidebarMenu({ children, userInfo, currentLivingLab, isAdmin, odpAdminHost }: Props) {
+export function SidebarMenu({
+  children,
+  userInfo,
+  currentLivingLab,
+  isAdmin,
+  odpAdminHost,
+}: Props) {
   const navbarItems: MenuItem[] = [
     {
       label: userInfo ? HOME_ITEM.label : "Home",
@@ -146,7 +153,8 @@ export function SidebarMenu({ children, userInfo, currentLivingLab, isAdmin, odp
       currentLivingLab?.authorizedLabs?.length > 1
     ) {
       navbarItems.push({
-        label: "My Labs",
+        headerLabel: "Lab Actions",
+        label: "My Living Labs",
         icon: <GlobeEuropeAfricaIcon />,
         subItems: currentLivingLab?.authorizedLabs?.map((item) => ({
           label: item.name,
@@ -159,6 +167,7 @@ export function SidebarMenu({ children, userInfo, currentLivingLab, isAdmin, odp
     navbarItems.push(
       ...[
         {
+          headerLabel: "Lab Actions",
           label: "Edit Lab information",
           icon: <Cog8ToothIcon />,
           href: getUrl("/lab-admin/lab/edit"),
@@ -166,12 +175,14 @@ export function SidebarMenu({ children, userInfo, currentLivingLab, isAdmin, odp
         {
           label: "View lab dashboard",
           icon: <EyeIcon />,
-          href: getUrl("/living-lab-city/" + currentLivingLab?.id),      separator: true,
-
+          href: getUrl("/living-lab-city/" + currentLivingLab?.id),
+          separator: true,
         },
-      ]);
+      ],
+    );
 
     navbarItems.push({
+      headerLabel: "Data management",
       label: `Manage ${currentLivingLab?.name ?? "my Living Lab"} data`,
       icon: <DocumentChartBarIcon />,
       subItems: [...DEFAULT_MENU_ITEMS],
@@ -182,6 +193,7 @@ export function SidebarMenu({ children, userInfo, currentLivingLab, isAdmin, odp
   }
 
   navbarItems.push({
+    headerLabel: "Support",
     icon: <QuestionMarkCircleIcon />,
     subItems: HELP_MENU_ITEMS,
     className: "max-md:hidden",
@@ -189,6 +201,7 @@ export function SidebarMenu({ children, userInfo, currentLivingLab, isAdmin, odp
 
   if (userInfo)
     navbarItems.push({
+      headerLabel: "User",
       label: "My account",
       icon: <UserCircleIcon />,
       subItems: [
@@ -286,6 +299,11 @@ export function SidebarMenu({ children, userInfo, currentLivingLab, isAdmin, odp
             sidebarBodyItems?.length > 0 &&
             sidebarBodyItems.map((item) => (
               <>
+                {item.headerLabel && (
+                  <p className="px-2 pb-1 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                    {item.headerLabel}
+                  </p>
+                )}
                 {item.dropdown ? (
                   getDropdownSection(item)
                 ) : item.subItems?.length !== undefined ? (

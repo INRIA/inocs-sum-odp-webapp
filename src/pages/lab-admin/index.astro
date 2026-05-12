@@ -15,6 +15,7 @@ import {
   computeKpiCoverageTable,
   isAdminUser,
 } from "../../lib/helpers";
+import { getAdminModeCookie, setAdminModeCookie } from "../../lib/utils/cookies";
 import { MetricCard } from "../../components/react/Analytics/MetricCard";
 import { D3LineChartLabKPIsOvertime } from "../../components/react/Analytics/D3LineChartLabKPIsOvertime";
 import { D3BarChartLabMeasures } from "../../components/react/Analytics/D3BarChartLabMeasures";
@@ -23,8 +24,15 @@ import { AnalyticsAlerts } from "../../components/react/Analytics/AnalyticsAlert
 
 const user = Astro.locals.user;
 
-// Admins see a dedicated chooser page unless they explicitly opted into editor mode
-if (isAdminUser(user) && Astro.url.searchParams.get("as") !== "editor") {
+// Persist admin-mode choice when coming from admin-home with ?as=editor
+if (isAdminUser(user) && Astro.url.searchParams.get("as") === "editor") {
+  setAdminModeCookie(Astro.cookies, "editor", {
+    secure: Astro.url.protocol === "https:",
+  });
+}
+
+// Redirect admins to the choice page only if they haven't chosen editor mode yet
+if (isAdminUser(user) && getAdminModeCookie(Astro.cookies) !== "editor") {
   return Astro.redirect(getUrl("/lab-admin/admin-home"));
 }
 

@@ -1,6 +1,8 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import { getUrl, getUrlForAdminHost, isAdminUser } from "../../lib/helpers";
+import { AdminHomeCards } from "../../components/react/ui/AdminHomeCards";
+import { ShieldCheckIcon } from "@heroicons/react/24/solid";
 
 const user = Astro.locals.user;
 
@@ -23,19 +25,7 @@ const editorUrl = getUrl("/lab-admin") + "?as=editor";
       <div
         class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4"
       >
-        <!-- Shield / admin icon -->
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="w-8 h-8 text-primary"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          aria-hidden="true"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M12 1.5a.75.75 0 01.696.47l2.01 5.027A.75.75 0 0015.42 7.5h5.33a.75.75 0 01.47 1.333l-4.31 3.132a.75.75 0 00-.273.84l1.646 5.067a.75.75 0 01-1.157.838L12 15.347l-5.126 3.363a.75.75 0 01-1.157-.838l1.646-5.067a.75.75 0 00-.273-.84L2.78 8.833A.75.75 0 013.25 7.5h5.33a.75.75 0 00.714-.503l2.01-5.027A.75.75 0 0112 1.5z"
-            clip-rule="evenodd"></path>
-        </svg>
+        <ShieldCheckIcon className="h-8 w-8 text-primary" aria-hidden="true" />
       </div>
       <h2 class="text-2xl font-bold text-gray-900">
         Welcome, {user?.name ?? "Administrator"}
@@ -47,184 +37,7 @@ const editorUrl = getUrl("/lab-admin") + "?as=editor";
     </div>
 
     <!-- Choice cards -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-      <!-- Card A: Continue in Lab Editor space -->
-      <div
-        class="flex flex-col gap-5 rounded-2xl border-2 border-primary/30 bg-white p-6 shadow-sm hover:shadow-md hover:border-primary transition-all duration-200"
-      >
-        <div
-          class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 shrink-0"
-        >
-          <!-- Presentation chart icon -->
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-6 h-6 text-primary"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M2.25 2.25a.75.75 0 000 1.5H3v10.5a3 3 0 003 3h1.21l-1.172 3.513a.75.75 0 001.424.474l.329-.987h8.418l.33.987a.75.75 0 001.422-.474l-1.17-3.513H18a3 3 0 003-3V3.75h.75a.75.75 0 000-1.5H2.25zm6.54 15h6.42l.5 1.5H8.29l.5-1.5zm8.085-8.995a.75.75 0 10-.75-1.299 12.81 12.81 0 00-3.096 2.579L9.83 11.14a.75.75 0 00-1.09.02L7.228 12.6a.75.75 0 101.144.972l1.048-1.233 1.992 1.786a.75.75 0 001.092-.02 11.31 11.31 0 012.737-2.351z"
-              clip-rule="evenodd"></path>
-          </svg>
-        </div>
-
-        <div class="flex-1 flex flex-col gap-3">
-          <h3 class="text-lg font-semibold text-gray-900">
-            Continue in Lab Editor space
-          </h3>
-          <p class="text-sm text-gray-500">
-            Manage Living Labs with the same interface Living Lab editors
-            experience.
-          </p>
-
-          <ul class="flex flex-col gap-2 mt-1">
-            {
-              [
-                "View and edit Living Lab profiles and information",
-                "Declare and update policy measures implemented by cities",
-                "Record and track KPI results over time",
-                "Manage modal split transport data",
-                "Monitor lab progress with analytics dashboards",
-              ].map((feature) => (
-                <li class="flex items-start gap-2 text-sm text-gray-700">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="w-4 h-4 text-primary mt-0.5 shrink-0"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                  {feature}
-                </li>
-              ))
-            }
-          </ul>
-        </div>
-
-        <a
-          href={editorUrl}
-          class="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors duration-150"
-        >
-          Open Lab Editor space
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-4 h-4"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z"
-              clip-rule="evenodd"></path>
-          </svg>
-        </a>
-      </div>
-
-      <!-- Card B: Go to full administration platform -->
-      <div
-        class="flex flex-col gap-5 rounded-2xl border-2 border-gray-200 bg-white p-6 shadow-sm hover:shadow-md hover:border-gray-400 transition-all duration-200"
-      >
-        <div
-          class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 shrink-0"
-        >
-          <!-- Cog / settings icon -->
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-6 h-6 text-gray-600"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 00-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 00-2.282.819l-.922 1.597a1.875 1.875 0 00.432 2.385l.84.692c.095.078.17.229.154.43a7.598 7.598 0 000 1.139c.015.2-.059.352-.153.43l-.841.692a1.875 1.875 0 00-.432 2.385l.922 1.597a1.875 1.875 0 002.282.818l1.019-.382c.115-.043.283-.031.45.082.312.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.673-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 002.28-.819l.923-1.597a1.875 1.875 0 00-.432-2.385l-.84-.692c-.095-.078-.17-.229-.154-.43a7.614 7.614 0 000-1.139c-.016-.2.059-.352.153-.43l.84-.692c.708-.582.891-1.59.433-2.385l-.922-1.597a1.875 1.875 0 00-2.282-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 00-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 00-1.85-1.567h-1.843zM12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z"
-              clip-rule="evenodd"></path>
-          </svg>
-        </div>
-
-        <div class="flex-1 flex flex-col gap-3">
-          <h3 class="text-lg font-semibold text-gray-900">
-            Go to full administration &amp; moderation space
-          </h3>
-          <p class="text-sm text-gray-500">
-            Manage all platform resources with full administrative control.
-          </p>
-
-          <ul class="flex flex-col gap-2 mt-1">
-            {
-              [
-                "Manage users, roles and access permissions",
-                "Moderate and administer all Living Labs",
-                "Maintain the KPI and category catalogues",
-                "Manage policy measures and resources library",
-                "Configure platform settings and system parameters",
-              ].map((feature) => (
-                <li class="flex items-start gap-2 text-sm text-gray-700">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="w-4 h-4 text-gray-500 mt-0.5 shrink-0"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                  {feature}
-                </li>
-              ))
-            }
-          </ul>
-
-          <p class="mt-1 flex items-center gap-1.5 text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-3.5 h-3.5 shrink-0"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z"
-                clip-rule="evenodd"></path>
-            </svg>
-            You will be asked to sign in again on the administration platform.
-          </p>
-        </div>
-
-        <a
-          href={adminHostUrl}
-          class="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gray-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 transition-colors duration-150"
-        >
-          Go to administration platform
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-4 h-4"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z"
-              clip-rule="evenodd"></path>
-          </svg>
-        </a>
-      </div>
-    </div>
+    <AdminHomeCards client:load editorUrl={editorUrl} adminHostUrl={adminHostUrl} />
 
     <!-- Helper hint -->
     <p class="mt-8 text-center text-sm text-gray-500">
@@ -234,3 +47,4 @@ const editorUrl = getUrl("/lab-admin") + "?as=editor";
     </p>
   </div>
 </Layout>
+

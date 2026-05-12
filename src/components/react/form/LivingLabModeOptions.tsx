@@ -41,6 +41,11 @@ export interface LivingLabModeOptionsProps {
   isLoading?: boolean;
 
   /**
+   * When true, hides the "Create new" radio option (login/switch flow)
+   */
+  hideCreate?: boolean;
+
+  /**
    * Custom labels for the radio options
    */
   labels?: {
@@ -63,6 +68,7 @@ export function LivingLabModeOptions({
   onLabSelect,
   isLoading = false,
   labels = {},
+  hideCreate = false,
 }: LivingLabModeOptionsProps) {
   const {
     select = "Select existing Living Lab",
@@ -78,25 +84,27 @@ export function LivingLabModeOptions({
 
   return (
     <div className="space-y-4">
-      <div className="text-sm">
-        <RadioGroup
-          name="labMode"
-          value={mode}
-          onChange={(v) => onModeChange(v as LivingLabMode)}
-          aria-label="Living lab mode"
-          disabled={isLoading}
-        >
-          <RadioField>
-            <Radio value="select" disabled={livingLabs.length === 0} />
-            <Label>{select}</Label>
-          </RadioField>
+      {!hideCreate && (
+        <div className="text-sm">
+          <RadioGroup
+            name="labMode"
+            value={mode}
+            onChange={(v) => onModeChange(v as LivingLabMode)}
+            aria-label="Living lab mode"
+            disabled={isLoading}
+          >
+            <RadioField>
+              <Radio value="select" disabled={livingLabs.length === 0} />
+              <Label>{select}</Label>
+            </RadioField>
 
-          <RadioField>
-            <Radio value="create" />
-            <Label>{create}</Label>
-          </RadioField>
-        </RadioGroup>
-      </div>
+            <RadioField>
+              <Radio value="create" />
+              <Label>{create}</Label>
+            </RadioField>
+          </RadioGroup>
+        </div>
+      )}
 
       {mode === "select" && (
         <div>

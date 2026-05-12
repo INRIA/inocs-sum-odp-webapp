@@ -72,7 +72,7 @@ describe("SidebarMenu – admin actions section", () => {
 
     expect(screen.getByText("Admin actions")).toBeInTheDocument();
 
-    const link = screen.getByRole("link", { name: /go to lab editor space/i });
+    const link = screen.getByRole("link", { name: /Go to Administrator space/i });
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute("href", "http://admin.example.com");
     expect(link).toHaveAttribute("target", "_blank");

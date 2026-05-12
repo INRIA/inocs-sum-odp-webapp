@@ -1,7 +1,8 @@
 ---
-import { clearLivingLabCookie } from "../../lib/utils/cookies";
+import { clearLivingLabCookie, clearAdminModeCookie } from "../../lib/utils/cookies";
 
 clearLivingLabCookie(Astro.cookies);
+clearAdminModeCookie(Astro.cookies);
 ---
 
 <script>

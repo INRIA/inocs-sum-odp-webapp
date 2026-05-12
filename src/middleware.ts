@@ -1,7 +1,7 @@
 import { defineMiddleware } from "astro:middleware";
 import { getSession } from "auth-astro/server";
 import { rateLimiterController } from "./bff/controllers/rate-limiter.controller";
-import { getLivingLabCookie } from "./lib/utils/cookies";
+import { getLivingLabCookie, clearAdminModeCookie } from "./lib/utils/cookies";
 
 // Routes that require authentication
 const PROTECTED_ROUTES = ["/lab-admin"];
@@ -27,6 +27,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const user = session?.user as any;
   // If user is authenticated and trying to access login page, redirect to dashboard
   if (["/lab-admin/login", "/lab-admin/signup"].includes(pathname) && user) {
+    // Reset admin mode so every new login starts from the chooser
+    clearAdminModeCookie(context.cookies);
     return redirect("/lab-admin");
   }
 

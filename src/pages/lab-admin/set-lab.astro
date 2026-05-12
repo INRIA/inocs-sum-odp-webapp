@@ -2,6 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import { setLivingLabCookie } from "../../lib/utils/cookies";
 import { UserService } from "../../bff/services/user.service";
+import { isAdminUser } from "../../lib/helpers/roles";
 import { type SessionLivingLabCookie } from "../../types";
 import { SetLabForm } from "../../components/react/form/SetLabForm";
 
@@ -28,8 +29,8 @@ if (!currentUser?.id) {
 		myLabs = authorizedLabs || [];
 
 		if (!requestedId) {
-			if (myLabs.length ===1) {
-				// Auto-pick the only available lab
+			if (myLabs.length === 1 && !isAdminUser(currentUser)) {
+				// Auto-pick the only available lab (not for admins — they always choose)
 				const lab = myLabs[0];
 				selectedLab = {
 					id: String(lab.id),
@@ -123,7 +124,7 @@ if (!currentUser?.id) {
 			{
 				status === "select" && (
 					<div class="bg-white rounded-lg border border-gray-200 p-6">
-						<SetLabForm client:load livingLabs={myLabs} />
+						<SetLabForm client:load livingLabs={myLabs} selectOnly={myLabs.length > 0} />
 					</div>
 				)
 			}

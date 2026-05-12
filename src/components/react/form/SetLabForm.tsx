@@ -8,15 +8,20 @@ import { getUrl } from "../../../lib/helpers";
 
 interface SetLabFormProps {
   livingLabs: { id: string; name: string }[];
+  /**
+   * When true (login/switch flow): only show the lab selector, no create option.
+   * When false/absent (signup flow): also show the "Create new Living Lab" option.
+   */
+  selectOnly?: boolean;
 }
 
 /**
  * Form component for selecting or creating a Living Lab from the set-lab page.
  * Allows users to either select from available labs or navigate to create a new one.
  */
-export function SetLabForm({ livingLabs }: SetLabFormProps) {
+export function SetLabForm({ livingLabs, selectOnly = false }: SetLabFormProps) {
   const [mode, setMode] = useState<LivingLabMode>(
-    livingLabs.length > 0 ? "select" : "create",
+    selectOnly || livingLabs.length > 0 ? "select" : "create",
   );
   const [selectedLabId, setSelectedLabId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -42,23 +47,29 @@ export function SetLabForm({ livingLabs }: SetLabFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold mb-4">Choose your Living Lab</h2>
-        {selectedLabId.length > 0 ? (
-          <p className="text-gray-600 mb-6">
-            Select an existing Living Lab to manage, or create a new one.
-          </p>
-        ) : (
-          <p className="text-gray-600 mb-6">
-            You have no Living Labs assigned to your account. If you want to
-            manage an existing Living Lab, please contact the administrator at{" "}
-            <a
-              href="mailto:odp@sum-project.eu"
-              className="text-blue-600 underline"
-            >
-              odp@sum-project.eu
-            </a>
-            . Otherwise, you can create a new Living Lab.
-          </p>
+        <h2 className="text-lg font-semibold mb-4">
+          {selectOnly
+            ? "Choose the Living Lab you want to manage"
+            : "Choose your Living Lab"}
+        </h2>
+        {!selectOnly && (
+          selectedLabId.length > 0 ? (
+            <p className="text-gray-600 mb-6">
+              Select an existing Living Lab to manage, or create a new one.
+            </p>
+          ) : (
+            <p className="text-gray-600 mb-6">
+              You have no Living Labs assigned to your account. If you want to
+              manage an existing Living Lab, please contact the administrator at{" "}
+              <a
+                href="mailto:odp@sum-project.eu"
+                className="text-blue-600 underline"
+              >
+                odp@sum-project.eu
+              </a>
+              . Otherwise, you can create a new Living Lab.
+            </p>
+          )
         )}
 
         <LivingLabModeOptions
@@ -68,6 +79,7 @@ export function SetLabForm({ livingLabs }: SetLabFormProps) {
           selectedLabId={selectedLabId}
           onLabSelect={setSelectedLabId}
           isLoading={isLoading}
+          hideCreate={selectOnly}
           labels={{
             select: "Manage existing Living Lab",
             create: "Create new Living Lab",

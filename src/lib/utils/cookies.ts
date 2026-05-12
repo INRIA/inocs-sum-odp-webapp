@@ -50,3 +50,32 @@ export function setLivingLabCookie(
 export function clearLivingLabCookie(cookies: AstroCookies): void {
   cookies.delete(COOKIE_NAME, { path: "/" });
 }
+
+// ---------------------------------------------------------------------------
+// Admin mode cookie — remembers that an admin chose the editor space for the
+// current browser session (no maxAge = clears on browser close).
+// ---------------------------------------------------------------------------
+
+const ADMIN_MODE_COOKIE = "admin_mode";
+
+export function getAdminModeCookie(cookies: AstroCookies): string | undefined {
+  return cookies.get(ADMIN_MODE_COOKIE)?.value;
+}
+
+export function setAdminModeCookie(
+  cookies: AstroCookies,
+  mode: "editor",
+  options?: { secure?: boolean }
+): void {
+  cookies.set(ADMIN_MODE_COOKIE, mode, {
+    path: "/",
+    httpOnly: true,
+    sameSite: "lax",
+    secure: options?.secure ?? false,
+    // No maxAge — session cookie, cleared when the browser tab/window closes
+  });
+}
+
+export function clearAdminModeCookie(cookies: AstroCookies): void {
+  cookies.delete(ADMIN_MODE_COOKIE, { path: "/" });
+}

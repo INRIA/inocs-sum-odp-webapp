@@ -6,13 +6,16 @@ import {
   type SignupLabEditorInput,
   UserStatus,
 } from "../../types";
-import { UserRepository } from "../repositories";
+import { UserRepository, LabRepository } from "../repositories";
+import { isAdminUser } from "../../lib/helpers/roles";
 
 export class UserService {
   private userRepository: UserRepository;
+  private labRepository: LabRepository;
 
   constructor() {
     this.userRepository = new UserRepository();
+    this.labRepository = new LabRepository();
   }
 
   /**
@@ -27,6 +30,13 @@ export class UserService {
       if (!user) {
         throw new Error("User not found");
       }
+
+      // Admins have access to every lab
+      if (isAdminUser(user)) {
+        const allLabs = await this.labRepository.findAll();
+        return allLabs.map((l: any) => ({ id: String(l.id), name: l.name }));
+      }
+
       const labs = user.living_lab_user_relation?.map(
         (relation) => relation.lab,
       );
