@@ -28,6 +28,11 @@ RUN npm run build
 # --- Stage 2: Production dependencies only ------------------------------------
 FROM node:20-bookworm-slim AS prod-deps
 ENV NODE_ENV=production
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    openssl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -44,6 +49,11 @@ FROM node:20-bookworm-slim AS runner
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \
     PORT=4321
+
+# Install OpenSSL for Prisma
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    openssl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
