@@ -1,0 +1,174 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { getUrl } from "../lib/helpers";
+---
+
+<Layout
+  breadcrumbs={[{ label: "Home", href: "/" }, { label: "Legal Notice" }]}
+  backHref="/"
+>
+  <section class="mx-auto my-16 px-4 max-w-3xl">
+    <h1 class="text-4xl font-bold mb-2">Legal Notice</h1>
+    <p class="text-sm text-gray-500 mb-2"><strong>SUM Open Data Platform (ODP)</strong></p>
+    <p class="text-sm text-gray-500 mb-8"><em>Last updated: 1 June 2026</em></p>
+
+    <p class="mb-8">
+      This Legal Notice applies to the SUM Open Data Platform (the "Platform"), accessible at{" "}
+      <a class="text-secondary hover:underline" href="https://sum-odp.eu">https://sum-odp.eu</a>{" "}
+      and{" "}
+      <a class="text-secondary hover:underline" href="https://odp.sum-project.eu">https://odp.sum-project.eu</a>.
+    </p>
+
+    <hr class="border-gray-200 my-8" />
+
+    {/* Section 1 */}
+    <h2 class="text-2xl font-semibold mt-10 mb-4">1. Publisher</h2>
+    <p class="mb-4">
+      The Platform is published as part of the <strong>SUM (Seamless Shared Urban Mobility)</strong>{" "}
+      project by the <strong>SUM Consortium</strong>, the group of partner organisations
+      participating in the project.
+    </p>
+    <p class="mb-4">
+      The project has received funding from the European Union's Horizon Europe Research and
+      Innovation programme under <strong>Grant Agreement No&nbsp;101103646</strong>.
+    </p>
+    <ul class="list-disc pl-6 mb-4 space-y-1 text-gray-700">
+      <li>
+        <strong>Project coordinator / point of contact:</strong> INRIA (Institut National de
+        Recherche en Informatique et en Automatique)
+      </li>
+      <li>
+        <strong>Registered office of the coordinator:</strong> Parc scientifique de la
+        Haute-Borne, 40 avenue Halley – Bât A – Park Plaza, 59650 Villeneuve d'Ascq, France
+      </li>
+      <li>
+        <strong>Contact:</strong>{" "}
+        <a class="text-secondary hover:underline" href="mailto:odp@sum-project.eu">odp@sum-project.eu</a>
+      </li>
+      <li>
+        <strong>Project website:</strong>{" "}
+        <a class="text-secondary hover:underline" href="https://www.sum-project.eu" target="_blank" rel="noopener noreferrer">
+          https://www.sum-project.eu
+        </a>
+      </li>
+    </ul>
+    <p class="mb-4">
+      <strong>Director of publication:</strong>{" "}
+    </p>
+    <p class="mb-4">The Platform is developed by SUM Consortium partners:</p>
+    <ul class="list-disc pl-6 mb-4 space-y-1 text-gray-700">
+      <li>
+        the public website and Living Lab features are developed by <strong>INRIA</strong>;
+      </li>
+      <li>
+        the administration features are developed {" "}
+        <strong>UTwente (University of Twente)</strong>
+      </li>
+    </ul>
+
+    <hr class="border-gray-200 my-8" />
+
+    {/* Section 2 */}
+    <h2 class="text-2xl font-semibold mt-10 mb-4">2. Hosting</h2>
+    <p class="mb-4">The Platform is hosted on <strong>INRIA servers</strong>.</p>
+    <ul class="list-disc pl-6 mb-4 space-y-1 text-gray-700">
+      <li><strong>Host:</strong> INRIA (Institut National de Recherche en Informatique et en Automatique)</li>
+      <li>
+        <strong>Address / data centre:</strong> Parc scientifique de la Haute-Borne,
+        40 avenue Halley – Bât A – Park Plaza, 59650 Villeneuve d'Ascq, France
+      </li>
+      <li>
+        <strong>Contact:</strong>{" "}
+        <mark class="bg-yellow-100 text-yellow-800 px-1 rounded"></mark>
+      </li>
+    </ul>
+
+    <hr class="border-gray-200 my-8" />
+
+    {/* Section 3 */}
+    <h2 class="text-2xl font-semibold mt-10 mb-4">3. Intellectual property</h2>
+    <p class="mb-4">
+      Unless otherwise stated, the content of the Platform — including its structure, texts,
+      graphics, logos, and software — is the property of the <strong>SUM Consortium</strong> and
+      its partners, or is used with the authorisation of the rights holders. It is protected by
+      applicable intellectual property law.
+    </p>
+    <p class="mb-4 text-gray-600 text-sm">Copyright © SUM Consortium.</p>
+    <p class="mb-4">
+      <strong>Open data and open-source content.</strong> Datasets and research outputs published
+      openly through the Platform are made available under the applicable open licences defined by
+      the project (for example, Creative Commons licences for publications and the licences
+      specified for each dataset). Please refer to the licence indicated for each dataset or
+      publication before reuse. The applicable terms follow the SUM Data Management Plan and the
+      principle "as open as possible, as closed as necessary".
+    </p>
+    <p class="mb-4">
+      Any reproduction, representation, modification or distribution of protected content, in whole
+      or in part, without prior authorisation or outside the terms of the applicable licence, is
+      prohibited.
+    </p>
+
+    <hr class="border-gray-200 my-8" />
+
+    {/* Section 4 */}
+    <h2 class="text-2xl font-semibold mt-10 mb-4">4. Personal data and cookies</h2>
+    <p class="mb-4">
+      The processing of personal data through the Platform is described in the{" "}
+      <a class="text-secondary hover:underline" href={getUrl("/privacy-policy")}>Privacy Policy</a>.
+    </p>
+    <p class="mb-4">
+      The Platform uses only strictly necessary cookies required for its operation and to maintain
+      user login sessions. It does not use advertising or third-party tracking cookies. See the
+      Privacy Policy for details.
+    </p>
+    <p class="mb-4">
+      For any question regarding personal data, or to exercise your rights under the GDPR,
+      contact{" "}
+      <a class="text-secondary hover:underline" href="mailto:odp@sum-project.eu">odp@sum-project.eu</a>{" "}
+      or the INRIA Data Protection Officer at{" "}
+      <a class="text-secondary hover:underline" href="mailto:dpo@inria.fr">dpo@inria.fr</a>.
+    </p>
+
+    <hr class="border-gray-200 my-8" />
+
+    {/* Section 5 */}
+    <h2 class="text-2xl font-semibold mt-10 mb-4">5. Liability</h2>
+    <p class="mb-4">
+      The Platform and its content are provided for information purposes. The SUM Consortium
+      endeavours to keep the information published on the Platform accurate and up to date, but
+      cannot guarantee that it is complete, accurate or error-free. Use of the information made
+      available on the Platform is under the sole responsibility of the user.
+    </p>
+    <p class="mb-4">
+      The SUM Consortium cannot be held liable for any direct or indirect damage resulting from
+      access to or use of the Platform, including the unavailability of the service, or from the
+      use of any information obtained through it.
+    </p>
+    <p class="mb-4">
+      The Platform may contain links to external websites that are not under the control of the
+      SUM Consortium. The SUM Consortium is not responsible for the content or privacy practices
+      of these external sites.
+    </p>
+
+    <hr class="border-gray-200 my-8" />
+
+    {/* Section 6 */}
+    <h2 class="text-2xl font-semibold mt-10 mb-4">6. EU funding disclaimer</h2>
+    <p class="mb-4">
+      Co-funded by the European Union. Views and opinions expressed are however those of the
+      author(s) only and do not necessarily reflect those of the European Union or the European
+      Climate, Infrastructure and Environment Executive Agency (CINEA). Neither the European Union
+      nor the granting authority can be held responsible for them.
+    </p>
+
+    <hr class="border-gray-200 my-8" />
+
+    {/* Section 7 */}
+    <h2 class="text-2xl font-semibold mt-10 mb-4">7. Applicable law</h2>
+    <p class="mb-4">
+      This Legal Notice is governed by <strong>French law</strong>, as the coordinating partner
+      (INRIA) is established in France, without prejudice to mandatory provisions of European Union
+      law, in particular the GDPR.
+    </p>
+  </section>
+</Layout>

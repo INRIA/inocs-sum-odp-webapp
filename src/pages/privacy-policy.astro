@@ -1,0 +1,320 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { getUrl } from "../lib/helpers";
+---
+
+<Layout
+  breadcrumbs={[{ label: "Home", href: "/" }, { label: "Privacy Policy" }]}
+  backHref="/"
+>
+  <section class="mx-auto my-16 px-4 max-w-3xl">
+    <h1 class="text-4xl font-bold mb-2">Privacy Policy</h1>
+    <p class="text-sm text-gray-500 mb-2"><strong>SUM Open Data Platform (ODP)</strong></p>
+    <p class="text-sm text-gray-500 mb-8"><em>Last updated: 1 June 2026</em></p>
+
+    <p class="mb-4">
+      This Privacy Policy explains how personal data is collected, processed and protected when
+      you use the SUM Open Data Platform (the "Platform"), accessible at{" "}
+      <a class="text-secondary hover:underline" href="https://sum-odp.eu">https://sum-odp.eu</a>{" "}
+      and{" "}
+      <a class="text-secondary hover:underline" href="https://odp.sum-project.eu">https://odp.sum-project.eu</a>.
+    </p>
+    <p class="mb-4">
+      The Platform is operated as part of the <strong>SUM (Seamless Shared Urban Mobility)</strong>{" "}
+      project, which has received funding from the European Union's Horizon Europe Research and
+      Innovation programme under Grant Agreement No&nbsp;101103646.
+    </p>
+    <p class="mb-8">
+      We are committed to protecting your personal data in accordance with{" "}
+      <strong>Regulation (EU) 2016/679 (General Data Protection Regulation, "GDPR")</strong>{" "}
+      and applicable national data protection law.
+    </p>
+
+    <hr class="border-gray-200 my-8" />
+
+    {/* Section 1 */}
+    <h2 class="text-2xl font-semibold mt-10 mb-4">1. Who is responsible for your data (Data Controller)</h2>
+    <p class="mb-4">
+      The data processing carried out through the Platform is the joint responsibility of the{" "}
+      <strong>SUM Consortium</strong>, the group of partner organisations participating in the SUM project.
+    </p>
+    <p class="mb-4">
+      The project is coordinated by{" "}
+      <strong>INRIA (Institut National de Recherche en Informatique et en Automatique)</strong>, which
+      acts as the primary point of contact for data protection matters relating to the Platform.
+    </p>
+    <ul class="list-disc pl-6 mb-4 space-y-1 text-gray-700">
+      <li>
+        <strong>Coordinator / point of contact:</strong> INRIA — SUM project coordination
+      </li>
+      <li>
+        <strong>Data protection contact:</strong>{" "}
+        <a class="text-secondary hover:underline" href="mailto:odp@sum-project.eu">odp@sum-project.eu</a>
+      </li>
+      <li>
+        <strong>INRIA Data Protection Officer (DPO):</strong>{" "}
+        <a class="text-secondary hover:underline" href="mailto:dpo@inria.fr">dpo@inria.fr</a>
+      </li>
+    </ul>
+    <p class="mb-4">
+      Each SUM Consortium partner has designated a Data Protection Officer for the project and is
+      responsible for the personal data it collects, generates and processes within its own activities.
+    </p>
+
+    <hr class="border-gray-200 my-8" />
+
+    {/* Section 2 */}
+    <h2 class="text-2xl font-semibold mt-10 mb-4">2. What personal data we collect</h2>
+    <p class="mb-4">
+      We limit the collection of personal data to what is necessary for the purposes described below
+      (data minimisation).
+    </p>
+    <p class="mb-2">
+      <strong>Account and registration data.</strong> When you register for a Living Lab user account
+      on the Platform, we collect:
+    </p>
+    <ul class="list-disc pl-6 mb-4 space-y-1 text-gray-700">
+      <li>your name;</li>
+      <li>your email address;</li>
+      <li>a password (stored in encrypted/hashed form);</li>
+      <li>the Living Lab(s) you are associated with;</li>
+      <li>your account status (e.g. pending verification, active, disabled).</li>
+    </ul>
+    <p class="mb-4">
+      Living Lab accounts are verified by a Platform administrator before activation.
+    </p>
+    <p class="mb-4">
+      <strong>Contact and messaging data.</strong> When an administrator contacts a Living Lab, or
+      when you submit a contact/message form, we process the content of the message and the
+      identifiers needed to deliver it (e.g. sender and recipient account details). A record of
+      messages sent through the Platform is retained.
+    </p>
+    <p class="mb-4">
+      <strong>Technical data.</strong> When you use the Platform, our servers process limited
+      technical information required to operate the service securely and to maintain your login
+      session (see Section&nbsp;7, Cookies).
+    </p>
+    <p class="mb-4">
+      <strong>Open data published on the Platform.</strong> The datasets, KPI results and Living Lab
+      content published openly on the Platform are <strong>anonymised and aggregated</strong>. Only
+      anonymised and aggregated data is made openly available, so that individual data subjects cannot
+      be identified, unless explicit consent has been obtained in accordance with the GDPR.
+    </p>
+    <p class="mb-4">
+      We do <strong>not</strong> process special categories of personal data (sensitive data) within
+      the meaning of Article&nbsp;9 GDPR through the Platform.
+    </p>
+
+    <hr class="border-gray-200 my-8" />
+
+    {/* Section 3 */}
+    <h2 class="text-2xl font-semibold mt-10 mb-4">3. Why we process your data and the legal basis</h2>
+    <p class="mb-4">
+      We process personal data for the following purposes, each with a lawful basis under Article&nbsp;6 GDPR:
+    </p>
+    <ul class="list-disc pl-6 mb-4 space-y-2 text-gray-700">
+      <li>
+        <strong>To create and manage your user account</strong> and to verify Living Lab
+        administrators — necessary to provide the service you request (Article&nbsp;6(1)(b) GDPR,
+        performance of a contract / steps at your request).
+      </li>
+      <li>
+        <strong>To enable communication</strong> between administrators and Living Labs through the
+        Platform's messaging features — based on our legitimate interest in operating the
+        collaboration features of the Platform (Article&nbsp;6(1)(f) GDPR).
+      </li>
+      <li>
+        <strong>To operate, secure and maintain the Platform</strong> (authentication, session
+        management, prevention of unauthorised access) — based on our legitimate interest in the
+        security and integrity of the service (Article&nbsp;6(1)(f) GDPR).
+      </li>
+      <li>
+        <strong>To publish open mobility data</strong> in the public interest and for scientific
+        research purposes, using only anonymised and aggregated data (Article&nbsp;6(1)(e) and/or
+        Article&nbsp;6(1)(f) GDPR). Where identifiable personal data would ever be published, this
+        is done only with your <strong>explicit consent</strong> (Article&nbsp;6(1)(a) and Article&nbsp;7 GDPR).
+      </li>
+    </ul>
+    <p class="mb-4">
+      Where consent is the legal basis, you may withdraw it at any time, without affecting the
+      lawfulness of processing carried out before withdrawal.
+    </p>
+
+    <hr class="border-gray-200 my-8" />
+
+    {/* Section 4 */}
+    <h2 class="text-2xl font-semibold mt-10 mb-4">4. How long we keep your data</h2>
+    <p class="mb-4">
+      We keep personal data in a form that permits your identification for{" "}
+      <strong>no longer than is necessary</strong> for the purposes for which it is processed
+      (Article&nbsp;5(1)(e) GDPR).
+    </p>
+    <ul class="list-disc pl-6 mb-4 space-y-2 text-gray-700">
+      <li>
+        <strong>Account data</strong> is kept for as long as your account remains active. If your
+        account is disabled or you ask us to delete it, your personal data is deleted or anonymised
+        within a reasonable period, subject to any legal retention obligations.
+      </li>
+      <li>
+        <strong>Messages</strong> sent through the Platform are retained for traceability of Platform
+        communications for{" "}
+        5 years.
+      </li>
+      <li>
+        <strong>Open data</strong> published on the Platform is anonymised/aggregated and is intended
+        to be preserved long-term to support research and decision-making beyond the lifetime of
+        the project.
+      </li>
+    </ul>
+
+    <hr class="border-gray-200 my-8" />
+
+    {/* Section 5 */}
+    <h2 class="text-2xl font-semibold mt-10 mb-4">5. Who has access to your data</h2>
+    <p class="mb-4">Access to personal data is restricted to authorised personnel only.</p>
+    <ul class="list-disc pl-6 mb-4 space-y-2 text-gray-700">
+      <li>
+        <strong>SUM Consortium partners and authorised Platform administrators</strong> access
+        account and messaging data strictly as needed to operate the Platform.
+      </li>
+      <li>
+        <strong>The Platform hosting infrastructure</strong> is provided on INRIA servers
+        (see Section&nbsp;8).
+      </li>
+      <li>
+        <strong>Authorised personnel of the funding authority</strong> of the project may access
+        project data where required.
+      </li>
+    </ul>
+    <p class="mb-4">
+      We do <strong>not</strong> sell your personal data, and we do not share it with third parties
+      for advertising or marketing purposes.
+    </p>
+
+    <hr class="border-gray-200 my-8" />
+
+    {/* Section 6 */}
+    <h2 class="text-2xl font-semibold mt-10 mb-4">6. International data transfers</h2>
+    <p class="mb-4">
+      Some SUM Consortium partners are based outside the European Economic Area (EEA) — for example,
+      in Israel. Where any personal data needs to be transferred to a recipient outside the EEA, such
+      transfer takes place only in accordance with:
+    </p>
+    <ul class="list-disc pl-6 mb-4 space-y-2 text-gray-700">
+      <li>
+        an <strong>adequacy decision</strong> of the European Commission (Article&nbsp;45 GDPR); or
+      </li>
+      <li>
+        <strong>appropriate safeguards</strong> such as Standard Contractual Clauses
+        (Article&nbsp;46 GDPR).
+      </li>
+    </ul>
+
+    <hr class="border-gray-200 my-8" />
+
+    {/* Section 7 */}
+    <h2 class="text-2xl font-semibold mt-10 mb-4">7. Cookies</h2>
+    <p class="mb-4">
+      The Platform uses <strong>only strictly necessary cookies</strong> required to operate the
+      service and to keep you logged in (session and authentication cookies). These cookies are
+      essential for the Platform to function and do not require your consent.
+    </p>
+    <p class="mb-4">
+      The Platform does <strong>not</strong> use advertising cookies, third-party tracking, or web
+      analytics tools that profile users.
+    </p>
+    <p class="mb-4">
+      If this changes in the future (for example, if analytics are introduced), this policy will be
+      updated and, where required, your consent will be requested before any non-essential cookies
+      are set.
+    </p>
+
+    <hr class="border-gray-200 my-8" />
+
+    {/* Section 8 */}
+    <h2 class="text-2xl font-semibold mt-10 mb-4">8. Where your data is stored and how it is secured</h2>
+    <p class="mb-4">
+      The Platform is hosted on <strong>INRIA servers</strong> at Parc scientifique de la
+      Haute-Borne, 40 avenue Halley – Bât A – Park Plaza, 59650 Villeneuve d'Ascq, France.
+    </p>
+    <p class="mb-4">
+      We apply appropriate technical and organisational measures, based on a risk assessment, to
+      protect personal data against accidental loss and unauthorised access, including:
+    </p>
+    <ul class="list-disc pl-6 mb-4 space-y-1 text-gray-700">
+      <li>encrypted connections (HTTPS);</li>
+      <li>user authentication and individual accounts with password protection;</li>
+      <li>access controls limiting access to authorised personnel;</li>
+      <li>firewall protection and regular security updates;</li>
+      <li>regular backups and integrity checks.</li>
+    </ul>
+    <p class="mb-4">
+      In the event of a personal data breach, the responsible party will notify the competent
+      national supervisory authority without undue delay and, where feasible,{" "}
+      <strong>within 72 hours</strong> of becoming aware of it, and will inform affected data
+      subjects where the breach is likely to result in a high risk to their rights and freedoms
+      (Articles&nbsp;33 and 34 GDPR).
+    </p>
+
+    <hr class="border-gray-200 my-8" />
+
+    {/* Section 9 */}
+    <h2 class="text-2xl font-semibold mt-10 mb-4">9. Your rights</h2>
+    <p class="mb-4">
+      Under the GDPR, you have the following rights regarding your personal data:
+    </p>
+    <ul class="list-disc pl-6 mb-4 space-y-2 text-gray-700">
+      <li><strong>Right of access</strong> — to obtain confirmation of whether we process your data and a copy of it.</li>
+      <li><strong>Right to rectification</strong> — to have inaccurate or incomplete data corrected.</li>
+      <li><strong>Right to erasure</strong> ("right to be forgotten") — to have your data deleted where there is no legitimate reason to keep it.</li>
+      <li><strong>Right to restriction of processing</strong> — to limit how we use your data in certain circumstances.</li>
+      <li><strong>Right to data portability</strong> — to receive your data in a structured, commonly used, machine-readable format and to transmit it to another controller.</li>
+      <li><strong>Right to object</strong> — to object to processing based on legitimate interests.</li>
+      <li><strong>Right to withdraw consent</strong> — at any time, where processing is based on consent.</li>
+    </ul>
+    <p class="mb-4">
+      To exercise any of these rights, contact us at{" "}
+      <a class="text-secondary hover:underline" href="mailto:odp@sum-project.eu">odp@sum-project.eu</a>{" "}
+      <!-- or the INRIA DPO at{" "}
+      <a class="text-secondary hover:underline" href="mailto:dpo@inria.fr">dpo@inria.fr</a>. -->
+    </p>
+
+    <hr class="border-gray-200 my-8" />
+
+    {/* Section 10 */}
+    <h2 class="text-2xl font-semibold mt-10 mb-4">10. Right to lodge a complaint</h2>
+    <p class="mb-4">
+      If you consider that the processing of your personal data infringes the GDPR, you have the
+      right to lodge a complaint with a <strong>supervisory authority</strong>, in particular in the
+      EU Member State of your residence, place of work, or of the alleged infringement.
+    </p>
+    <p class="mb-4">
+      In France, the competent authority is the{" "}
+      <strong>Commission Nationale de l'Informatique et des Libertés (CNIL)</strong> —{" "}
+      <a class="text-secondary hover:underline" href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer">
+        https://www.cnil.fr
+      </a>.
+    </p>
+
+    <hr class="border-gray-200 my-8" />
+
+    {/* Section 11 */}
+    <h2 class="text-2xl font-semibold mt-10 mb-4">11. Changes to this Privacy Policy</h2>
+    <p class="mb-4">
+      We may update this Privacy Policy to reflect changes in the Platform or in legal requirements.
+      The current version, with its date, is always available on the Platform.
+    </p>
+
+    <hr class="border-gray-200 my-8" />
+
+    {/* Section 12 */}
+    <h2 class="text-2xl font-semibold mt-10 mb-4">12. EU funding disclaimer</h2>
+    <p class="mb-4">
+      Co-funded by the European Union. Views and opinions expressed are however those of the
+      author(s) only and do not necessarily reflect those of the European Union or the European
+      Climate, Infrastructure and Environment Executive Agency (CINEA). Neither the European Union
+      nor the granting authority can be held responsible for them.
+    </p>
+    <p class="mb-4 text-gray-600 text-sm">Copyright © SUM Consortium.</p>
+  </section>
+</Layout>

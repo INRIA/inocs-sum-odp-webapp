@@ -168,6 +168,17 @@ export default function SignupForm({ livingLabs }: Props) {
         <RButton variant="secondary" text="Go back" href={getUrl("/")} />
       </div>
 
+      <p className="text-xs text-gray-500">
+        By signing up you agree to our{" "}
+        <a
+          href={getUrl("/privacy-policy")}
+          className="text-blue-800 hover:text-blue-800 underline"
+        >
+          Privacy Policy
+        </a>
+        .
+      </p>
+
       <div className="text-center mt-6">
         <p className="text-sm text-gray-600">
           Already have an account?<br></br>
