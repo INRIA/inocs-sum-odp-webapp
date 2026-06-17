@@ -399,3 +399,65 @@ ALTER TABLE `messages` ADD CONSTRAINT `messages_kpiresult_id_fkey` FOREIGN KEY (
 
 -- AddForeignKey
 ALTER TABLE `messages` ADD CONSTRAINT `messages_living_lab_project_implementation_id_fkey` FOREIGN KEY (`living_lab_project_implementation_id`) REFERENCES `living_lab_projects_implementation`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- Migration: add_last_updated_by_user_id
+-- Adds audit column last_updated_by_user_id to labs, kpiresults, and living_lab_projects_implementation.
+-- Also adds @updatedAt behaviour hint (Prisma handles this at the ORM level, no SQL trigger needed).
+
+ALTER TABLE `labs`
+  ADD COLUMN `last_updated_by_user_id` BIGINT UNSIGNED NULL,
+  ADD INDEX `labs_last_updated_by_user_id_foreign` (`last_updated_by_user_id`),
+  ADD CONSTRAINT `labs_last_updated_by_user_id_foreign`
+    FOREIGN KEY (`last_updated_by_user_id`) REFERENCES `users` (`id`)
+    ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+ALTER TABLE `kpiresults`
+  ADD COLUMN `last_updated_by_user_id` BIGINT UNSIGNED NULL,
+  ADD INDEX `kpiresults_last_updated_by_user_id_index` (`last_updated_by_user_id`),
+  ADD CONSTRAINT `kpiresults_last_updated_by_user_id_foreign`
+    FOREIGN KEY (`last_updated_by_user_id`) REFERENCES `users` (`id`)
+    ON DELETE SET NULL ON UPDATE NO ACTION;
+
+-- Rename existing kpiresults FK on user_id to match new named relation
+-- (only needed if the existing constraint was unnamed/auto-generated; skip if already named)
+
+ALTER TABLE `living_lab_projects_implementation`
+  ADD COLUMN `last_updated_by_user_id` BIGINT UNSIGNED NULL,
+  ADD INDEX `lab_projects_last_updated_by_user_id_foreign` (`last_updated_by_user_id`),
+  ADD CONSTRAINT `lab_projects_last_updated_by_user_id_foreign`
+    FOREIGN KEY (`last_updated_by_user_id`) REFERENCES `users` (`id`)
+    ON DELETE SET NULL ON UPDATE NO ACTION;
+
+
+-- Script to create triggers for messages table to auto-populate from_email and to_email based on from_user_id and to_user_id.
+DELIMITER $$
+
+CREATE TRIGGER messages_before_insert
+BEFORE INSERT ON messages
+FOR EACH ROW
+BEGIN
+  -- Set from_email from users table
+  IF NEW.from_user_id IS NOT NULL THEN
+    SET NEW.from_email = (SELECT email FROM users WHERE id = NEW.from_user_id);
+  END IF;
+  
+  -- Set to_email from users table if to_user_id is provided
+  IF NEW.to_user_id IS NOT NULL THEN
+    SET NEW.to_email = (SELECT email FROM users WHERE id = NEW.to_user_id);
+  END IF;
+END$$
+
+CREATE TRIGGER messages_before_update
+BEFORE UPDATE ON messages
+FOR EACH ROW
+BEGIN
+  IF NEW.from_user_id IS NOT NULL THEN
+    SET NEW.from_email = (SELECT email FROM users WHERE id = NEW.from_user_id);
+  END IF;
+  
+  IF NEW.to_user_id IS NOT NULL THEN
+    SET NEW.to_email = (SELECT email FROM users WHERE id = NEW.to_user_id);
+  END IF;
+END$$
+
+DELIMITER ;

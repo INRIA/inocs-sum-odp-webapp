@@ -1,0 +1,212 @@
+# =============================================================================
+# SUM Open Data Platform — full-stack template
+# =============================================================================
+# Brings up the complete platform from the published GitLab registry images:
+#
+#   db          MySQL 8       — shared database (single source of truth)
+#   webapp      this repo     — public website + Living Lab editor space  (Astro)
+#   admin       UTwente repo  — administration back-office                (Laravel)
+#   impact-api  INRIA repo    — impact analysis API / MCDA decision tools (FastAPI)
+#
+# This is a TEMPLATE. Replace every value marked  # << CHANGE >>  before use.
+# The placeholder keys/passwords below are NOT secrets — generate real ones with:
+#   openssl rand -base64 32
+# Never commit real credentials.
+#
+# Usage:
+#   docker compose pull        # fetch the :latest images
+#   docker compose up -d
+#   docker compose logs -f webapp
+#
+# IMPORTANT — one-time schema + seed setup is NOT automated here. All three apps
+# share ONE database, so the database name / user / password must be IDENTICAL
+# across every service (they are, below: db "sumodp"). After first start, apply
+# each app's schema + seed against the `db` service, following its own README:
+#   • webapp     — Prisma migrate + the SQL seed files (see this repo's README)
+#   • admin      — docker compose exec admin php artisan migrate --seed
+#   • impact-api — no schema of its own; reads/writes the shared tables
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # Shared MySQL database
+  # ---------------------------------------------------------------------------
+  db:
+    image: mysql:8
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "change-me-root"    # << CHANGE >>
+      MYSQL_DATABASE: "sumodp"                  # shared DB name (must match all services below)
+      MYSQL_USER: "sumodp"                      # << CHANGE >> shared app DB user
+      MYSQL_PASSWORD: "change-me"               # << CHANGE >> shared app DB password
+    ports:
+      # Exposed on the host so you can run migrations / mysql imports from your
+      # machine. Remove to keep the DB private to the compose network.
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [odp]
+
+  # ---------------------------------------------------------------------------
+  # Public website + Living Lab editor space  (this repository — Astro, port 4321)
+  # ---------------------------------------------------------------------------
+  webapp:
+    image: registry.gitlab.inria.fr/inocs-lab/inocs-sum-docker-images/inocs-sum-odp-webapp:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "4321:4321"   # public website → http://localhost:4321
+    environment:
+      # Shared MySQL — host is the `db` service name. Must match db creds above.
+      DATABASE_URL: "mysql://sumodp:change-me@db:3306/sumodp"   # << CHANGE >> password
+      AUTH_SECRET: "change-me-random-secret"                    # << CHANGE >> signs auth JWTs
+
+      # Admin back-office. PRIVATE = in-network address (Apache listens on 80);
+      # PUBLIC = the URL the browser is redirected to.
+      ODP_ADMIN_HOST_PRIVATE: "http://admin:80"                 # internal, no change needed
+      ODP_ADMIN_HOST_PUBLIC: "http://localhost:8000"           # << CHANGE >> public admin URL in prod
+      # Shared with the admin app's USER_CREATION_API_KEY (must be identical).
+      USER_CREATION_API_KEY: "change-me-user-creation-key"     # << CHANGE >>
+
+      # Impact API — full POST route for MCDA jobs. Header X-Internal-API-Key is
+      # sent with JOB_RUN_IMPACT_API_KEY, which must equal impact-api INTERNAL_API_KEY.
+      # Confirm the exact path against the impact-api /docs (Swagger).
+      JOB_RUN_IMPACT_ASSESS_ROUTE: "http://impact-api:8000/jobs/runs/mcda_analysis_custom"  # << CONFIRM path
+      JOB_RUN_IMPACT_API_KEY: "change-me-internal-api-key"     # << CHANGE >> == impact-api INTERNAL_API_KEY
+
+      # New signups become lab editors (role_id=2) and are auto-activated.
+      SIGNUP_LAB_EDITOR_ROLE_ID: "2"
+      SIGNUP_AUTO_ACTIVATE: "true"
+
+      # Rate limiting (safe defaults).
+      RATE_LIMIT_MAX_REQUESTS_PER_MINUTE: "50"
+      RATE_LIMIT_BLOCK_DURATION_MINUTES: "1"
+      JOB_RUN_RATE_LIMIT_MAX_REQUESTS_PER_MINUTE: "3"
+      JOB_RUN_RATE_LIMIT_BLOCK_DURATION_MINUTES: "5"
+
+      # SMTP for admin notifications. If SMTP_HOST is unset, emails print to logs.
+      # SMTP_HOST: "smtp.example.com"          # << CHANGE >> (optional)
+      # SMTP_PORT: "587"
+      # SMTP_SECURE: "false"                   # "true" for implicit TLS (port 465)
+      # SMTP_USER: "user@example.com"
+      # SMTP_PASSWORD: "change-me"
+      # SMTP_FROM: "noreply@example.com"
+      # ADMIN_EMAILS: "admin@example.com"      # comma-separated
+    networks: [odp]
+
+  # ---------------------------------------------------------------------------
+  # Administration back-office  (UTwente — Laravel/PHP 8.3-apache, listens on 80)
+  # SUM-project/SUM-Open-data-Platform
+  # ---------------------------------------------------------------------------
+  admin:
+    image: registry.gitlab.inria.fr/inocs-lab/inocs-sum-docker-images/sum-odp-admin-webapp:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:80"   # admin UI → http://localhost:8000
+    networks:
+      odp:
+        # Static IP so it can be named in the impact-api admin-refresh allowlist below.
+        ipv4_address: 172.28.0.10
+    environment:
+      APP_NAME: "SUM Open Data Platform"
+      APP_ENV: "production"          # use "local" for a dev container
+      APP_DEBUG: "false"
+      # Laravel encryption key — REQUIRED. Generate a base64 key, e.g.:
+      #   docker compose run --rm admin php artisan key:generate --show
+      APP_KEY: "base64:CHANGE_ME="   # << CHANGE >>
+      APP_URL: "http://localhost:8000"   # << CHANGE >> public admin URL in prod
+      ASSET_URL: "http://localhost:8000" # << CHANGE >> usually same as APP_URL
+      LOG_CHANNEL: "stderr"
+      LOG_LEVEL: "info"
+
+      # Shared MySQL (Laravel-style vars). Must match db creds above.
+      DB_CONNECTION: "mysql"
+      DB_HOST: "db"
+      DB_PORT: "3306"
+      DB_DATABASE: "sumodp"
+      DB_USERNAME: "sumodp"
+      DB_PASSWORD: "change-me"        # << CHANGE >> match db password
+
+      # Must match the webapp's USER_CREATION_API_KEY.
+      USER_CREATION_API_KEY: "change-me-user-creation-key"   # << CHANGE >>
+
+      # Impact API — admin full-refresh route + the admin-tier key.
+      # API_IMPACT_ADMIN_API_KEY must equal impact-api ADMIN_REFRESH_API_KEY.
+      API_IMPACT_URL: "http://impact-api:8000/jobs/runs/full_impact_refresh"
+      API_IMPACT_ADMIN_API_KEY: "change-me-admin-refresh-key"  # << CHANGE >>
+
+      # Outbound mail (Brevo SMTP by default). Optional.
+      # MAIL_MAILER: "smtp"
+      # MAIL_HOST: "smtp-relay.brevo.com"
+      # MAIL_PORT: "587"
+      # MAIL_USERNAME: ""              # << CHANGE >>
+      # MAIL_PASSWORD: ""             # << CHANGE >>
+      # MAIL_FROM_ADDRESS: "odp@sum-project.eu"
+      # MAIL_FROM_NAME: "SUM Open Data Platform"
+
+  # ---------------------------------------------------------------------------
+  # Impact analysis API  (INRIA — FastAPI/Python 3.13, listens on 8000)
+  # INRIA/sum-impact-assessment-models — internal network service only
+  # ---------------------------------------------------------------------------
+  impact-api:
+    image: registry.gitlab.inria.fr/inocs-lab/inocs-sum-docker-images/inocs-sum-odp-impact-api:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    # Not published to the host — internal service only. Uncomment to debug /docs.
+    expose:
+      - "8000"
+    # ports:
+    #   - "8001:8000"   # then open http://localhost:8001/docs
+    environment:
+      ENV: "production"   # "development"|"preproduction" enable /simulation endpoints
+      # Shared MySQL (impact-api uses DB_USER/DB_NAME naming). Must match db creds.
+      DB_HOST: "db"
+      DB_PORT: "3306"
+      DB_USER: "sumodp"
+      DB_PASSWORD: "change-me"        # << CHANGE >> match db password
+      DB_NAME: "sumodp"
+
+      API_HOST: "0.0.0.0"
+      API_PORT: "8000"
+      LOG_LEVEL: "INFO"
+      LOG_FORMAT: "json"
+
+      # INTERNAL_API_KEY      → protects /kpis, /jobs, /simulation (called by webapp).
+      #                         Must equal the webapp's JOB_RUN_IMPACT_API_KEY.
+      # ADMIN_REFRESH_API_KEY → protects the admin full-refresh route (called by admin).
+      #                         Must equal the admin's API_IMPACT_ADMIN_API_KEY.
+      INTERNAL_API_KEY: "change-me-internal-api-key"        # << CHANGE >>
+      ADMIN_REFRESH_API_KEY: "change-me-admin-refresh-key"  # << CHANGE >>
+      # IPs allowed to call the admin full-refresh route (JSON list). The admin
+      # container's static IP (set above) is listed so its refresh calls pass.
+      ADMIN_REFRESH_ALLOWED_IPS: '["172.28.0.10"]'
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health').status==200 else 1)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks: [odp]
+
+networks:
+  odp:
+    driver: bridge
+    ipam:
+      config:
+        # Fixed subnet so the admin service can have a predictable IP for the
+        # impact-api admin-refresh allowlist.
+        - subnet: 172.28.0.0/16
+
+volumes:
+  db_data:
