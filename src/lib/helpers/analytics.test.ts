@@ -371,26 +371,49 @@ describe("computeLabKpiTimeline - User Story 2", () => {
     expect(series[0].dataPoints[1]).toEqual({ year: 2024, count: 1 });
   });
 
-  it("returns empty dataPoints for labs with no results", () => {
+  it("filters out labs with no results", () => {
     const labs = [createLab(1, "Empty Lab")];
 
     const series = computeLabKpiTimeline(labs);
 
-    expect(series).toHaveLength(1);
-    expect(series[0].dataPoints).toHaveLength(0);
+    expect(series).toHaveLength(0);
   });
 
   it("assigns different colors to different labs", () => {
     const labs = [
-      createLab(1, "Lab 1"),
-      createLab(2, "Lab 2"),
-      createLab(3, "Lab 3"),
+      createLab(1, "Lab 1", [
+        { living_lab_id: 1, kpidefinition_id: 1, results: [createResult(1, 1, 1, "2023-01-01")] },
+      ]),
+      createLab(2, "Lab 2", [
+        { living_lab_id: 2, kpidefinition_id: 1, results: [createResult(2, 1, 2, "2023-01-01")] },
+      ]),
+      createLab(3, "Lab 3", [
+        { living_lab_id: 3, kpidefinition_id: 1, results: [createResult(3, 1, 3, "2023-01-01")] },
+      ]),
     ];
 
     const series = computeLabKpiTimeline(labs);
 
     const colors = series.map((s) => s.color);
     expect(new Set(colors).size).toBe(3); // All different
+  });
+
+  it("creates unique colors when more labs are added than the baseline palette", () => {
+    const labs = Array.from({ length: 9 }, (_, index) =>
+      createLab(index + 1, `Lab ${index + 1}`, [
+        {
+          living_lab_id: index + 1,
+          kpidefinition_id: 1,
+          results: [createResult(index + 1, 1, index + 1, "2023-01-01")],
+        },
+      ]),
+    );
+
+    const series = computeLabKpiTimeline(labs);
+    const colors = series.map((s) => s.color);
+
+    expect(colors).toHaveLength(9);
+    expect(new Set(colors).size).toBe(9);
   });
 });
 
@@ -426,14 +449,25 @@ describe("computeLabMeasuresBar - User Story 3", () => {
     });
   });
 
+  it("filters out labs with no projects at all", () => {
+    const labs = [
+      createLab(1, "Lab 1", [], [createImplementation(1, "PUSH")]),
+      createLab(2, "Empty Lab", []),
+      createLab(3, "Lab 3", [], [createImplementation(2, "PULL")]),
+    ];
+
+    const data = computeLabMeasuresBar(labs);
+
+    expect(data).toHaveLength(2);
+    expect(data.map((item) => item.labName)).toEqual(["Lab 1", "Lab 3"]);
+  });
+
   it("handles labs with zero measures", () => {
     const labs = [createLab(1, "Empty Lab")];
 
     const data = computeLabMeasuresBar(labs);
 
-    expect(data).toHaveLength(1);
-    expect(data[0].pushCount).toBe(0);
-    expect(data[0].pullCount).toBe(0);
+    expect(data).toHaveLength(0);
   });
 });
 

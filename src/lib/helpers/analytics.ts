@@ -23,6 +23,7 @@ import type {
   AlertCardData,
 } from "../../components/react/Analytics/types";
 import { formatDateOToMonthYear } from "./format";
+import { generateLabColorsWithSeed } from "./colorUtils";
 
 /**
  * Safely parse a date string. Returns null if invalid.
@@ -267,19 +268,11 @@ export function computeLabMetricsTable(
 export function computeLabKpiTimeline(
   labs: ILivingLabPopulated[],
 ): LabKpiTimelineSeries[] {
-  // Color palette for labs (will cycle if more labs than colors)
-  const colors = [
-    "#3B82F6", // blue
-    "#10B981", // green
-    "#F59E0B", // amber
-    "#EF4444", // red
-    "#8B5CF6", // purple
-    "#06B6D4", // cyan
-    "#F97316", // orange
-    "#EC4899", // pink
-  ];
+  const labColorAssignments = generateLabColorsWithSeed(
+    labs.map((lab) => ({ id: lab.id, name: lab.name })),
+  );
 
-  return labs.map((lab, index) => {
+  return labs.flatMap((lab) => {
     // Group results by year
     const yearCounts = new Map<number, number>();
 
@@ -292,17 +285,27 @@ export function computeLabKpiTimeline(
       }
     }
 
+    if (allResults.length === 0) {
+      return [];
+    }
+
     // Convert to sorted array of data points
     const dataPoints = Array.from(yearCounts.entries())
       .map(([year, count]) => ({ year, count }))
       .sort((a, b) => a.year - b.year);
 
-    return {
-      labId: lab.id,
-      labName: lab.name,
-      color: colors[index % colors.length],
-      dataPoints,
-    };
+    const colorAssignment = labColorAssignments.find(
+      (assignment) => assignment.labId === lab.id,
+    );
+
+    return [
+      {
+        labId: lab.id,
+        labName: lab.name,
+        color: colorAssignment?.color ?? "#3B82F6",
+        dataPoints,
+      },
+    ];
   });
 }
 
@@ -312,7 +315,7 @@ export function computeLabKpiTimeline(
 export function computeLabMeasuresBar(
   labs: ILivingLabPopulated[],
 ): LabMeasuresBarData[] {
-  return labs.map((lab) => {
+  return labs.flatMap((lab) => {
     const implementations = lab.living_lab_projects_implementation ?? [];
     const pushCount = implementations.filter(
       (impl) => impl.project?.type === "PUSH",
@@ -321,11 +324,17 @@ export function computeLabMeasuresBar(
       (impl) => impl.project?.type === "PULL",
     ).length;
 
-    return {
-      labName: lab.name,
-      pushCount,
-      pullCount,
-    };
+    if (pushCount + pullCount === 0) {
+      return [];
+    }
+
+    return [
+      {
+        labName: lab.name,
+        pushCount,
+        pullCount,
+      },
+    ];
   });
 }
 
