@@ -1,9 +1,9 @@
 /**
  * D3LineChartLabKPIsOvertime Component
- * 
+ *
  * React component with client:load that renders a D3 line chart showing
  * KPI results over time per living lab.
- * 
+ *
  * @module User Story 2
  */
 
@@ -18,13 +18,16 @@ export interface D3LineChartLabKPIsOvertimeProps {
  * A D3 line chart showing KPI results submitted per year for each living lab.
  * This component requires client:load for D3 DOM manipulation.
  */
-export function D3LineChartLabKPIsOvertime({ data }: D3LineChartLabKPIsOvertimeProps) {
+export function D3LineChartLabKPIsOvertime({
+  data,
+}: D3LineChartLabKPIsOvertimeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const [dimensions, setDimensions] = useState({ width: 400, height: 250 });
   const [selectedLabIds, setSelectedLabIds] = useState<number[]>(() =>
     data.map((series) => series.labId),
   );
+  const [activeLabId, setActiveLabId] = useState<number | null>(null);
 
   useEffect(() => {
     const nextLabIds = data.map((series) => series.labId);
@@ -39,7 +42,9 @@ export function D3LineChartLabKPIsOvertime({ data }: D3LineChartLabKPIsOvertimeP
         nextLabIdSet.has(labId),
       );
       const selectedLabIdSet = new Set(preservedSelection);
-      const newLabIds = nextLabIds.filter((labId) => !selectedLabIdSet.has(labId));
+      const newLabIds = nextLabIds.filter(
+        (labId) => !selectedLabIdSet.has(labId),
+      );
       const nextSelection = [...preservedSelection, ...newLabIds];
 
       return nextSelection.length > 0 ? nextSelection : [...nextLabIds];
@@ -56,6 +61,11 @@ export function D3LineChartLabKPIsOvertime({ data }: D3LineChartLabKPIsOvertimeP
     [data, selectedLabIdSet],
   );
 
+  const activeSeries = useMemo(
+    () => data.find((series) => series.labId === activeLabId) ?? null,
+    [activeLabId, data],
+  );
+
   const hasVisibleDataPoints = useMemo(
     () => visibleSeries.some((series) => series.dataPoints.length > 0),
     [visibleSeries],
@@ -70,7 +80,9 @@ export function D3LineChartLabKPIsOvertime({ data }: D3LineChartLabKPIsOvertimeP
           return previousSelection;
         }
 
-        return previousSelection.filter((selectedLabId) => selectedLabId !== labId);
+        return previousSelection.filter(
+          (selectedLabId) => selectedLabId !== labId,
+        );
       }
 
       return [...previousSelection, labId];
@@ -151,7 +163,7 @@ export function D3LineChartLabKPIsOvertime({ data }: D3LineChartLabKPIsOvertimeP
           d3
             .axisBottom(xScale)
             .ticks(Math.min(years.length, 6))
-            .tickFormat(d3.format("d"))
+            .tickFormat(d3.format("d")),
         )
         .selectAll("text")
         .attr("class", "text-xs text-gray-500");
@@ -183,7 +195,9 @@ export function D3LineChartLabKPIsOvertime({ data }: D3LineChartLabKPIsOvertimeP
         if (series.dataPoints.length === 0) return;
 
         // Sort data points by year
-        const sortedPoints = [...series.dataPoints].sort((a, b) => a.year - b.year);
+        const sortedPoints = [...series.dataPoints].sort(
+          (a, b) => a.year - b.year,
+        );
 
         // Draw line
         g.append("path")
@@ -191,7 +205,10 @@ export function D3LineChartLabKPIsOvertime({ data }: D3LineChartLabKPIsOvertimeP
           .attr("fill", "none")
           .attr("stroke", series.color)
           .attr("stroke-width", 2)
-          .attr("d", line);
+          .attr("d", line)
+          .attr("class", "cursor-pointer")
+          .on("mouseenter", () => setActiveLabId(series.labId))
+          .on("click", () => setActiveLabId(series.labId));
 
         // Draw dots
         g.selectAll(`.dot-${series.labId}`)
@@ -203,6 +220,8 @@ export function D3LineChartLabKPIsOvertime({ data }: D3LineChartLabKPIsOvertimeP
           .attr("r", 4)
           .attr("fill", series.color)
           .attr("class", "cursor-pointer")
+          .on("mouseenter", () => setActiveLabId(series.labId))
+          .on("click", () => setActiveLabId(series.labId))
           .append("title")
           .text((d) => `${series.labName}: ${d.count} results in ${d.year}`);
       });
@@ -229,47 +248,76 @@ export function D3LineChartLabKPIsOvertime({ data }: D3LineChartLabKPIsOvertimeP
       </div>
       {data.length > 0 && (
         <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between gap-3">
-            <small className="text-xs text-gray-500">
-              Click on living labs to show or hide them in the chart
-            </small>
-            <span className="text-xs text-gray-500">
-              {selectedLabIds.length}/{data.length} selected
-            </span>
-          </div>
-
           <div className="flex flex-wrap justify-center gap-2">
-          {data.map((series) => (
-            <button
-              key={series.labId}
-              type="button"
-              onClick={() => toggleLabVisibility(series.labId)}
-              aria-pressed={selectedLabIdSet.has(series.labId)}
-              disabled={selectedLabIdSet.has(series.labId) && selectedLabIds.length === 1}
-              className="flex items-center gap-2 rounded-full border border-gray-200 px-3 py-1.5 text-left text-sm transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <span
-                className="inline-block h-3 w-3 rounded-full border"
-                style={{
-                  backgroundColor: selectedLabIdSet.has(series.labId)
-                    ? series.color
-                    : "transparent",
-                  borderColor: series.color,
-                }}
-                aria-hidden
-              />
-              <span
-                className={
-                  selectedLabIdSet.has(series.labId)
-                    ? "text-gray-900"
-                    : "text-gray-500"
+            {data.map((series) => (
+              <button
+                key={series.labId}
+                type="button"
+                onClick={() => toggleLabVisibility(series.labId)}
+                onMouseEnter={() => setActiveLabId(series.labId)}
+                onFocus={() => setActiveLabId(series.labId)}
+                onMouseLeave={() =>
+                  setActiveLabId((currentLabId) =>
+                    currentLabId === series.labId ? null : currentLabId,
+                  )
                 }
+                aria-pressed={selectedLabIdSet.has(series.labId)}
+                disabled={
+                  selectedLabIdSet.has(series.labId) &&
+                  selectedLabIds.length === 1
+                }
+                className="flex items-center gap-2 rounded-full border border-gray-200 px-3 py-1.5 text-left text-sm transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {series.labName}
+                <span
+                  className="inline-block h-3 w-3 rounded-full border"
+                  style={{
+                    backgroundColor: selectedLabIdSet.has(series.labId)
+                      ? series.color
+                      : "transparent",
+                    borderColor: series.color,
+                  }}
+                  aria-hidden
+                />
+                <span
+                  className={
+                    selectedLabIdSet.has(series.labId)
+                      ? "text-gray-900"
+                      : "text-gray-500"
+                  }
+                >
+                  {series.labName}
+                </span>
+              </button>
+            ))}
+          </div>
+          {data.length > 1 && (
+            <div className="flex items-center justify-between gap-3">
+              <small className="text-xs text-gray-500">
+                Click on living labs to show or hide them in the chart
+              </small>
+              <span className="text-xs text-gray-500">
+                {selectedLabIds.length}/{data.length} selected
               </span>
-            </button>
-          ))}
-        </div>
+            </div>
+          )}
+          {activeSeries && (
+            <div
+              role="status"
+              aria-label="Selected lab details"
+              className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2"
+            >
+              <p className="text-sm font-medium text-gray-900">
+                {activeSeries.labName}
+              </p>
+              <ul className="mt-1 space-y-1 text-sm text-gray-600">
+                {activeSeries.dataPoints.map((point) => (
+                  <li key={`${activeSeries.labId}-${point.year}`}>
+                    {point.year}: {point.count} KPI results
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -109,6 +109,22 @@ describe("D3LineChartLabKPIsOvertime component - User Story 2", () => {
     expect(screen.getByText("1/2 selected")).toBeInTheDocument();
   });
 
+  it("shows data point values for a lab when hovering its legend button", async () => {
+    const user = userEvent.setup();
+
+    render(<D3LineChartLabKPIsOvertime data={mockData} />);
+
+    await user.hover(screen.getByRole("button", { name: /lab 2/i }));
+
+    const details = screen.getByRole("status", {
+      name: /selected lab details/i,
+    });
+
+    expect(details).toHaveTextContent("Lab 2");
+    expect(details).toHaveTextContent("2022: 3 KPI results");
+    expect(details).toHaveTextContent("2023: 7 KPI results");
+  });
+
   it("shows an empty state when the selected labs have no timeline data", async () => {
     const user = userEvent.setup();
     const mixedData: LabKpiTimelineSeries[] = [
