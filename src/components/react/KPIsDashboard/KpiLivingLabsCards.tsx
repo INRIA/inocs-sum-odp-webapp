@@ -26,7 +26,6 @@ export const KpiLivingLabsCards: React.FC<KpiLivingLabsCardsProps> = ({
     const kpiIds = new Set<number>();
     categories.forEach((category) => {
       if (filter.selectedCategoryIds?.includes(category.id)) {
-        // Add all KPIs in this category
         category.kpis?.forEach((kpi) => {
           kpiIds.add(kpi.id);
         });
@@ -38,11 +37,9 @@ export const KpiLivingLabsCards: React.FC<KpiLivingLabsCardsProps> = ({
   // Filter KPIs by selected categories (filter by parent KPI only)
   const filteredKpis = useMemo(() => {
     return kpis.filter((kpi) => {
-      // For parent KPIs or single KPIs (no parent_kpi_id), check if they're in selected categories
       if (!kpi.parent_kpi_id) {
         return kpiIdsInSelectedCategories.has(kpi.id);
       }
-      // For child KPIs, check if their parent is in selected categories
       return kpiIdsInSelectedCategories.has(kpi.parent_kpi_id);
     });
   }, [kpis, kpiIdsInSelectedCategories]);
@@ -52,7 +49,7 @@ export const KpiLivingLabsCards: React.FC<KpiLivingLabsCardsProps> = ({
     return groupKpisByParentChild(filteredKpis);
   }, [filteredKpis]);
 
-  // Build timeline data for ALL KPIs (parents and children)
+  // Build partitioned data map for ALL KPIs (applies data-sufficiency rule)
   const kpiDataMap = useMemo(() => {
     return buildKpiDataMap(
       filteredKpis,
@@ -63,12 +60,11 @@ export const KpiLivingLabsCards: React.FC<KpiLivingLabsCardsProps> = ({
     );
   }, [filteredKpis, livingLabs, filter, colorMap]);
 
-  // Filter groups to only those with data
+  // Filter groups to only those with any data (chart or baseline)
   const groupsWithData = kpiGroups.filter((group) => {
     if (group.type === "single") {
       return kpiDataMap.has(group.kpi.id);
     } else {
-      // For parent groups, check if parent or any child has data
       const hasParentData = kpiDataMap.has(group.parentKpi.id);
       const hasChildData = group.childKpis.some((child) =>
         kpiDataMap.has(child.id),
@@ -84,18 +80,15 @@ export const KpiLivingLabsCards: React.FC<KpiLivingLabsCardsProps> = ({
       { category: (typeof categories)[0]; groups: IKpiGroup[] }
     >();
 
-    // Initialize with selected categories
     categories
       .filter((cat) => filter.selectedCategoryIds?.includes(cat.id))
       .forEach((category) => {
         categoryMap.set(category.id, { category, groups: [] });
       });
 
-    // Assign each group to its category
     groupsWithData.forEach((group) => {
       const kpiId = group.type === "single" ? group.kpi.id : group.parentKpi.id;
 
-      // Find which category this KPI belongs to
       for (const category of categories) {
         if (category.kpis?.some((kpi) => kpi.id === kpiId)) {
           const entry = categoryMap.get(category.id);
@@ -107,14 +100,12 @@ export const KpiLivingLabsCards: React.FC<KpiLivingLabsCardsProps> = ({
       }
     });
 
-    // Filter out categories with no groups
     return Array.from(categoryMap.values()).filter(
       (entry) => entry.groups.length > 0,
     );
   }, [categories, filter.selectedCategoryIds, groupsWithData]);
 
   // Get selected labs with their colors for the legend
-  // IMPORTANT: This must be before any early returns to maintain consistent hook order
   const legendItems = useMemo(() => {
     return livingLabs
       .filter((lab) => filter.selectedLabIds?.includes(lab.id))
@@ -128,11 +119,13 @@ export const KpiLivingLabsCards: React.FC<KpiLivingLabsCardsProps> = ({
   // Helper function to render a group of KPIs
   const renderKpiGroup = (group: IKpiGroup, kpiDataMap: IKpiTimelineMap) => {
     if (group.type === "single") {
+      const partition = kpiDataMap.get(group.kpi.id);
       return (
         <div key={group.kpi.id} className="break-inside-avoid col-span-1">
           <KpiLivingLabsSingleCard
             kpi={group.kpi}
-            labTimelines={kpiDataMap.get(group.kpi.id) ?? []}
+            labTimelines={partition?.chartLabs ?? []}
+            baselineLabs={partition?.baselineLabs ?? []}
           />
         </div>
       );
@@ -200,7 +193,6 @@ export const KpiLivingLabsCards: React.FC<KpiLivingLabsCardsProps> = ({
             <div className="grid grid-flow-row-dense grid-cols-1 md:grid-cols-3 gap-0">
               {groups
                 .sort((a, b) => {
-                  // Sort by number of children (parent groups first, then by size)
                   const aSize =
                     a.type === "parent" ? a.childKpis.length + 1 : 1;
                   const bSize =

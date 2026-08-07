@@ -1,5 +1,6 @@
 import type {
   IKpi,
+  IKpiResult,
   IKpiResultGroup,
   ITransportMode,
 } from "../../../types";
@@ -12,6 +13,8 @@ export interface ILivingLabKpiData {
   id: number;
   name: string;
   kpiResults: IKpiResultGroup[];
+  /** Lab-level validation timestamp used by the data-sufficiency check (T03) */
+  validated_at?: Date | null;
 }
 
 /**
@@ -31,6 +34,22 @@ export interface ILabKpiTimeline {
   labName: string;
   color: string;
   dataPoints: ITimelineDataPoint[];
+}
+
+/**
+ * Partitioned lab data for a single KPI.
+ * chartLabs have ≥2 validated estimations; baselineLabs have exactly 1.
+ * Labs with 0 validated estimations are excluded from both.
+ */
+export interface ILabPartition {
+  chartLabs: ILabKpiTimeline[];
+  baselineLabs: Array<{
+    labId: number;
+    labName: string;
+    color: string;
+    /** The single validated result for display in the baseline row */
+    result: IKpiResult;
+  }>;
 }
 
 /**
@@ -54,9 +73,9 @@ export interface KpiLivingLabsCardsFilter {
 }
 
 /**
- * Map of KPI IDs to their lab timelines
+ * Map of KPI IDs to their partitioned lab data (chart-eligible + baseline-only)
  */
-export type IKpiTimelineMap = Map<number, ILabKpiTimeline[]>;
+export type IKpiTimelineMap = Map<number, ILabPartition>;
 
 /**
  * Represents a single KPI (no parent-child relationship)
@@ -120,7 +139,10 @@ export interface IModalSplitKpiData {
  */
 export interface KPIsDashboardProps {
   livingLabs: ILivingLabKpiData[];
+  /** Outcome KPIs only — implementation KPIs are passed separately (T02) */
   kpis: IKpi[];
+  /** Implementation-record KPIs rendered in a separate table, not as charts (T02) */
+  implementationKpis?: IKpi[];
   availableYears: number[];
   categories: ICategory[];
   /** Pre-processed modal split data (computed on SSR for performance) */
@@ -145,7 +167,10 @@ export interface KpiLivingLabsCardsProps {
  */
 export interface KpiLivingLabsCardProps {
   kpi: IKpi;
+  /** Chart-eligible timelines (labs with ≥2 validated estimations) */
   labTimelines: ILabKpiTimeline[];
+  /** Labs with exactly 1 validated estimation — shown as a baseline table */
+  baselineLabs: ILabPartition["baselineLabs"];
 }
 
 /**

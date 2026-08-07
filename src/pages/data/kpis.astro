@@ -3,6 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import ApiClient from "../../lib/api-client/ApiClient";
 import { KPIsDashboard, KpisFrameworkDiagram } from "../../components/react";
 import type { ILivingLabPopulated } from "../../types";
+import { isImplementationKpi } from "../../config/implementationKpis";
 
 const api = new ApiClient(Astro.request);
 
@@ -14,6 +15,14 @@ const livingLabsData =
 const allKpis = (await api.getKPIs()) ?? [];
 const nonModalSplitKpis = allKpis.filter(
   (kpi) => !kpi.kpi_number.startsWith("15"),
+);
+
+// T02: split outcome KPIs from implementation-record KPIs
+const outcomeKpis = nonModalSplitKpis.filter(
+  (kpi) => !isImplementationKpi(kpi.id),
+);
+const implementationKpis = nonModalSplitKpis.filter((kpi) =>
+  isImplementationKpi(kpi.id),
 );
 
 // Fetch all KPI categories
@@ -40,11 +49,12 @@ filteredLivingLabs.forEach((lab) => {
 });
 const sortedYears = Array.from(allYears).sort((a, b) => a - b);
 
-// Prepare living labs data for the dashboard
+// T03: include validated_at so the sufficiency rule can be applied in the dashboard
 const livingLabsForDashboard = filteredLivingLabs.map((lab) => ({
   id: Number(lab.id),
   name: lab.name,
   kpiResults: lab.kpi_results ?? [],
+  validated_at: lab.validated_at ?? null,
 }));
 ---
 
@@ -90,7 +100,8 @@ const livingLabsForDashboard = filteredLivingLabs.map((lab) => ({
       ) : (
         <KPIsDashboard
           livingLabs={livingLabsForDashboard}
-          kpis={nonModalSplitKpis}
+          kpis={outcomeKpis}
+          implementationKpis={implementationKpis}
           availableYears={sortedYears}
           categories={categories}
           modalSplitData={[]}
