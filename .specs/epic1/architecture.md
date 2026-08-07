@@ -11,14 +11,18 @@
 
 The acceptance criteria require: **"A request with no matching rows returns HTTP 200 and a header-only CSV."** The current throw-on-empty design is the root cause of the reported failure.
 
-### Cause B — `ModalSplitLivingLabsCard` passes `NaN` as a query param (produces `status=400`)
+### Cause B — `ModalSplitLivingLabsCard` uses unsafe `Number()` coercion (latent risk, not the active 400)
 
 `ModalSplitLivingLabsCard.tsx:107` passes `kpidefinition_id={Number(kpiId)}` where `kpiId: string` (types.ts:197).
 
+In practice `kpiId` is always a valid numeric string — it originates from `String(kpi.id)` in `living-lab.ts:302`, where `kpi.id` is a positive integer from the database. So `Number("42")` = 42 works correctly today.
+
+However, the pattern is **unsafe by construction**:
 - `Number("")` → `0` → `String(0) → "0"` → `parsePositiveInt("0")` returns null → **400**
 - `Number("abc")` → `NaN` → `String(NaN) → "NaN"` → `parsePositiveInt("NaN")` returns null → **400**
+- `NaN !== undefined` is `true`, so `buildPath()` would include it in the URL
 
-`Number(x)` is unsafe on arbitrary strings. `TriggerDownloadCsv.buildPath()` adds the value to the URL when `!== undefined`, and `NaN !== undefined` is `true`, so NaN leaks into the request.
+This is defensive hardening, not the active bug. The reported `status=400` is most likely Cause A (empty-set 404) being misidentified, or Cause C on edge-case URLs.
 
 ### Cause C — `kpiresults.ts` `parsePositiveInt` does not guard empty string (secondary 400 vector)
 
@@ -113,6 +117,23 @@ The try/catch block remains for the 500 path.
 
 ---
 
+### Change 3b — `src/bff/services/csv-export.service.ts`
+
+**Goal:** Remove the `EmptyCsvError` re-export (build would break without this).
+
+Both route files import `EmptyCsvError` from this re-export hub, not from `CsvSerializer.ts` directly. Once `EmptyCsvError` is deleted from `CsvSerializer.ts`, this file must be updated:
+
+1. Remove `EmptyCsvError` from the import on line 9:
+   ```typescript
+   import { CsvSerializer } from "../../lib/utils/CsvSerializer";
+   ```
+2. Remove `EmptyCsvError` from the re-export on line 19:
+   ```typescript
+   export { CsvSerializer };
+   ```
+
+---
+
 ### Change 4 — `src/components/react/KPIsDashboard/ModalSplitLivingLabsCard.tsx`
 
 **Goal:** Prevent `NaN` from reaching the URL.
@@ -120,10 +141,8 @@ The try/catch block remains for the 500 path.
 Replace the unsafe `Number(kpiId)` with a safe integer parse. Compute once at the top of the component body:
 
 ```typescript
-const kpiDefinitionId = (() => {
-  const n = parseInt(kpiId, 10);
-  return Number.isFinite(n) && n > 0 ? n : undefined;
-})();
+const kpiDefinitionId = parseInt(kpiId, 10);
+const isValidKpiId = Number.isFinite(kpiDefinitionId) && kpiDefinitionId > 0;
 ```
 
 Then pass:
@@ -131,11 +150,12 @@ Then pass:
 <TriggerDownloadCsv
   type="kpi-results-definition"
   size="sm"
-  kpidefinition_id={kpiDefinitionId}
+  kpidefinition_id={isValidKpiId ? kpiDefinitionId : undefined}
+  disabled={!isValidKpiId}
 />
 ```
 
-When `kpiDefinitionId` is `undefined`, `buildPath()` omits the param from the URL. The button still renders (it just fetches all results for that modal-split view), which is acceptable fallback behaviour. If the intent is to disable the button when the ID is invalid, set `disabled={kpiDefinitionId === undefined}`.
+When the ID is invalid, the button is disabled. An unfiltered fetch of all KPI results would be an expensive wide query and not what the user expects from a single-KPI card — so disable, don't silently widen.
 
 ---
 
@@ -167,15 +187,8 @@ When `kpiDefinitionId` is `undefined`, `buildPath()` omits the param from the UR
     const res = await GET({ url: makeUrl({ kpidefinition_id: "42" }) } as never);
     expect(res.status).toBe(200);
   });
-
-  it("returns 200 when no params supplied (empty result set)", async () => {
-    const headerOnly = '"KPI Group","KPI Number","KPI Name (parent)",...';
-    mockGetKpiResultsCsv.mockResolvedValueOnce(headerOnly);
-    const res = await GET({ url: makeUrl() } as never);
-    expect(res.status).toBe(200);
-    expect(res.headers.get("Content-Type")).toContain("text/csv");
-  });
   ```
+  Note: "returns 200 when no params supplied" is already covered by the existing test at line 42-55. Do not duplicate it.
 
 - **Add** guard test for empty-string param (Cause C):
   ```typescript
@@ -203,7 +216,7 @@ When `kpiDefinitionId` is `undefined`, `buildPath()` omits the param from the UR
 |---|---|---|
 | `/data/kpis` | `KpiLivingLabsSingleCard` | `kpi-results-definition` |
 | `/data/kpis` | `KpiLivingLabsMultipleCard` | `kpi-results-definition` |
-| `/data/kpis` | `ModalSplitLivingLabsCard` ← **was broken** | `kpi-results-definition` |
+| `/data/kpis` | `ModalSplitLivingLabsCard` ← **unsafe coercion hardened** | `kpi-results-definition` |
 | `/tools/impact_analysis` | `ImpactAnalysisDashboard` | `kpi-results-category` |
 | `/tools/impact_analysis` | `ImpactAnalysisDashboard` | `projects-all` |
 | City page | `LivingLabKPIsView` | `kpi-results-lab` |
@@ -220,12 +233,13 @@ When `kpiDefinitionId` is `undefined`, `buildPath()` omits the param from the UR
 | `src/lib/utils/CsvSerializer.ts` | Remove `EmptyCsvError`; return header row on empty |
 | `src/pages/api/v1/csv/kpiresults.ts` | Fix empty-string guard; remove `EmptyCsvError` import + catch |
 | `src/pages/api/v1/csv/projects.ts` | Remove `EmptyCsvError` import + catch |
-| `src/components/react/KPIsDashboard/ModalSplitLivingLabsCard.tsx` | Safe `parseInt` for `kpiId` |
+| `src/bff/services/csv-export.service.ts` | Remove `EmptyCsvError` from import + re-export |
+| `src/components/react/KPIsDashboard/ModalSplitLivingLabsCard.tsx` | Safe `parseInt` for `kpiId`; disable button on invalid |
 | `src/bff/services/csv-export.service.test.ts` | Replace throw test with header-only regression test |
-| `src/pages/api/v1/csv/kpiresults.test.ts` | Replace 404 test; add 3 new tests |
+| `src/pages/api/v1/csv/kpiresults.test.ts` | Replace 404 test; add 2 new tests |
 | `src/pages/api/v1/csv/projects.test.ts` | Replace 404 test |
 
-Total: **7 files**, all surgical. No new files.
+Total: **8 files**, all surgical. No new files.
 
 ---
 
