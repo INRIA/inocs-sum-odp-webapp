@@ -95,10 +95,6 @@ Every task carries: **Impact** (why it ranks here) · **Answers** (PO comment re
 
 | Current | New |
 |---|---|
-| Transport System – Time | Travel time |
-| Transport System – Safety/Comfort | Safety & comfort |
-| Transport System – Cost | Cost of travel |
-| Impact – Environment / Society / Economy | Environment / Social outcomes / Local economy |
 | "Policy measures driving improvements for KPIs in group X" | "Measures linked to better <plain-language X>" |
 | Net flow / positive flow / negative flow | Overall score / strengths / weaknesses (PROMETHEE terms in tooltip) |
 | Score matrix | Your ratings |
