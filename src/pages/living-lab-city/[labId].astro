@@ -16,6 +16,7 @@ import {
 } from "../../components/react";
 import { TriggerDownloadCsv } from "../../components/react/TriggerDownloadCsv/TriggerDownloadCsv";
 import type { IKpiResultGroup } from "../../types";
+import { displayLabType } from "../../lib/labels";
 
 const api = new ApiClient(Astro.request);
 
@@ -83,7 +84,7 @@ const kpiResultsByCategory = categories.map((category) => ({
 >
   <div class="lg:mx-10 mx-auto px-1 py-4 flex flex-col gap-8">
     <h2>
-      <strong>{livingLabData?.name}</strong> Living lab data dashboard
+      <strong>{livingLabData?.name}</strong> — {displayLabType(Number(livingLabData?.id))} data dashboard
     </h2>
 
     <!-- Map Section -->
@@ -100,7 +101,7 @@ const kpiResultsByCategory = categories.map((category) => ({
       <div class="w-full lg:w-1/4">
         <DataDisplayCard
           data={[
-            { label: "Living Lab", value: livingLabData?.name },
+            { label: displayLabType(Number(livingLabData?.id)), value: livingLabData?.name },
             {
               label: "Location",
               //value: `${livingLabData?.city}, ${livingLabData?.country}`,

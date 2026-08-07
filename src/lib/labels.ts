@@ -35,26 +35,16 @@ export const SCORE_MATRIX_DISPLAY = "Your ratings";
 // --- Living Lab type distinction ---
 
 /**
- * The 9 SUM Horizon Europe project cities.
- * Every other registered lab is a "Contributing city".
+ * The 9 SUM Horizon Europe project cities have IDs 1–9 (seeded in order).
+ * Any lab with id > 9 is a "Contributing city".
  */
-export const SUM_PROJECT_LAB_NAMES = new Set<string>([
-  "Thessaloniki",
-  "Lyon",
-  "Oslo",
-  "Tallinn",
-  "Vilnius",
-  "Vienna",
-  "Naples",
-  "Porto",
-  "Bogotá",
-]);
+export const SUM_PROJECT_MAX_LAB_ID = 9;
 
 export const SUM_LIVING_LAB_LABEL = "SUM Living Lab";
 export const CONTRIBUTING_CITY_LABEL = "Contributing city";
 
-export function displayLabType(labName: string): string {
-  return SUM_PROJECT_LAB_NAMES.has(labName)
+export function displayLabType(labId: number): string {
+  return labId <= SUM_PROJECT_MAX_LAB_ID
     ? SUM_LIVING_LAB_LABEL
     : CONTRIBUTING_CITY_LABEL;
 }

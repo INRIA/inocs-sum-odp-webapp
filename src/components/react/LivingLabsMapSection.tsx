@@ -150,7 +150,7 @@ export function LivingLabsMapSection({ labs }: Props) {
             <div className="w-full lg:w-1/4 absolute bottom-0 left-0 right-0 lg:right-96 bg-white rounded-t-lg p-3 shadow-lg border border-primary z-20">
               <div className="flex justify-between items-center mb-4">
                 <h4 className="font-bold text-primary">
-                  {selectedLab.name} — {displayLabType(selectedLab.name)} overview
+                  {selectedLab.name} — {displayLabType(Number(selectedLab.id))} overview
                 </h4>
                 <button
                   onClick={() => setSelectedLab(null)}
@@ -198,7 +198,7 @@ export function LivingLabsMapSection({ labs }: Props) {
                   variant="primary"
                   href={getUrl(`/living-lab-city/${selectedLab.id}`)}
                 >
-                  Explore {selectedLab.name} — {displayLabType(selectedLab.name)}
+                  Explore {selectedLab.name} — {displayLabType(Number(selectedLab.id))}
                 </RButton>
               </div>
             </div>
