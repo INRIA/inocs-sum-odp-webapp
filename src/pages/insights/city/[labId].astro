@@ -1,0 +1,19 @@
+---
+// Insights city page — placeholder until Epic 9 implements content.
+// Counterpart to /living-lab-city/[labId].
+import Layout from "../../../layouts/Layout.astro";
+
+const { labId } = Astro.params;
+---
+
+<Layout role="visitor" breadcrumbs={[{ label: "Home", href: "/" }, { label: "Insights" }, { label: `City ${labId}` }]} backHref="/">
+  <div class="mx-auto max-w-2xl px-4 py-24 text-center">
+    <h1 class="text-3xl font-bold text-gray-900 mb-4">City Insights</h1>
+    <p class="text-gray-500 text-lg mb-2">
+      Lab ID: <span class="font-mono text-primary">{labId}</span>
+    </p>
+    <p class="text-gray-400">
+      Coming soon — Epic 9 will implement the full city insights view.
+    </p>
+  </div>
+</Layout>

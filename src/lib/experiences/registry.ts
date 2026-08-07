@@ -274,7 +274,11 @@ export function resolveExperience(
   let dataHref = dataHome;
   let insightsHref = insightsHome;
 
-  if (matchedEntry?.counterpart) {
+  if (isShared) {
+    // On shared surfaces, preserve the current path and toggle ?view=
+    dataHref = appendViewParam(cleanPath, "data");
+    insightsHref = appendViewParam(cleanPath, "insights");
+  } else if (matchedEntry?.counterpart) {
     const resolved = buildCounterpartUrl(matchedEntry.counterpart, matchedParams);
     if (active === "data") {
       insightsHref = resolved;
