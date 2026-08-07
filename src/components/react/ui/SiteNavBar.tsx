@@ -30,9 +30,12 @@ import { getUrl } from "../../../lib/helpers";
 import type { SessionLivingLabCookie } from "../../../types";
 import { RButton } from "./RButton";
 import { BrandLogo } from "./BrandLogo";
+import { ExperienceSwitch } from "./ExperienceSwitch";
+import type { ExperienceState } from "../../../lib/experiences/registry";
 
 interface Props {
   menuItems?: MenuItem[];
+  experience?: ExperienceState;
   children?: React.ReactNode;
   userInfo?: { name: string; email: string; avatar?: string };
   currentLivingLab?: SessionLivingLabCookie;
@@ -47,6 +50,7 @@ interface MenuItem {
 }
 export function SiteNavBar({
   menuItems,
+  experience,
   children,
   userInfo,
   currentLivingLab,
@@ -104,6 +108,9 @@ export function SiteNavBar({
       navbar={
         <Navbar className="flex flex-row w-full min-w-0 flex-1">
           <BrandLogo className="mx-4" />
+          {experience && (
+            <ExperienceSwitch segments={experience.switchSegments} />
+          )}
 
           <NavbarSpacer />
 
@@ -162,6 +169,13 @@ export function SiteNavBar({
       sidebar={
         <Sidebar>
           <SidebarBody>
+            {experience && (
+              <SidebarSection>
+                <div className="px-2 pt-2 pb-1">
+                  <ExperienceSwitch segments={experience.switchSegments} />
+                </div>
+              </SidebarSection>
+            )}
             <SidebarSection>
               {navbarItems.map((item) => (
                 <React.Fragment key={item.label}>

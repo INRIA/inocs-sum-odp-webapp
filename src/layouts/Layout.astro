@@ -6,6 +6,7 @@ import ApiClient from "../lib/api-client/ApiClient";
 import { getUrl, isAdminUser } from "../lib/helpers";
 import type { BreadcrumbItem } from "../components/Breadcrumbs";
 import PageHeaderNavigation from "../components/PageHeaderNavigation.astro";
+import { resolveExperience } from "../lib/experiences/registry";
 
 interface Props {
   role?: "visitor" | "editor" | "admin";
@@ -34,33 +35,12 @@ const currentLivingLab = Astro.locals.livingLab;
 const isAdmin = isAdminUser(Astro.locals.user);
 const odpAdminHost = Astro.locals.odpAdminHost ?? "";
 
-const menuItems = [
-  {
-    label: "Home",
-    href: getUrl("/"),
-  },
-  {
-    label: "Living Labs",
-    subItems: labsItems,
-  },
-  {
-    label: "Data",
-    subItems: [
-      { href: "/data/measures", label: "Policy measures" },
-      { href: "/data/kpis", label: "KPIs" },
-      { href: "/data/modal-split", label: "Modal split" },
-      { href: "/data/collection-plan", label: "Data collection process" },
-    ],
-  },
-  {
-    label: "Tools",
-    subItems: [
-      { href: "/tools/impact_analysis", label: "Impact analysis" },
-      { href: "/tools/mcda_analysis/", label: "Multi‑criteria decision tool" },
-    ],
-  },
-  { href: "/tools/resources", label: "Resources" },
-];
+// Resolve experience from current URL and inject dynamic Living Labs
+const experienceState = resolveExperience(
+  Astro.url.pathname,
+  Astro.url.searchParams,
+  labsItems,
+);
 
 const footerMenuItems = [
   {
@@ -125,7 +105,8 @@ const footerMenuItems = [
     {
       role === "visitor" && (
         <SiteNavBar
-          menuItems={menuItems}
+          menuItems={experienceState.menu}
+          experience={experienceState}
           userInfo={userInfo}
           currentLivingLab={currentLivingLab}
           client:load
@@ -150,6 +131,6 @@ const footerMenuItems = [
       )
     }
 
-    <Footer sections={footerMenuItems} />
+    <Footer sections={footerMenuItems} experience={experienceState} />
   </body>
 </html>
