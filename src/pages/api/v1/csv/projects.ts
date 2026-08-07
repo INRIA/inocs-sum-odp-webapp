@@ -1,6 +1,5 @@
 import type { APIRoute } from "astro";
 import { CsvExportController } from "../../../../bff/controllers/csv-export.controller";
-import { EmptyCsvError } from "../../../../bff/services/csv-export.service";
 
 const controller = new CsvExportController();
 
@@ -38,9 +37,6 @@ export const GET: APIRoute = async ({ url }) => {
       },
     });
   } catch (err) {
-    if (err instanceof EmptyCsvError) {
-      return Response.json({ error: "No data found" }, { status: 404 });
-    }
     console.error("Error in GET /api/v1/csv/projects:", err);
     return Response.json({ error: "Internal Server Error" }, { status: 500 });
   }
