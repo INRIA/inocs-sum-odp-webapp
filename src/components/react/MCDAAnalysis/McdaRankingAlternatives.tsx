@@ -69,7 +69,7 @@ export const McdaRankingAlternatives: React.FC<McdaRankingAlternativesProps> = (
                     {alternativeLabels[key] || key}
                   </div>
                   <div className="mt-0.5 text-xs text-gray-600">
-                    Rank: #{displayRank} • Net Flow:{" "}
+                    Rank: #{displayRank} • Overall score:{" "}
                     <span className={flowColor}>{netFlow.toFixed(3)}</span>
                   </div>
                 </div>

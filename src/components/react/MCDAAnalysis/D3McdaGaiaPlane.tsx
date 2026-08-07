@@ -630,7 +630,7 @@ export const D3McdaGaiaPlane: React.FC<D3McdaGaiaPlaneProps> = ({
               </div>
               {tooltip.netFlow !== undefined && (
                 <div className="text-dark text-xs">
-                  Net Flow: {tooltip.netFlow.toFixed(3)}
+                  Overall score: {tooltip.netFlow.toFixed(3)}
                 </div>
               )}
             </>

@@ -30,10 +30,10 @@ describe("CustomAnalysisForm", () => {
     expect(screen.getByText(/goals selection/i)).toBeInTheDocument();
     expect(screen.getByText(/goal weights/i)).toBeInTheDocument();
     expect(screen.getByText(/business activities/i)).toBeInTheDocument();
-    expect(screen.getByText(/score matrix/i)).toBeInTheDocument();
+    expect(screen.getByText(/your ratings/i)).toBeInTheDocument();
   });
 
-  it("syncs selected goals and activities to the score matrix", async () => {
+  it("syncs selected goals and activities to the ratings table", async () => {
     const user = userEvent.setup();
 
     render(

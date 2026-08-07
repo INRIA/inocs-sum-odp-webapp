@@ -71,9 +71,9 @@ export function LivingLabModeOptions({
   hideCreate = false,
 }: LivingLabModeOptionsProps) {
   const {
-    select = "Select existing Living Lab",
-    create = "Create new Living Lab",
-    selectDropdown = "Select a Living Lab",
+    select = "Select existing city",
+    create = "Register new Contributing city",
+    selectDropdown = "Select a city",
   } = labels;
 
   const handleLabChange = (e: React.ChangeEvent<HTMLSelectElement>) => {

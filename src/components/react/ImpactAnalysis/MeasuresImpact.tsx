@@ -11,6 +11,7 @@ import {
   calculateStatistics,
 } from "../../../lib/helpers/impact-analysis-format";
 import { InfoAlert } from "../ui";
+import { displayCategoryName } from "../../../lib/labels";
 
 interface MeasuresImpactProps {
   selectedGroup: IKpiGroup | null;
@@ -23,14 +24,22 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
   analysisResult,
   kpiCount,
 }) => {
+  const categoryLabel = selectedGroup
+    ? displayCategoryName(selectedGroup.name)
+    : "";
+
   const divider = (
     <AnalysisSectionDivider
       step={2}
-      title="Measures Impact"
+      title={
+        selectedGroup
+          ? `Measures linked to ${categoryLabel} improvement`
+          : "Linked measures"
+      }
       // subtitle="Analyse how implemented measures contributed to the KPIs variations"
       description={
         "Estimation of the level of contribution for each measure to KPIs in the scope " +
-        selectedGroup?.name +
+        categoryLabel +
         "."
       }
     />
@@ -64,7 +73,7 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
         >
           <p>
             Impact coefficients could not be computed for the KPI group{" "}
-            <strong>{selectedGroup.name}</strong>. This typically occurs when
+            <strong>{categoryLabel}</strong>. This typically occurs when
             only one living lab has reported KPI results for this group — the
             model requires data from at least two cities to attribute changes to
             specific policy measures.
@@ -174,13 +183,12 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
               />
             </svg>
             <h5>
-              Policy Measures driving improvements for KPIs in group{" "}
-              <strong>{selectedGroup.name}</strong>{" "}
+              Top {topMeasures.length} measures linked to{" "}
+              <strong>{categoryLabel}</strong> improvement
             </h5>
           </div>
           <p className="text-dark mb-4 h-10">
-            Top {topMeasures.length} policy measures estimated to have
-            contributed to KPI improvements
+            Measures estimated to have contributed to KPI improvements
           </p>
           <div className="grid grid-cols-1 gap-3">
             {topMeasures.map((measure, index) => (
@@ -209,13 +217,13 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
               />
             </svg>
             <h5>
-              Policy Measures associated with decline for KPIs in group{" "}
-              <strong>{selectedGroup.name}</strong>
+              Bottom {bottomMeasures.length} measures linked to{" "}
+              <strong>{categoryLabel}</strong> regression
             </h5>
           </div>
           <p className="text-dark mb-4 h-10">
-            Bottom {bottomMeasures.length} policy measures estimated to have
-            contributed negatively or had adverse effects
+            Measures estimated to have contributed negatively or had adverse
+            effects
           </p>
           <div className="grid grid-cols-1 gap-3">
             {bottomMeasures.map((measure, index) => (

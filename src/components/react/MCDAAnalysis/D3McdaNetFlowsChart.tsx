@@ -272,7 +272,7 @@ export const D3McdaNetFlowsChart: React.FC<D3McdaNetFlowsChartProps> = ({
       .attr("fill", COLOR_GRAY)
       .attr("font-size", "12px")
       .attr("font-weight", "600")
-      .text("Net Flow (φ)");
+      .text("Overall score (φ)");
 
     // Add Y axis with labels
     const yAxis = g.append("g").attr("class", "y-axis");
@@ -340,7 +340,7 @@ export const D3McdaNetFlowsChart: React.FC<D3McdaNetFlowsChartProps> = ({
     return (
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
         <p className="text-gray-600">
-          No net flows data available for visualization.
+          No overall scores data available for visualization.
         </p>
       </div>
     );
@@ -374,7 +374,7 @@ export const D3McdaNetFlowsChart: React.FC<D3McdaNetFlowsChartProps> = ({
                 style={{ backgroundColor: NET_FLOW_COLOR }}
               />
               <span className="text-sm font-medium text-gray-700">
-                Net flow
+                Overall score
               </span>
             </button>
 
@@ -391,7 +391,7 @@ export const D3McdaNetFlowsChart: React.FC<D3McdaNetFlowsChartProps> = ({
                 style={{ backgroundColor: POSITIVE_FLOW_COLOR }}
               />
               <span className="text-sm font-medium text-gray-700">
-                Positive flow
+                Strengths
               </span>
             </button>
             <button
@@ -407,7 +407,7 @@ export const D3McdaNetFlowsChart: React.FC<D3McdaNetFlowsChartProps> = ({
                 style={{ backgroundColor: NEGATIVE_FLOW_COLOR }}
               />
               <span className="text-sm font-medium text-gray-700">
-                Negative flow
+                Weaknesses
               </span>
             </button>
           </div>
@@ -427,14 +427,14 @@ export const D3McdaNetFlowsChart: React.FC<D3McdaNetFlowsChartProps> = ({
           <div className="font-bold mb-1">{tooltip.label}</div>
           <div className="space-y-1">
             <div className="text-dark text-xs">
-              Net Flow (φ):{" "}
+              Overall score (φ):{" "}
               <span className="font-semibold text-black">
                 {tooltip.netFlow.toFixed(4)}
               </span>
             </div>
             {tooltip.positiveFlow !== undefined && (
               <div className="text-dark text-xs">
-                Positive Flow (φ+):{" "}
+                Strengths (φ+):{" "}
                 <span className="font-semibold text-black">
                   {tooltip.positiveFlow.toFixed(4)}
                 </span>
@@ -442,7 +442,7 @@ export const D3McdaNetFlowsChart: React.FC<D3McdaNetFlowsChartProps> = ({
             )}
             {tooltip.negativeFlow !== undefined && (
               <div className="text-dark text-xs">
-                Negative Flow (φ-):{" "}
+                Weaknesses (φ-):{" "}
                 <span className="font-semibold text-black">
                   {tooltip.negativeFlow.toFixed(4)}
                 </span>

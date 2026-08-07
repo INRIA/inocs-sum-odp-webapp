@@ -76,7 +76,7 @@ export const ImpactAnalysisDashboard: React.FC<
     () => [
       {
         id: MEASURES_TAB_ID,
-        label: "Measures Impact",
+        label: "Linked measures",
         content: (
           <MeasuresImpact
             selectedGroup={selectedGroup}
