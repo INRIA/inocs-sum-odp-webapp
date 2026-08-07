@@ -3,6 +3,8 @@ import cofoundedLogo from "../assets/img/EN-Co-Funded-by-the-EU_POS-1.png";
 import civitasLogo from "../assets/img/CIVITAS_Logo_EU_transparent.png";
 import sumLogo from "../assets/img/sum_logo.svg";
 import { getUrl } from "../lib/helpers";
+import type { ExperienceState } from "../lib/experiences/registry";
+
 export interface FooterItem {
   label: string;
   href: string;
@@ -17,15 +19,34 @@ const {
   projectLogo = sumLogo.src,
   leftLogo = cofoundedLogo.src,
   rightLogo = civitasLogo.src,
+  experience,
 } = Astro.props as {
   sections?: FooterSection[];
   projectLogo?: string;
   leftLogo?: string;
   rightLogo?: string;
+  experience?: ExperienceState;
 };
+
+const showDataCrossLink = experience?.active === "insights";
 ---
 
 <footer class="bg-gray-100 text-gray-700 border-t border-gray-200 z-10">
+  {
+    showDataCrossLink && (
+      <div class="bg-primary/5 border-b border-primary/20">
+        <div class="max-w-7xl mx-auto px-6 py-3 flex items-center gap-2">
+          <span class="text-sm text-gray-600">Looking for data and tools?</span>
+          <a
+            href={getUrl("/data/kpis")}
+            class="text-sm font-medium text-primary hover:underline"
+          >
+            Explore Data &amp; scientific tools &rarr;
+          </a>
+        </div>
+      </div>
+    )
+  }
   <div class="max-w-7xl mx-auto px-6 py-10">
     <div
       class="flex flex-col md:flex-row md:items-start md:justify-between gap-8"
