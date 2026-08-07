@@ -1,6 +1,6 @@
 // T004 — CsvSerializer tests (write FIRST, must fail before T006/T007)
 import { describe, it, expect } from "vitest";
-import { CsvSerializer, EmptyCsvError } from "./csv-export.service";
+import { CsvSerializer } from "./csv-export.service";
 import type { CsvHeaderDef } from "./csv-export.service";
 
 const headers: CsvHeaderDef[] = [
@@ -57,8 +57,9 @@ describe("CsvSerializer.serialize", () => {
     expect(lines[2]).toBe('"B","2","y"');
   });
 
-  it("throws EmptyCsvError when rows array is empty", () => {
-    expect(() => CsvSerializer.serialize([], headers)).toThrow(EmptyCsvError);
+  it("returns header-only CSV when rows array is empty", () => {
+    const csv = CsvSerializer.serialize([], headers);
+    expect(csv).toBe('"Name","Value","Note"');
   });
 
   it("uses keys from headers to pick row fields", () => {
