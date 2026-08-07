@@ -15,6 +15,7 @@ import type {
   IKpiGroup,
   IKpiVariationData,
   ILivingLab,
+  ILivingLabPopulated,
 } from "../../types";
 import {
   calculateKpiVariationsData,
@@ -22,6 +23,7 @@ import {
 } from "../../lib/helpers/impact-analysis-format";
 import { formatDateWithTime } from "../../lib/helpers";
 import { InfoCard, RButton } from "../../components/react";
+import { computePlatformCounters } from "../../lib/utils/platformCounters";
 
 const api = new ApiClient(Astro.request);
 
@@ -35,6 +37,7 @@ let variationsByKpisMap: Map<number, IKpiVariationData> = new Map();
 let errorMessage: string | null = null;
 let formattedDate: string | null = null;
 let jobRunOutput: IJobRunOutputData | null = null;
+let platformCounters = { sumLivingLabs: 0, contributingCities: 0, citiesWithData: 0, totalCities: 0, lastDataUpdate: null as Date | null };
 try {
   const response = await api.getLatestJobRun("kpi_measures_analysis");
 
@@ -45,6 +48,9 @@ try {
       livingLabsMap.set(lab.id, lab);
     });
   }
+  platformCounters = computePlatformCounters(
+    (livingLabsResponse ?? []) as ILivingLabPopulated[],
+  );
   if (response) {
     jobRun = response;
 
@@ -282,10 +288,10 @@ const howToUseSteps = [
             textAlign="center"
           />
           <InfoCard
-            title={livingLabsMap.size > 0
-              ? `${livingLabsMap.size} Living Labs`
-              : "Living Labs"}
-            description="Cities participating in the SUM Open Data Platform that have implemented various combinations of push and pull measures, providing a diverse dataset for analysis"
+            title={platformCounters.citiesWithData > 0
+              ? `${platformCounters.citiesWithData} cities with data`
+              : "Cities"}
+            description={`${platformCounters.sumLivingLabs} SUM Living Labs and ${platformCounters.contributingCities} Contributing cities participating in the SUM Open Data Platform, providing a diverse dataset for analysis`}
             showIcon={false}
             textAlign="center"
           />
@@ -378,6 +384,7 @@ const howToUseSteps = [
             jobRunOutput={jobRunOutput}
             kpiVariationsData={kpiVariationsData}
             variationsByKpis={variationsByKpis}
+            totalPlatformLabs={livingLabsMap.size}
             client:load
           />
         </section>

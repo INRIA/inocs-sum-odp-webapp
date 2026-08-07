@@ -16,7 +16,7 @@ export const MeasureImpactCard: React.FC<MeasureImpactCardProps> = ({
   const coefficient = measure.coefficient;
   const isPositive = coefficient >= 0;
 
-  // Determine colors based on impact
+  // Determine colors based on association direction
   const colorClasses = ""; //isPositive
   // ? "from-secondary/20 to-secondary/40 border-secondary text-dark"
   // : "from-danger/20 to-danger/40 border-danger text-dark";
@@ -86,9 +86,15 @@ export const MeasureImpactCard: React.FC<MeasureImpactCardProps> = ({
               {formatCoefficient(coefficient)}
             </span>
             <small className="text-sm text-dark">
-              level of contribution to KPIs{" "}
+              strength of association with KPIs{" "}
               {isPositive ? "improvement" : "decline"}
             </small>
+            {typeof measure.times_implemented === "number" && (
+              <small className="text-xs text-gray-500 mt-1">
+                {measure.times_implemented}{" "}
+                {measure.times_implemented === 1 ? "city" : "cities"} implemented
+              </small>
+            )}
           </div>
         </div>
       </div>

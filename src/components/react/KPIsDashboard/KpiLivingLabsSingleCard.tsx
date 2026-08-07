@@ -4,6 +4,7 @@ import { Badge, Tooltip } from "../ui";
 import { D3TimelineChart } from "./D3TimelineChart";
 import { TriggerDownloadCsv } from "../TriggerDownloadCsv";
 import { formatValue, formatMonthYear } from "../../../lib/helpers";
+import { getKpiReading, formatDirection } from "../../../config/kpiReadings";
 
 export const KpiLivingLabsSingleCard: React.FC<KpiLivingLabsCardProps> = ({
   kpi,
@@ -21,6 +22,16 @@ export const KpiLivingLabsSingleCard: React.FC<KpiLivingLabsCardProps> = ({
     0,
   );
   const labCount = labTimelines.length + baselineLabs.length;
+
+  const reading = getKpiReading(kpi.id);
+
+  // Freshness: find the most recent data point date across all labs
+  const allDates = [
+    ...labTimelines.flatMap((lab) => lab.dataPoints.map((dp) => dp.date)),
+    ...baselineLabs.map((bl) => bl.result.date),
+  ].filter(Boolean).sort();
+  const lastDataDate = allDates.length > 0 ? allDates[allDates.length - 1] : null;
+  const firstDataDate = allDates.length > 0 ? allDates[0] : null;
 
   return (
     <div className="p-2">
@@ -50,6 +61,19 @@ export const KpiLivingLabsSingleCard: React.FC<KpiLivingLabsCardProps> = ({
           {kpi?.metric_description && (
             <div className="text-sm text-muted mt-1 max-w-xl mx-auto">
               {kpi?.metric_description}
+            </div>
+          )}
+          {reading && (
+            <div className="mt-1 text-xs text-gray-500 space-y-0.5">
+              {reading.reading !== "PLACEHOLDER — awaiting WP1 content" && (
+                <p className="italic">{reading.reading}</p>
+              )}
+              <p>
+                {reading.unit !== "?" && (
+                  <span className="font-medium">{reading.unit}</span>
+                )}{" "}
+                &middot; {formatDirection(reading.direction)}
+              </p>
             </div>
           )}
         </div>
@@ -106,10 +130,23 @@ export const KpiLivingLabsSingleCard: React.FC<KpiLivingLabsCardProps> = ({
 
         {/* Summary footer */}
         <div className="mt-2 pt-2 border-t border-gray-100 flex w-full items-center justify-between">
-          <span className="text-sm text-gray-500 text-left">
-            {labCount} living lab{labCount !== 1 ? "s" : ""}
-            {hasChart && ` • ${totalDataPoints} data point${totalDataPoints !== 1 ? "s" : ""}`}
-          </span>
+          <div className="flex flex-col gap-0.5">
+            <span className="text-sm text-gray-500 text-left">
+              {labCount} living lab{labCount !== 1 ? "s" : ""}
+              {hasChart && ` • ${totalDataPoints} data point${totalDataPoints !== 1 ? "s" : ""}`}
+            </span>
+            {firstDataDate && (
+              <span className="text-xs text-gray-400">
+                Period:{" "}
+                <span className="font-medium text-gray-600">
+                  {formatMonthYear(firstDataDate)}
+                  {lastDataDate && lastDataDate !== firstDataDate
+                    ? ` – ${formatMonthYear(lastDataDate)}`
+                    : ""}
+                </span>
+              </span>
+            )}
+          </div>
           <div className="flex justify-end">
             <TriggerDownloadCsv
               type="kpi-results-definition"

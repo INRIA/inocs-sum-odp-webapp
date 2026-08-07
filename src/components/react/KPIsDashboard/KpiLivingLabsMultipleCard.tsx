@@ -9,6 +9,7 @@ import { D3TimelineChart } from "./D3TimelineChart";
 import { D3FacetedTimelineChart } from "./D3FacetedTimelineChart";
 import { TriggerDownloadCsv } from "../TriggerDownloadCsv";
 import { formatValue, formatMonthYear } from "../../../lib/helpers";
+import { getKpiReading, formatDirection } from "../../../config/kpiReadings";
 
 export const KpiLivingLabsMultipleCard: React.FC<
   KpiLivingLabsMultipleCardProps
@@ -103,6 +104,23 @@ export const KpiLivingLabsMultipleCard: React.FC<
               {parentKpi?.metric_description}
             </div>
           )}
+          {(() => {
+            const reading = getKpiReading(parentKpi.id);
+            if (!reading) return null;
+            return (
+              <div className="mt-1 text-xs text-gray-500 text-center space-y-0.5">
+                {reading.reading !== "PLACEHOLDER — awaiting WP1 content" && (
+                  <p className="italic">{reading.reading}</p>
+                )}
+                <p>
+                  {reading.unit !== "?" && (
+                    <span className="font-medium">{reading.unit}</span>
+                  )}{" "}
+                  &middot; {formatDirection(reading.direction)}
+                </p>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Parent KPI Chart (if data exists) */}

@@ -4,6 +4,7 @@ import ApiClient from "../../lib/api-client/ApiClient";
 import { KPIsDashboard, KpisFrameworkDiagram } from "../../components/react";
 import type { ILivingLabPopulated } from "../../types";
 import { isImplementationKpi } from "../../config/implementationKpis";
+import { computePlatformCounters } from "../../lib/utils/platformCounters";
 
 const api = new ApiClient(Astro.request);
 
@@ -56,6 +57,9 @@ const livingLabsForDashboard = filteredLivingLabs.map((lab) => ({
   kpiResults: lab.kpi_results ?? [],
   validated_at: lab.validated_at ?? null,
 }));
+
+// T09: compute platform counters for accurate city type breakdown
+const platformCounters = computePlatformCounters(livingLabsData);
 ---
 
 <Layout
@@ -77,8 +81,9 @@ const livingLabsForDashboard = filteredLivingLabs.map((lab) => ({
         Shared Urban Mobility
       </h1>
       <p class="text-gray-600 text-lg">
-        Compare Key Performance Indicators across all Living Labs. Each chart
-        displays KPI values over time, with each living lab represented by a
+        Compare Key Performance Indicators across all cities ({platformCounters.sumLivingLabs} SUM Living Labs and {platformCounters.contributingCities} Contributing cities,
+        {platformCounters.citiesWithData} with before/after data). Each chart
+        displays KPI values over time, with each city represented by a
         unique color.
       </p>
     </div>

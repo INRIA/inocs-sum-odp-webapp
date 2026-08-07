@@ -22,6 +22,7 @@ import { COLORS } from "../../../styles/constants";
 import { TriggerDownloadCsv } from "../TriggerDownloadCsv/TriggerDownloadCsv";
 import { KpiBaselineValue } from "./KpiBaselineValue";
 import { getKpiDisplayMode } from "../../../lib/utils/kpiSufficiency";
+import { getKpiReading, formatDirection } from "../../../config/kpiReadings";
 
 ChartJS.register(
   CategoryScale,
@@ -136,6 +137,24 @@ export function KpiMultiple({ parentKpi, kpis, results, lab_validated_at }: Prop
           </div>
         ) : null}
 
+        {(() => {
+          const reading = getKpiReading(parentKpi.id);
+          if (!reading) return null;
+          return (
+            <div className="mt-1 text-xs text-gray-500 text-center space-y-0.5">
+              {reading.reading !== "PLACEHOLDER — awaiting WP1 content" && (
+                <p className="italic">{reading.reading}</p>
+              )}
+              <p>
+                {reading.unit !== "?" && (
+                  <span className="font-medium">{reading.unit}</span>
+                )}{" "}
+                &middot; {formatDirection(reading.direction)}
+              </p>
+            </div>
+          );
+        })()}
+
         {/* Chart section — only children with ≥2 validated estimations */}
         {chartResults.length > 0 && (
           <>
@@ -173,6 +192,16 @@ export function KpiMultiple({ parentKpi, kpis, results, lab_validated_at }: Prop
                     className="flex flex-col w-1/2  p-1 min-w-1/3 max-w-1/2 md:max-w-1/4 md:p-2"
                   >
                     <p className="leading-none">{kpiData?.name}</p>
+                    {kpiData && (() => {
+                      const childReading = getKpiReading(kpiData.id);
+                      if (!childReading) return null;
+                      return (
+                        <span className="text-xs text-gray-500">
+                          {formatDirection(childReading.direction)}
+                          {childReading.unit !== "?" && ` · ${childReading.unit}`}
+                        </span>
+                      );
+                    })()}
                     <div className="mt-6 flex flex-row items-end justify-between gap-1">
                       <div className="flex flex-col items-start justify-end w-1/2">
                         <p className="text-4xl font-extrabold text-primary dark:text-white leading-none">
@@ -232,6 +261,7 @@ export function KpiMultiple({ parentKpi, kpis, results, lab_validated_at }: Prop
                   metricType={kpiData?.metric}
                   labValidatedAt={lab_validated_at}
                   label={kpiData?.name}
+                  kpiDefinitionId={r.kpidefinition_id}
                 />
               );
             })}

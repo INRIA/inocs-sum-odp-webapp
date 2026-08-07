@@ -1,0 +1,332 @@
+{
+  "1": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "%"
+  },
+  "2": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "activities"
+  },
+  "3": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "not_applicable",
+    "unit": "ratio"
+  },
+  "4": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "not_applicable",
+    "unit": "ratio"
+  },
+  "5": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "not_applicable",
+    "unit": "ratio"
+  },
+  "6": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "services"
+  },
+  "7": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "%"
+  },
+  "8": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "%"
+  },
+  "9": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "%"
+  },
+  "10": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "%"
+  },
+  "11": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "%"
+  },
+  "12": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "13": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "14": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "15": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "16": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "17": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "18": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "19": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "20": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "%"
+  },
+  "21": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "%"
+  },
+  "22": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "23": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "24": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "25": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "26": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "27": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "28": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "29": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "30": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "31": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "32": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "33": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "34": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "35": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "36": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "37": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "38": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "39": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "40": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "score"
+  },
+  "41": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "score"
+  },
+  "42": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "score"
+  },
+  "43": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "score"
+  },
+  "44": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "score"
+  },
+  "45": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "score"
+  },
+  "46": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "score"
+  },
+  "47": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "score"
+  },
+  "48": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "%"
+  },
+  "49": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "?"
+  },
+  "50": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "ratio"
+  },
+  "51": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "not_applicable",
+    "unit": "?"
+  },
+  "52": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "not_applicable",
+    "unit": "%"
+  },
+  "53": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "not_applicable",
+    "unit": "%"
+  },
+  "54": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "not_applicable",
+    "unit": "%"
+  },
+  "60": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "?"
+  },
+  "61": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "%"
+  },
+  "62": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "down_is_good",
+    "unit": "?"
+  },
+  "63": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "ratio"
+  },
+  "64": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "ratio"
+  },
+  "65": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "ratio"
+  },
+  "66": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "%"
+  },
+  "67": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "?"
+  },
+  "68": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "%"
+  },
+  "69": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "%"
+  },
+  "70": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "?"
+  },
+  "71": {
+    "reading": "PLACEHOLDER — awaiting WP1 content",
+    "direction": "up_is_good",
+    "unit": "%"
+  }
+}

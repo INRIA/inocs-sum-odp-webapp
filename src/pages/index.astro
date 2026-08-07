@@ -15,6 +15,8 @@ import ApiClient from "../lib/api-client/ApiClient";
 import { getUrl, getYearFromDate } from "../lib/helpers";
 import { type ILivingLabPopulated } from "../types";
 import { COLOR_GREEN } from "../styles/constants";
+import { getCityType, getCityDataStatus } from "../lib/utils/cityStatus";
+import { computePlatformCounters } from "../lib/utils/platformCounters";
 
 const api = new ApiClient(Astro.request);
 
@@ -25,6 +27,8 @@ const parentKpis = allKPIs?.filter((kpi) => !kpi.parent_kpi_id);
 const transportModes = (await api.getTransportModes())?.filter(
   (tm) => tm.type === "NSM",
 );
+
+const platformCounters = computePlatformCounters(livingLabsData ?? []);
 
 const labs = livingLabsData?.map((lab) => {
   const kpiSet = new Set<number>();
@@ -40,17 +44,22 @@ const labs = livingLabsData?.map((lab) => {
       year && yearsSet.add(year);
     });
 
+  const labId = Number(lab.id);
+  const cityType = getCityType(labId);
+  const dataStatus = getCityDataStatus(lab.kpi_results ?? null);
+
   return {
-    id: lab.id,
+    id: String(lab.id),
     name: lab.name,
     coordinates: { lat: lab.lat, lng: lab.lng },
     radius: lab.radius ?? 50,
-    // status: lab.status,
-    totalMeasures: lab.projects?.length,
+    cityType,
+    dataStatus,
+    totalMeasures: lab.projects?.length ?? 0,
     kpisCollected: kpiSet.size,
     yearsCollected: Array.from(yearsSet),
     transportModes: lab.transport_modes?.filter((tm) => tm.type === "NSM")
-      .length,
+      .length ?? 0,
     sustainablePercentage: 0.4,
   };
 });
@@ -109,7 +118,7 @@ const steps = [
       href: getUrl("/lab-admin/login"),
     }}
     secondary={{
-      text: "Explore the Living Labs",
+      text: "Explore the cities",
       href: "#labs-section",
     }}
     titleTextColor={COLOR_GREEN}
@@ -129,19 +138,33 @@ const steps = [
       title="Shared Urban Mobility"
       subtitle="The SUM Open Data Platform collects and delivers data and analytical tools to monitor, evaluate, and optimize the seamless integration of new shared mobility services with public transport across European Living Labs."
       stats={[
-        { id: 1, name: "Living labs", value: labs?.length.toString() ?? "0" },
+        {
+          id: 1,
+          name: "SUM Living Labs",
+          value: platformCounters.sumLivingLabs.toString(),
+        },
         {
           id: 2,
+          name: "Contributing cities",
+          value: platformCounters.contributingCities.toString(),
+        },
+        {
+          id: 3,
+          name: "Cities with before/after data",
+          value: platformCounters.citiesWithData.toString(),
+        },
+        {
+          id: 4,
           name: "Measures implemented for Seamless Urban Shared Mobility",
           value: measures?.length.toString() ?? "0",
         },
         {
-          id: 3,
+          id: 5,
           name: "Shared Mobility integrated in Living Labs",
           value: transportModes?.length.toString() ?? "0",
         },
         {
-          id: 4,
+          id: 6,
           name: "Key Performance Indicators (KPIs) monitored",
           value: parentKpis?.length.toString() ?? "0",
         },
