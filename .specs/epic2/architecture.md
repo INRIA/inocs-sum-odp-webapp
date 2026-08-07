@@ -264,6 +264,7 @@ export function KpiCard({ kpi, kpiResults, lab_validated_at }: Props) {
           <KpiBaselineValue
             kpiResults={kpiResults}
             metricType={kpi.metric}
+            labValidatedAt={lab_validated_at}
           />
         </div>
       </div>
@@ -339,6 +340,7 @@ export function KpiMultiple({ parentKpi, kpis, results, lab_validated_at }: Prop
                   key={r.kpidefinition_id}
                   kpiResults={r}
                   metricType={kpiData?.metric}
+                  labValidatedAt={lab_validated_at}
                   label={kpiData?.name}
                 />
               );
@@ -359,33 +361,51 @@ The chart datasets must be rebuilt using only `chartResults` — the existing `r
 
 ---
 
-### 3g. Dashboard: `buildLabTimelines` and `KpiLivingLabsSingleCard`
+### 3g. Dashboard: sufficiency in `buildKpiDataMap`, `KpiLivingLabsSingleCard`, and `KpiLivingLabsMultipleCard`
 
-#### New helper: `partitionLabsBySufficiency`
+> **Corrected decision (review finding).** The original draft chose "option 2" — pass raw `livingLabs`/`filter`/`colorMap` to each card and let the card call `partitionLabsBySufficiency`. That approach has two problems:
+> 1. It duplicates iteration already done by `buildKpiDataMap`.
+> 2. It leaves `KpiLivingLabsMultipleCard` completely unaddressed — parent-child D3 charts also need sufficiency checks per lab per KPI.
+>
+> **Revised decision: option 1.** Integrate sufficiency into `buildKpiDataMap` so it returns `Map<number, ILabPartition>`. Both card components receive pre-partitioned data from one place. No extra props needed on card components beyond the partition result.
+
+#### New type and helper in `utils.ts`
 
 Add to `src/components/react/KPIsDashboard/utils.ts`:
 
 ```typescript
-import { getKpiDisplayMode, type KpiDisplayMode } from "../../../lib/utils/kpiSufficiency";
+import {
+  getKpiDisplayMode,
+  isResultValidated,
+} from "../../../lib/utils/kpiSufficiency";
 
+/**
+ * Partitioned lab data for a single KPI — chart-eligible vs baseline-only.
+ */
 export interface ILabPartition {
   chartLabs: ILabKpiTimeline[];
   baselineLabs: Array<{
     labId: number;
     labName: string;
     color: string;
-    // The single validated result for display in the baseline row
+    /** The single validated result for display in the baseline row */
     result: IKpiResult;
   }>;
 }
+```
 
+#### `buildLabTimelines` → `buildLabPartition`
+
+Replace (or wrap) the existing `buildLabTimelines` with a partitioning variant. Keep the old function for backwards compatibility if any test imports it directly.
+
+```typescript
 /**
- * Splits living lab data for a single KPI into chart-eligible labs and
- * baseline-only labs according to the data-sufficiency rule.
- *
- * Labs with 0 validated estimations are excluded from both partitions.
+ * Builds partitioned lab data for a single KPI.
+ * Labs with ≥2 validated estimations → chartLabs (rendered as timelines).
+ * Labs with exactly 1 → baselineLabs (rendered as a table row).
+ * Labs with 0 → excluded.
  */
-export function partitionLabsBySufficiency(
+export function buildLabPartition(
   kpi: IKpi,
   livingLabs: ILivingLabKpiData[],
   filter: KpiLivingLabsCardsFilter,
@@ -398,7 +418,9 @@ export function partitionLabsBySufficiency(
   livingLabs.forEach((lab) => {
     if (!filter.selectedLabIds?.includes(lab.id)) return;
 
-    const kpiResult = lab.kpiResults.find((r) => r.kpidefinition_id === kpi.id);
+    const kpiResult = lab.kpiResults.find(
+      (r) => r.kpidefinition_id === kpi.id,
+    );
     if (!kpiResult) return;
 
     const mode = getKpiDisplayMode(kpiResult.results, lab.validated_at);
@@ -416,9 +438,8 @@ export function partitionLabsBySufficiency(
         });
       }
     } else if (mode === "baseline") {
-      // Find the single validated result to display
-      const validatedResult = kpiResult.results.find(
-        (r) => isResultValidated(r, lab.validated_at)
+      const validatedResult = kpiResult.results.find((r) =>
+        isResultValidated(r, lab.validated_at),
       );
       if (validatedResult) {
         baselineLabs.push({
@@ -436,18 +457,94 @@ export function partitionLabsBySufficiency(
 }
 ```
 
-`buildLabTimelines` (existing function) is **unchanged** — it is not called on the chart path anymore; `KpiLivingLabsSingleCard` will call `partitionLabsBySufficiency` instead. However, to avoid a breaking change in any test that imports `buildLabTimelines`, keep the function. The call-site in `buildKpiDataMap` is replaced.
-
 #### `buildKpiDataMap` update
 
-The existing function only stores `ILabKpiTimeline[]` per KPI. After T03 it must also store baseline data. Two approaches are possible:
+Change the return type from `Map<number, ILabKpiTimeline[]>` to `Map<number, ILabPartition>`:
 
-1. Replace `Map<number, ILabKpiTimeline[]>` with `Map<number, ILabPartition>` — cleaner but touches more type sites.
-2. Keep `buildKpiDataMap` returning `ILabKpiTimeline[]` for chart labs only and call `partitionLabsBySufficiency` directly from the card component.
+```typescript
+export function buildKpiDataMap(
+  filteredKpis: IKpi[],
+  livingLabs: ILivingLabKpiData[],
+  filter: KpiLivingLabsCardsFilter,
+  colorMap: Map<number, string>,
+  fallbackColor: string,
+): Map<number, ILabPartition> {
+  const map = new Map<number, ILabPartition>();
 
-**Decision: option 2.** `KpiLivingLabsSingleCard` receives the full `livingLabs` array (which now includes `validated_at`) plus the current `filter` and `colorMap`, calls `partitionLabsBySufficiency` internally, and decides what to render. This avoids threading a new map type through `KpiLivingLabsCards`.
+  filteredKpis.forEach((kpi) => {
+    const partition = buildLabPartition(kpi, livingLabs, filter, colorMap, fallbackColor);
 
-This means `KpiLivingLabsSingleCard` needs new props:
+    // Include KPI if it has any data at all (chart or baseline)
+    if (partition.chartLabs.length > 0 || partition.baselineLabs.length > 0) {
+      map.set(kpi.id, partition);
+    }
+  });
+
+  return map;
+}
+```
+
+#### Update `IKpiTimelineMap` type alias
+
+In `src/components/react/KPIsDashboard/types.ts`:
+
+```typescript
+// BEFORE
+export type IKpiTimelineMap = Map<number, ILabKpiTimeline[]>;
+
+// AFTER — import ILabPartition from utils
+import type { ILabPartition } from "./utils";
+export type IKpiTimelineMap = Map<number, ILabPartition>;
+```
+
+#### `KpiLivingLabsCards` changes
+
+The `groupsWithData` filter and `renderKpiGroup` adapt to `ILabPartition`:
+
+```typescript
+// groupsWithData — a KPI group has data if any partition exists
+const groupsWithData = kpiGroups.filter((group) => {
+  if (group.type === "single") {
+    return kpiDataMap.has(group.kpi.id);
+  } else {
+    const hasParentData = kpiDataMap.has(group.parentKpi.id);
+    const hasChildData = group.childKpis.some((child) =>
+      kpiDataMap.has(child.id),
+    );
+    return hasParentData || hasChildData;
+  }
+});
+
+// renderKpiGroup — extract chartLabs for the card
+const renderKpiGroup = (group: IKpiGroup, kpiDataMap: IKpiTimelineMap) => {
+  if (group.type === "single") {
+    const partition = kpiDataMap.get(group.kpi.id);
+    return (
+      <div key={group.kpi.id} className="break-inside-avoid col-span-1">
+        <KpiLivingLabsSingleCard
+          kpi={group.kpi}
+          labTimelines={partition?.chartLabs ?? []}
+          baselineLabs={partition?.baselineLabs ?? []}
+        />
+      </div>
+    );
+  } else {
+    return (
+      <div key={group.parentKpi.id} className="break-inside-avoid md:col-span-2">
+        <KpiLivingLabsMultipleCard
+          parentKpi={group.parentKpi}
+          childKpis={group.childKpis}
+          kpiTimelineMap={kpiDataMap}
+        />
+      </div>
+    );
+  }
+};
+```
+
+No new props (`livingLabs`, `filter`, `colorMap`) are pushed to card components. The partition is computed once in `buildKpiDataMap`.
+
+#### `KpiLivingLabsCardProps` type change
 
 ```typescript
 // BEFORE
@@ -459,29 +556,20 @@ export interface KpiLivingLabsCardProps {
 // AFTER
 export interface KpiLivingLabsCardProps {
   kpi: IKpi;
-  labTimelines: ILabKpiTimeline[];  // kept for backward compat; used only if partition not available
-  livingLabs: ILivingLabKpiData[];  // NEW — to run partitionLabsBySufficiency
-  filter: KpiLivingLabsCardsFilter; // NEW
-  colorMap: Map<number, string>;    // NEW
+  labTimelines: ILabKpiTimeline[];   // chart-eligible labs (≥2 validated)
+  baselineLabs: ILabPartition["baselineLabs"];  // NEW — labs with exactly 1 validated
 }
 ```
-
-`KpiLivingLabsCards.renderKpiGroup` passes the extra props when constructing `KpiLivingLabsSingleCard`.
 
 #### `KpiLivingLabsSingleCard` render logic
 
 ```typescript
 export const KpiLivingLabsSingleCard: React.FC<KpiLivingLabsCardProps> = ({
   kpi,
-  livingLabs,
-  filter,
-  colorMap,
+  labTimelines,  // already filtered to chart-eligible labs
+  baselineLabs,
 }) => {
-  const { chartLabs, baselineLabs } = partitionLabsBySufficiency(
-    kpi, livingLabs, filter, colorMap, COLOR_GRAY
-  );
-
-  const hasChart = chartLabs.length > 0;
+  const hasChart = labTimelines.length > 0;
   const hasBaseline = baselineLabs.length > 0;
 
   if (!hasChart && !hasBaseline) return null;
@@ -495,7 +583,7 @@ export const KpiLivingLabsSingleCard: React.FC<KpiLivingLabsCardProps> = ({
         {hasChart && (
           <div className="mt-4">
             <D3TimelineChart
-              data={chartLabs}
+              data={labTimelines}
               metricType={kpi.metric}
               height={280}
               showLegend={false}
@@ -549,6 +637,59 @@ export const KpiLivingLabsSingleCard: React.FC<KpiLivingLabsCardProps> = ({
 };
 ```
 
+#### `KpiLivingLabsMultipleCard` changes
+
+> **Review finding:** The original draft did not address this component. It renders parent+child D3 charts across multiple labs and also needs sufficiency filtering.
+
+`KpiLivingLabsMultipleCard` receives `kpiTimelineMap: IKpiTimelineMap` which is now `Map<number, ILabPartition>`. Adapt it to extract `chartLabs` for charts and `baselineLabs` for a baseline table:
+
+```typescript
+export const KpiLivingLabsMultipleCard: React.FC<KpiLivingLabsMultipleCardProps> = ({
+  parentKpi, childKpis, kpiTimelineMap, className,
+}) => {
+  const parentPartition = kpiTimelineMap.get(parentKpi.id);
+  const parentTimelines = parentPartition?.chartLabs ?? [];
+  const hasParentChart = parentTimelines.length > 0;
+
+  // Collect all baseline labs across parent + children (deduplicated)
+  const allBaselineLabs = useMemo(() => {
+    const seen = new Set<number>();
+    const baselines: ILabPartition["baselineLabs"] = [];
+    [parentPartition, ...childKpis.map((c) => kpiTimelineMap.get(c.id))]
+      .filter(Boolean)
+      .forEach((partition) => {
+        partition!.baselineLabs.forEach((bl) => {
+          if (!seen.has(bl.labId)) {
+            seen.add(bl.labId);
+            baselines.push(bl);
+          }
+        });
+      });
+    return baselines;
+  }, [parentPartition, childKpis, kpiTimelineMap]);
+
+  // Child KPIs — use chartLabs only for the faceted chart
+  const childKpisWithData = childKpis.filter((child) => {
+    const partition = kpiTimelineMap.get(child.id);
+    return partition && partition.chartLabs.length > 0;
+  });
+
+  const facets: IFacetData[] = useMemo(() => {
+    return childKpisWithData.map((child) => ({
+      kpiId: child.id,
+      kpiName: child.name,
+      labTimelines: kpiTimelineMap.get(child.id)!.chartLabs,
+    }));
+  }, [childKpisWithData, kpiTimelineMap]);
+
+  // ... rest of component: render parent chart (parentTimelines),
+  // faceted chart (facets), baseline table (allBaselineLabs), footer.
+  // Baseline table uses same pattern as KpiLivingLabsSingleCard above.
+};
+```
+
+The key change: every use of `kpiTimelineMap.get(id)` that previously returned `ILabKpiTimeline[]` now returns `ILabPartition`, so the chart-rendering code accesses `.chartLabs` and baseline rendering accesses `.baselineLabs`.
+
 ---
 
 ### 3h. New component: `KpiBaselineValue`
@@ -559,6 +700,7 @@ Used by `KpiCard` (single-lab page, single KPI with 1 validated result) and by `
 
 ```typescript
 import type { IKpiResultGroup, EnumKpiMetricType } from "../../../types/KPIs";
+import { isResultValidated } from "../../../lib/utils/kpiSufficiency";
 import {
   formatValue,
   formatMonthYear,
@@ -568,12 +710,16 @@ import {
 type Props = {
   kpiResults: IKpiResultGroup;
   metricType: EnumKpiMetricType | undefined;
+  labValidatedAt: Date | null | undefined;  // required — caller must pass this
   label?: string;  // optional override for child KPI name in KpiMultiple context
 };
 
-export function KpiBaselineValue({ kpiResults, metricType, label }: Props) {
-  // There is exactly one validated result; display it
-  const result = kpiResults.results[0];
+export function KpiBaselineValue({ kpiResults, metricType, label, labValidatedAt }: Props) {
+  // Find the single validated result — do NOT assume results[0].
+  // The validated result is the one where lab.validated_at > result.updated_at.
+  const result = kpiResults.results.find((r) =>
+    isResultValidated(r, labValidatedAt),
+  );
   if (!result) return null;
 
   const formattedValue = formatValue(result.value, metricType);
@@ -995,11 +1141,12 @@ const implementationResults: IKpiResultGroup[] = (implementationKpis ?? []).leng
 | `src/config/implementationKpis.ts` | **new** | T02 | `IMPLEMENTATION_KPI_IDS`, `isImplementationKpi` |
 | `src/components/react/KpiCards/KpiBaselineValue.tsx` | **new** | T03 | Baseline-only display: value, date, tag line |
 | `src/components/react/KPIsDashboard/ImplementationRecordTable.tsx` | **new** | T02 | Shared table component, `view="global"` and `view="lab"` |
-| `src/components/react/KPIsDashboard/types.ts` | **modify** | T03, T02 | Add `validated_at` to `ILivingLabKpiData`; add `implementationKpis` to `KPIsDashboardProps`; add `livingLabs`, `filter`, `colorMap` to `KpiLivingLabsCardProps` |
-| `src/components/react/KPIsDashboard/utils.ts` | **modify** | T03 | Add `partitionLabsBySufficiency`; import `isResultValidated`, `getKpiDisplayMode` |
+| `src/components/react/KPIsDashboard/types.ts` | **modify** | T03, T02 | Add `validated_at` to `ILivingLabKpiData`; change `IKpiTimelineMap` to `Map<number, ILabPartition>`; add `baselineLabs` to `KpiLivingLabsCardProps`; add `implementationKpis` to `KPIsDashboardProps` |
+| `src/components/react/KPIsDashboard/utils.ts` | **modify** | T03 | Add `ILabPartition` type; add `buildLabPartition`; change `buildKpiDataMap` return type to `Map<number, ILabPartition>`; import `isResultValidated`, `getKpiDisplayMode` |
 | `src/components/react/KPIsDashboard/KPIsDashboard.tsx` | **modify** | T02 | Accept `implementationKpis` prop; render `ImplementationRecordTable` below chart section |
-| `src/components/react/KPIsDashboard/KpiLivingLabsCards.tsx` | **modify** | T03 | Pass `livingLabs`, `filter`, `colorMap` to `KpiLivingLabsSingleCard` |
-| `src/components/react/KPIsDashboard/KpiLivingLabsSingleCard.tsx` | **modify** | T03 | Call `partitionLabsBySufficiency`; render chart section (chartLabs) + baseline table (baselineLabs); return null when both empty |
+| `src/components/react/KPIsDashboard/KpiLivingLabsCards.tsx` | **modify** | T03 | Extract `partition.chartLabs` and `partition.baselineLabs` from `kpiDataMap` when constructing card components |
+| `src/components/react/KPIsDashboard/KpiLivingLabsSingleCard.tsx` | **modify** | T03 | Accept `baselineLabs` prop; render chart from `labTimelines` (chart-eligible) + baseline table from `baselineLabs`; return null when both empty |
+| `src/components/react/KPIsDashboard/KpiLivingLabsMultipleCard.tsx` | **modify** | T03 | Adapt to `ILabPartition` shape from `kpiTimelineMap` — use `.chartLabs` for D3 charts, collect `.baselineLabs` across parent+children for a baseline table |
 | `src/components/react/LivingLabKPIsView.tsx` | **modify** | T03, T02 | Add `lab_validated_at` prop (T03); add `implementationKpis` prop (T02); pass `lab_validated_at` to `KpiCard`/`KpiMultiple`; render `ImplementationRecordTable` (T02) |
 | `src/components/react/KpiCards/KpiCard.tsx` | **modify** | T03 | Add `lab_validated_at` prop; call `getKpiDisplayMode`; branch to `KpiBaselineValue`, null, or original render |
 | `src/components/react/KpiCards/KpiMultiple.tsx` | **modify** | T03 | Add `lab_validated_at` prop; partition `results` by display mode; rebuild chart datasets from `chartResults` only; render `KpiBaselineValue` rows for `baselineResults` |
@@ -1030,15 +1177,17 @@ Execute in this order. Each step depends on the previous.
 
 8. **Modify `KpiMultiple`** — add prop, partition results, rebuild chart datasets, add baseline rows.
 
-9. **Add `partitionLabsBySufficiency` to `utils.ts`** — imports from `kpiSufficiency.ts` (step 1) and existing `processKpiResults`.
+9. **Add `ILabPartition` type and `buildLabPartition` to `utils.ts`** — imports from `kpiSufficiency.ts` (step 1) and existing `processKpiResults`. Change `buildKpiDataMap` to return `Map<number, ILabPartition>`.
 
-10. **Modify `KpiLivingLabsCardProps` in `types.ts`** — add `livingLabs`, `filter`, `colorMap`.
+10. **Update `IKpiTimelineMap` in `types.ts`** — change to `Map<number, ILabPartition>`. Add `baselineLabs` to `KpiLivingLabsCardProps`.
 
-11. **Modify `KpiLivingLabsCards`** — pass new props when constructing `KpiLivingLabsSingleCard`.
+11. **Modify `KpiLivingLabsCards`** — extract `partition.chartLabs` and `partition.baselineLabs` when building card props.
 
-12. **Modify `KpiLivingLabsSingleCard`** — call `partitionLabsBySufficiency`, branch render logic.
+12. **Modify `KpiLivingLabsSingleCard`** — accept `baselineLabs` prop; render chart from `labTimelines` + baseline table.
 
-13. **Manual smoke-test on `/data/kpis` and a city page** — confirm no single-point charts, baseline rows appear correctly, zero-point labs are absent.
+13. **Modify `KpiLivingLabsMultipleCard`** — adapt to `ILabPartition` shape from `kpiTimelineMap`; use `.chartLabs` for D3 charts; collect `.baselineLabs` across parent and children.
+
+14. **Manual smoke-test on `/data/kpis` and a city page** — confirm no single-point charts, baseline rows appear correctly, zero-point labs are absent.
 
 ### Phase 2 — T02 (only after T03 is merged and green)
 
