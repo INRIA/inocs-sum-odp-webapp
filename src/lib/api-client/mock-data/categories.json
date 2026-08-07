@@ -14,7 +14,7 @@
   },
   {
     "id": 2,
-    "name": "Transport System - Time",
+    "name": "Travel time",
     "type": "KPI_SIEF",
     "kpis": [
       { "id": 12 },
@@ -36,7 +36,7 @@
   },
   {
     "id": 3,
-    "name": "Transport System - Safety/Comfort",
+    "name": "Safety & comfort",
     "type": "KPI_SIEF",
     "kpis": [
       { "id": 8 },
@@ -55,7 +55,7 @@
   },
   {
     "id": 4,
-    "name": "Transport System - Cost",
+    "name": "Cost of travel",
     "type": "KPI_SIEF",
     "kpis": [
       { "id": 22 },
@@ -74,19 +74,19 @@
   },
   {
     "id": 5,
-    "name": "Impact - Environment",
+    "name": "Environment",
     "type": "KPI_SIEF",
     "kpis": [{ "id": 49 }, { "id": 60 }, { "id": 61 }, { "id": 62 }]
   },
   {
     "id": 6,
-    "name": "Impact - Society",
+    "name": "Social outcomes",
     "type": "KPI_SIEF",
     "kpis": [{ "id": 63 }, { "id": 64 }, { "id": 65 }, { "id": 66 }]
   },
   {
     "id": 7,
-    "name": "Impact - Economy",
+    "name": "Local economy",
     "type": "KPI_SIEF",
     "kpis": [
       { "id": 50 },

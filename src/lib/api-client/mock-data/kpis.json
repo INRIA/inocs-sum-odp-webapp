@@ -2,8 +2,8 @@
   {
     "id": 1,
     "kpi_number": "1",
-    "name": "Level of completion of SUMP measures",
-    "description": "It is the share (%) of SUMP measures implemented within the SUM project in each LL.",
+    "name": "Level of completion of SUMP (city plan) measures",
+    "description": "It is the share (%) of SUMP (city plan) measures implemented within the SUM project in each LL.",
     "progression_target": 1,
     "metric": "percentage",
     "min_value": 0,

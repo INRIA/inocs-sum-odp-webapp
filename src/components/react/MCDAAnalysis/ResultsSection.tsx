@@ -5,6 +5,7 @@ import type {
   McdaResults,
   OutrankingGraphData,
 } from "../../../types";
+import { displayCategoryName } from "../../../lib/labels";
 import { D3McdaNetFlowsChart } from "./D3McdaNetFlowsChart";
 import { D3McdaGaiaPlane } from "./D3McdaGaiaPlane";
 import { D3McdaNetworkChart } from "./D3McdaNetworkChart";
@@ -233,7 +234,7 @@ export const ResultsSection: React.FC<ResultsSectionProps> = ({
             <p className="text-lg font-medium mb-2">Results pending</p>
             <p className="text-sm text-gray-400">
               We couldn't find MCDA results for{" "}
-              <strong>{selectedGroup?.name || "this stakeholder"}</strong> yet.
+              <strong>{selectedGroup ? displayCategoryName(selectedGroup.name) : "this stakeholder"}</strong> yet.
             </p>
           </div>
         </div>

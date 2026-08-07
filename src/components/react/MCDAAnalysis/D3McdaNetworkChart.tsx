@@ -438,16 +438,16 @@ export const D3McdaNetworkChart: React.FC<D3McdaNetworkChartProps> = ({
                 </div>
               )}
               <div className="text-xs text-dark">
-                Net flow: {tooltip.node.netFlow.toFixed(3)}
+                Overall score: {tooltip.node.netFlow.toFixed(3)}
               </div>
               {tooltip.node.positiveFlow !== undefined && (
                 <div className="text-xs text-dark">
-                  Positive flow: {tooltip.node.positiveFlow.toFixed(3)}
+                  Strengths: {tooltip.node.positiveFlow.toFixed(3)}
                 </div>
               )}
               {tooltip.node.negativeFlow !== undefined && (
                 <div className="text-xs text-dark">
-                  Negative flow: {tooltip.node.negativeFlow.toFixed(3)}
+                  Weaknesses: {tooltip.node.negativeFlow.toFixed(3)}
                 </div>
               )}
             </>
