@@ -1,5 +1,6 @@
 import type {
   ILabKpiTimeline,
+  ILabPartition,
   ITimelineDataPoint,
   ILivingLabKpiData,
   KpiLivingLabsCardsFilter,
@@ -8,6 +9,10 @@ import type {
 import type { IKpi } from "../../../types";
 import type { IKpiResult, IKpiResultGroup } from "../../../types/KPIs";
 import { normalizeKpiResultGroup } from "../../../lib/utils/kpis";
+import {
+  getKpiDisplayMode,
+  isResultValidated,
+} from "../../../lib/utils/kpiSufficiency";
 
 /**
  * Creates a timeline data point from a KPI result if it matches the selected years
@@ -62,8 +67,9 @@ export function processKpiResults(
 }
 
 /**
- * Builds timeline data for all living labs for a specific KPI
- * Only includes labs that are selected in the filter and have data points
+ * Builds timeline data for all living labs for a specific KPI.
+ * Kept for backwards compatibility — use buildLabPartition for new code.
+ * Only includes labs that are selected in the filter and have data points.
  */
 export function buildLabTimelines(
   kpi: IKpi,
@@ -75,12 +81,10 @@ export function buildLabTimelines(
   const labTimelines: ILabKpiTimeline[] = [];
 
   livingLabs.forEach((lab) => {
-    // Skip if lab is not selected
     if (!filter.selectedLabIds?.includes(lab.id)) {
       return;
     }
 
-    // Find KPI result for this lab and KPI
     const kpiResult = lab.kpiResults.find((r) => r.kpidefinition_id === kpi.id);
 
     if (!kpiResult) {
@@ -91,7 +95,6 @@ export function buildLabTimelines(
       ? processKpiResults(kpiResult, filter.selectedYears)
       : [];
 
-    // Only add if there are data points
     if (dataPoints.length > 0) {
       labTimelines.push({
         labId: lab.id,
@@ -106,8 +109,69 @@ export function buildLabTimelines(
 }
 
 /**
- * Builds a map of KPI IDs to lab timelines for all filtered KPIs
- * Only includes KPIs that have at least one lab with data
+ * Builds partitioned lab data for a single KPI applying the data-sufficiency rule.
+ *
+ * - Labs with ≥2 validated estimations → chartLabs (rendered as D3 timeline)
+ * - Labs with exactly 1 validated estimation → baselineLabs (rendered as table row)
+ * - Labs with 0 validated estimations → excluded from both partitions
+ *
+ * "Validated" means lab.validated_at > kpiresult.updated_at.
+ */
+export function buildLabPartition(
+  kpi: IKpi,
+  livingLabs: ILivingLabKpiData[],
+  filter: KpiLivingLabsCardsFilter,
+  colorMap: Map<number, string>,
+  fallbackColor: string,
+): ILabPartition {
+  const chartLabs: ILabKpiTimeline[] = [];
+  const baselineLabs: ILabPartition["baselineLabs"] = [];
+
+  livingLabs.forEach((lab) => {
+    if (!filter.selectedLabIds?.includes(lab.id)) return;
+
+    const kpiResult = lab.kpiResults.find(
+      (r) => r.kpidefinition_id === kpi.id,
+    );
+    if (!kpiResult) return;
+
+    const mode = getKpiDisplayMode(kpiResult.results, lab.validated_at);
+
+    if (mode === "chart") {
+      const dataPoints = filter.selectedYears
+        ? processKpiResults(kpiResult, filter.selectedYears)
+        : [];
+      if (dataPoints.length > 0) {
+        chartLabs.push({
+          labId: lab.id,
+          labName: lab.name,
+          color: colorMap.get(lab.id) || fallbackColor,
+          dataPoints,
+        });
+      }
+    } else if (mode === "baseline") {
+      const validatedResult = kpiResult.results.find((r) =>
+        isResultValidated(r, lab.validated_at),
+      );
+      if (validatedResult) {
+        baselineLabs.push({
+          labId: lab.id,
+          labName: lab.name,
+          color: colorMap.get(lab.id) || fallbackColor,
+          result: validatedResult,
+        });
+      }
+    }
+    // mode === "hidden" → skip
+  });
+
+  return { chartLabs, baselineLabs };
+}
+
+/**
+ * Builds a map of KPI IDs to partitioned lab data for all filtered KPIs.
+ * Applies the data-sufficiency rule: only includes KPIs that have at least
+ * one lab with chart-worthy or baseline-worthy data.
  */
 export function buildKpiDataMap(
   filteredKpis: IKpi[],
@@ -115,11 +179,11 @@ export function buildKpiDataMap(
   filter: KpiLivingLabsCardsFilter,
   colorMap: Map<number, string>,
   fallbackColor: string,
-): Map<number, ILabKpiTimeline[]> {
-  const map = new Map<number, ILabKpiTimeline[]>();
+): Map<number, ILabPartition> {
+  const map = new Map<number, ILabPartition>();
 
   filteredKpis.forEach((kpi) => {
-    const labTimelines = buildLabTimelines(
+    const partition = buildLabPartition(
       kpi,
       livingLabs,
       filter,
@@ -127,8 +191,8 @@ export function buildKpiDataMap(
       fallbackColor,
     );
 
-    if (labTimelines.length > 0) {
-      map.set(kpi.id, labTimelines);
+    if (partition.chartLabs.length > 0 || partition.baselineLabs.length > 0) {
+      map.set(kpi.id, partition);
     }
   });
 
@@ -145,12 +209,10 @@ export function groupKpisByParentChild(kpis: IKpi[]): IKpiGroup[] {
   const groups: IKpiGroup[] = [];
   const processedKpiIds = new Set<number>();
 
-  // First, identify all parent KPIs and group their children
-  const parentKpiMap = new Map<number, IKpi[]>(); // Map parent ID to child KPIs
+  const parentKpiMap = new Map<number, IKpi[]>();
 
   kpis.forEach((kpi) => {
     if (kpi.parent_kpi_id) {
-      // This is a child KPI
       if (!parentKpiMap.has(kpi.parent_kpi_id)) {
         parentKpiMap.set(kpi.parent_kpi_id, []);
       }
@@ -159,25 +221,20 @@ export function groupKpisByParentChild(kpis: IKpi[]): IKpiGroup[] {
     }
   });
 
-  // Now process all KPIs
   kpis.forEach((kpi) => {
-    // Skip if already processed as a child
     if (processedKpiIds.has(kpi.id)) {
       return;
     }
 
-    // Check if this KPI has children
     const childKpis = parentKpiMap.get(kpi.id);
 
     if (childKpis && childKpis.length > 0) {
-      // This is a parent KPI with children
       groups.push({
         type: "parent",
         parentKpi: kpi,
         childKpis,
       });
     } else {
-      // This is a single KPI (no parent, no children)
       groups.push({
         type: "single",
         kpi,

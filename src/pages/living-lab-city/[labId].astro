@@ -9,6 +9,7 @@ import {
   getModalSplitKpiResults,
   createMapMarker,
 } from "../../lib/helpers/living-lab";
+import { isImplementationKpi } from "../../config/implementationKpis";
 import {
   DataDisplayCard,
   LivingLabKPIsView,
@@ -60,6 +61,14 @@ const modalSplitKpis = getModalSplitKpiResults(
 
 const nonModalSplitKpis = allKpis.filter(
   (kpi) => !kpi.kpi_number.startsWith("15"),
+);
+
+// T02: split outcome KPIs from implementation-record KPIs
+const outcomeKpis = nonModalSplitKpis.filter(
+  (kpi) => !isImplementationKpi(kpi.id),
+);
+const implementationKpis = nonModalSplitKpis.filter((kpi) =>
+  isImplementationKpi(kpi.id),
 );
 
 const mapMarker = createMapMarker(livingLabData);
@@ -185,7 +194,10 @@ const kpiResultsByCategory = categories.map((category) => ({
           <div class="flex flex-wrap gap-0">
             <LivingLabKPIsView
               categories={kpiResultsByCategory ?? []}
-              kpis={nonModalSplitKpis}
+              kpis={outcomeKpis}
+              implementationKpis={implementationKpis}
+              lab_validated_at={livingLabData?.validated_at ?? null}
+              living_lab_id={Number(livingLabData.id)}
               client:load
             />
           </div>

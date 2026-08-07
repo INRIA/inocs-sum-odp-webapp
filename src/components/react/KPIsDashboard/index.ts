@@ -1,4 +1,5 @@
 export { KPIsDashboard } from "./KPIsDashboard";
+export { ImplementationRecordTable } from "./ImplementationRecordTable";
 export { KpiLivingLabsCards } from "./KpiLivingLabsCards";
 export { KpiLivingLabsSingleCard } from "./KpiLivingLabsSingleCard";
 export { KpiLivingLabsMultipleCard } from "./KpiLivingLabsMultipleCard";
@@ -8,6 +9,7 @@ export { D3FacetedTimelineChart } from "./D3FacetedTimelineChart";
 export * from "./utils";
 export type {
   ILivingLabKpiData,
+  ILabPartition,
   ITimelineDataPoint,
   ILabKpiTimeline,
   ILabColorAssignment,
