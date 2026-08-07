@@ -8,4 +8,4 @@ export * from "./colorUtils";
 export * from "./mcda-format";
 export * from "./analytics";
 export * from "./roles";
-export { displayCategoryName, FLOW_LABELS } from "../labels";
+export { displayCategoryName, FLOW_LABELS, displayLabType } from "../labels";

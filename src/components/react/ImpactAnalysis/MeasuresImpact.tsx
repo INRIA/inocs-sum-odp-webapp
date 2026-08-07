@@ -24,18 +24,22 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
   analysisResult,
   kpiCount,
 }) => {
+  const categoryLabel = selectedGroup
+    ? displayCategoryName(selectedGroup.name)
+    : "";
+
   const divider = (
     <AnalysisSectionDivider
       step={2}
       title={
         selectedGroup
-          ? `Measures linked to better ${displayCategoryName(selectedGroup.name)}`
+          ? `Measures linked to ${categoryLabel} improvement`
           : "Linked measures"
       }
       // subtitle="Analyse how implemented measures contributed to the KPIs variations"
       description={
         "Estimation of the level of contribution for each measure to KPIs in the scope " +
-        (selectedGroup ? displayCategoryName(selectedGroup.name) : "") +
+        categoryLabel +
         "."
       }
     />
@@ -69,7 +73,7 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
         >
           <p>
             Impact coefficients could not be computed for the KPI group{" "}
-            <strong>{displayCategoryName(selectedGroup.name)}</strong>. This typically occurs when
+            <strong>{categoryLabel}</strong>. This typically occurs when
             only one living lab has reported KPI results for this group — the
             model requires data from at least two cities to attribute changes to
             specific policy measures.
@@ -179,8 +183,8 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
               />
             </svg>
             <h5>
-              Top {topMeasures.length} measures linked to better{" "}
-              <strong>{displayCategoryName(selectedGroup.name)}</strong>
+              Top {topMeasures.length} measures linked to{" "}
+              <strong>{categoryLabel}</strong> improvement
             </h5>
           </div>
           <p className="text-dark mb-4 h-10">
@@ -213,8 +217,8 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
               />
             </svg>
             <h5>
-              Bottom {bottomMeasures.length} measures linked to better{" "}
-              <strong>{displayCategoryName(selectedGroup.name)}</strong>
+              Bottom {bottomMeasures.length} measures linked to{" "}
+              <strong>{categoryLabel}</strong> regression
             </h5>
           </div>
           <p className="text-dark mb-4 h-10">
