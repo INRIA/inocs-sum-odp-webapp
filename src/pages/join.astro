@@ -1,0 +1,235 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { RButton } from "../components/react";
+import { getUrl } from "../lib/helpers";
+
+const steps = [
+  {
+    id: 1,
+    color: "primary",
+    icon: "👤",
+    title: "Create your account",
+    description:
+      "Sign up and join your existing Living Lab, or create a new one to start contributing.",
+  },
+  {
+    id: 2,
+    color: "secondary",
+    icon: "🏙️",
+    title: "Describe your Living Lab",
+    description:
+      "Provide key details: name, city, and zone or area of intervention for your Living Lab.",
+  },
+  {
+    id: 3,
+    color: "warning",
+    icon: "📊",
+    title: "Collect baseline data",
+    description:
+      "Input your first round of KPI values before implementing mobility measures.",
+  },
+  {
+    id: 4,
+    color: "info",
+    icon: "⚙️",
+    title: "Add your measures",
+    description:
+      "Document the mobility measures and policies implemented in your Living Lab.",
+  },
+  {
+    id: 5,
+    color: "primary",
+    icon: "📈",
+    title: "Collect post-data",
+    description:
+      "Measure KPIs again to assess the impact of measures and share results in the platform.",
+  },
+];
+---
+
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Join the project" },
+  ]}
+>
+  <!-- Page Header -->
+  <div class="bg-primary/5 py-16 px-4 sm:px-8 lg:px-16 border-b border-primary/10">
+    <div class="max-w-4xl mx-auto text-center">
+      <h1 class="text-4xl font-bold text-dark mb-4">
+        Join the SUM Open Data Platform
+      </h1>
+      <p class="text-lg text-gray-600">
+        Contribute real-world data from your Living Lab to evaluate and improve
+        New Shared Mobility measures across Europe. Together we build the
+        evidence base for sustainable urban mobility policy.
+      </p>
+    </div>
+  </div>
+
+  <!-- How to Contribute Timeline (moved from homepage) -->
+  <section class="bg-gray-50 py-16 px-4 sm:px-8 lg:px-16">
+    <div class="max-w-5xl mx-auto text-center mb-16">
+      <h2 class="text-3xl font-bold text-gray-900 mb-4">
+        How to Contribute to the SUM Open Data Platform
+      </h2>
+      <p class="text-lg text-gray-600">
+        Join the SUM Open Data Platform and help shape the future of sustainable
+        urban mobility. Living Labs contribute real-world data to evaluate and
+        improve New Shared Mobility measures across Europe.
+      </p>
+    </div>
+
+    <div class="relative max-w-5xl mx-auto mt-40">
+      {/* Vertical line */}
+      <div
+        class="absolute left-4 md:left-1/2 transform md:-translate-x-1/2 w-1 bg-primary h-full rounded"
+      >
+      </div>
+
+      {
+        steps.map((step, index) => (
+          <div
+            key={step.id}
+            class={`mb-16 flex items-start w-full md:justify-between md:items-center md:-mt-28 ${
+              index % 2 === 0 ? "md:flex-row-reverse" : ""
+            }`}
+          >
+            <div class="hidden md:block md:w-5/12" />
+
+            <div
+              class={`z-20 flex items-center ml-2 ${
+                index % 2 === 0
+                  ? "flex-row md:-ml-18"
+                  : "md:flex-row-reverse md:-mr-18"
+              }`}
+            >
+              <div
+                class={`flex items-center justify-center w-5 h-5 rounded-full bg-${step.color} border-2 border-${step.color} text-xs font-extralight text-light shadow`}
+              >
+                {step.id}
+              </div>
+              <div class="hidden md:block md:w-14">
+                <div class="w-full h-0.5 bg-primary rounded" />
+              </div>
+            </div>
+
+            <div
+              class={`relative w-full md:w-5/12 bg-white rounded-xl shadow-lg p-6 border-${step.color} ml-6 md:ml-0 ${
+                index % 2 === 0 ? "border-r-8" : "border-l-8"
+              }`}
+            >
+              <div class="flex items-center mb-2">
+                <span class="text-2xl mr-3">{step.icon}</span>
+                <h5 class="text-xl font-semibold text-gray-900">{step.title}</h5>
+              </div>
+              <p class="text-gray-600">{step.description}</p>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- ODP Monitoring Timeline (moved from homepage) -->
+  <section class="py-12 px-4 sm:px-8 lg:px-16 border-t border-gray-200">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-2xl font-bold text-gray-900 mb-3">
+        Monitoring measures around New Shared Mobility
+      </h2>
+      <p class="text-gray-600">
+        From pre-implementation surveys to data-driven impact analysis, here's
+        how data flows through the SUM project.
+      </p>
+    </div>
+  </section>
+
+  <!-- Resources Section -->
+  <section class="bg-white py-12 px-4 sm:px-8 lg:px-16 border-t border-gray-100">
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+        Resources & Tools
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <a
+          href={getUrl("/tools/resources")}
+          class="block p-6 rounded-xl border border-gray-200 hover:border-primary hover:shadow-sm transition-all"
+        >
+          <h3 class="font-semibold text-primary mb-2">Resources & tools</h3>
+          <p class="text-sm text-gray-600">
+            Models, optimisation tools and software to plan integrated New
+            Shared Mobility systems.
+          </p>
+        </a>
+        <a
+          href={getUrl("/data/collection-plan")}
+          class="block p-6 rounded-xl border border-gray-200 hover:border-primary hover:shadow-sm transition-all"
+        >
+          <h3 class="font-semibold text-primary mb-2">Data collection plan</h3>
+          <p class="text-sm text-gray-600">
+            Step-by-step guide to collecting and submitting KPI data for your
+            Living Lab.
+          </p>
+        </a>
+        <a
+          href={getUrl("/data/kpis")}
+          class="block p-6 rounded-xl border border-gray-200 hover:border-primary hover:shadow-sm transition-all"
+        >
+          <h3 class="font-semibold text-primary mb-2">KPI framework</h3>
+          <p class="text-sm text-gray-600">
+            Explore the SIEF KPI framework used to evaluate shared mobility
+            measures across Living Labs.
+          </p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section (moved from homepage) -->
+  <section class="bg-gray-50 py-12 px-4 sm:px-8 lg:px-16 border-t border-gray-100">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-2xl font-bold text-gray-900 mb-3">
+        Have questions? Visit our FAQ
+      </h2>
+      <p class="text-gray-600 mb-6">
+        Find concise answers about data access, contributing Living Lab results,
+        measures, KPIs, and technical integration.
+      </p>
+      <a
+        href={getUrl("/faq")}
+        class="inline-block rounded-lg px-6 py-3 bg-primary text-white font-semibold hover:bg-primary/90 transition-colors"
+      >
+        Go to the FAQ →
+      </a>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="bg-primary py-16 px-4 sm:px-8 lg:px-16">
+    <div class="max-w-3xl mx-auto text-center">
+      <h2 class="text-3xl font-bold text-white mb-4">Ready to get started?</h2>
+      <p class="text-primary-light mb-8 text-lg">
+        Create your account and start contributing data from your city.
+      </p>
+      <div
+        class="flex flex-col md:flex-row gap-4 mx-auto justify-center"
+      >
+        <RButton
+          href={getUrl("/lab-admin/signup")}
+          variant="primary"
+          className="bg-white text-primary hover:bg-gray-100"
+        >
+          Create your account →
+        </RButton>
+        <RButton
+          href={getUrl("/lab-admin/login")}
+          variant="primary"
+          className="bg-warning text-light"
+        >
+          Log in →
+        </RButton>
+      </div>
+    </div>
+  </section>
+</Layout>
