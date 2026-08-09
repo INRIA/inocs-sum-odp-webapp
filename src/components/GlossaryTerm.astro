@@ -1,0 +1,34 @@
+---
+import { GLOSSARY_TERMS } from "../lib/data/glossary";
+
+interface Props {
+  termId: string;
+  label?: string;
+}
+
+const { termId, label } = Astro.props;
+const entry = GLOSSARY_TERMS.find((t) => t.id === termId);
+const displayLabel = label ?? entry?.term ?? termId;
+const href = `/methods/glossary#${termId}`;
+---
+
+{
+  entry ? (
+    <span class="relative group inline-block">
+      <a
+        href={href}
+        class="border-b border-dotted border-current text-inherit hover:text-primary transition-colors"
+        aria-label={`Glossary: ${displayLabel}`}
+      >
+        {displayLabel}
+      </a>
+      <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-64 bg-gray-900 text-white text-xs rounded-lg p-3 shadow-lg z-50 pointer-events-none">
+        {entry.definition}
+      </span>
+    </span>
+  ) : (
+    <a href={href} class="border-b border-dotted border-current hover:text-primary transition-colors">
+      {displayLabel}
+    </a>
+  )
+}

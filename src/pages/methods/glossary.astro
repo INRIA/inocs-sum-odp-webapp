@@ -1,0 +1,98 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { GLOSSARY_TERMS } from "../../lib/data/glossary";
+
+const sorted = [...GLOSSARY_TERMS].sort((a, b) =>
+  a.term.localeCompare(b.term),
+);
+
+const grouped = sorted.reduce(
+  (acc, entry) => {
+    const letter = entry.term[0].toUpperCase();
+    if (!acc[letter]) acc[letter] = [];
+    acc[letter].push(entry);
+    return acc;
+  },
+  {} as Record<string, typeof sorted>,
+);
+
+const letters = Object.keys(grouped).sort();
+---
+
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Methods", href: "/methods/evaluation-framework" },
+    { label: "Glossary" },
+  ]}
+>
+  <div class="mx-auto px-4 sm:px-8 py-12 max-w-4xl">
+    <div class="mb-10">
+      <h1 class="text-3xl font-bold text-dark mb-3">Glossary</h1>
+      <p class="text-gray-600 text-lg">
+        Definitions of technical terms used across the SUM Open Data Platform,
+        covering MCDA methodology, impact analysis, and the KPI evaluation
+        framework.
+      </p>
+    </div>
+
+    <!-- Letter index -->
+    <div class="flex flex-wrap gap-2 mb-10">
+      {
+        letters.map((letter) => (
+          <a
+            href={`#letter-${letter}`}
+            class="w-8 h-8 flex items-center justify-center rounded border border-gray-300 text-sm font-medium hover:bg-primary hover:text-white hover:border-primary transition-colors"
+          >
+            {letter}
+          </a>
+        ))
+      }
+    </div>
+
+    {
+      letters.map((letter) => (
+        <div id={`letter-${letter}`} class="mb-10">
+          <h2 class="text-xl font-bold text-primary border-b border-gray-200 pb-2 mb-6">
+            {letter}
+          </h2>
+          <dl class="space-y-8">
+            {grouped[letter].map((entry) => (
+              <div id={entry.id} class="scroll-mt-20">
+                <dt class="font-semibold text-dark text-lg">{entry.term}</dt>
+                {entry.aliases.length > 0 && (
+                  <p class="text-sm text-gray-500 mb-1">
+                    Also known as: {entry.aliases.join(", ")}
+                  </p>
+                )}
+                <dd class="text-gray-700 mt-1 leading-relaxed">
+                  {entry.definition}
+                </dd>
+                {entry.relatedTerms.length > 0 && (
+                  <p class="text-sm text-gray-500 mt-2">
+                    Related:{" "}
+                    {entry.relatedTerms.map((id, i) => {
+                      const related = GLOSSARY_TERMS.find((t) => t.id === id);
+                      return (
+                        <span>
+                          {i > 0 && ", "}
+                          <a
+                            href={`#${id}`}
+                            class="text-primary hover:underline"
+                          >
+                            {related?.term ?? id}
+                          </a>
+                        </span>
+                      );
+                    })}
+                  </p>
+                )}
+              </div>
+            ))}
+          </dl>
+        </div>
+      ))
+    }
+  </div>
+</Layout>
