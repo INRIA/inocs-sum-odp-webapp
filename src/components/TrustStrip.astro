@@ -1,0 +1,52 @@
+---
+interface Counters {
+  sumLivingLabs: number;
+  contributingCities: number;
+  citiesWithData: number;
+  measures: number;
+  kpis: number;
+  lastDataUpdate: string | null;
+}
+
+interface Props {
+  counters: Counters;
+  curatorRole?: string;
+}
+
+const { counters, curatorRole = "the SUM consortium" } = Astro.props;
+
+const figures = [
+  { label: "SUM Living Labs", value: counters.sumLivingLabs },
+  { label: "Contributing cities", value: counters.contributingCities },
+  { label: "Cities with before/after data", value: counters.citiesWithData },
+  { label: "Policy measures", value: counters.measures },
+  { label: "KPIs monitored", value: counters.kpis },
+  {
+    label: "Last data update",
+    value: counters.lastDataUpdate ?? "—",
+    isDate: true,
+  },
+];
+---
+
+<div class="bg-gray-50 border-y border-gray-200 py-8 px-4 sm:px-8">
+  <div class="max-w-7xl mx-auto">
+    <div
+      class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 text-center"
+    >
+      {
+        figures.map((fig) => (
+          <div class="flex flex-col items-center">
+            <span class="text-2xl font-bold text-primary">
+              {fig.isDate ? fig.value : fig.value}
+            </span>
+            <span class="text-xs text-gray-600 mt-1">{fig.label}</span>
+          </div>
+        ))
+      }
+    </div>
+    <p class="text-center text-xs text-gray-500 mt-6">
+      Data curated by {curatorRole}
+    </p>
+  </div>
+</div>

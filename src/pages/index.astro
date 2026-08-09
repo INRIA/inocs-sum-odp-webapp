@@ -2,19 +2,17 @@
 import Layout from "../layouts/Layout.astro";
 import {
   CTAHero,
-  CTASection,
-  StatsSection,
   TransportBadge,
-  ODPTimeline,
   LivingLabsMapSection,
-  RButton,
-  CTACard,
 } from "../components/react";
+import ExperienceDoor from "../components/ExperienceDoor.astro";
+import TrustStrip from "../components/TrustStrip.astro";
 import heroImage from "../assets/img/sum-hero.png";
 import ApiClient from "../lib/api-client/ApiClient";
 import { getUrl, getYearFromDate } from "../lib/helpers";
 import { type ILivingLabPopulated } from "../types";
 import { COLOR_GREEN } from "../styles/constants";
+import { computePlatformCounters } from "../lib/utils/platformCounters";
 
 const api = new ApiClient(Astro.request);
 
@@ -45,7 +43,6 @@ const labs = livingLabsData?.map((lab) => {
     name: lab.name,
     coordinates: { lat: lab.lat, lng: lab.lng },
     radius: lab.radius ?? 50,
-    // status: lab.status,
     totalMeasures: lab.projects?.length,
     kpisCollected: kpiSet.size,
     yearsCollected: Array.from(yearsSet),
@@ -55,65 +52,35 @@ const labs = livingLabsData?.map((lab) => {
   };
 });
 
-const steps = [
-  {
-    id: 1,
-    color: "primary",
-    icon: "👤",
-    title: "Create your account",
-    description:
-      "Sign up and join your existing Living Lab, or create a new one to start contributing.",
-  },
-  {
-    id: 2,
-    color: "secondary",
-    icon: "🏙️",
-    title: "Describe your Living Lab",
-    description:
-      "Provide key details: name, city, and zone or area of intervention for your Living Lab.",
-  },
-  {
-    id: 3,
-    color: "warning",
-    icon: "📊",
-    title: "Collect baseline data",
-    description:
-      "Input your first round of KPI values before implementing mobility measures.",
-  },
-  {
-    id: 4,
-    color: "info",
-    icon: "⚙️",
-    title: "Add your measures",
-    description:
-      "Document the mobility measures and policies implemented in your Living Lab.",
-  },
-  {
-    id: 5,
-    color: "primary",
-    icon: "📈",
-    title: "Collect post-data",
-    description:
-      "Measure KPIs again to assess the impact of measures and share results in the platform.",
-  },
-];
+const platformCounters = computePlatformCounters(livingLabsData ?? []);
+
+const trustCounters = {
+  sumLivingLabs: platformCounters.sumLivingLabs,
+  contributingCities: platformCounters.contributingCities,
+  citiesWithData: platformCounters.citiesWithData,
+  measures: measures?.length ?? 0,
+  kpis: parentKpis?.length ?? 0,
+  lastDataUpdate: platformCounters.lastDataUpdate,
+};
 ---
 
 <Layout role="visitor">
   <CTAHero
     image={heroImage}
-    title="SUM Open Data Platform"
-    subtitle="A first-of-its-kind, Pan-European Open Data Platform tracking the impact of policy measures on New Shared Mobility seamless integration with Public Transport across 9+ Living Labs."
+    title="Understand how shared mobility policies work"
+    subtitle="A Pan-European Open Data Platform tracking the impact of policy measures on New Shared Mobility across 9+ Living Labs."
     primary={{
-      text: "Login",
-      href: getUrl("/lab-admin/login"),
+      text: "Explore data",
+      href: getUrl("/data/kpis"),
     }}
     secondary={{
-      text: "Explore the Living Labs",
-      href: "#labs-section",
+      text: "Get insights",
+      href: "#experience-doors",
     }}
     titleTextColor={COLOR_GREEN}
   />
+
+  <!-- Transport badge decoration row -->
   <div class="text-center">
     <div class="flex justify-center flex-wrap gap-1 md:gap-4 my-6">
       <TransportBadge type="bus" size="lg" color="warning" />
@@ -123,265 +90,68 @@ const steps = [
       <TransportBadge type="e-bus" size="lg" color="light" />
       <TransportBadge type="scooter" size="lg" color="secondary" />
     </div>
-
-    <StatsSection
-      titleHighlight="SEAMLESS"
-      title="Shared Urban Mobility"
-      subtitle="The SUM Open Data Platform collects and delivers data and analytical tools to monitor, evaluate, and optimize the seamless integration of new shared mobility services with public transport across European Living Labs."
-      stats={[
-        { id: 1, name: "Living labs", value: labs?.length.toString() ?? "0" },
-        {
-          id: 2,
-          name: "Measures implemented for Seamless Urban Shared Mobility",
-          value: measures?.length.toString() ?? "0",
-        },
-        {
-          id: 3,
-          name: "Shared Mobility integrated in Living Labs",
-          value: transportModes?.length.toString() ?? "0",
-        },
-        {
-          id: 4,
-          name: "Key Performance Indicators (KPIs) monitored",
-          value: parentKpis?.length.toString() ?? "0",
-        },
-      ]}
-    />
-
-    <!-- <CTASection
-      title="Measures for Seamless Shared Urban Mobility"
-      description="Measures are policy actions, infrastructure changes, service rollouts, or regulatory shifts implemented by cities to impact how people move through urban spaces. Each measure falls under one of two strategic categories: "
-      order="center"
-      linkText="Know more about the measures"
-      linkHref={getUrl("/data/measures")}
-    >
-      <MobilityMeasures
-        pullMeasures={measures?.filter((m) => m.type === "PULL") ?? []}
-        pushMeasures={measures?.filter((m) => m.type === "PUSH") ?? []}
-        hideDescription={true}
-        cols={4}
-        client:load
-      />
-    </CTASection> -->
-
-    <CTASection
-      title="Open Data Platform features"
-      description="Multiple ways to explore SUM Open Data Platform and leverage its data and tools."
-      order="center"
-      className="border-t border-b border-gray-200 py-10 mx-4"
-    >
-      <div class="my-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <CTACard
-          id="interactive-kpi-dashboard"
-          title="Interactive KPI dashboard"
-          description="Filter and explore SUM data (Living Labs and KPIs) with customizable views and charts."
-          cta="Explore KPIs"
-          href={getUrl("/data/kpis")}
-          iconVariant="chart"
-          client:load
-        />
-        <CTACard
-          id="interactive-modalsplit-dashboard"
-          title="Interactive Modal Split dashboard"
-          description="Filter and explore SUM data (Living Labs and Modal Split) with customizable views and charts."
-          cta="Explore Modal Split"
-          href={getUrl("/data/modal-split")}
-          iconVariant="pie"
-          client:load
-        />
-        <CTACard
-          id="measures-dashboard"
-          title="Policy Measures"
-          description="Explore the various push and pull measures implemented across Living Labs to promote New Shared Mobility integration with Public Transport."
-          cta="Explore Measures"
-          href={getUrl("/data/measures")}
-          iconVariant="checklist"
-          client:load
-        />
-        <CTACard
-          id="measures-impact-analysis"
-          title="Impact analysis and variations comparison tool"
-          description="Data-driven tools to estimate and visualise the impact level of push & pull measures on KPIs across Living Labs."
-          cta="Analyze measures"
-          href={getUrl("/tools/impact_analysis")}
-          iconVariant="trending"
-          client:load
-        />
-        <CTACard
-          id="mcda-decision-tool"
-          title="Business activity decision tool"
-          description="A multi-criteria analysis tool to compare and prioritise NSM business activities for your city or project."
-          cta="Use the decision tool"
-          href={getUrl("/tools/mcda_analysis/")}
-          iconVariant="scale"
-          client:load
-        />
-        <CTACard
-          id="resources-and-tools"
-          title="Resources & tools"
-          description="Models, optimisation tools and software to plan integrated New Shared Mobility and Public Transport systems."
-          cta="Discover resources"
-          href={getUrl("/tools/resources")}
-          iconVariant="tools"
-          client:load
-        />
-      </div>
-    </CTASection>
-
-    <LivingLabsMapSection labs={labs} client:only="react" />
-
-    <CTASection
-      title="Monitoring measures around New Shared Mobility"
-      description="From pre-implementation surveys to data driven impact analysis, here's how data flows through the SUM project."
-      order="center"
-    >
-      <ODPTimeline />
-    </CTASection>
   </div>
 
-  <section class="bg-gray-50 py-16 px-4 sm:px-8 lg:px-16">
-    <div class="max-w-5xl mx-auto text-center mb-16">
-      <h2 class="text-3xl font-bold text-gray-900 mb-4">
-        How to Contribute to the SUM Open Data Platform
-      </h2>
-      <p class="text-lg text-gray-600">
-        Join the SUM Open Data Platform and help shape the future of sustainable
-        urban mobility. Living Labs contribute real-world data to evaluate and
-        improve New Shared Mobility measures across Europe.
-      </p>
-    </div>
-
-    <div class="relative max-w-5xl mx-auto mt-40">
-      {/* Vertical line: left on mobile, centered on md+ */}
-      <div
-        class="absolute left-4 md:left-1/2 transform md:-translate-x-1/2 w-1 bg-primary h-full rounded"
-      >
+  <!-- Experience Doors -->
+  <section id="experience-doors" class="py-12 px-4 sm:px-8 lg:px-16">
+    <div class="max-w-5xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <ExperienceDoor
+          title="Data & Scientific Tools"
+          audience="For researchers and analysts"
+          entries={[
+            { label: "KPI dashboard", href: getUrl("/data/kpis") },
+            {
+              label: "Impact analysis",
+              href: getUrl("/tools/impact_analysis"),
+            },
+            {
+              label: "Multi-criteria decision tool",
+              href: getUrl("/tools/mcda_analysis/"),
+            },
+          ]}
+          ctaLabel="Explore"
+          ctaHref={getUrl("/data/kpis")}
+          variant="data"
+        />
+        <ExperienceDoor
+          title="Insights"
+          audience="For policy makers and practitioners"
+          entries={[
+            { label: "What works (goals)", href: "/insights/goals" },
+            { label: "City profiles", href: "/insights/cities" },
+            { label: "Plan for my city", href: "/insights/plan" },
+          ]}
+          ctaLabel="Discover"
+          ctaHref="/insights"
+          variant="insights"
+        />
       </div>
-
-      {
-        steps.map((step, index) => (
-          <div
-            key={step.id}
-            class={`mb-16 flex items-start w-full md:justify-between md:items-center  md:-mt-28 ${
-              index % 2 === 0 ? "md:flex-row-reverse" : ""
-            }`}
-          >
-            {/* Empty space on one side only for md+ (keeps centered layout on larger screens) */}
-            <div class="hidden md:block md:w-5/12" />
-
-            {/* Step marker + connector: circle and line adjacent (no extra spacing) */}
-            <div
-              class={`z-20 flex items-center ml-2 ${
-                index % 2 === 0
-                  ? "flex-row md:-ml-18"
-                  : "md:flex-row-reverse md:-mr-18"
-              }`}
-            >
-              <div
-                class={`flex items-center justify-center w-5 h-5 rounded-full bg-${step.color} border-2 border-${step.color} text-xs font-extralight text-light shadow`}
-              >
-                {step.id}
-              </div>
-
-              {/* Connector between marker and card (visible on md+) */}
-              <div class="hidden md:block md:w-14">
-                <div class="w-full h-0.5 bg-primary rounded" />
-              </div>
-            </div>
-
-            {/* Card: full width on mobile to the right of the line, constrained on md+ */}
-            <div
-              class={`relative w-full md:w-5/12 bg-white rounded-xl shadow-lg p-6  border-${step.color} ml-6 md:ml-0  ${
-                index % 2 === 0 ? "border-r-8" : "border-l-8"
-              }`}
-            >
-              <div class="flex items-center mb-2">
-                <span class="text-2xl mr-3">{step.icon}</span>
-                <h5 class="text-xl font-semibold text-gray-900">
-                  {step.title}
-                </h5>
-              </div>
-              <p class="text-gray-600">{step.description}</p>
-            </div>
-          </div>
-        ))
-      }
-    </div>
-
-    {/* CTA */}
-    <div
-      class="text-center mt-16 flex flex-col md:flex-row gap-4 mx-auto justify-center"
-    >
-      <RButton
-        href="/lab-admin/login"
-        variant="primary"
-        className="bg-warning text-light"
-      >
-        Login to your account →
-      </RButton>
-      <RButton href="/lab-admin/signup" variant="primary">
-        Join the Platform →
-      </RButton>
     </div>
   </section>
 
-  <!-- TODO: enable when features become available, only one section for tools -->
-  <!-- <CTASection
-    title="Push and pull measures impact assessment tool"
-    description="Discover how push and pull measures impacted Living Labs Key Performance Indicators (KPI). The impact assessment tool provides : "
-    imageSrc={impactImage.src}
-    imageAlt="Impactfull measures example"
-    benefits={[
-      "Estimation of what measures worked and where ",
-      "Ranking of each measures",
-      "Estimation of how measures contributed to KPI changes across Living Labs",
-      "Compare Living Labs KPI variations",
-    ]}
-    linkText="Discover the impact assessment tool"
-    linkHref="#"
-    order="right"
-  />
-  <CTASection
-    title="Decision tool for NSM measures"
-    description="Compare and rank sustainable mobility strategies across multiple cities and stakeholders."
-    imageSrc={mcdaImage.src}
-    imageAlt="Recommended business activities"
-    benefits={[
-      "Analyze the impact of measures from different perspectives",
-      "Define a strategy for your city",
-      "Get recommendations of push and pull measures aligned with your goals",
-      "Multi-Criteria Decision Analysis (MCDA) tool",
-      "Rank and compare mobility strategies",
-      "Customizable criteria and weights",
-    ]}
-    linkText="Try the decision tool"
-    linkHref="#"
-  /> -->
+  <!-- Trust Strip -->
+  <TrustStrip counters={trustCounters} />
 
-  <!-- Section to display research subjects -->
+  <!-- Map Teaser -->
+  <LivingLabsMapSection labs={labs} teaser={true} client:only="react" />
 
-  <!-- FAQ intro section -->
-  <section
-    class="bg-white py-12 px-4 sm:px-8 lg:px-16 mt-12 border-t border-gray-100"
-  >
-    <div class="max-w-4xl mx-auto text-center">
-      <h2 class="text-2xl font-bold text-gray-900 mb-3">
-        Have questions? Visit our FAQ
+  <!-- Add Your City CTA -->
+  <section class="bg-primary/5 py-12 px-4 sm:px-8 lg:px-16 border-t border-primary/10">
+    <div class="max-w-3xl mx-auto text-center">
+      <h2 class="text-2xl font-bold text-dark mb-3">
+        Want to add your city to the platform?
       </h2>
       <p class="text-gray-600 mb-6">
-        Find concise answers about data access, contributing Living Lab results,
-        measures, KPIs, and technical integration.
+        Join the SUM Open Data Platform and help shape the future of sustainable
+        urban mobility across Europe.
       </p>
-
-      <div class="flex flex-col md:flex-row items-center gap-4 justify-center">
-        <RButton
-          href={getUrl("/faq")}
-          variant="primary"
-          className="bg-primary text-light"
-        >
-          Go to the FAQ →
-        </RButton>
-      </div>
+      <a
+        href={getUrl("/join")}
+        class="inline-block rounded-lg px-6 py-3 bg-primary text-white font-semibold hover:bg-primary/90 transition-colors"
+      >
+        Join the project →
+      </a>
     </div>
   </section>
 </Layout>

@@ -19,9 +19,10 @@ type LivingLab = {
 
 type Props = {
   labs: LivingLab[];
+  teaser?: boolean;
 };
 
-export function LivingLabsMapSection({ labs }: Props) {
+export function LivingLabsMapSection({ labs, teaser = false }: Props) {
   const [selectedLab, setSelectedLab] = useState<LivingLab | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>([50, 10]);
   const [mapZoom, setMapZoom] = useState<number>(4);
@@ -62,18 +63,27 @@ export function LivingLabsMapSection({ labs }: Props) {
     <section id="labs-section" className="py-12 px-4 sm:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Section Title */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-dark mb-2">
-            Living Labs across Europe
-          </h2>
-          <p className="text-dark text-lg">
-            Explore where shared mobility innovation is happening with the SUM
-            project. Click on a city or map marker to view details.
-          </p>
-        </div>
+        {!teaser && (
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold text-dark mb-2">
+              Living Labs across Europe
+            </h2>
+            <p className="text-dark text-lg">
+              Explore where shared mobility innovation is happening with the SUM
+              project. Click on a city or map marker to view details.
+            </p>
+          </div>
+        )}
+        {teaser && (
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-dark mb-1">
+              Living Labs across Europe
+            </h2>
+          </div>
+        )}
 
         {/* Map Container - Full Width */}
-        <div className="relative h-[600px] rounded shadow overflow-hidden">
+        <div className={`relative rounded shadow overflow-hidden ${teaser ? "h-[400px]" : "h-[600px]"}`}>
           <MapViewer
             key={mapKey}
             markers={markers}
@@ -90,8 +100,8 @@ export function LivingLabsMapSection({ labs }: Props) {
             }}
           />
 
-          {/* Toggle Button - Shows when list is closed */}
-          {!isListOpen && (
+          {/* Toggle Button - Shows when list is closed (hidden in teaser mode) */}
+          {!teaser && !isListOpen && (
             <button
               onClick={() => setIsListOpen(true)}
               className="absolute top-4 right-4 z-10 bg-white rounded-lg shadow-lg p-3 hover:bg-gray-50 transition-colors flex items-center gap-2"
@@ -104,8 +114,8 @@ export function LivingLabsMapSection({ labs }: Props) {
             </button>
           )}
 
-          {/* City List Overlay */}
-          {isListOpen && (
+          {/* City List Overlay (hidden in teaser mode) */}
+          {!teaser && isListOpen && (
             <div className="absolute top-4 right-4 z-10 max-h-[calc(100%-2rem)] bg-white/95 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden">
               {/* List Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200">
@@ -203,6 +213,18 @@ export function LivingLabsMapSection({ labs }: Props) {
             </div>
           )}
         </div>
+
+        {/* View all cities link — teaser mode only */}
+        {teaser && (
+          <div className="mt-4 text-right">
+            <a
+              href="/living-labs"
+              className="text-primary font-medium hover:underline"
+            >
+              View all cities →
+            </a>
+          </div>
+        )}
       </div>
     </section>
   );

@@ -1,0 +1,59 @@
+---
+interface Entry {
+  label: string;
+  href: string;
+}
+
+interface Props {
+  title: string;
+  audience: string;
+  entries: Entry[];
+  ctaLabel: string;
+  ctaHref: string;
+  variant: "data" | "insights";
+}
+
+const { title, audience, entries, ctaLabel, ctaHref, variant } = Astro.props;
+
+const accentClass =
+  variant === "data"
+    ? "border-primary bg-primary/5"
+    : "border-secondary bg-secondary/5";
+
+const ctaClass =
+  variant === "data"
+    ? "bg-primary text-white hover:bg-primary/90"
+    : "bg-secondary text-white hover:bg-secondary/90";
+---
+
+<div
+  class={`rounded-xl border-2 p-6 flex flex-col gap-4 shadow-sm h-full ${accentClass}`}
+>
+  <div>
+    <h2 class="text-2xl font-bold text-dark mb-1">{title}</h2>
+    <p class="text-gray-600 text-sm">{audience}</p>
+  </div>
+
+  <ul class="flex flex-col gap-2 flex-1">
+    {
+      entries.map((entry) => (
+        <li>
+          <a
+            href={entry.href}
+            class="text-primary hover:underline font-medium flex items-center gap-1"
+          >
+            <span>→</span>
+            <span>{entry.label}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <a
+    href={ctaHref}
+    class={`inline-block rounded-lg px-6 py-3 text-center font-semibold transition-colors ${ctaClass}`}
+  >
+    {ctaLabel}
+  </a>
+</div>
