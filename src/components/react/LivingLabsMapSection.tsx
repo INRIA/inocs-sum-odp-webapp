@@ -2,15 +2,19 @@ import React, { useEffect, useState } from "react";
 import { RButton } from "./ui";
 import { getUrl } from "../../lib/helpers";
 import { MapViewer, type MarkerData } from "./MapViewer";
+import { MapLegend } from "./MapLegend";
 import { XMarkIcon, MapIcon } from "@heroicons/react/24/outline";
 import { displayLabType } from "../../lib/labels";
+import type { CityType, CityDataStatus } from "../../lib/utils/cityStatus";
+import { COLOR_GREEN } from "../../styles/constants";
 
 type LivingLab = {
   id: string;
   name: string;
   coordinates: { lat: number; lng: number };
   radius: number;
-  status: "complete" | "incomplete" | "in-progress";
+  cityType: CityType;
+  dataStatus: CityDataStatus;
   totalMeasures: number;
   kpisCollected: number;
   yearsCollected: number[];
@@ -28,6 +32,7 @@ export function LivingLabsMapSection({ labs }: Props) {
   const [mapZoom, setMapZoom] = useState<number>(4);
   const [isListOpen, setIsListOpen] = useState(false);
   const mapKey = mapCenter ? `${mapCenter[0]},${mapCenter[1]}` : "no-center";
+
   useEffect(() => {
     if (
       selectedLab &&
@@ -39,15 +44,15 @@ export function LivingLabsMapSection({ labs }: Props) {
     }
   }, [selectedLab]);
 
-  const getStatusColor = (status: LivingLab["status"]) => {
-    switch (status) {
-      case "complete":
-        return "bg-success";
-      case "incomplete":
-        return "bg-danger";
-      case "in-progress":
-        return "bg-warning";
-    }
+  const getMarkerColor = (lab: LivingLab): string => {
+    // Cities with data get a green-ish secondary color; pending get gray
+    return lab.dataStatus === "has_data" ? COLOR_GREEN : "#9ca3af";
+  };
+
+  const getStatusBadgeClass = (lab: LivingLab): string => {
+    return lab.dataStatus === "has_data"
+      ? "bg-secondary/10 text-secondary"
+      : "bg-gray-100 text-gray-500";
   };
 
   // convert labs to MarkerData for MapViewer
@@ -56,6 +61,7 @@ export function LivingLabsMapSection({ labs }: Props) {
     name: lab.name,
     coordinates: lab.coordinates,
     radius: lab.radius * 1000, // convert km to meters
+    color: getMarkerColor(lab),
     meta: { lab },
   }));
 
@@ -65,7 +71,7 @@ export function LivingLabsMapSection({ labs }: Props) {
         {/* Section Title */}
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-dark mb-2">
-            Living Labs across Europe
+            Cities across Europe
           </h2>
           <p className="text-dark text-lg">
             Explore where shared mobility innovation is happening with the SUM
@@ -91,16 +97,21 @@ export function LivingLabsMapSection({ labs }: Props) {
             }}
           />
 
+          {/* Map Legend — always visible at bottom-left */}
+          <div className="absolute bottom-4 left-4 z-10">
+            <MapLegend />
+          </div>
+
           {/* Toggle Button - Shows when list is closed */}
           {!isListOpen && (
             <button
               onClick={() => setIsListOpen(true)}
               className="absolute top-4 right-4 z-10 bg-white rounded-lg shadow-lg p-3 hover:bg-gray-50 transition-colors flex items-center gap-2"
-              aria-label="Show living labs list"
+              aria-label="Show cities list"
             >
               <MapIcon className="h-5 w-5 text-primary" />
               <span className="text-sm font-medium text-primary">
-                Show {labs.length + " "} Living Labs
+                Show {labs.length + " "} cities
               </span>
             </button>
           )}
@@ -111,12 +122,12 @@ export function LivingLabsMapSection({ labs }: Props) {
               {/* List Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200">
                 <h3 className="font-semibold text-dark">
-                  {labs.length + " "} Living Labs
+                  {labs.length + " "} cities
                 </h3>
                 <button
                   onClick={() => setIsListOpen(false)}
                   className="p-1 rounded hover:bg-gray-100 transition-colors"
-                  aria-label="Close living labs list"
+                  aria-label="Close cities list"
                 >
                   <XMarkIcon className="h-5 w-5 text-gray-500" />
                 </button>
@@ -129,15 +140,21 @@ export function LivingLabsMapSection({ labs }: Props) {
                     <div
                       key={lab.id}
                       onClick={() => setSelectedLab(lab)}
-                      className={`cursor-pointer p-1 rounded shadow-sm bg-white hover:bg-primary-light transition ${getStatusColor(
-                        lab.status,
-                      )}`}
+                      className="cursor-pointer p-2 rounded shadow-sm bg-white hover:bg-primary-light transition"
                     >
                       <h6 className="font-semibold text-primary">{lab.name}</h6>
-                      {/* <p className="text-sm text-gray-600">
-                        {lab.totalMeasures} Measures • {lab.transportModes} NSM
-                        Modes
-                      </p> */}
+                      <div className="flex gap-2 mt-1">
+                        <span className="text-xs text-gray-500">
+                          {displayLabType(Number(lab.id))}
+                        </span>
+                        <span
+                          className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${getStatusBadgeClass(lab)}`}
+                        >
+                          {lab.dataStatus === "has_data"
+                            ? "Data available"
+                            : "Data pending"}
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -158,6 +175,16 @@ export function LivingLabsMapSection({ labs }: Props) {
                 >
                   <XMarkIcon className="h-5 w-5 text-gray-500" />
                 </button>
+              </div>
+
+              <div className="mb-3 flex gap-2 flex-wrap">
+                <span
+                  className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusBadgeClass(selectedLab)}`}
+                >
+                  {selectedLab.dataStatus === "has_data"
+                    ? "Data available"
+                    : "Data pending"}
+                </span>
               </div>
 
               <div className="grid grid-cols-2 gap-1 text-sm">

@@ -3,6 +3,8 @@ import { KpiVariationCard } from "./KpiVariationCard";
 import { KpiVariationsTable } from "./KpiVariationsTable";
 import type { ILivingLabVariation, IKpiVariation } from "../../../types";
 import { InfoAlert } from "../ui";
+import { EvidenceBadge } from "./EvidenceBadge";
+import type { EvidenceBadgeConfig } from "../../../config/evidenceStrength";
 
 interface KpiGroupVariationCardProps {
   livingLabVariations: ILivingLabVariation[];
@@ -10,6 +12,8 @@ interface KpiGroupVariationCardProps {
   globalTotalVariation?: number | null;
   globalTotalVariationPercentage?: string;
   globalKpiVariations?: IKpiVariation[];
+  badge?: EvidenceBadgeConfig;
+  cityCount?: number;
 }
 
 export const KpiGroupVariationDataTable: React.FC<
@@ -20,6 +24,8 @@ export const KpiGroupVariationDataTable: React.FC<
   globalTotalVariation,
   globalTotalVariationPercentage,
   globalKpiVariations,
+  badge,
+  cityCount,
 }) => {
   const [selectedLabIndex, setSelectedLabIndex] = useState<number | null>(null);
 
@@ -44,7 +50,7 @@ export const KpiGroupVariationDataTable: React.FC<
 
   const displayData = isGlobalView
     ? {
-        name: "All Living Labs",
+        name: "All cities",
         totalVariation: globalTotalVariation ?? null,
         totalVariationPercentage: globalTotalVariationPercentage ?? "N/A",
         kpis: globalKpiVariations ?? [],
@@ -65,9 +71,12 @@ export const KpiGroupVariationDataTable: React.FC<
       <div className="border-b border-gray-200 p-6">
         <div className="flex flex-col items-start justify-between gap-4">
           <h4>{groupName}</h4>
-          <h5>KPIs variations - Data Overview</h5>
+          <h5>KPI Variations - Data Overview</h5>
+          {badge && cityCount !== undefined && (
+            <EvidenceBadge badge={badge} cityCount={cityCount} />
+          )}
           <p>
-            Observe how key indicators changed across each Living Lab for{" "}
+            Observe how key indicators changed across each city for{" "}
             {displayData.kpis?.length ?? 0} metrics collected.
           </p>
         </div>
@@ -85,7 +94,7 @@ export const KpiGroupVariationDataTable: React.FC<
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
-                All Living Labs
+                All cities
               </button>
             )}
             {/* Individual lab buttons */}
@@ -145,8 +154,8 @@ export const KpiGroupVariationDataTable: React.FC<
                     displayData.kpis.length
                   } metrics collected across ${
                     displayData.labCount
-                  } living lab${displayData.labCount > 1 ? "s" : ""}`
-                : `Average percentage change across all ${displayData.kpis.length} metrics collected in this Living Lab`
+                  } cit${displayData.labCount > 1 ? "ies" : "y"}`
+                : `Average percentage change across all ${displayData.kpis.length} metrics collected in this city`
             }
             size="medium"
             ratioValue={displayData.totalVariation}

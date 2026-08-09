@@ -6,15 +6,22 @@ import {
   KpiGroupVariationCharts,
   KpiGroupVariationMap,
 } from "./";
+import {
+  computeEvidenceRatio,
+  getEvidenceBadge,
+  type EvidenceBadgeConfig,
+} from "../../../config/evidenceStrength";
 
 interface KpiVariationsProps {
   selectedGroup: IKpiGroup | null;
   variationsData: IKpiVariationData | null;
+  totalPlatformLabs?: number;
 }
 
 export const KpiVariations: React.FC<KpiVariationsProps> = ({
   selectedGroup,
   variationsData,
+  totalPlatformLabs,
 }) => {
   const [viewMode, setViewMode] = useState<"data" | "chart" | "map">("data");
 
@@ -28,7 +35,7 @@ export const KpiVariations: React.FC<KpiVariationsProps> = ({
       //   " KPIs variations among living labs"
       // }
       description={
-        "Only Living Labs with enough data collected are included, for KPIs in the scope of " +
+        "Only cities with enough data collected are included, for KPIs in the scope of " +
         selectedGroup?.name +
         "."
       }
@@ -60,6 +67,19 @@ export const KpiVariations: React.FC<KpiVariationsProps> = ({
       </div>
     );
   }
+
+  // Compute evidence badge for this KPI group
+  const labsWithData = variationsData.livingLabVariations.length;
+  const kpiObservations = variationsData.allKpiVariations.length;
+  const totalLabs = totalPlatformLabs ?? Math.max(labsWithData, 1);
+  const totalMeasures = Math.max(kpiObservations, 1);
+  const evidenceRatio = computeEvidenceRatio(
+    labsWithData,
+    kpiObservations,
+    totalLabs,
+    totalMeasures,
+  );
+  const badge: EvidenceBadgeConfig = getEvidenceBadge(evidenceRatio);
 
   return (
     <div>
@@ -102,7 +122,7 @@ export const KpiVariations: React.FC<KpiVariationsProps> = ({
             Map view
           </button>
         </div>
-        {/* Living Labs Variations with Global Data */}
+        {/* Cities Variations with Global Data */}
         <div>
           {viewMode === "data" ? (
             <KpiGroupVariationDataTable
@@ -113,6 +133,8 @@ export const KpiVariations: React.FC<KpiVariationsProps> = ({
                 variationsData.totalVariationPercentage
               }
               globalKpiVariations={variationsData.allKpiVariations}
+              badge={badge}
+              cityCount={labsWithData}
             />
           ) : viewMode === "chart" ? (
             <KpiGroupVariationCharts
