@@ -1,0 +1,189 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { MethodologyAccordion } from "../../components/AnalysisPageSections";
+---
+
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Methods", href: "/methods/evaluation-framework" },
+    { label: "Limitations" },
+  ]}
+>
+  <div class="mx-auto px-4 sm:px-8 py-12 max-w-4xl">
+    <div class="mb-10">
+      <h1 class="text-3xl font-bold text-dark mb-3">Limitations</h1>
+      <p class="text-gray-600 text-lg">
+        Important caveats to keep in mind when interpreting results from the
+        impact analysis and MCDA tools on the SUM platform.
+      </p>
+    </div>
+
+    <!-- Impact analysis limitations -->
+    <div class="mb-8">
+      <h2 class="text-xl font-bold text-dark mb-4 border-b border-gray-200 pb-2">
+        Impact Analysis Limitations
+      </h2>
+    </div>
+
+    <MethodologyAccordion
+      title="Interpreting regression coefficients"
+      subtitle="What the model can and cannot tell you"
+      content=""
+      defaultOpen={true}
+    >
+      <div class="space-y-4 text-sm text-gray-700 leading-relaxed">
+        <p>Results should be interpreted with the following in mind:</p>
+        <ul class="list-disc list-inside space-y-3 ml-4">
+          <li>
+            If a measure was implemented uniformly across all Living Labs, its
+            individual effect may be harder to isolate, and results should be
+            read with caution.
+          </li>
+          <li>
+            The <strong>mean squared error (MSE)</strong> of the model provides
+            an indication of estimation accuracy. A lower MSE means the model
+            fits the observed data more closely, but even a low MSE does not
+            imply causal certainty.
+          </li>
+          <li>
+            The regression model estimates <strong>association</strong>, not
+            causation. Unobserved factors (e.g. external economic conditions,
+            parallel policy changes) may influence KPI outcomes independently of
+            the measures recorded.
+          </li>
+          <li>
+            Results are most reliable when a diverse set of Living Labs
+            implements different combinations of measures, enabling the model to
+            differentiate individual contributions.
+          </li>
+        </ul>
+      </div>
+    </MethodologyAccordion>
+
+    <MethodologyAccordion
+      title="Data constraints"
+      subtitle="How data volume affects result reliability"
+      content=""
+    >
+      <div class="space-y-4 text-sm text-gray-700 leading-relaxed">
+        <ul class="list-disc list-inside space-y-3 ml-4">
+          <li>
+            The number of Living Labs (observations) is small relative to the
+            number of measures (predictors). Ridge regularization mitigates
+            overfitting, but estimates remain less precise than in
+            large-scale observational studies.
+          </li>
+          <li>
+            KPIs with few data points (e.g. local KPIs measured by only 2–3
+            labs) produce wider confidence intervals. Multivariate analysis
+            groups KPIs by type to partially address this.
+          </li>
+          <li>
+            Missing before/after data pairs reduce the effective sample. Labs
+            with only one measurement time point are excluded from regression
+            but appear in trend charts.
+          </li>
+        </ul>
+      </div>
+    </MethodologyAccordion>
+
+    <!-- MCDA limitations -->
+    <div class="mb-8 mt-12">
+      <h2 class="text-xl font-bold text-dark mb-4 border-b border-gray-200 pb-2">
+        MCDA Limitations
+      </h2>
+    </div>
+
+    <MethodologyAccordion
+      title="Interpreting PROMETHEE rankings"
+      subtitle="What rankings do and do not express"
+      content=""
+      defaultOpen={true}
+    >
+      <div class="space-y-4 text-sm text-gray-700 leading-relaxed">
+        <ul class="list-disc list-inside space-y-3 ml-4">
+          <li>
+            Rankings reflect the specific set of criteria and weights used in
+            each analysis. Changing perspective weights can change rankings
+            significantly — this is expected behavior, not a flaw.
+          </li>
+          <li>
+            A high PROMETHEE rank does not guarantee a measure will be effective
+            in a specific city. Rankings reflect relative performance across the
+            alternatives in the analysis set, not absolute effectiveness.
+          </li>
+          <li>
+            Alternatives not included in the analysis set do not appear in the
+            ranking, even if they might outperform those included.
+          </li>
+        </ul>
+      </div>
+    </MethodologyAccordion>
+
+    <MethodologyAccordion
+      title="GAIA plane interpretation caveats"
+      subtitle="When to rely more on flow-based results"
+      content=""
+    >
+      <div class="space-y-4 text-sm text-gray-700 leading-relaxed">
+        <ul class="list-disc list-inside space-y-3 ml-4">
+          <li>
+            <strong>GAIA quality below 60%</strong> indicates the 2D projection
+            loses significant decision information. In this case, rely on the
+            PROMETHEE net flow ranking rather than visual GAIA positions.
+          </li>
+          <li>
+            The decision stick represents the overall PROMETHEE direction, not
+            an absolute recommendation. It summarises the model's view given
+            the current weights.
+          </li>
+          <li>
+            Criterion vectors of similar length dominate the GAIA plane equally.
+            If one criterion has a very long vector, small changes in its weight
+            may strongly alter the ranking.
+          </li>
+        </ul>
+      </div>
+    </MethodologyAccordion>
+
+    <!-- General limitations -->
+    <div class="mb-8 mt-12">
+      <h2 class="text-xl font-bold text-dark mb-4 border-b border-gray-200 pb-2">
+        General Data Limitations
+      </h2>
+    </div>
+
+    <MethodologyAccordion
+      title="Platform-wide data caveats"
+      subtitle="Limitations that apply across all tools"
+      content=""
+      defaultOpen={true}
+    >
+      <div class="space-y-4 text-sm text-gray-700 leading-relaxed">
+        <ul class="list-disc list-inside space-y-3 ml-4">
+          <li>
+            The platform covers Living Labs within the SUM project. Results may
+            not generalise to cities or contexts outside the project scope.
+          </li>
+          <li>
+            Data is self-reported by Living Lab administrators and subject to
+            the quality control process described on the{" "}
+            <a
+              href="/methods/data-quality"
+              class="text-primary hover:underline font-medium"
+            >
+              data quality page
+            </a>. Errors in submission affect downstream analysis.
+          </li>
+          <li>
+            The platform reflects data submitted at a point in time. Ongoing
+            measures may show incomplete before/after pairs until post-intervention
+            data is submitted.
+          </li>
+        </ul>
+      </div>
+    </MethodologyAccordion>
+  </div>
+</Layout>

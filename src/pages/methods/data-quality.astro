@@ -1,0 +1,142 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { MethodologyAccordion } from "../../components/AnalysisPageSections";
+---
+
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Methods", href: "/methods/evaluation-framework" },
+    { label: "Data quality & curation" },
+  ]}
+>
+  <div class="mx-auto px-4 sm:px-8 py-12 max-w-4xl">
+    <div class="mb-10">
+      <h1 class="text-3xl font-bold text-dark mb-3">
+        Data Quality & Curation
+      </h1>
+      <p class="text-gray-600 text-lg">
+        How data submitted by Living Labs is validated, curated, and prepared
+        for display in the SUM Open Data Platform.
+      </p>
+    </div>
+
+    <MethodologyAccordion
+      title="Validation workflow"
+      subtitle="Steps from submission to publication"
+      content=""
+      defaultOpen={true}
+    >
+      <div class="space-y-4 text-sm text-gray-700 leading-relaxed">
+        <p>
+          Submitted KPI data passes through the following validation stages
+          before appearing in public dashboards:
+        </p>
+        <ol class="list-decimal list-inside space-y-3 ml-4">
+          <li>
+            <strong>Format check</strong> — Values must be numerical and within
+            plausible ranges for each KPI definition. Records with missing
+            required fields are flagged for review.
+          </li>
+          <li>
+            <strong>Temporal consistency</strong> — Before and after dates are
+            checked for logical ordering. Results submitted without a
+            corresponding baseline are noted as incomplete.
+          </li>
+          <li>
+            <strong>Cross-lab comparison</strong> — Outlier detection flags
+            values that deviate significantly from the distribution across all
+            Living Labs, triggering manual review.
+          </li>
+          <li>
+            <strong>Curator review</strong> — A designated data curator reviews
+            flagged records and either approves, requests correction, or
+            excludes them from analysis.
+          </li>
+          <li>
+            <strong>Publication</strong> — Approved data is published to the
+            platform and becomes available in KPI dashboards, impact analysis,
+            and MCDA tools.
+          </li>
+        </ol>
+      </div>
+    </MethodologyAccordion>
+
+    <MethodologyAccordion
+      title="Curator role"
+      subtitle="Who is responsible for data quality"
+      content=""
+    >
+      <div class="space-y-3 text-sm text-gray-700 leading-relaxed">
+        <div
+          class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-yellow-800"
+        >
+          <strong>Placeholder</strong> — The designated curator role is to be
+          confirmed by the SUM consortium. This section will be updated once the
+          responsible party and contact details are confirmed.
+        </div>
+        <p>
+          The data curator is responsible for reviewing flagged submissions,
+          maintaining consistency across Living Lab data, and coordinating with
+          lab administrators to resolve data quality issues.
+        </p>
+      </div>
+    </MethodologyAccordion>
+
+    <MethodologyAccordion
+      title="Review cadence"
+      subtitle="How often data is reviewed and updated"
+      content=""
+    >
+      <div class="space-y-3 text-sm text-gray-700 leading-relaxed">
+        <div
+          class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-yellow-800"
+        >
+          <strong>Placeholder</strong> — The review cadence (quarterly / on
+          data submission / on request) is to be confirmed by the consortium.
+        </div>
+        <p>
+          Once confirmed, this section will describe the schedule for periodic
+          data review, including how Living Labs are notified of review windows
+          and how corrections are incorporated.
+        </p>
+      </div>
+    </MethodologyAccordion>
+
+    <MethodologyAccordion
+      title="Display rules"
+      subtitle="How incomplete or invalid data is handled in dashboards"
+      content=""
+    >
+      <div class="space-y-4 text-sm text-gray-700 leading-relaxed">
+        <p>
+          The platform applies the following rules when displaying data in
+          dashboards and analysis tools:
+        </p>
+        <ul class="list-disc list-inside space-y-2 ml-4">
+          <li>
+            <strong>Missing KPI values</strong> — Labs without data for a given
+            KPI are excluded from that KPI's charts. The chart caption notes the
+            number of labs with available data.
+          </li>
+          <li>
+            <strong>Incomplete before/after pairs</strong> — Impact analysis
+            requires both baseline and post-intervention data. Labs with only
+            one measurement are excluded from regression calculations but may
+            appear in trend charts.
+          </li>
+          <li>
+            <strong>Empty measure records</strong> — Labs with no policy
+            measures recorded are excluded from MCDA and impact analysis to
+            avoid skewing results.
+          </li>
+          <li>
+            <strong>Invalid coordinates</strong> — Labs without valid geographic
+            coordinates are excluded from the map view.
+          </li>
+        </ul>
+      </div>
+    </MethodologyAccordion>
+  </div>
+</Layout>

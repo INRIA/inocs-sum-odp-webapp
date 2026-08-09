@@ -1,0 +1,112 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { MethodologyAccordion } from "../../components/AnalysisPageSections";
+---
+
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Methods", href: "/methods/evaluation-framework" },
+    { label: "How the data is collected" },
+  ]}
+>
+  <div class="mx-auto px-4 sm:px-8 py-12 max-w-4xl">
+    <div class="mb-10">
+      <h1 class="text-3xl font-bold text-dark mb-3">
+        How the Data is Collected
+      </h1>
+      <p class="text-gray-600 text-lg">
+        Data in the SUM Open Data Platform comes from Living Labs across Europe
+        that implement New Shared Mobility measures and collect KPI evidence
+        before and after intervention.
+      </p>
+    </div>
+
+    <MethodologyAccordion
+      title="The before/after measurement design"
+      subtitle="How Living Labs collect KPI evidence"
+      content=""
+      defaultOpen={true}
+    >
+      <div class="space-y-4 text-sm text-gray-700 leading-relaxed">
+        <p>
+          Each Living Lab measures KPI values at two points in time:
+        </p>
+        <ul class="list-disc list-inside space-y-2 ml-4">
+          <li>
+            <strong>Baseline (before)</strong> — KPIs measured before mobility
+            measures are implemented
+          </li>
+          <li>
+            <strong>Post-intervention (after)</strong> — KPIs measured after
+            measure implementation to quantify impact
+          </li>
+        </ul>
+        <p>
+          This before/after design enables direct comparison of mobility
+          outcomes and feeds into the impact analysis tools on the platform.
+        </p>
+      </div>
+    </MethodologyAccordion>
+
+    <MethodologyAccordion
+      title="What data is collected"
+      subtitle="KPIs, measures, and transport modes"
+      content=""
+    >
+      <div class="space-y-4 text-sm text-gray-700 leading-relaxed">
+        <p>Each Living Lab submits:</p>
+        <ul class="list-disc list-inside space-y-2 ml-4">
+          <li>
+            <strong>KPI results</strong> — numerical values for the KPIs in the
+            SIEF framework, with dates and result types
+          </li>
+          <li>
+            <strong>Policy measures</strong> — which push and pull measures were
+            implemented (binary: yes/no per measure)
+          </li>
+          <li>
+            <strong>New Shared Mobility modes</strong> — which NSM services
+            (bike sharing, e-scooters, car sharing, etc.) are active in the lab
+          </li>
+        </ul>
+      </div>
+    </MethodologyAccordion>
+
+    <MethodologyAccordion
+      title="Validation and quality checks"
+      subtitle="How data is reviewed before publication"
+      content=""
+    >
+      <div class="text-sm text-gray-700 leading-relaxed space-y-3">
+        <p>
+          Submitted data goes through a validation workflow before appearing in
+          the public dashboards. See the{" "}
+          <a
+            href="/methods/data-quality"
+            class="text-primary hover:underline font-medium"
+          >
+            Data quality & curation page
+          </a>{" "}
+          for details on validation rules and curation responsibilities.
+        </p>
+      </div>
+    </MethodologyAccordion>
+
+    <div class="mt-8 p-6 bg-primary/5 rounded-xl border border-primary/20">
+      <h3 class="font-semibold text-dark mb-2">Full data collection guide</h3>
+      <p class="text-sm text-gray-700 mb-4">
+        The detailed step-by-step data collection process, including templates,
+        timelines, and submission instructions, is available on the data
+        collection plan page.
+      </p>
+      <a
+        href="/data/collection-plan"
+        class="inline-block text-sm font-medium text-primary hover:underline"
+      >
+        View the data collection plan →
+      </a>
+    </div>
+  </div>
+</Layout>

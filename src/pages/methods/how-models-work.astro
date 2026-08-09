@@ -1,0 +1,233 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { MethodologyAccordion } from "../../components/AnalysisPageSections";
+---
+
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Methods", href: "/methods/evaluation-framework" },
+    { label: "How the models work" },
+  ]}
+>
+  <div class="mx-auto px-4 sm:px-8 py-12 max-w-4xl">
+    <div class="mb-10">
+      <h1 class="text-3xl font-bold text-dark mb-3">How the Models Work</h1>
+      <p class="text-gray-600 text-lg">
+        The SUM platform uses two analytical methods: Ridge regression for
+        impact analysis and PROMETHEE-GAIA for multi-criteria decision analysis.
+        This page explains how each model works and how to interpret its
+        outputs.
+      </p>
+    </div>
+
+    <!-- Ridge Regression section -->
+    <div class="mb-8">
+      <h2 class="text-xl font-bold text-dark mb-4 border-b border-gray-200 pb-2">
+        Impact Analysis — Ridge Regression
+      </h2>
+    </div>
+
+    <MethodologyAccordion
+      title="Understanding the regression approach"
+      subtitle="How policy measure contributions are estimated"
+      content=""
+      defaultOpen={true}
+    >
+      <div class="space-y-4 text-sm text-gray-700 leading-relaxed">
+        <p>
+          The impact analysis assesses the effect of push and pull measures —
+          combinations of restrictions on private car use (push) and incentives
+          for shared mobility adoption (pull) — implemented across multiple
+          Living Labs as part of Sustainable Urban Mobility Plan (SUMP)
+          interventions.
+        </p>
+        <p>The analysis follows a three-step process:</p>
+        <ol class="list-decimal list-inside space-y-2 ml-4">
+          <li>
+            <strong>Baseline data collection</strong> — KPIs are measured
+            before the interventions.
+          </li>
+          <li>
+            <strong>Impact estimation</strong> — KPIs are recalculated after
+            implementation and compared to the baseline.
+          </li>
+          <li>
+            <strong>Interactive interface</strong> — Results are communicated
+            through a dedicated interface to support stakeholder exploration.
+          </li>
+        </ol>
+        <p>
+          To quantify the contribution of each measure, a{" "}
+          <strong>Ridge regression model</strong> (linear regression with L2
+          regularization) is used. Each measure is encoded as a binary variable
+          (implemented = 1, not implemented = 0) per Living Lab. The model
+          associates a regression coefficient to each measure, estimating its
+          individual contribution to the observed change in each KPI. Ridge
+          regularization is chosen because the number of measures exceeds the
+          number of Living Labs, helping prevent overfitting and address
+          multicollinearity.
+        </p>
+        <p>
+          Both univariate (per KPI) and multivariate (grouped KPIs of the same
+          type, i.e. environmental, societal, economic) analyses are conducted
+          to ensure robustness, especially when data points are limited for
+          local KPIs.
+        </p>
+      </div>
+    </MethodologyAccordion>
+
+    <MethodologyAccordion
+      title="How to interpret regression results"
+      subtitle="Reading regression coefficients and model accuracy"
+      content=""
+    >
+      <div class="space-y-4 text-sm text-gray-700 leading-relaxed">
+        <p>
+          The model outputs a regression coefficient (β) for each measure,
+          representing its estimated contribution to the observed change in a
+          given KPI:
+        </p>
+        <ul class="list-disc list-inside space-y-2 ml-4">
+          <li>
+            A <strong>positive coefficient</strong> indicates the measure
+            contributed to an increase in that KPI.
+          </li>
+          <li>
+            A <strong>negative coefficient</strong> indicates a decrease.
+          </li>
+          <li>
+            A coefficient <strong>close to zero</strong> suggests the measure
+            had little to no isolated impact on that KPI.
+          </li>
+        </ul>
+        <p class="mt-4">
+          The <strong>mean squared error (MSE)</strong> of the model provides an
+          indication of estimation accuracy. A lower MSE means the model fits
+          the observed data more closely.
+        </p>
+        <p>
+          See{" "}
+          <a href="/methods/limitations" class="text-primary hover:underline font-medium">
+            Limitations
+          </a>{" "}
+          for important caveats when interpreting these results.
+        </p>
+      </div>
+    </MethodologyAccordion>
+
+    <!-- PROMETHEE-GAIA section -->
+    <div class="mb-8 mt-12">
+      <h2 class="text-xl font-bold text-dark mb-4 border-b border-gray-200 pb-2">
+        MCDA — PROMETHEE and GAIA
+      </h2>
+    </div>
+
+    <MethodologyAccordion
+      title="What is PROMETHEE?"
+      subtitle="Multi-criteria decision analysis method"
+      content=""
+      defaultOpen={true}
+    >
+      <div class="space-y-4 text-sm text-gray-700 leading-relaxed">
+        <p>
+          PROMETHEE (Preference Ranking Organisation METHod for Enrichment
+          Evaluations) is a Multi-Criteria Decision Analysis (MCDA) method used
+          to evaluate and rank alternatives when multiple, and sometimes
+          conflicting, criteria must be considered simultaneously.
+        </p>
+        <p>
+          It handles both quantitative data (e.g. costs, travel times) and
+          qualitative factors (e.g. environmental impact, social acceptability),
+          making it well-suited for complex decisions like urban transport policy
+          evaluation. It also incorporates the diverse perspectives of multiple
+          stakeholders (citizens, businesses, public authorities) by building
+          preference relations between alternatives based on how each group
+          values the criteria.
+        </p>
+        <p>
+          In the SUM platform, KPI groups serve as PROMETHEE criteria, and
+          policy measures or business activities serve as alternatives. The
+          three pre-defined perspectives (Regulatory Authorities, Public
+          Transport Operators, New Shared Mobility Providers) reflect different
+          stakeholder weightings of these criteria.
+        </p>
+      </div>
+    </MethodologyAccordion>
+
+    <MethodologyAccordion
+      title="What is GAIA?"
+      subtitle="Geometric Analysis for Interactive Aid"
+      content=""
+    >
+      <div class="space-y-4 text-sm text-gray-700 leading-relaxed">
+        <p>
+          GAIA (Geometrical Analysis for Interactive Aid) is the visual,
+          interactive companion to PROMETHEE. It displays evaluation results
+          graphically on a GAIA plane, mapping both the policy alternatives and
+          the evaluation criteria together.
+        </p>
+        <p>
+          This visual representation helps stakeholders (regardless of their
+          technical background) better understand the analysis, communicate
+          results, and identify trade-offs and areas where preferences converge
+          or conflict.
+        </p>
+        <ul class="list-disc list-inside space-y-2 ml-4">
+          <li>
+            <strong>Criteria pointing in the same direction</strong> indicate
+            aligned objectives.
+          </li>
+          <li>
+            <strong>Criteria pointing in opposite directions</strong> reveal
+            trade-offs.
+          </li>
+          <li>
+            The <strong>decision stick</strong> summarises the overall
+            PROMETHEE ranking direction.
+          </li>
+          <li>
+            <strong>GAIA quality</strong> (0–100%) indicates how well the 2D
+            projection preserves the full decision information.
+          </li>
+        </ul>
+      </div>
+    </MethodologyAccordion>
+
+    <MethodologyAccordion
+      title="How to interpret PROMETHEE-GAIA results"
+      subtitle="Reading rankings, net flows, and the GAIA plane"
+      content=""
+    >
+      <div class="space-y-4 text-sm text-gray-700 leading-relaxed">
+        <p>
+          PROMETHEE-GAIA results combine two complementary outputs:
+        </p>
+        <ul class="list-disc list-inside space-y-2 ml-4">
+          <li>
+            <strong>PROMETHEE ranking</strong> — alternatives ordered by net
+            flow (φ). Higher φ means the alternative outperforms others across
+            more criteria.
+          </li>
+          <li>
+            <strong>GAIA plane</strong> — visual mapping of alternatives and
+            criteria onto 2D. Policies positioned close to a criterion's axis
+            perform well on that specific criterion.
+          </li>
+        </ul>
+        <p>
+          Together, they allow users to rank alternatives, identify trade-offs,
+          and explore consensus areas across stakeholder perspectives.
+        </p>
+        <p>
+          See{" "}
+          <a href="/methods/limitations" class="text-primary hover:underline font-medium">
+            Limitations
+          </a>{" "}
+          for important caveats.
+        </p>
+      </div>
+    </MethodologyAccordion>
+  </div>
+</Layout>

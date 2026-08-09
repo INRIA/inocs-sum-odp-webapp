@@ -1,0 +1,107 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { KpisFrameworkDiagram } from "../../components/react";
+import { MethodologyAccordion } from "../../components/AnalysisPageSections";
+---
+
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Methods", href: "/methods/evaluation-framework" },
+    { label: "Evaluation framework" },
+  ]}
+>
+  <div class="mx-auto px-4 sm:px-8 py-12 max-w-4xl">
+    <div class="mb-10">
+      <h1 class="text-3xl font-bold text-dark mb-3">Evaluation Framework</h1>
+      <p class="text-gray-600 text-lg">
+        The SUM Open Data Platform uses the SIEF (SUM Impact Evaluation
+        Framework) to organise and evaluate Key Performance Indicators across
+        Living Labs.
+      </p>
+    </div>
+
+    <!-- KPI Framework Diagram -->
+    <div class="mb-10">
+      <KpisFrameworkDiagram client:visible />
+    </div>
+
+    <MethodologyAccordion
+      title="What is SIEF?"
+      subtitle="SUM Impact Evaluation Framework"
+      content=""
+      defaultOpen={true}
+    >
+      <div class="space-y-4 text-sm text-gray-700 leading-relaxed">
+        <p>
+          The SIEF is the KPI framework developed within the SUM project to
+          monitor the impact of New Shared Mobility (NSM) policy measures on
+          urban transport. It organises KPIs into three thematic domains:
+        </p>
+        <ul class="list-disc list-inside space-y-2 ml-4">
+          <li>
+            <strong>Environmental</strong> — greenhouse gas emissions, energy
+            consumption, noise levels
+          </li>
+          <li>
+            <strong>Societal</strong> — user satisfaction, accessibility,
+            safety, modal shift
+          </li>
+          <li>
+            <strong>Economic</strong> — cost efficiency, business viability of
+            NSM services
+          </li>
+        </ul>
+        <p>
+          KPIs are measured before and after the implementation of mobility
+          measures to quantify impact. This before/after design is central to
+          the SUM evaluation approach.
+        </p>
+      </div>
+    </MethodologyAccordion>
+
+    <MethodologyAccordion
+      title="How KPIs are structured"
+      subtitle="Parent KPIs, child KPIs, and measurement levels"
+      content=""
+    >
+      <div class="space-y-4 text-sm text-gray-700 leading-relaxed">
+        <p>
+          The SIEF organises KPIs hierarchically: parent KPIs define broad
+          objectives (e.g. "Reduce GHG emissions"), while child KPIs provide
+          specific measurable indicators (e.g. "CO₂ emissions per passenger
+          km"). This hierarchy supports both high-level comparison across Living
+          Labs and detailed drill-down into specific metrics.
+        </p>
+        <p>
+          KPI numbers starting with <strong>15</strong> indicate modal split
+          indicators, which are treated separately in the platform's dashboards.
+        </p>
+      </div>
+    </MethodologyAccordion>
+
+    <MethodologyAccordion
+      title="Data collection and submission"
+      subtitle="How Living Labs contribute KPI data"
+      content=""
+    >
+      <div class="text-sm text-gray-700 leading-relaxed space-y-3">
+        <p>
+          Each Living Lab collects KPI values at two points in time: before
+          measure implementation (baseline) and after (post-intervention). Data
+          is submitted through the lab-admin portal and validated before
+          appearing in the public dashboards.
+        </p>
+        <p>
+          <a
+            href="/data/collection-plan"
+            class="text-primary hover:underline font-medium"
+          >
+            View the full data collection plan →
+          </a>
+        </p>
+      </div>
+    </MethodologyAccordion>
+  </div>
+</Layout>
