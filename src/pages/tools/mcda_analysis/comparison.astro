@@ -1,0 +1,107 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import { MCDAComparisonView } from "../../../components/react/MCDAAnalysis/MCDAComparisonView";
+import type { PerspectiveResult } from "../../../components/react/MCDAAnalysis/MCDAComparisonView";
+import { JobRunsService } from "../../../bff/services/job-runs.service";
+import {
+  MCDA_PERSPECTIVES,
+  computeRankingConvergence,
+} from "../../../lib/helpers/mcda-format";
+import type { IJobRun } from "../../../types";
+
+const jobRunsService = new JobRunsService();
+
+const perspectiveKeys = Object.keys(MCDA_PERSPECTIVES);
+
+const jobRuns: (IJobRun | null)[] = await Promise.all(
+  perspectiveKeys.map(async (key) => {
+    try {
+      return await jobRunsService.getLatestSuccessfulJobRun(
+        `mcda_analysis_quantitative_${key}`,
+      );
+    } catch {
+      return null;
+    }
+  }),
+);
+
+const perspectives: PerspectiveResult[] = perspectiveKeys
+  .map((key, idx) => {
+    const run = jobRuns[idx];
+    const results = run?.output_data?.mcda_results;
+    if (!results) return null;
+
+    const ranking = results.ranking ?? [];
+    const alternativeLabels = results.alternative_labels ?? {};
+    const netFlows = results.net_flows ?? {};
+    const topKey = ranking[0];
+    const topPerformer = topKey
+      ? (alternativeLabels[topKey] ?? topKey)
+      : "N/A";
+
+    return {
+      key,
+      label: MCDA_PERSPECTIVES[key],
+      ranking,
+      alternativeLabels,
+      netFlows,
+      topPerformer,
+      gaiaQuality: results.gaia_quality ?? null,
+    };
+  })
+  .filter((p): p is PerspectiveResult => p !== null);
+
+const rankingsMap: Record<string, string[]> = {};
+const labelsMap: Record<string, string> = {};
+for (const p of perspectives) {
+  rankingsMap[p.key] = p.ranking;
+  Object.assign(labelsMap, p.alternativeLabels);
+}
+
+const convergence = computeRankingConvergence(rankingsMap, labelsMap);
+---
+
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Tools" },
+    { label: "Multi-criteria decision tool", href: "/tools/mcda_analysis" },
+    { label: "Comparison" },
+  ]}
+  backHref="/tools/mcda_analysis"
+>
+  <div class="mx-auto px-4 sm:px-8 py-12 max-w-6xl">
+    <div class="mb-10">
+      <h1 class="text-3xl font-bold text-dark mb-3">
+        Perspective Comparison
+      </h1>
+      <p class="text-gray-600 text-lg">
+        Side-by-side ranking of all three stakeholder perspectives — Regulatory
+        Authorities, Public Transport Operators, and New Shared Mobility
+        Providers — using the latest quantitative MCDA results.
+      </p>
+    </div>
+
+    {
+      perspectives.length === 0 ? (
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
+          <div class="text-6xl mb-4">⚠️</div>
+          <h2 class="text-2xl font-bold text-gray-900 mb-3">
+            No Data Available
+          </h2>
+          <p class="text-gray-700">
+            No successful MCDA job runs found for any perspective. Please run
+            the quantitative analysis first.
+          </p>
+        </div>
+      ) : (
+        <MCDAComparisonView
+          perspectives={perspectives}
+          convergence={convergence}
+          client:load
+        />
+      )
+    }
+  </div>
+</Layout>

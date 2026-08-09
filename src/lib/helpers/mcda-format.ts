@@ -519,3 +519,95 @@ export const buildMcdaKeyInsights = (
     // },
   ];
 };
+
+export interface ConvergenceResult {
+  converges: boolean;
+  statement: string;
+  details: {
+    perspectiveA: string;
+    perspectiveB: string;
+    maxDisplacement: number;
+    divergentAlternatives: string[];
+  }[];
+}
+
+export function computeRankingConvergence(
+  rankings: Record<string, string[]>,
+  alternativeLabels: Record<string, string>,
+  tolerance: number = 1,
+): ConvergenceResult {
+  const keys = Object.keys(rankings);
+  if (keys.length < 2) {
+    return {
+      converges: true,
+      statement: "Only one perspective available — no comparison possible.",
+      details: [],
+    };
+  }
+
+  const details: ConvergenceResult["details"] = [];
+  let overallConverges = true;
+
+  for (let i = 0; i < keys.length; i++) {
+    for (let j = i + 1; j < keys.length; j++) {
+      const perspA = keys[i];
+      const perspB = keys[j];
+      const rankA = rankings[perspA];
+      const rankB = rankings[perspB];
+
+      const allAlts = Array.from(new Set([...rankA, ...rankB]));
+      const rankIndexA = new Map(rankA.map((id, idx) => [id, idx]));
+      const rankIndexB = new Map(rankB.map((id, idx) => [id, idx]));
+
+      let maxDisplacement = 0;
+      const divergentAlts: string[] = [];
+
+      for (const alt of allAlts) {
+        const posA = rankIndexA.get(alt) ?? rankA.length;
+        const posB = rankIndexB.get(alt) ?? rankB.length;
+        const displacement = Math.abs(posA - posB);
+        if (displacement > maxDisplacement) maxDisplacement = displacement;
+        if (displacement > tolerance) {
+          divergentAlts.push(alternativeLabels[alt] ?? alt);
+        }
+      }
+
+      if (maxDisplacement > tolerance) overallConverges = false;
+
+      details.push({
+        perspectiveA: perspA,
+        perspectiveB: perspB,
+        maxDisplacement,
+        divergentAlternatives: divergentAlts,
+      });
+    }
+  }
+
+  let statement: string;
+  if (overallConverges) {
+    const topKey = rankings[keys[0]]?.[0];
+    const topLabel = topKey
+      ? (alternativeLabels[topKey] ?? topKey)
+      : "the same alternative";
+    statement = `All perspectives agree: "${topLabel}" is the top-ranked alternative. Rankings converge within ${tolerance} position${tolerance === 1 ? "" : "s"}.`;
+  } else {
+    const worstPair = details.reduce((worst, d) =>
+      d.maxDisplacement > worst.maxDisplacement ? d : worst,
+    );
+    const topA = rankings[worstPair.perspectiveA]?.[0];
+    const topB = rankings[worstPair.perspectiveB]?.[0];
+    const labelA = topA
+      ? (alternativeLabels[topA] ?? topA)
+      : "different alternatives";
+    const labelB = topB
+      ? (alternativeLabels[topB] ?? topB)
+      : "different alternatives";
+    const perspLabelA =
+      MCDA_PERSPECTIVES[worstPair.perspectiveA] ?? worstPair.perspectiveA;
+    const perspLabelB =
+      MCDA_PERSPECTIVES[worstPair.perspectiveB] ?? worstPair.perspectiveB;
+    statement = `Perspectives diverge: ${perspLabelA} ranks "${labelA}" first while ${perspLabelB} ranks "${labelB}" first. Largest disagreement: ${worstPair.maxDisplacement} position${worstPair.maxDisplacement === 1 ? "" : "s"}.`;
+  }
+
+  return { converges: overallConverges, statement, details };
+}
