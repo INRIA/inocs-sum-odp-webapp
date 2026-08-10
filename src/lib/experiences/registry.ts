@@ -79,6 +79,7 @@ const ROUTES: RouteEntry[] = [
   { pattern: "/faq", experience: "shared" },
   { pattern: "/legal-notice", experience: "shared" },
   { pattern: "/privacy-policy", experience: "shared" },
+  { pattern: "/join", experience: "shared" },
 ];
 
 // ---------------------------------------------------------------------------
@@ -123,7 +124,7 @@ const INSIGHTS_MENU: ExperienceMenu = {
     { href: "/insights/goals", label: "What works" }, // Epic 8
     { href: "/insights/cities", label: "Cities" }, // Epic 9
     { href: "/insights/plan", label: "Plan for my city" }, // Epic 10
-    { href: "/insights/resources", label: "Join & resources" }, // content TBD
+    { href: "/join", label: "Join & resources" }, // T18
   ],
 };
 

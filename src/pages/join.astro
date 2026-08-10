@@ -1,0 +1,191 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { RButton } from "../components/react";
+import { getUrl } from "../lib/helpers";
+
+const steps = [
+  {
+    id: 1,
+    color: "primary",
+    icon: "👤",
+    title: "Create your account",
+    description:
+      "Sign up and join your existing city, or register a new one to start contributing.",
+  },
+  {
+    id: 2,
+    color: "secondary",
+    icon: "🏙️",
+    title: "Describe your city",
+    description:
+      "Provide key details: name, city, and zone or area of intervention.",
+  },
+  {
+    id: 3,
+    color: "warning",
+    icon: "📊",
+    title: "Collect baseline data",
+    description:
+      "Input your first round of KPI values before implementing mobility measures.",
+  },
+  {
+    id: 4,
+    color: "info",
+    icon: "⚙️",
+    title: "Add your measures",
+    description:
+      "Document the mobility measures and policies implemented in your city.",
+  },
+  {
+    id: 5,
+    color: "primary",
+    icon: "📈",
+    title: "Collect post-data",
+    description:
+      "Measure KPIs again to assess the impact of measures and share results.",
+  },
+];
+---
+
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Join & Resources" },
+  ]}
+  backHref="/"
+>
+  <!-- Page header -->
+  <div class="mx-auto px-4 py-8 max-w-5xl">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Join & Resources</h1>
+    <p class="text-lg text-gray-600 mb-8">
+      Learn how to contribute your city's data to the SUM Open Data Platform,
+      access resources for data collection, and find answers to common questions.
+    </p>
+  </div>
+
+  <!-- Contribution steps (extracted from homepage) -->
+  <section class="bg-gray-50 py-16 px-4 sm:px-8 lg:px-16">
+    <div class="max-w-5xl mx-auto text-center mb-16">
+      <h2 class="text-3xl font-bold text-gray-900 mb-4">
+        How to Contribute to the SUM Open Data Platform
+      </h2>
+      <p class="text-lg text-gray-600">
+        Join the SUM Open Data Platform and help shape the future of sustainable
+        urban mobility. Cities contribute real-world data to evaluate and
+        improve New Shared Mobility measures across Europe.
+      </p>
+    </div>
+
+    <div class="relative max-w-5xl mx-auto mt-40">
+      {/* Vertical line: left on mobile, centered on md+ */}
+      <div
+        class="absolute left-4 md:left-1/2 transform md:-translate-x-1/2 w-1 bg-primary h-full rounded"
+      >
+      </div>
+
+      {
+        steps.map((step, index) => (
+          <div
+            key={step.id}
+            class={`mb-16 flex items-start w-full md:justify-between md:items-center md:-mt-28 ${
+              index % 2 === 0 ? "md:flex-row-reverse" : ""
+            }`}
+          >
+            {/* Empty space on one side only for md+ */}
+            <div class="hidden md:block md:w-5/12" />
+
+            {/* Step marker + connector */}
+            <div
+              class={`z-20 flex items-center ml-2 ${
+                index % 2 === 0
+                  ? "flex-row md:-ml-18"
+                  : "md:flex-row-reverse md:-mr-18"
+              }`}
+            >
+              <div
+                class={`flex items-center justify-center w-5 h-5 rounded-full bg-${step.color} border-2 border-${step.color} text-xs font-extralight text-light shadow`}
+              >
+                {step.id}
+              </div>
+
+              {/* Connector between marker and card (visible on md+) */}
+              <div class="hidden md:block md:w-14">
+                <div class="w-full h-0.5 bg-primary rounded" />
+              </div>
+            </div>
+
+            {/* Card */}
+            <div
+              class={`relative w-full md:w-5/12 bg-white rounded-xl shadow-lg p-6 border-${step.color} ml-6 md:ml-0 ${
+                index % 2 === 0 ? "border-r-8" : "border-l-8"
+              }`}
+            >
+              <div class="flex items-center mb-2">
+                <span class="text-2xl mr-3">{step.icon}</span>
+                <h5 class="text-xl font-semibold text-gray-900">
+                  {step.title}
+                </h5>
+              </div>
+              <p class="text-gray-600">{step.description}</p>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Resources library entry -->
+  <section class="py-12 px-4 max-w-5xl mx-auto">
+    <h2 class="text-2xl font-bold text-gray-900 mb-4">Resources</h2>
+    <p class="text-gray-600 mb-6">
+      Access templates, guides, and tools to help you collect and calculate KPI data for your city.
+    </p>
+    <div class="grid sm:grid-cols-2 gap-4">
+      <a
+        href={getUrl("/tools/resources")}
+        class="block p-6 bg-white rounded-xl border border-gray-200 hover:shadow-md transition-shadow"
+      >
+        <h3 class="font-semibold text-gray-900 mb-1">Resource library</h3>
+        <p class="text-sm text-gray-600">
+          Models, optimisation tools and software for integrated mobility planning.
+        </p>
+      </a>
+      <a
+        href={getUrl("/data/collection-plan")}
+        class="block p-6 bg-white rounded-xl border border-gray-200 hover:shadow-md transition-shadow"
+      >
+        <h3 class="font-semibold text-gray-900 mb-1">Data collection planning</h3>
+        <p class="text-sm text-gray-600">
+          KPI framework, spreadsheet templates, and survey tools for your city.
+        </p>
+      </a>
+    </div>
+  </section>
+
+  <!-- FAQ entry point -->
+  <section class="bg-white py-12 px-4 border-t border-gray-100">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-2xl font-bold text-gray-900 mb-3">Have questions?</h2>
+      <p class="text-gray-600 mb-6">
+        Find answers about data access, contributing results, measures, KPIs,
+        and technical integration.
+      </p>
+      <RButton href={getUrl("/faq")} variant="primary" className="bg-primary text-light" client:load>
+        Go to the FAQ →
+      </RButton>
+    </div>
+  </section>
+
+  <!-- Login/signup CTAs -->
+  <section class="py-12 px-4">
+    <div class="text-center flex flex-col md:flex-row gap-4 mx-auto justify-center">
+      <RButton href="/lab-admin/login" variant="primary" className="bg-warning text-light" client:load>
+        Login to your account →
+      </RButton>
+      <RButton href="/lab-admin/signup" variant="primary" client:load>
+        Join the Platform →
+      </RButton>
+    </div>
+  </section>
+</Layout>

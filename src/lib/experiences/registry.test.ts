@@ -141,4 +141,9 @@ describe("resolveExperience", () => {
     const insightsSeg = state.switchSegments.find((s) => s.label === "Insights");
     expect(insightsSeg?.href).toBe("/insights");
   });
+
+  it("resolves /join to shared experience", () => {
+    const state = resolveExperience("/join", sp());
+    expect(state.isShared).toBe(true);
+  });
 });
