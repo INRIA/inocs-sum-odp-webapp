@@ -55,6 +55,7 @@ const ROUTES: RouteEntry[] = [
 
   // Data experience
   { pattern: "/methods", experience: "data" }, // prefix match covers all /methods/* routes
+  { pattern: "/data/downloads", experience: "data" },
   { pattern: "/data/kpis", experience: "data" },
   { pattern: "/data/modal-split", experience: "data" },
   { pattern: "/data/measures", experience: "data" },
@@ -73,6 +74,8 @@ const ROUTES: RouteEntry[] = [
     experience: "insights",
     counterpart: "/living-lab-city/:labId",
   },
+  { pattern: "/insights/goals", experience: "insights" },
+  { pattern: "/insights/plan", experience: "insights" },
   { pattern: "/insights", experience: "insights" },
 
   // Shared surfaces — keep visitor's current menu

@@ -156,4 +156,24 @@ describe("resolveExperience", () => {
     const state = resolveExperience("/methods/models", sp());
     expect(state.active).toBe("data");
   });
+
+  it("resolves /insights/goals to insights experience", () => {
+    const state = resolveExperience("/insights/goals", sp());
+    expect(state.active).toBe("insights");
+  });
+
+  it("resolves /insights/goals/reduce-car-use to insights experience", () => {
+    const state = resolveExperience("/insights/goals/reduce-car-use", sp());
+    expect(state.active).toBe("insights");
+  });
+
+  it("resolves /insights/plan to insights experience", () => {
+    const state = resolveExperience("/insights/plan", sp());
+    expect(state.active).toBe("insights");
+  });
+
+  it("resolves /data/downloads to data experience", () => {
+    const state = resolveExperience("/data/downloads", sp());
+    expect(state.active).toBe("data");
+  });
 });
