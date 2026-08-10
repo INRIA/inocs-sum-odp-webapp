@@ -308,6 +308,12 @@ export default class ApiClient {
     return this.request<IResource | null>(`/items/${id}`);
   }
 
+  async getResourcesForLab(labId: number): Promise<IResource[]> {
+    const all = await this.getItemsByCategoryType("RESOURCES");
+    if (!all) return [];
+    return all.filter((r) => Number(r.living_lab?.id) === labId);
+  }
+
   /**
    * Get users with optional status filter.
    * Used by the analytics dashboard to count active vs pending users.

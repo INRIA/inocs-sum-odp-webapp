@@ -141,4 +141,39 @@ describe("resolveExperience", () => {
     const insightsSeg = state.switchSegments.find((s) => s.label === "Insights");
     expect(insightsSeg?.href).toBe("/insights");
   });
+
+  it("resolves /join to shared experience", () => {
+    const state = resolveExperience("/join", sp());
+    expect(state.isShared).toBe(true);
+  });
+
+  it("resolves /methods/glossary to data experience", () => {
+    const state = resolveExperience("/methods/glossary", sp());
+    expect(state.active).toBe("data");
+  });
+
+  it("resolves /methods/models to data experience", () => {
+    const state = resolveExperience("/methods/models", sp());
+    expect(state.active).toBe("data");
+  });
+
+  it("resolves /insights/goals to insights experience", () => {
+    const state = resolveExperience("/insights/goals", sp());
+    expect(state.active).toBe("insights");
+  });
+
+  it("resolves /insights/goals/reduce-car-use to insights experience", () => {
+    const state = resolveExperience("/insights/goals/reduce-car-use", sp());
+    expect(state.active).toBe("insights");
+  });
+
+  it("resolves /insights/plan to insights experience", () => {
+    const state = resolveExperience("/insights/plan", sp());
+    expect(state.active).toBe("insights");
+  });
+
+  it("resolves /data/downloads to data experience", () => {
+    const state = resolveExperience("/data/downloads", sp());
+    expect(state.active).toBe("data");
+  });
 });

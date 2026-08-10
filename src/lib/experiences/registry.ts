@@ -54,6 +54,8 @@ const ROUTES: RouteEntry[] = [
   { pattern: "/", experience: "landing" },
 
   // Data experience
+  { pattern: "/methods", experience: "data" }, // prefix match covers all /methods/* routes
+  { pattern: "/data/downloads", experience: "data" },
   { pattern: "/data/kpis", experience: "data" },
   { pattern: "/data/modal-split", experience: "data" },
   { pattern: "/data/measures", experience: "data" },
@@ -72,6 +74,8 @@ const ROUTES: RouteEntry[] = [
     experience: "insights",
     counterpart: "/living-lab-city/:labId",
   },
+  { pattern: "/insights/goals", experience: "insights" },
+  { pattern: "/insights/plan", experience: "insights" },
   { pattern: "/insights", experience: "insights" },
 
   // Shared surfaces — keep visitor's current menu
@@ -79,6 +83,7 @@ const ROUTES: RouteEntry[] = [
   { pattern: "/faq", experience: "shared" },
   { pattern: "/legal-notice", experience: "shared" },
   { pattern: "/privacy-policy", experience: "shared" },
+  { pattern: "/join", experience: "shared" },
 ];
 
 // ---------------------------------------------------------------------------
@@ -111,6 +116,18 @@ const DATA_MENU: ExperienceMenu = {
       ],
     },
     { href: "/tools/resources", label: "Resources" },
+    {
+      label: "Methods & quality",
+      subItems: [
+        { href: "/methods/evaluation-framework", label: "Evaluation framework" },
+        { href: "/methods/data-collection", label: "Data collection" },
+        { href: "/methods/data-quality", label: "Data quality" },
+        { href: "/methods/models", label: "How the models work" },
+        { href: "/methods/limitations", label: "Limitations" },
+        { href: "/methods/glossary", label: "Glossary" },
+        { href: "/faq", label: "FAQ" },
+      ],
+    },
   ],
 };
 
@@ -123,7 +140,7 @@ const INSIGHTS_MENU: ExperienceMenu = {
     { href: "/insights/goals", label: "What works" }, // Epic 8
     { href: "/insights/cities", label: "Cities" }, // Epic 9
     { href: "/insights/plan", label: "Plan for my city" }, // Epic 10
-    { href: "/insights/resources", label: "Join & resources" }, // content TBD
+    { href: "/join", label: "Join & resources" }, // T18
   ],
 };
 

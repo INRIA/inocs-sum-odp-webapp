@@ -20,6 +20,7 @@ interface MCDADashboardProps {
   outrankingGraphData?: OutrankingGraphData;
   mcdaKeyInsights?: McdaKeyInsightCard[];
   enableCustomAnalysis?: boolean;
+  comparisonUrl?: string;
   // Additional MCDA-specific data can be added here as the feature develops
   [key: string]: any;
 }
@@ -39,6 +40,7 @@ export const MCDADashboard: React.FC<MCDADashboardProps> = ({
   mcdaResults,
   outrankingGraphData,
   mcdaKeyInsights,
+  comparisonUrl,
 }) => {
   const [isConfigDrawerOpen, setIsConfigDrawerOpen] = useState(false);
   const navigationSections = [
@@ -177,6 +179,16 @@ export const MCDADashboard: React.FC<MCDADashboardProps> = ({
           ) : (
             <div className="rounded-lg border border-gray-200 bg-white p-6 text-gray-600">
               Please select a stakeholder perspective to view results.
+            </div>
+          )}
+          {comparisonUrl && (
+            <div className="flex justify-center mt-6">
+              <a
+                href={comparisonUrl}
+                className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+              >
+                Compare all perspectives →
+              </a>
             </div>
           )}
         </section>

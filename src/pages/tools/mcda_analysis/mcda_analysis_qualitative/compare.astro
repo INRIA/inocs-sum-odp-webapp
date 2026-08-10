@@ -1,0 +1,42 @@
+---
+import Layout from "../../../../layouts/Layout.astro";
+import { McdaComparisonView } from "../../../../components/react/MCDAAnalysis/McdaComparisonView";
+import { MCDA_PERSPECTIVES } from "../../../../lib/helpers";
+import ApiClient from "../../../../lib/api-client/ApiClient";
+
+const api = new ApiClient(Astro.request);
+const analysisType = "mcda_analysis_qualitative";
+
+const perspectiveResults = await Promise.all(
+  Object.entries(MCDA_PERSPECTIVES).map(async ([key, label]) => {
+    try {
+      const jobRun = await api.getLatestJobRun(`${analysisType}_${key}`);
+      return {
+        key,
+        label,
+        results: jobRun?.output_data?.mcda_results ?? null,
+        goals: jobRun?.input_data?.goals ?? [],
+      };
+    } catch {
+      return { key, label, results: null, goals: [] };
+    }
+  })
+);
+---
+
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Tools" },
+    { label: "Multi-criteria decision tool", href: "/tools/mcda_analysis/" },
+    { label: "Compare perspectives" },
+  ]}
+  backHref="/tools/mcda_analysis/"
+>
+  <McdaComparisonView
+    analysisType={analysisType}
+    perspectives={perspectiveResults}
+    client:load
+  />
+</Layout>

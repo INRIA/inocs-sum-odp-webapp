@@ -1,0 +1,76 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Methods & quality" },
+    { label: "Evaluation framework" },
+  ]}
+  backHref="/"
+>
+  <div class="mx-auto px-4 py-8 max-w-4xl prose prose-gray">
+    <h1>Evaluation Framework (SIEF)</h1>
+
+    <section>
+      <h2>What SIEF is and why it exists</h2>
+      <p>
+        The SUM Integrated Evaluation Framework (SIEF) provides a structured methodology for
+        measuring the impact of New Shared Mobility (NSM) services on Public Transport integration
+        across European cities. It was developed within the Horizon Europe SUM project to ensure
+        that data collected across different Living Labs remains comparable and scientifically rigorous.
+      </p>
+      <p>
+        SIEF defines which Key Performance Indicators (KPIs) are collected, how they are calculated,
+        and what evaluation criteria are applied. It draws on established frameworks from sustainable
+        urban mobility planning (SUMP) and transport research, adapted for the specific context of
+        shared mobility integration.
+      </p>
+    </section>
+
+    <section>
+      <h2>The KPI framework</h2>
+      <p>
+        The framework organises KPIs into four evaluation domains:
+      </p>
+      <ul>
+        <li><strong>Accessibility</strong> — how well shared mobility services reach different population groups and areas</li>
+        <li><strong>Safety</strong> — incident rates, perceived safety, and infrastructure conditions</li>
+        <li><strong>Environmental impact</strong> — modal shift toward sustainable transport, emissions reduction</li>
+        <li><strong>Economic viability</strong> — cost efficiency, service adoption rates, and business sustainability</li>
+      </ul>
+      <p>
+        Each KPI has a defined calculation methodology, data requirements, and target direction
+        (whether higher or lower values indicate improvement). Full specifications are available
+        in the KPI Framework PDF.
+      </p>
+      <p>
+        <a href="/files/SIEF_All_KPIs-template.xlsx" class="text-primary hover:underline">
+          Download KPI Framework spreadsheet →
+        </a>
+      </p>
+    </section>
+
+    <section>
+      <h2>Evaluation criteria and methodology</h2>
+      <p>
+        SIEF uses a before/after measurement approach: cities collect baseline KPI values before
+        implementing mobility measures, and then collect post-implementation values to assess impact.
+        This enables the platform to quantify changes attributable to specific measures using
+        ridge regression analysis.
+      </p>
+      <p>
+        The evaluation covers both quantitative metrics (measurable values with units) and
+        qualitative assessments (survey-based perceptions). Together they provide a comprehensive
+        picture of how NSM integration affects urban mobility patterns.
+      </p>
+    </section>
+
+    <nav class="not-prose mt-8 flex gap-4 text-sm">
+      <a href="/methods/data-collection" class="text-primary hover:underline">Next: Data collection →</a>
+      <a href="/methods/glossary" class="text-primary hover:underline">Glossary →</a>
+    </nav>
+  </div>
+</Layout>

@@ -1,4 +1,5 @@
 export { MCDADashboard } from "./MCDADashboard";
+export { McdaComparisonView } from "./McdaComparisonView";
 export { ResultsSection } from "./ResultsSection";
 export { GoalsSection } from "./GoalsSection";
 export { GoalWeightBar } from "./GoalWeightBar";

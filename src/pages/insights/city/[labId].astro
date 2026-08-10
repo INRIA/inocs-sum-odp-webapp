@@ -1,19 +1,169 @@
 ---
-// Insights city page — placeholder until Epic 9 implements content.
-// Counterpart to /living-lab-city/[labId].
 import Layout from "../../../layouts/Layout.astro";
+import {
+  InsightsCityOverview,
+  InsightsCityMeasures,
+  InsightsCityKPIs,
+  CityDataPending,
+  InsightsCityLessons,
+} from "../../../components/react/Insights";
+import ApiClient from "../../../lib/api-client/ApiClient";
+import { getCityDataStatus } from "../../../lib/utils/cityStatus";
+import { isImplementationKpi } from "../../../config/implementationKpis";
+import { getKpiReading } from "../../../config/kpiReadings";
+import { getUrl } from "../../../lib/helpers";
+import type { IKpiResultGroup, ILivingLabPopulated } from "../../../types";
 
 const { labId } = Astro.params;
+const api = new ApiClient(Astro.request);
+
+const lab = (await api.getLivingLab(String(labId))) as ILivingLabPopulated | null;
+if (!lab) return Astro.redirect("/insights");
+
+const kpiResultGroups = (lab.kpi_results ?? []) as IKpiResultGroup[];
+const dataStatus = getCityDataStatus(kpiResultGroups);
+const hasData = dataStatus === "has_data";
+
+const registrationDate = lab.created_at
+  ? new Date(lab.created_at as unknown as string).toLocaleDateString()
+  : "Unknown";
+
+// Flatten KPI results for the city profile, excluding implementation-record KPIs
+const outcomeKpiResults: Array<{
+  kpidefinition_id: number;
+  kpi_name: string;
+  results: Array<{ date: string; value: number }>;
+}> = [];
+
+// Build KPI readings map
+const kpiReadingsMap: Record<number, ReturnType<typeof getKpiReading>> = {};
+
+if (hasData) {
+  for (const group of kpiResultGroups) {
+    if (isImplementationKpi(group.kpidefinition_id)) continue;
+    // Only include groups that have both before and after data (chartable)
+    if (!group.result_before && !group.result_after) continue;
+
+    const results = (group.results ?? []).map((r) => ({
+      date: String(r.date),
+      value: Number(r.value),
+    }));
+
+    if (results.length >= 2) {
+      outcomeKpiResults.push({
+        kpidefinition_id: group.kpidefinition_id,
+        kpi_name: `KPI ${group.kpidefinition_id}`,
+        results,
+      });
+      const reading = getKpiReading(group.kpidefinition_id);
+      if (reading) {
+        kpiReadingsMap[group.kpidefinition_id] = reading;
+      }
+    }
+  }
+}
+
+// Headline result: pick the KPI with the most data points
+const headlineKpi = outcomeKpiResults.sort(
+  (a, b) => b.results.length - a.results.length,
+)[0];
+const headlineResult = headlineKpi
+  ? `${headlineKpi.results.length} data points recorded for KPI ${headlineKpi.kpidefinition_id}`
+  : "Data available — see results below";
+const lastUpdated = headlineKpi?.results
+  ?.map((r) => r.date)
+  .sort()
+  .reverse()[0] ?? registrationDate;
+const lastUpdatedDisplay = lastUpdated
+  ? new Date(lastUpdated).toLocaleDateString()
+  : registrationDate;
+
+// Measures (projects)
+const measures = (lab.projects ?? []).map((p) => ({
+  id: Number(p.id),
+  name: p.name,
+  type: p.type ?? "OTHER",
+  description: p.description,
+  start_at:
+    p.living_lab_projects_implementation?.[0]?.start_at ?? null,
+}));
+
+// Resources (T17)
+const rawResources = await api.getResourcesForLab(Number(labId));
+const lessonResources = rawResources.map((r) => ({
+  id: r.id,
+  name: r.name,
+  description: r.description,
+  url: r.url,
+  associationType: "city" as const,
+  associationLabel: lab.name,
+  date: r.updated_at,
+}));
+
+const kpiResources = rawResources
+  .filter((r) => r.kpidefinition != null)
+  .map((r) => ({
+    id: r.id,
+    name: r.name,
+    url: r.url,
+    kpiDefinitionId: Number(r.kpidefinition?.id),
+  }));
 ---
 
-<Layout role="visitor" breadcrumbs={[{ label: "Home", href: "/" }, { label: "Insights" }, { label: `City ${labId}` }]} backHref="/">
-  <div class="mx-auto max-w-2xl px-4 py-24 text-center">
-    <h1 class="text-3xl font-bold text-gray-900 mb-4">City Insights</h1>
-    <p class="text-gray-500 text-lg mb-2">
-      Lab ID: <span class="font-mono text-primary">{labId}</span>
-    </p>
-    <p class="text-gray-400">
-      Coming soon — Epic 9 will implement the full city insights view.
-    </p>
-  </div>
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Insights", href: "/insights" },
+    { label: lab.name },
+  ]}
+  backHref="/insights"
+>
+  {
+    !hasData ? (
+      <CityDataPending
+        cityName={lab.name}
+        registrationDate={registrationDate}
+        counterpartHref={getUrl(`/living-lab-city/${labId}`)}
+        client:load
+      />
+    ) : (
+      <>
+        <InsightsCityOverview
+          cityName={lab.name}
+          country={lab.country}
+          population={lab.population}
+          area={lab.area}
+          headlineResult={headlineResult}
+          lastUpdated={lastUpdatedDisplay}
+          client:load
+        />
+
+        <InsightsCityMeasures measures={measures} client:load />
+
+        <InsightsCityKPIs
+          kpiResults={outcomeKpiResults}
+          kpiReadings={kpiReadingsMap}
+          kpiResources={kpiResources}
+          client:load
+        />
+
+        {lessonResources.length > 0 && (
+          <InsightsCityLessons resources={lessonResources} client:load />
+        )}
+
+        <section class="py-8 px-4 text-center border-t border-gray-200">
+          <p class="text-gray-600 mb-3">
+            Explore the full dataset and all KPI series for {lab.name}.
+          </p>
+          <a
+            href={getUrl(`/living-lab-city/${labId}`)}
+            class="text-primary font-medium hover:underline"
+          >
+            Open in Data &amp; scientific tools →
+          </a>
+        </section>
+      </>
+    )
+  }
 </Layout>

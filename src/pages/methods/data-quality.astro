@@ -1,0 +1,106 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { InfoAlert } from "../../components/react/ui";
+---
+
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Methods & quality" },
+    { label: "Data quality & curation" },
+  ]}
+  backHref="/methods/evaluation-framework"
+>
+  <div class="mx-auto px-4 py-8 max-w-4xl prose prose-gray">
+    <h1>Data Quality &amp; Curation</h1>
+
+    <InfoAlert title="Placeholder content" variant="warning" client:load>
+      <p>The curator role and review cadence must be confirmed by the consortium.
+      Current values are placeholders.</p>
+    </InfoAlert>
+
+    <section class="mt-6">
+      <h2>Data validation workflow</h2>
+      <p>
+        All data submitted to the SUM platform passes through a structured validation process
+        before being made available for analysis and display. This ensures data integrity and
+        comparability across cities.
+      </p>
+      <p>The validation workflow consists of:</p>
+      <ol>
+        <li>
+          <strong>Format validation</strong> — Submitted values are checked against expected data
+          types, units, and ranges for each KPI.
+        </li>
+        <li>
+          <strong>Completeness check</strong> — Required fields and minimum data requirements
+          are verified before a submission is accepted.
+        </li>
+        <li>
+          <strong>Plausibility review</strong> — Values are compared against known ranges and
+          against other submissions from the same city to detect anomalies.
+        </li>
+        <li>
+          <strong>Consortium review</strong> — The data curation team performs a final check
+          and confirms the submission as validated.
+        </li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Curator role</h2>
+      <p>
+        Data quality is overseen by the <strong>SUM Data Curation Team</strong> (placeholder —
+        consortium to confirm the named role and responsible person or institution).
+      </p>
+      <p>
+        The curator team is responsible for:
+      </p>
+      <ul>
+        <li>Reviewing submitted data for plausibility and completeness</li>
+        <li>Coordinating with cities to resolve data quality issues</li>
+        <li>Approving data for publication on the platform</li>
+        <li>Maintaining the validation standards documentation</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Review cadence</h2>
+      <p>
+        Data is reviewed on a <strong>Quarterly review cycle</strong> (placeholder — consortium
+        to confirm). Cities are encouraged to submit data ahead of each review window to ensure
+        timely inclusion in platform analyses.
+      </p>
+    </section>
+
+    <section>
+      <h2>How quality is communicated to users</h2>
+      <p>
+        The platform uses several visual indicators to communicate data quality:
+      </p>
+      <ul>
+        <li>
+          <strong>Evidence strength badges</strong> — Show the normalised ratio of data coverage
+          for statistical association results. Three levels: Limited, Moderate, Strong.
+        </li>
+        <li>
+          <strong>Freshness indicators</strong> — Show whether a city's data was recently validated
+          or whether it may be outdated.
+        </li>
+        <li>
+          <strong>Curated domain badge</strong> — KPI groups flagged as curated are pre-selected
+          as the default view because of their particular relevance to NSM integration.
+        </li>
+        <li>
+          <strong>Validation date</strong> — The date a city's data was last reviewed and confirmed
+          by the consortium team.
+        </li>
+      </ul>
+    </section>
+
+    <nav class="not-prose mt-8 flex gap-4 text-sm">
+      <a href="/methods/models" class="text-primary hover:underline">Next: How the models work →</a>
+    </nav>
+  </div>
+</Layout>

@@ -1,0 +1,85 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { DownloadCatalogue } from "../../components/react/DataConsole";
+import ApiClient from "../../lib/api-client/ApiClient";
+import { getUrl } from "../../lib/helpers";
+import type { ILivingLabPopulated } from "../../types";
+
+const api = new ApiClient(Astro.request);
+const labs = ((await api.getLivingLabs([])) as ILivingLabPopulated[]) ?? [];
+const kpiDefs = (await api.getKPIs()) ?? [];
+const cityNames = labs.map((l) => l.name).join(", ") || "All participating cities";
+const kpiCount = kpiDefs.length;
+
+const entries = [
+  {
+    title: "KPI Results (CSV)",
+    description: "All KPI measurement results submitted by participating cities, including before and after values for each KPI series.",
+    doesNotContain: "Implementation-record KPIs (process completion), modal split data, MCDA analysis output, or any inferred/modelled values.",
+    format: "CSV",
+    schemaFields: ["city_id", "city_name", "kpi_id", "kpi_name", "value", "date", "transport_mode", "validated_at"],
+    coverage: cityNames,
+    period: "2019–present",
+    licence: "CC BY 4.0",
+    downloadUrl: getUrl("/api/v1/csv-export?type=kpi_results"),
+    sourcePages: ["/data/kpis", "/tools/impact_analysis"],
+  },
+  {
+    title: "Policy Measures (CSV)",
+    description: "All policy measures (mobility interventions) reported by participating cities, including measure type, start date, and description.",
+    doesNotContain: "KPI outcome data, MCDA scores, or city contact details.",
+    format: "CSV",
+    schemaFields: ["city_id", "city_name", "measure_id", "measure_name", "measure_type", "start_at", "description"],
+    coverage: cityNames,
+    period: "2019–present",
+    licence: "CC BY 4.0",
+    downloadUrl: getUrl("/api/v1/csv-export?type=projects"),
+    sourcePages: ["/data/measures"],
+  },
+  {
+    title: "Impact Analysis Output (CSV)",
+    description: `Regression coefficients estimating the statistical association between each policy measure and KPI group, based on data from participating cities. Covers ${kpiCount} KPI indicators.`,
+    doesNotContain: "Individual city-level KPI values, MCDA rankings, or causal claims.",
+    format: "CSV",
+    schemaFields: ["kpi_group_id", "kpi_group_name", "measure_id", "measure_name", "coefficient", "times_implemented"],
+    coverage: "All SUM Living Labs with before & after data",
+    period: "Latest model run",
+    licence: "CC BY 4.0",
+    downloadUrl: getUrl("/tools/impact_analysis"),
+    sourcePages: ["/tools/impact_analysis"],
+  },
+  {
+    title: "KPI Framework (PDF)",
+    description: "Documentation of the KPI framework, indicator definitions, and data collection methodology.",
+    doesNotContain: "City-specific data, analysis results, or MCDA output.",
+    format: "PDF",
+    schemaFields: ["kpi_number", "kpi_name", "description", "unit", "source", "collection_method"],
+    coverage: "All KPI definitions",
+    period: "Framework document",
+    licence: "CC BY 4.0",
+    downloadUrl: getUrl("/data/collection-plan"),
+    sourcePages: ["/data/collection-plan"],
+  },
+];
+---
+
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Data & scientific tools", href: "/data" },
+    { label: "Downloads" },
+  ]}
+  backHref="/data"
+>
+  <section class="py-12 px-4">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-3xl font-bold text-gray-900 mb-3">Downloads</h1>
+      <p class="text-gray-600 mb-8">
+        Every downloadable file available on this platform, with schema,
+        coverage, and what each file does <strong>not</strong> contain.
+      </p>
+      <DownloadCatalogue entries={entries} client:load />
+    </div>
+  </section>
+</Layout>

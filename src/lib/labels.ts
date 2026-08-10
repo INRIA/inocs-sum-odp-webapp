@@ -62,4 +62,11 @@ export const GLOSSARY: Record<string, string> = {
   "NSM": "New Shared Mobility — shared transport modes such as bike-sharing, e-scooters, car-sharing.",
   "Ridge regression": "A regression technique used here to estimate each measure's contribution to KPI changes, handling collinearity when measures outnumber cities.",
   "Modal split": "The distribution of trips across transport modes (e.g., car, bus, bike, walking).",
+  "Evidence strength badge": "A visual indicator showing the normalized ratio of data coverage for a statistical association result. Three levels: Limited, Moderate, Strong.",
+  "Statistical association": "A measured relationship between policy measures and KPI changes, derived from ridge regression. Not a proven causal relationship.",
+  "Curated domain": "A subset of KPI groups selected for their relevance to New Shared Mobility uptake. Used as the default view on the impact analysis page.",
+  "Living Lab": "A SUM Horizon Europe project city that is a primary research site with full project involvement.",
+  "Contributing city": "A city participating in the SUM Open Data Platform by contributing data, but not a core SUM Living Lab.",
+  "Before/after data": "KPI measurements taken before and after implementing mobility measures, enabling impact assessment.",
+  "Validation date": "The date a living lab's data was reviewed and confirmed by the consortium. Used to determine 'validated' status.",
 };

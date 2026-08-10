@@ -1,0 +1,78 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { StatusTiles, CoverageMatrix, QuickLinks } from "../../components/react/DataConsole";
+import ApiClient from "../../lib/api-client/ApiClient";
+import { computePlatformCounters } from "../../lib/utils/platformCounters";
+import { buildCoverageMatrix } from "../../lib/utils/coverageMatrix";
+import { getUrl } from "../../lib/helpers";
+import type { ILivingLabPopulated } from "../../types";
+
+const api = new ApiClient(Astro.request);
+
+const labs = ((await api.getLivingLabs(["kpiresults"])) as ILivingLabPopulated[]) ?? [];
+const kpiDefs = (await api.getKPIs()) ?? [];
+const latestJobRun = await api.getLatestJobRun("kpi_measures_analysis");
+
+const counters = computePlatformCounters(labs);
+const matrix = buildCoverageMatrix(labs, kpiDefs);
+
+const lastModelRun = latestJobRun?.completed_at
+  ? new Date(latestJobRun.completed_at as unknown as string).toLocaleDateString()
+  : "N/A";
+const modelStatus = latestJobRun?.status ?? "N/A";
+
+const tiles = [
+  { label: "Cities with before & after", value: counters.citiesWithData },
+  { label: "Total cities", value: counters.totalCities },
+  { label: "SUM Living Labs", value: counters.sumLivingLabs },
+  { label: "Contributing cities", value: counters.contributingCities },
+  { label: "KPI definitions", value: kpiDefs.length },
+  { label: "Last model run", value: lastModelRun },
+];
+---
+
+<Layout
+  role="visitor"
+  breadcrumbs={[{ label: "Home", href: "/" }, { label: "Data & scientific tools" }]}
+  backHref="/"
+>
+  <section class="py-8 px-4">
+    <div class="max-w-6xl mx-auto">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">
+        Data &amp; scientific tools
+      </h1>
+      <p class="text-gray-600 mb-6">
+        Platform status and data coverage across all cities and KPI domains.
+      </p>
+      <StatusTiles tiles={tiles} client:load />
+    </div>
+  </section>
+
+  <section class="py-8 px-4">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-xl font-bold text-gray-900 mb-2">Data coverage matrix</h2>
+      <p class="text-sm text-gray-600 mb-4">
+        Cities × KPI groups. Each cell shows whether a city has before &amp; after
+        data (<strong>●</strong>), baseline only (<strong>◑</strong>), or no data
+        (<strong>○</strong>).
+      </p>
+      <CoverageMatrix matrix={matrix} client:load />
+    </div>
+  </section>
+
+  <section class="py-8 px-4">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">Dashboards &amp; tools</h2>
+      <QuickLinks client:load />
+    </div>
+  </section>
+
+  <section class="py-8 px-4 text-center border-t border-gray-200">
+    <p class="text-gray-600 mb-3">
+      Looking for curated insights and evidence-based recommendations?
+    </p>
+    <a href={getUrl("/insights/goals")} class="text-primary font-medium hover:underline">
+      Switch to Insights for decision-makers →
+    </a>
+  </section>
+</Layout>
