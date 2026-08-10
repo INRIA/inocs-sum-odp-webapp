@@ -31,6 +31,8 @@ interface ExperienceMenu {
   label: string;
   /** Default route used when switching to this experience without a counterpart match */
   home: string;
+  /** Short phrase describing the experience, shown next to the switch */
+  descriptor: string;
   items: MenuItem[];
 }
 
@@ -39,6 +41,8 @@ export interface ExperienceState {
   active: ExperienceId | null;
   /** Nav items for the active experience (or Data by default for shared routes) */
   menu: MenuItem[];
+  /** Short phrase describing the active experience */
+  descriptor: string;
   switchSegments: { label: string; href: string; active: boolean }[];
   isShared: boolean;
   /** ?view= value present in the URL, if any */
@@ -74,17 +78,19 @@ const ROUTES: RouteEntry[] = [
     experience: "insights",
     counterpart: "/living-lab-city/:labId",
   },
-  { pattern: "/insights/goals", experience: "insights" },
+  { pattern: "/insights/measures", experience: "insights" },
   { pattern: "/insights/cities", experience: "insights" },
   { pattern: "/insights/plan", experience: "insights" },
   { pattern: "/insights", experience: "insights" },
+
+  // Insights — Join page
+  { pattern: "/join", experience: "insights" },
 
   // Shared surfaces — keep visitor's current menu
   { pattern: "/tools/resources", experience: "shared" }, // prefix match
   { pattern: "/faq", experience: "shared" },
   { pattern: "/legal-notice", experience: "shared" },
   { pattern: "/privacy-policy", experience: "shared" },
-  { pattern: "/join", experience: "shared" },
 ];
 
 // ---------------------------------------------------------------------------
@@ -97,6 +103,7 @@ const DATA_MENU: ExperienceMenu = {
   id: "data",
   label: "Data & scientific tools",
   home: "/data/kpis",
+  descriptor: "Full datasets and analytical tools",
   items: [
     { label: "Home", href: "/" },
     { label: "Living Labs", subItems: [] }, // populated from API at runtime
@@ -135,13 +142,14 @@ const DATA_MENU: ExperienceMenu = {
 const INSIGHTS_MENU: ExperienceMenu = {
   id: "insights",
   label: "Insights",
-  home: "/insights/goals",
+  home: "/insights/measures",
+  descriptor: "Evidence for decision makers",
   items: [
     { label: "Home", href: "/" },
-    { href: "/insights/goals", label: "What works" }, // Epic 8
-    { href: "/insights/cities", label: "Cities" }, // Epic 9
-    { href: "/insights/plan", label: "Plan for my city" }, // Epic 10
-    { href: "/join", label: "Join & resources" }, // T18
+    { href: "/insights/cities", label: "Cities performance" }, // Epic 9
+    { href: "/insights/goals", label: "Observed Policy measures" }, // Epic 8
+    // { href: "/insights/plan", label: "Plan for my city" }, // Epic 10
+    { href: "/join", label: "Contribute" }, // T18
   ],
 };
 
@@ -307,32 +315,35 @@ export function resolveExperience(
 
   const switchSegments = [
     {
-      label: "Data & tools",
-      href: dataHref,
-      active: active === "data",
-    },
-    {
       label: "Insights",
       href: insightsHref,
       active: active === "insights",
+    },
+    {
+      label: "Data & tools",
+      href: dataHref,
+      active: active === "data",
     },
   ];
 
   // 6. Build menu: inject Living Labs into Data menu
   let menu: MenuItem[];
-  if (active === "insights") {
-    menu = INSIGHTS_MENU.items;
-  } else {
-    // Data experience (or null landing — show Data menu as default)
+  if (active === "data") {
     menu = DATA_MENU.items.map((item) => {
       if (item.label === "Living Labs") {
         return { ...item, subItems: labsItems ?? [] };
       }
       return item;
     });
+  } else {
+    // Insights experience, or landing page (default to Insights menu)
+    menu = INSIGHTS_MENU.items;
   }
 
-  return { active, menu, switchSegments, isShared, viewParam };
+  const descriptor =
+    active === "data" ? DATA_MENU.descriptor : INSIGHTS_MENU.descriptor;
+
+  return { active, menu, descriptor, switchSegments, isShared, viewParam };
 }
 
 // ---------------------------------------------------------------------------

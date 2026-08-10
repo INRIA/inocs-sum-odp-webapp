@@ -1,7 +1,7 @@
 ---
 import "../styles/global.css";
 import Footer from "../components/Footer.astro";
-import { SidebarMenu, SiteNavBar } from "../components/react/ui";
+import { SidebarMenu, SiteHeader } from "../components/react/ui";
 import ApiClient from "../lib/api-client/ApiClient";
 import { getUrl, isAdminUser } from "../lib/helpers";
 import type { BreadcrumbItem } from "../components/Breadcrumbs";
@@ -104,16 +104,17 @@ const footerMenuItems = [
   <body>
     {
       role === "visitor" && (
-        <SiteNavBar
+        <SiteHeader
           menuItems={experienceState.menu}
           experience={experienceState}
           userInfo={userInfo}
           currentLivingLab={currentLivingLab}
+          currentPath={Astro.url.pathname}
           client:load
         >
           <PageHeaderNavigation breadcrumbs={breadcrumbs} backHref={backHref} />
           <slot />
-        </SiteNavBar>
+        </SiteHeader>
       )
     }
     {

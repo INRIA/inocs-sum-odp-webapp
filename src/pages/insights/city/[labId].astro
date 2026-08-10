@@ -18,7 +18,7 @@ const { labId } = Astro.params;
 const api = new ApiClient(Astro.request);
 
 const lab = (await api.getLivingLab(String(labId))) as ILivingLabPopulated | null;
-if (!lab) return Astro.redirect("/insights/goals");
+if (!lab) return Astro.redirect("/insights/measures");
 
 const kpiResultGroups = (lab.kpi_results ?? []) as IKpiResultGroup[];
 const dataStatus = getCityDataStatus(kpiResultGroups);
@@ -114,10 +114,10 @@ const kpiResources = rawResources
   role="visitor"
   breadcrumbs={[
     { label: "Home", href: "/" },
-    { label: "Insights", href: "/insights/goals" },
+    { label: "Insights", href: "/insights/measures" },
     { label: lab.name },
   ]}
-  backHref="/insights/goals"
+  backHref="/insights/measures"
 >
   {
     !hasData ? (

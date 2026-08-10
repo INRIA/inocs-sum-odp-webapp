@@ -108,7 +108,7 @@ describe("resolveExperience", () => {
   it("returns Insights menu on an Insights route", () => {
     const state = resolveExperience("/insights/city/1", sp());
     const labels = state.menu.map((m) => m.label);
-    expect(labels).toContain("What works");
+    expect(labels).toContain("Policy measures");
     expect(labels).toContain("Cities");
   });
 
@@ -139,7 +139,7 @@ describe("resolveExperience", () => {
   it("insights switch segment href falls back to /insights when no counterpart", () => {
     const state = resolveExperience("/data/measures", sp());
     const insightsSeg = state.switchSegments.find((s) => s.label === "Insights");
-    expect(insightsSeg?.href).toBe("/insights/goals");
+    expect(insightsSeg?.href).toBe("/insights/measures");
   });
 
   it("resolves /join to shared experience", () => {
@@ -157,13 +157,13 @@ describe("resolveExperience", () => {
     expect(state.active).toBe("data");
   });
 
-  it("resolves /insights/goals to insights experience", () => {
-    const state = resolveExperience("/insights/goals", sp());
+  it("resolves /insights/measures to insights experience", () => {
+    const state = resolveExperience("/insights/measures", sp());
     expect(state.active).toBe("insights");
   });
 
-  it("resolves /insights/goals/reduce-car-use to insights experience", () => {
-    const state = resolveExperience("/insights/goals/reduce-car-use", sp());
+  it("resolves /insights/measures/reduce-car-use to insights experience", () => {
+    const state = resolveExperience("/insights/measures/reduce-car-use", sp());
     expect(state.active).toBe("insights");
   });
 

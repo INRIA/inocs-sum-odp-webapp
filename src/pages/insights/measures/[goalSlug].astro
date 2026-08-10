@@ -12,7 +12,7 @@ const { goalSlug } = Astro.params;
 const goal = GOALS.find((g) => g.slug === goalSlug);
 
 if (!goal) {
-  return Astro.redirect(getUrl("/insights/goals"));
+  return Astro.redirect(getUrl("/insights/measures"));
 }
 
 const api = new ApiClient(Astro.request);
@@ -28,11 +28,11 @@ const measures = getMeasuresForGoal(goal, successItems, livingLabs);
   role="visitor"
   breadcrumbs={[
     { label: "Home", href: getUrl("/") },
-    { label: "Insights", href: getUrl("/insights/goals") },
-    { label: "What works", href: getUrl("/insights/goals") },
+    { label: "Insights", href: getUrl("/insights/measures") },
+    { label: "Policy measures", href: getUrl("/insights/measures") },
     { label: goal.title },
   ]}
-  backHref={getUrl("/insights/goals")}
+  backHref={getUrl("/insights/measures")}
 >
   <div class="mx-auto max-w-3xl px-4 py-12">
     <div class="mb-8">
