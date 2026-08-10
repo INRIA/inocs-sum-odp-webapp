@@ -75,6 +75,7 @@ const ROUTES: RouteEntry[] = [
     counterpart: "/living-lab-city/:labId",
   },
   { pattern: "/insights/goals", experience: "insights" },
+  { pattern: "/insights/cities", experience: "insights" },
   { pattern: "/insights/plan", experience: "insights" },
   { pattern: "/insights", experience: "insights" },
 
@@ -134,7 +135,7 @@ const DATA_MENU: ExperienceMenu = {
 const INSIGHTS_MENU: ExperienceMenu = {
   id: "insights",
   label: "Insights",
-  home: "/insights",
+  home: "/insights/goals",
   items: [
     { label: "Home", href: "/" },
     { href: "/insights/goals", label: "What works" }, // Epic 8

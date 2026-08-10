@@ -34,24 +34,10 @@ export function countCitiesForGoal(
   successItems: IJobRunImpactAnalysisSuccess[],
 ): number {
   const groups = getGroupsForGoal(goal, successItems);
-  const qualifyingMeasureIds = new Set<number>();
-  for (const group of groups) {
-    for (const mc of group.results.measure_coefficients) {
-      if (mc.times_implemented > 0) {
-        qualifyingMeasureIds.add(mc.id);
-      }
-    }
-  }
-
   const cityIds = new Set<number>();
   for (const group of groups) {
     for (const la of group.results.living_labs_analysis) {
-      for (const m of la.measures) {
-        const mId = Number(m.measure_id);
-        if (qualifyingMeasureIds.has(mId)) {
-          cityIds.add(la.id);
-        }
-      }
+      cityIds.add(la.id);
     }
   }
   return cityIds.size;
@@ -102,18 +88,13 @@ export function computeTopFindings(
     for (const mc of item.results.measure_coefficients) {
       if (mc.times_implemented <= 0) continue;
 
-      const cityIds = new Set<number>();
-      for (const la of item.results.living_labs_analysis) {
-        if (la.measures.some((m) => Number(m.measure_id) === mc.id)) {
-          cityIds.add(la.id);
-        }
-      }
+      const cityCount = item.results.living_labs_analysis.length;
 
       candidates.push({
         measureName: mc.name,
         direction: mc.coefficient > 0 ? "improvement" : "decline",
         kpiGroupName: item.group_name,
-        cityCount: cityIds.size,
+        cityCount,
         evidenceLabel: evidenceLabel(mc.times_implemented),
         goalSlug: matchingGoal.slug,
         timesImplemented: mc.times_implemented,
@@ -179,12 +160,9 @@ export function getMeasuresForGoal(
       if (mc.times_implemented === 0) continue;
       const existing = measureMap.get(mc.id);
       if (!existing || mc.times_implemented > existing.timesImplemented) {
-        const cityIds = new Set<number>();
-        for (const la of group.results.living_labs_analysis) {
-          if (la.measures.some((m) => Number(m.measure_id) === mc.id)) {
-            cityIds.add(la.id);
-          }
-        }
+        const cityIds = new Set(
+          group.results.living_labs_analysis.map((la) => la.id),
+        );
         measureMap.set(mc.id, {
           name: mc.name,
           coefficient: mc.coefficient,

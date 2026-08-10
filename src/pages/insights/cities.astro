@@ -1,0 +1,144 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { InsightsCityMap } from "../../components/react/Insights";
+import ApiClient from "../../lib/api-client/ApiClient";
+import { getUrl } from "../../lib/helpers";
+import { getFullCityStatus } from "../../lib/utils/cityStatus";
+import type { ILivingLabPopulated } from "../../types";
+
+const api = new ApiClient(Astro.request);
+const livingLabsRaw = (await api.getLivingLabs([])) ?? [];
+const livingLabs = livingLabsRaw as ILivingLabPopulated[];
+
+const cities = livingLabs
+  .map((lab) => {
+    const status = getFullCityStatus(lab.id, lab.kpi_results);
+    return {
+      id: lab.id,
+      name: lab.name,
+      country: lab.country ?? null,
+      ...status,
+    };
+  })
+  .sort((a, b) => a.name.localeCompare(b.name));
+
+const citiesWithEvidence = cities
+  .filter((c) => c.dataStatus === "has_data")
+  .map((c) => ({ id: c.id, name: c.name }));
+
+const sumLabs = cities.filter((c) => c.type === "sum_living_lab");
+const contributingCities = cities.filter((c) => c.type === "contributing_city");
+---
+
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: getUrl("/") },
+    { label: "Insights", href: getUrl("/insights/goals") },
+    { label: "Cities" },
+  ]}
+  backHref={getUrl("/insights/goals")}
+>
+  <div class="mx-auto max-w-5xl px-4 py-12">
+    <div class="mb-10">
+      <h1 class="text-3xl font-bold text-gray-900 mb-3">Cities</h1>
+      <p class="text-gray-500 text-lg max-w-2xl">
+        Browse the cities contributing to SUM — Living Labs with active
+        mobility interventions and contributing cities sharing their data.
+      </p>
+    </div>
+
+    {
+      citiesWithEvidence.length > 0 && (
+        <section class="mb-12">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">
+            Cities with evidence
+          </h2>
+          <InsightsCityMap cities={citiesWithEvidence} client:load />
+        </section>
+      )
+    }
+
+    {
+      sumLabs.length > 0 && (
+        <section class="mb-12">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">
+            SUM Living Labs
+          </h2>
+          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {sumLabs.map((city) => (
+              <a
+                href={getUrl(`/insights/city/${city.id}`)}
+                class="group rounded-xl border border-gray-200 p-5 hover:border-primary/40 hover:shadow-sm transition-all"
+              >
+                <div class="flex items-start justify-between gap-2 mb-2">
+                  <h3 class="font-semibold text-gray-900 group-hover:text-primary transition-colors">
+                    {city.name}
+                  </h3>
+                  <span
+                    class:list={[
+                      "shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
+                      city.dataStatus === "has_data"
+                        ? "bg-green-50 text-green-700"
+                        : "bg-gray-100 text-gray-500",
+                    ]}
+                  >
+                    {city.statusLabel}
+                  </span>
+                </div>
+                {city.country && (
+                  <p class="text-sm text-gray-500">{city.country}</p>
+                )}
+              </a>
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    {
+      contributingCities.length > 0 && (
+        <section class="mb-12">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">
+            Contributing cities
+          </h2>
+          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {contributingCities.map((city) => (
+              <a
+                href={getUrl(`/insights/city/${city.id}`)}
+                class="group rounded-xl border border-gray-200 p-5 hover:border-primary/40 hover:shadow-sm transition-all"
+              >
+                <div class="flex items-start justify-between gap-2 mb-2">
+                  <h3 class="font-semibold text-gray-900 group-hover:text-primary transition-colors">
+                    {city.name}
+                  </h3>
+                  <span
+                    class:list={[
+                      "shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
+                      city.dataStatus === "has_data"
+                        ? "bg-green-50 text-green-700"
+                        : "bg-gray-100 text-gray-500",
+                    ]}
+                  >
+                    {city.statusLabel}
+                  </span>
+                </div>
+                {city.country && (
+                  <p class="text-sm text-gray-500">{city.country}</p>
+                )}
+              </a>
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    {
+      cities.length === 0 && (
+        <div class="rounded-xl border border-gray-100 bg-gray-50 p-8 text-center text-gray-400">
+          No cities registered yet.
+        </div>
+      )
+    }
+  </div>
+</Layout>

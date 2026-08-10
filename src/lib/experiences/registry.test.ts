@@ -139,7 +139,7 @@ describe("resolveExperience", () => {
   it("insights switch segment href falls back to /insights when no counterpart", () => {
     const state = resolveExperience("/data/measures", sp());
     const insightsSeg = state.switchSegments.find((s) => s.label === "Insights");
-    expect(insightsSeg?.href).toBe("/insights");
+    expect(insightsSeg?.href).toBe("/insights/goals");
   });
 
   it("resolves /join to shared experience", () => {

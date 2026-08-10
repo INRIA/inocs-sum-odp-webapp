@@ -47,7 +47,10 @@ const labs = livingLabsData?.map((lab) => {
   return {
     id: String(lab.id),
     name: lab.name,
-    coordinates: { lat: lab.lat, lng: lab.lng },
+    coordinates:
+      lab.lat != null && lab.lng != null
+        ? { lat: parseFloat(lab.lat), lng: parseFloat(lab.lng) }
+        : null,
     radius: lab.radius ?? 50,
     cityType,
     dataStatus,
@@ -62,6 +65,20 @@ const labs = livingLabsData?.map((lab) => {
 
 const experienceDoors = [
   {
+    id: "insights",
+    title: "Insights for decision-makers",
+    audience: "For city planners, policy makers, and transport operators",
+    description:
+      "Discover what works, compare cities, and plan sustainable mobility strategies guided by evidence from the SUM project.",
+    entries: [
+      { label: "What works", href: "/insights/goals" },
+      { label: "Cities", href: "/insights/cities" },
+      { label: "Plan for my city", href: "/insights/plan" },
+    ],
+    cta: { label: "Explore insights", href: "/insights/goals" },
+    colorAccent: "secondary",
+  },
+  {
     id: "data",
     title: "Data & scientific tools",
     audience: "For researchers, data analysts, and cities contributing data",
@@ -75,20 +92,6 @@ const experienceDoors = [
     cta: { label: "Explore data", href: "/data/kpis" },
     colorAccent: "primary",
   },
-  {
-    id: "insights",
-    title: "Insights for decision-makers",
-    audience: "For city planners, policy makers, and transport operators",
-    description:
-      "Discover what works, compare cities, and plan sustainable mobility strategies guided by evidence from the SUM project.",
-    entries: [
-      { label: "What works", href: "/insights/goals" },
-      { label: "Cities", href: "/insights/cities" },
-      { label: "Plan for my city", href: "/insights/plan" },
-    ],
-    cta: { label: "Explore insights", href: "/insights" },
-    colorAccent: "secondary",
-  },
 ];
 
 const trustCounters = [
@@ -100,8 +103,15 @@ const trustCounters = [
   { value: parentKpis?.length ?? 0, label: "KPIs monitored" },
 ];
 
-const curatorName = "SUM Consortium Data Team"; // placeholder — consortium to confirm
-const lastUpdated = "August 2026"; // placeholder — can be derived from latest KPI result date
+const curatorName = "SUM Consortium"; // placeholder — consortium to confirm
+const mostRecentDate = livingLabsData
+  ?.flatMap((lab) => [lab.validated_at, lab.updated_at])
+  .filter((d): d is Date => d != null)
+  .map((d) => new Date(d).getTime())
+  .sort((a, b) => b - a)[0];
+const lastUpdated = mostRecentDate
+  ? new Date(mostRecentDate).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+  : "—";
 ---
 
 <Layout role="visitor">
@@ -130,6 +140,25 @@ const lastUpdated = "August 2026"; // placeholder — can be derived from latest
     </div>
   </div>
 
+  <!-- Trust strip -->
+  <section class="bg-gray-50 border-y border-gray-200 py-6 px-4">
+    <div class="max-w-6xl mx-auto">
+      <div class="flex flex-wrap justify-center gap-x-8 gap-y-3 text-center">
+        {trustCounters.map(counter => (
+          <div class="flex flex-col items-center">
+            <span class="text-2xl font-bold text-primary">{counter.value}</span>
+            <span class="text-xs text-gray-500 max-w-24">{counter.label}</span>
+          </div>
+        ))}
+      </div>
+      <div class="text-center mt-3 text-xs text-gray-400 italic">
+        <span>Curated by {curatorName}</span>
+        <br>
+        <span>Last updated on {lastUpdated}</span>
+      </div>
+    </div>
+  </section>
+
   <!-- Two experience doors -->
   <section class="py-12 px-4">
     <div class="max-w-6xl mx-auto">
@@ -138,7 +167,7 @@ const lastUpdated = "August 2026"; // placeholder — can be derived from latest
       </h2>
       <div class="grid md:grid-cols-2 gap-6">
         {experienceDoors.map(door => (
-          <div class={`rounded-2xl border-2 border-${door.colorAccent}/20 bg-white p-8 shadow-sm hover:shadow-md transition-shadow`}>
+          <div class="rounded-2xl border-2 border-warning/20 bg-white p-8 shadow-sm hover:shadow-md transition-shadow">
             <h3 class={`text-xl font-bold text-${door.colorAccent} mb-1`}>{door.title}</h3>
             <p class="text-sm text-gray-500 mb-3">{door.audience}</p>
             <p class="text-gray-600 mb-6">{door.description}</p>
@@ -154,25 +183,6 @@ const lastUpdated = "August 2026"; // placeholder — can be derived from latest
             </RButton>
           </div>
         ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- Trust strip -->
-  <section class="bg-gray-50 border-y border-gray-200 py-6 px-4">
-    <div class="max-w-6xl mx-auto">
-      <div class="flex flex-wrap justify-center gap-x-8 gap-y-3 text-center">
-        {trustCounters.map(counter => (
-          <div class="flex flex-col items-center">
-            <span class="text-2xl font-bold text-primary">{counter.value}</span>
-            <span class="text-xs text-gray-500 max-w-24">{counter.label}</span>
-          </div>
-        ))}
-      </div>
-      <div class="text-center mt-3 text-xs text-gray-400">
-        <span>Curated by: {curatorName}</span>
-        <span class="mx-2">·</span>
-        <span>Last updated: {lastUpdated}</span>
       </div>
     </div>
   </section>

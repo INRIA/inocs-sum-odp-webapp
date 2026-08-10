@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { RButton } from "./ui";
 import { getUrl } from "../../lib/helpers";
-import { MapViewer, type MarkerData } from "./MapViewer";
+import { MapViewer, type MarkerData, type MarkerShape } from "./MapViewer";
 import { MapLegend } from "./MapLegend";
 import { XMarkIcon, MapIcon } from "@heroicons/react/24/outline";
 import { displayLabType } from "../../lib/labels";
 import type { CityType, CityDataStatus } from "../../lib/utils/cityStatus";
-import { COLOR_GREEN } from "../../styles/constants";
+import { COLOR_ORANGE, COLOR_BLUE } from "../../styles/constants";
 
 type LivingLab = {
   id: string;
   name: string;
-  coordinates: { lat: number; lng: number };
+  coordinates: { lat: number; lng: number } | null;
   radius: number;
   cityType: CityType;
   dataStatus: CityDataStatus;
@@ -45,8 +45,8 @@ export function LivingLabsMapSection({ labs }: Props) {
   }, [selectedLab]);
 
   const getMarkerColor = (lab: LivingLab): string => {
-    // Cities with data get a green-ish secondary color; pending get gray
-    return lab.dataStatus === "has_data" ? COLOR_GREEN : "#9ca3af";
+    if (lab.cityType === "contributing_city") return COLOR_BLUE;
+    return lab.dataStatus === "has_data" ? COLOR_ORANGE : COLOR_BLUE;
   };
 
   const getStatusBadgeClass = (lab: LivingLab): string => {
@@ -55,15 +55,22 @@ export function LivingLabsMapSection({ labs }: Props) {
       : "bg-gray-100 text-gray-500";
   };
 
-  // convert labs to MarkerData for MapViewer
-  const markers: MarkerData[] = labs.map((lab) => ({
-    id: lab.id,
-    name: lab.name,
-    coordinates: lab.coordinates,
-    radius: lab.radius * 1000, // convert km to meters
-    color: getMarkerColor(lab),
-    meta: { lab },
-  }));
+  const getMarkerShape = (lab: LivingLab): MarkerShape => {
+    return lab.cityType === "contributing_city" ? "diamond" : "circle";
+  };
+
+  // convert labs to MarkerData for MapViewer (only labs with data and valid coordinates)
+  const markers: MarkerData[] = labs
+    .filter((lab) => lab.coordinates !== null && lab.dataStatus === "has_data")
+    .map((lab) => ({
+      id: lab.id,
+      name: lab.name,
+      coordinates: lab.coordinates!,
+      radius: lab.radius * 1000, // convert km to meters
+      color: getMarkerColor(lab),
+      shape: getMarkerShape(lab),
+      meta: { lab },
+    }));
 
   return (
     <section id="labs-section" className="py-12 px-4 sm:px-8">
@@ -111,7 +118,7 @@ export function LivingLabsMapSection({ labs }: Props) {
             >
               <MapIcon className="h-5 w-5 text-primary" />
               <span className="text-sm font-medium text-primary">
-                Show {labs.length + " "} cities
+                All {labs.length} cities
               </span>
             </button>
           )}
@@ -122,7 +129,7 @@ export function LivingLabsMapSection({ labs }: Props) {
               {/* List Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200">
                 <h3 className="font-semibold text-dark">
-                  {labs.length + " "} cities
+                  All {labs.length} cities
                 </h3>
                 <button
                   onClick={() => setIsListOpen(false)}

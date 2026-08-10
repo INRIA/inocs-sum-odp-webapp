@@ -43,29 +43,15 @@ export const MAP_LEGEND_ENTRIES = [
   {
     type: "sum_living_lab" as CityType,
     dataStatus: "has_data" as CityDataStatus,
-    label: "SUM Living Lab — data available",
+    label: "SUM Living Lab",
     symbol: "circle",
-    color: "secondary",
-  },
-  {
-    type: "sum_living_lab" as CityType,
-    dataStatus: "data_pending" as CityDataStatus,
-    label: "SUM Living Lab — data pending",
-    symbol: "circle",
-    color: "gray",
+    color: "warning",
   },
   {
     type: "contributing_city" as CityType,
     dataStatus: "has_data" as CityDataStatus,
-    label: "Contributing city — data available",
+    label: "Contributing city",
     symbol: "diamond",
-    color: "secondary",
-  },
-  {
-    type: "contributing_city" as CityType,
-    dataStatus: "data_pending" as CityDataStatus,
-    label: "Contributing city — data pending",
-    symbol: "diamond",
-    color: "gray",
+    color: "primary",
   },
 ] as const;

@@ -140,7 +140,7 @@ describe("countMeasuresForGoal", () => {
 });
 
 describe("countCitiesForGoal", () => {
-  it("counts cities that implemented at least one qualifying measure", () => {
+  it("counts all cities in the analysis for matching groups", () => {
     const count = countCitiesForGoal(safetyGoal, mockSuccessItems);
     expect(count).toBe(2);
   });
