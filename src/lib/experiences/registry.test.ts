@@ -146,4 +146,14 @@ describe("resolveExperience", () => {
     const state = resolveExperience("/join", sp());
     expect(state.isShared).toBe(true);
   });
+
+  it("resolves /methods/glossary to data experience", () => {
+    const state = resolveExperience("/methods/glossary", sp());
+    expect(state.active).toBe("data");
+  });
+
+  it("resolves /methods/models to data experience", () => {
+    const state = resolveExperience("/methods/models", sp());
+    expect(state.active).toBe("data");
+  });
 });

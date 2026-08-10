@@ -1,0 +1,33 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { GLOSSARY } from "../../lib/labels";
+
+const sortedTerms = Object.entries(GLOSSARY).sort(([a], [b]) =>
+  a.localeCompare(b)
+);
+---
+
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Methods & quality" },
+    { label: "Glossary" },
+  ]}
+  backHref="/methods/evaluation-framework"
+>
+  <div class="mx-auto px-4 py-8 max-w-4xl">
+    <h1 class="text-3xl font-bold text-gray-900 mb-3">Glossary</h1>
+    <p class="text-gray-600 mb-8">
+      Technical terms used across the SUM Open Data Platform.
+    </p>
+    <dl class="space-y-4">
+      {sortedTerms.map(([term, definition]) => (
+        <div class="border-b border-gray-100 pb-3">
+          <dt class="font-semibold text-gray-900">{term}</dt>
+          <dd class="text-gray-600 mt-1">{definition}</dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+</Layout>

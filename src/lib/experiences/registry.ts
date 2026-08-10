@@ -54,6 +54,7 @@ const ROUTES: RouteEntry[] = [
   { pattern: "/", experience: "landing" },
 
   // Data experience
+  { pattern: "/methods", experience: "data" }, // prefix match covers all /methods/* routes
   { pattern: "/data/kpis", experience: "data" },
   { pattern: "/data/modal-split", experience: "data" },
   { pattern: "/data/measures", experience: "data" },
@@ -112,6 +113,18 @@ const DATA_MENU: ExperienceMenu = {
       ],
     },
     { href: "/tools/resources", label: "Resources" },
+    {
+      label: "Methods & quality",
+      subItems: [
+        { href: "/methods/evaluation-framework", label: "Evaluation framework" },
+        { href: "/methods/data-collection", label: "Data collection" },
+        { href: "/methods/data-quality", label: "Data quality" },
+        { href: "/methods/models", label: "How the models work" },
+        { href: "/methods/limitations", label: "Limitations" },
+        { href: "/methods/glossary", label: "Glossary" },
+        { href: "/faq", label: "FAQ" },
+      ],
+    },
   ],
 };
 

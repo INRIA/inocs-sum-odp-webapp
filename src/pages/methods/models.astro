@@ -1,0 +1,115 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Methods & quality" },
+    { label: "How the models work" },
+  ]}
+  backHref="/methods/evaluation-framework"
+>
+  <div class="mx-auto px-4 py-8 max-w-4xl prose prose-gray">
+    <h1>How the Models Work</h1>
+
+    <section>
+      <h2>Impact analysis model — ridge regression</h2>
+      <p>
+        The impact analysis tool estimates the contribution of each mobility measure to observed
+        KPI changes across Living Labs. It uses <strong>ridge regression</strong>, a variant of
+        linear regression designed to handle situations where the number of predictors (measures)
+        is large relative to the number of observations (cities).
+      </p>
+
+      <h3>What it does</h3>
+      <p>
+        Ridge regression fits a model that relates each measure's presence (binary: implemented
+        or not) to the observed change in a KPI value. The regularisation parameter (lambda)
+        prevents any single measure from dominating the model when data coverage is limited.
+      </p>
+
+      <h3>Inputs</h3>
+      <ul>
+        <li>Before/after KPI values per city</li>
+        <li>Binary indicator of which measures each city implemented</li>
+        <li>City-level covariates (where available)</li>
+      </ul>
+
+      <h3>Outputs</h3>
+      <ul>
+        <li>Estimated coefficient for each measure — its associated direction of KPI change</li>
+        <li>Evidence strength badge based on data coverage (Limited / Moderate / Strong)</li>
+        <li>Ranking of measures by estimated impact magnitude</li>
+      </ul>
+
+      <h3>Important assumptions</h3>
+      <p>
+        The model assumes linear relationships between measures and KPI changes. It cannot
+        establish causal relationships — only statistical associations. Results should be
+        interpreted in conjunction with local context. See
+        <a href="/methods/limitations" class="text-primary hover:underline">Limitations</a> for details.
+      </p>
+
+      <p>
+        <a href="/tools/impact_analysis" class="text-primary hover:underline">Use the impact analysis tool →</a>
+      </p>
+    </section>
+
+    <section>
+      <h2>MCDA model — PROMETHEE II</h2>
+      <p>
+        The multi-criteria decision analysis (MCDA) tool uses the
+        <strong>PROMETHEE II</strong> (Preference Ranking Organisation METHod for Enrichment
+        Evaluations) method to rank business activities for New Shared Mobility according to
+        multiple criteria simultaneously.
+      </p>
+
+      <h3>What it does</h3>
+      <p>
+        PROMETHEE II computes pairwise preference comparisons between alternatives (NSM business
+        activities) across multiple weighted goals. For each pair, it calculates how much one
+        alternative is preferred over another. Aggregating these pairwise comparisons yields
+        a net flow score (phi) for each alternative, and the alternatives are ranked by descending
+        phi value.
+      </p>
+
+      <h3>Inputs</h3>
+      <ul>
+        <li>Set of alternatives (NSM business activities)</li>
+        <li>Goal weights per stakeholder perspective</li>
+        <li>Performance scores per alternative per goal</li>
+      </ul>
+
+      <h3>Outputs</h3>
+      <ul>
+        <li>Net flow (phi) score per alternative — higher is better</li>
+        <li>Ranked list of alternatives by perspective</li>
+        <li>GAIA plane visualisation showing trade-offs and stakeholder alignment</li>
+      </ul>
+
+      <h3>GAIA companion</h3>
+      <p>
+        The GAIA (Geometrical Analysis for Interactive Aid) plane is a 2D projection of the
+        PROMETHEE results that helps visualise conflicts and synergies between goals and
+        alternatives. The decision axis (d-axis) indicates the overall PROMETHEE ranking direction.
+      </p>
+
+      <h3>Important assumptions</h3>
+      <p>
+        Goal weights reflect stakeholder priorities from expert surveys and may not reflect all
+        real-world contexts. Performance scores are derived from platform data. See
+        <a href="/methods/limitations" class="text-primary hover:underline">Limitations</a> for details.
+      </p>
+
+      <p>
+        <a href="/tools/mcda_analysis/" class="text-primary hover:underline">Use the decision tool →</a>
+      </p>
+    </section>
+
+    <nav class="not-prose mt-8 flex gap-4 text-sm">
+      <a href="/methods/limitations" class="text-primary hover:underline">Next: Limitations →</a>
+    </nav>
+  </div>
+</Layout>
