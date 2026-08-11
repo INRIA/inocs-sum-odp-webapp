@@ -5,7 +5,8 @@ export const ADMIN_ROLE_ID = 1;
 
 /** Returns true if the given user holds the Admin role. */
 export function isAdminUser(user: User | undefined | null): boolean {
-  const roleId: number | string | "bigint" | undefined = user?.role_id;
+  if (!user) return false;
+  const roleId: number | string | "bigint" | undefined = user.role_id;
   if (roleId === undefined) {
     console.warn("User object does not have a role_id field:", user);
     return false;
