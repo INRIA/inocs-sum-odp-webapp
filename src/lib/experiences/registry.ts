@@ -106,7 +106,6 @@ const DATA_MENU: ExperienceMenu = {
         { href: "/data/measures", label: "Policy measures" },
         { href: "/data/kpis", label: "KPIs" },
         { href: "/data/modal-split", label: "Modal split" },
-        { href: "/methods/collection-plan", label: "Data collection process" },
       ],
     },
     {
@@ -118,13 +117,13 @@ const DATA_MENU: ExperienceMenu = {
     },
     { href: "/tools/resources", label: "Resources" },
     {
-      label: "Methods & quality",
+      label: "Evaluation methods",
       subItems: [
-        { href: "/methods/evaluation-framework", label: "Evaluation framework" },
         { href: "/methods/collection-plan", label: "Data collection" },
+        { href: "/methods/evaluation-framework", label: "Evaluation framework" },
         { href: "/methods/data-quality", label: "Data quality" },
-        { href: "/methods/models", label: "How the models work" },
-        { href: "/methods/glossary", label: "Glossary" },
+        { href: "/methods/models", label: "Impact analysis methodology" },
+        // { href: "/methods/glossary", label: "Glossary" },
         { href: "/faq", label: "FAQ" },
       ],
     },

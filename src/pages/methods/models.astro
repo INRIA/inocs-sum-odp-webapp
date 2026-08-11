@@ -40,55 +40,66 @@ const methodologyQuestions = [
   role="visitor"
   breadcrumbs={[
     { label: "Home", href: "/" },
-    { label: "Methods & quality" },
-    { label: "How the models work" },
+    { label: "Evaluation methods" },
+    { label: "Impact analysis methodology" },
   ]}
   backHref="/methods/evaluation-framework"
 >
-  <div class="mx-auto px-4 py-8 max-w-[1240px]">
-    <h1 class="text-3xl font-bold text-gray-900 mb-3">How the Models Work</h1>
+  <div class="mx-auto px-4 py-8 max-w-8xl">
+    <h1 class="text-3xl font-bold text-gray-900 mb-3">
+      Impact analysis methodology
+    </h1>
     <p class="text-base text-dark max-w-[70ch] mb-2">
-      The platform runs two complementary analyses: one estimates what each mobility
-      measure contributed to observed KPI changes, the other ranks options across
-      competing criteria.
+      The platform runs two complementary analyses: one estimates what each
+      mobility measure contributed to observed KPI changes, the other ranks
+      options across competing criteria.
     </p>
     <div class="w-14 h-1 rounded bg-primary mb-8"></div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-7 items-stretch">
-
       <!-- Left panel: Impact analysis -->
-      <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+      <div
+        class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden flex flex-col"
+      >
         <div class="h-1 bg-primary"></div>
 
         <div class="px-7 pt-6 pb-5">
-          <span class="inline-block text-xs font-bold tracking-widest uppercase text-primary bg-primary/7 px-3 py-1 rounded-full mb-3">
+          <span
+            class="inline-block text-xs font-bold tracking-widest uppercase text-primary bg-primary/7 px-3 py-1 rounded-full mb-3"
+          >
             Model 1 · Regression
           </span>
-          <h2 class="text-xl font-bold text-gray-900 mb-3">Impact analysis model</h2>
+          <h2 class="text-xl font-bold text-gray-900 mb-3">
+            Impact analysis model
+          </h2>
           <p class="text-sm text-dark leading-relaxed mb-5 max-w-[56ch]">
             The impact analysis tool estimates the contribution of each mobility
             measure to observed KPI changes across Living Labs. It uses <strong
               >ridge regression</strong
-            >, a variant of linear regression designed to handle situations where
-            the number of predictors (measures) is large relative to the number of
-            observations (cities).
+            >, a variant of linear regression designed to handle situations
+            where the number of predictors (measures) is large relative to the
+            number of observations (cities).
           </p>
           <a
             href="/tools/impact_analysis"
             class="inline-flex items-center gap-2 bg-primary text-white text-sm font-semibold px-4 py-2.5 rounded-lg shadow-sm hover:bg-primary/90 transition-colors"
-          >Use the impact analysis tool →</a>
+            >Use the impact analysis tool →</a
+          >
         </div>
 
-        <div class="border-t border-gray-200 flex-1 flex flex-col [&_details.group]:mb-0 [&_details.group>summary]:rounded-none [&_details.group>summary]:border-x-0 [&_details.group>summary]:border-t-0 [&_details.group>summary]:border-b [&_details.group>summary]:border-gray-200 [&_details.group>div]:rounded-none [&_details.group>div]:border-x-0 [&_details.group>div]:mt-0 [&_details.group>div]:border-b [&_details.group>div]:border-gray-200 [&_details.group:last-child>summary]:border-b-0 [&_details.group:last-child>div]:border-b-0">
+        <div
+          class="border-t border-gray-200 flex-1 flex flex-col [&_details.group]:mb-0 [&_details.group>summary]:rounded-none [&_details.group>summary]:border-x-0 [&_details.group>summary]:border-t-0 [&_details.group>summary]:border-b [&_details.group>summary]:border-gray-200 [&_details.group>div]:rounded-none [&_details.group>div]:border-x-0 [&_details.group>div]:mt-0 [&_details.group>div]:border-b [&_details.group>div]:border-gray-200 [&_details.group:last-child>summary]:border-b-0 [&_details.group:last-child>div]:border-b-0"
+        >
           <MethodologyAccordion
             title="Understanding the methodology"
             subtitle="Regression analysis approach"
             content=""
           >
             <p class="text-sm text-gray-700 leading-relaxed mb-4">
-              The impact analysis assesses the effect of push and pull measures implemented across
-              multiple Living Labs as part of Sustainable Urban Mobility Plan
-              (SUMP) interventions. Policy measures are combinations of restrictions on private car use (push) and
+              The impact analysis assesses the effect of push and pull measures
+              implemented across multiple Living Labs as part of Sustainable
+              Urban Mobility Plan (SUMP) interventions. Policy measures are
+              combinations of restrictions on private car use (push) and
               incentives for shared mobility adoption (pull).
             </p>
             <p class="text-sm text-gray-700 leading-relaxed mb-3">
@@ -106,25 +117,26 @@ const methodologyQuestions = [
                 and compared to the baseline.
               </li>
               <li>
-                <strong>Interactive interface</strong> : Results are communicated through
-                a dedicated interface to support stakeholder exploration.
+                <strong>Interactive interface</strong> : Results are communicated
+                through a dedicated interface to support stakeholder exploration.
               </li>
             </ol>
             <p class="text-sm text-gray-700 leading-relaxed mb-3">
               To quantify the contribution of each measure, a <strong
                 >Ridge regression model</strong
               > (linear regression with L2 regularization) is used. Each measure is
-              encoded as a binary variable (implemented = 1, not implemented = 0) per
-              Living Lab. The model associates a regression coefficient to each measure,
-              estimating its individual contribution to the observed change in each
-              KPI. Ridge regularization is chosen because the number of measures exceeds
-              the number of Living Labs, helping prevent overfitting and address multicollinearity.
+              encoded as a binary variable (implemented = 1, not implemented = 0)
+              per Living Lab. The model associates a regression coefficient to each
+              measure, estimating its individual contribution to the observed change
+              in each KPI. Ridge regularization is chosen because the number of measures
+              exceeds the number of Living Labs, helping prevent overfitting and address
+              multicollinearity.
             </p>
             <p class="text-sm text-gray-700 leading-relaxed">
-              Both univariate (per KPI) and multivariate (grouped KPIs of the same
-              type, ie. environmental, societal, economic) analyses are conducted
-              to ensure robustness, especially when data points are limited for
-              local KPIs.
+              Both univariate (per KPI) and multivariate (grouped KPIs of the
+              same type, ie. environmental, societal, economic) analyses are
+              conducted to ensure robustness, especially when data points are
+              limited for local KPIs.
             </p>
           </MethodologyAccordion>
 
@@ -168,9 +180,9 @@ const methodologyQuestions = [
           >
             <div class="space-y-4">
               <p class="text-sm text-gray-700 leading-relaxed">
-                The model outputs a regression coefficient (&beta;) for each measure,
-                representing its estimated contribution to the observed change in
-                a given KPI:
+                The model outputs a regression coefficient (&beta;) for each
+                measure, representing its estimated contribution to the observed
+                change in a given KPI:
               </p>
               <ul
                 class="list-disc list-inside text-sm text-gray-700 leading-relaxed space-y-2 ml-4"
@@ -210,27 +222,36 @@ const methodologyQuestions = [
       </div>
 
       <!-- Right panel: MCDA -->
-      <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+      <div
+        class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden flex flex-col"
+      >
         <div class="h-1 bg-secondary-dark"></div>
 
         <div class="px-7 pt-6 pb-5">
-          <span class="inline-block text-xs font-bold tracking-widest uppercase text-secondary-dark bg-secondary-dark/10 px-3 py-1 rounded-full mb-3">
+          <span
+            class="inline-block text-xs font-bold tracking-widest uppercase text-secondary-dark bg-secondary-dark/10 px-3 py-1 rounded-full mb-3"
+          >
             Model 2 · Decision analysis
           </span>
-          <h2 class="text-xl font-bold text-gray-900 mb-3">Multi-Criteria Decision Analysis (MCDA)</h2>
+          <h2 class="text-xl font-bold text-gray-900 mb-3">
+            Multi-Criteria Decision Analysis (MCDA)
+          </h2>
           <p class="text-sm text-dark leading-relaxed mb-5 max-w-[56ch]">
             The multi-criteria decision analysis (MCDA) tool uses the
-            <strong>PROMETHEE II</strong> (Preference Ranking Organisation METHod for
-            Enrichment Evaluations) method to rank business activities for New Shared
-            Mobility according to multiple criteria simultaneously.
+            <strong>PROMETHEE II</strong> (Preference Ranking Organisation METHod
+            for Enrichment Evaluations) method to rank business activities for New
+            Shared Mobility according to multiple criteria simultaneously.
           </p>
           <a
             href="/tools/mcda_analysis/"
             class="inline-flex items-center gap-2 bg-secondary-dark text-white text-sm font-semibold px-4 py-2.5 rounded-lg shadow-sm hover:bg-secondary-dark/90 transition-colors"
-          >Use the decision tool →</a>
+            >Use the decision tool →</a
+          >
         </div>
 
-        <div class="border-t border-gray-200 flex-1 flex flex-col [&_details.group]:mb-0 [&_details.group>summary]:rounded-none [&_details.group>summary]:border-x-0 [&_details.group>summary]:border-t-0 [&_details.group>summary]:border-b [&_details.group>summary]:border-gray-200 [&_details.group>div]:rounded-none [&_details.group>div]:border-x-0 [&_details.group>div]:mt-0 [&_details.group>div]:border-b [&_details.group>div]:border-gray-200 [&_details.group:last-child>summary]:border-b-0 [&_details.group:last-child>div]:border-b-0">
+        <div
+          class="border-t border-gray-200 flex-1 flex flex-col [&_details.group]:mb-0 [&_details.group>summary]:rounded-none [&_details.group>summary]:border-x-0 [&_details.group>summary]:border-t-0 [&_details.group>summary]:border-b [&_details.group>summary]:border-gray-200 [&_details.group>div]:rounded-none [&_details.group>div]:border-x-0 [&_details.group>div]:mt-0 [&_details.group>div]:border-b [&_details.group>div]:border-gray-200 [&_details.group:last-child>summary]:border-b-0 [&_details.group:last-child>div]:border-b-0"
+        >
           <MethodologyAccordion
             title="PROMETHEE-GAIA Multi-Criteria Analysis"
             subtitle="Multi-criteria decision analysis approach with PROMETHEE and GAIA visualization"
@@ -259,17 +280,19 @@ const methodologyQuestions = [
               city's interventions perform across all weighted criteria and
               stakeholder perspectives. A higher rank indicates a policy that
               better satisfies the overall set of criteria as valued by the
-              stakeholders involved. The GAIA plane then brings a visual dimension
-              to these rankings, mapping both the policy alternatives and the
-              evaluation criteria onto a two-dimensional graph. On this plane,
-              criteria pointing in similar directions indicate aligned objectives,
-              while criteria pointing in opposite directions reveal trade-offs.
-              Policies positioned close to a criterion's axis perform well on that
-              specific criterion. A decision axis summarizes the overall PROMETHEE
-              ranking direction, helping users quickly identify the most globally
-              preferred alternatives.
+              stakeholders involved. The GAIA plane then brings a visual
+              dimension to these rankings, mapping both the policy alternatives
+              and the evaluation criteria onto a two-dimensional graph. On this
+              plane, criteria pointing in similar directions indicate aligned
+              objectives, while criteria pointing in opposite directions reveal
+              trade-offs. Policies positioned close to a criterion's axis
+              perform well on that specific criterion. A decision axis
+              summarizes the overall PROMETHEE ranking direction, helping users
+              quickly identify the most globally preferred alternatives.
             </p>
-            <p class="mb-6 text-sm text-gray-700">Together, these two outputs allow users to:</p>
+            <p class="mb-6 text-sm text-gray-700">
+              Together, these two outputs allow users to:
+            </p>
             <div class="grid grid-cols-1 gap-4">
               <InfoCard
                 title="Rank Alternatives"
@@ -293,39 +316,72 @@ const methodologyQuestions = [
           </MethodologyAccordion>
         </div>
       </div>
-
     </div>
 
     <section class="mt-12">
-      <h2 class="text-2xl font-bold text-gray-900 mb-2">Data context and limitations</h2>
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">
+        Data context and limitations
+      </h2>
       <p class="text-gray-600 mb-6">
-        The platform is decision <em>support</em>. Validated data does not make every question
-        answerable — the method, the sample and the value judgements built into the models each set a
-        boundary.
+        The results presented on this platform are based on data collected from
+        SUM Living Labs and Contributing cities. They reflect patterns across
+        cities, but do not include local indicators, context, or the local
+        knowledge each city holds about why something worked.
       </p>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <InfoAlert title="You can use it to" variant="success" hideIcon>
-          <ul class="list-disc list-inside text-sm leading-relaxed space-y-2 mt-2">
-            <li>See which measures tend to <strong>co-occur</strong> with improvements in a KPI across cities</li>
-            <li>Compare your city against peers on a common, validated indicator set</li>
-            <li>See how a ranking shifts when different stakeholder priorities are applied</li>
-            <li>Judge how much data sits behind any given result, before you rely on it</li>
-            <li>Build a shortlist of measures worth a local feasibility study</li>
+          <ul
+            class="list-disc list-inside text-sm leading-relaxed space-y-2 mt-2"
+          >
+            <li>
+              See which measures tend to <strong>co-occur</strong> with improvements
+              in a KPI across cities
+            </li>
+            <li>
+              Compare your city against peers on a common, validated indicator
+              set
+            </li>
+            <li>
+              See how a ranking shifts when different stakeholder priorities are
+              applied
+            </li>
+            <li>
+              Judge how much data sits behind any given result, before you rely
+              on it
+            </li>
+            <li>
+              Build a shortlist of measures worth a local feasibility study
+            </li>
           </ul>
         </InfoAlert>
 
         <InfoAlert title="You cannot use it to" variant="danger" hideIcon>
-          <ul class="list-disc list-inside text-sm leading-relaxed space-y-2 mt-2">
-            <li>Conclude that a measure <strong>caused</strong> an observed outcome</li>
-            <li>Assume a result from one set of cities transfers to yours unchanged</li>
-            <li>Read an MCDA ranking as an objective ordering independent of whose priorities were used</li>
-            <li>Treat a missing value as a zero, or as evidence that nothing happened</li>
-            <li>Replace local expertise, stakeholder engagement or regulatory assessment</li>
+          <ul
+            class="list-disc list-inside text-sm leading-relaxed space-y-2 mt-2"
+          >
+            <li>
+              Conclude that a measure <strong>caused</strong> an observed outcome
+            </li>
+            <li>
+              Assume a result from one set of cities transfers to yours
+              unchanged
+            </li>
+            <li>
+              Read an MCDA ranking as an objective ordering independent of whose
+              priorities were used
+            </li>
+            <li>
+              Treat a missing value as a zero, or as evidence that nothing
+              happened
+            </li>
+            <li>
+              Replace local expertise, stakeholder engagement or regulatory
+              assessment
+            </li>
           </ul>
         </InfoAlert>
       </div>
     </section>
-
   </div>
 </Layout>

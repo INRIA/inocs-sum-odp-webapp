@@ -1,81 +1,309 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import FeaturesGrid from "../../components/AnalysisPageSections/FeaturesGrid.astro";
 import { KpisFrameworkDiagram } from "../../components/react";
+import { InfoAlert, Timeline } from "../../components/react/ui";
+
+const measurementSteps = [
+  {
+    stepLabel: "1",
+    title: "Before",
+    description:
+      "The baseline: the WP1 SUM survey, run at the start of the project with at least 200 respondents per Living Lab, plus the city's own records.",
+  },
+  {
+    stepLabel: "2",
+    title: "During",
+    description:
+      "Intermediate measurements, on the actual indicators only:  policy implementation and transport system performance.",
+  },
+  {
+    stepLabel: "3",
+    title: "After",
+    description:
+      "The survey is repeated and the indicators are measured again. Modal split is measured at least twice: before and after.",
+  },
+];
+import {
+  NumberedListIcon,
+  DocumentTextIcon,
+  TableCellsIcon,
+  ArrowRightCircleIcon,
+} from "@heroicons/react/20/solid";
+import {
+  ArrowDownTrayIcon,
+  ArrowTopRightOnSquareIcon,
+} from "@heroicons/react/24/outline";
+
+const resourcesFeatures: any[] = [
+  {
+    iconComponent: DocumentTextIcon,
+    title: "KPI SIEF Framework & Formulas",
+    description:
+      "Comprehensive documentation explaining each KPI, calculation methodologies, data requirements, and scientific framework for NSM-PT integration metrics.",
+    badge: {
+      label: "REQUIRED",
+      color: "warning",
+      className: "bg-danger/20 text-danger border-danger/20",
+    },
+    ctas: [
+      {
+        label: "Download Guide",
+        href: "/files/SUM_D1.2_KPI Review_V1.0_FINAL.pdf",
+        variant: "primary",
+        iconComponent: ArrowDownTrayIcon,
+        target: "_blank",
+        rel: "noopener noreferrer",
+      },
+      {
+        label: "Learn more",
+        href: "/methods/evaluation-framework",
+        variant: "secondary",
+        iconComponent: ArrowRightCircleIcon,
+      },
+    ],
+  },
+  {
+    iconComponent: TableCellsIcon,
+    title: "KPI Calculation Spreadsheet",
+    description:
+      "Pre-built Excel template with formulas and data validation to help you organize raw data and calculate KPI values. Includes examples and instructions.",
+    badge: {
+      label: "OPTIONAL",
+      color: "light",
+      className: "bg-gray-100 text-gray-700 border-gray-200",
+    },
+    ctas: [
+      {
+        label: "Download Template",
+        href: "/files/SIEF_All_KPIs-template.xlsx",
+        variant: "primary",
+        iconComponent: ArrowDownTrayIcon,
+        target: "_blank",
+        rel: "noopener noreferrer",
+      },
+    ],
+  },
+  {
+    iconComponent: NumberedListIcon,
+    title: "Survey Template (English)",
+    description:
+      "Sample survey questionnaire designed to collect citizen feedback and usage data for relevant KPIs. Can be adapted and translated for your city's specific context.",
+    badge: {
+      label: "OPTIONAL",
+      color: "light",
+      className: "bg-gray-100 text-gray-700 border-gray-200",
+    },
+    ctas: [
+      {
+        label: "Download Guide",
+        href: "/files/SUM_survey_template.pdf",
+        variant: "primary",
+        iconComponent: ArrowDownTrayIcon,
+        target: "_blank",
+        rel: "noopener noreferrer",
+      },
+      {
+        label: "Duplicate Microsoft Forms template",
+        href: "https://forms.cloud.microsoft/Pages/ShareFormPage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAANAAQXN0CpURDJQMzZCMEFEMUMzT04zSURDWjdOWTlPVS4u&sharetoken=6TrOGxDjd9EBJAA7Hhg3",
+        variant: "secondary",
+        iconComponent: ArrowTopRightOnSquareIcon,
+        target: "_blank",
+        rel: "noopener noreferrer",
+      },
+    ],
+  },
+];
 ---
 
 <Layout
   role="visitor"
   breadcrumbs={[
     { label: "Home", href: "/" },
-    { label: "Methods & quality" },
+    { label: "Evaluation methods" },
     { label: "Evaluation framework" },
   ]}
   backHref="/"
 >
-  <div class="mx-auto px-4 py-8 max-w-4xl prose prose-gray">
-    <h1>Evaluation Framework (SIEF)</h1>
+  <div class="mx-auto px-4 py-8">
+    <div class="">
+      <h1 class="mt-2">Evaluation Framework (SIEF)</h1>
+      <p class="mt-4 text-base sm:text-lg text-gray-700">
+        The SUM Standardized Impact Evaluation Framework (SIEF) extends CIVITAS
+        CEF to verify SUM’s core target: at least a 25% shift from daily private
+        car use to NSM and/or public transport in each Living Lab. It is the
+        shared method every Living Lab uses to measure whether new shared
+        mobility (NSM) moves people out of private cars. It also measures the
+        impact on the environment, society and the local economy.
+      </p>
+    </div>
 
-    <div class="not-prose">
+    <!-- KPI framework diagram -->
+    <div class="mt-10 not-prose">
       <KpisFrameworkDiagram />
     </div>
 
-    <section>
-      <h2>What SIEF is and why it exists</h2>
-      <p>
-        The SUM Integrated Evaluation Framework (SIEF) provides a structured methodology for
-        measuring the impact of New Shared Mobility (NSM) services on Public Transport integration
-        across European cities. It was developed within the Horizon Europe SUM project to ensure
-        that data collected across different Living Labs remains comparable and scientifically rigorous.
+    <!-- How to read the framework -->
+    <section class="mt-14">
+      <h2>How to read the framework</h2>
+      <p class="mt-3 text-gray-700">
+        SIEF is built on four horizontal levels, crossed by vertical dimensions.
+        The chart below follows exactly that structure.
       </p>
-      <p>
-        SIEF defines which Key Performance Indicators (KPIs) are collected, how they are calculated,
-        and what evaluation criteria are applied. It draws on established frameworks from sustainable
-        urban mobility planning (SUMP) and transport research, adapted for the specific context of
-        shared mobility integration.
+      <div class="mt-6 rounded-xl border border-gray-200 p-5">
+        <h3 class="text-lg font-semibold text-gray-900">
+          Four levels <span class="text-gray-400">(top to bottom)</span>
+        </h3>
+        <ol class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <li class="border-l-4 border-gray-200 pl-3">
+            <span class="block h-1.5 w-8 rounded-full bg-lime-500"></span>
+            <span class="mt-2 block text-sm font-semibold text-gray-900"
+              >1. Policies</span
+            >
+            <span class="block text-xs font-medium text-gray-500">KPIs 1–6</span
+            >
+            <span class="mt-1 block text-sm text-gray-600"
+              >Push and pull measures, NSM modes integrated, community
+              involvement.</span
+            >
+          </li>
+          <li class="border-l-4 border-gray-200 pl-3">
+            <span class="block h-1.5 w-8 rounded-full bg-orange-500"></span>
+            <span class="mt-2 block text-sm font-semibold text-gray-900"
+              >2. Transport system</span
+            >
+            <span class="block text-xs font-medium text-gray-500"
+              >KPIs 7–14</span
+            >
+            <span class="mt-1 block text-sm text-gray-600"
+              >Alternative modes versus private car on travel time, cost and
+              safety.</span
+            >
+          </li>
+          <li class="border-l-4 border-gray-200 pl-3">
+            <span class="block h-1.5 w-8 rounded-full bg-primary"></span>
+            <span class="mt-2 block text-sm font-semibold text-gray-900"
+              >3. Modal split</span
+            >
+            <span class="block text-xs font-medium text-gray-500"
+              >KPIs 15a–15c</span
+            >
+            <span class="mt-1 block text-sm text-gray-600"
+              >The main project outcome: the share of each mode.</span
+            >
+          </li>
+          <li class="border-l-4 border-gray-200 pl-3">
+            <span class="block h-1.5 w-8 rounded-full bg-sky-400"></span>
+            <span class="mt-2 block text-sm font-semibold text-gray-900"
+              >4. Sustainability outcomes</span
+            >
+            <span class="block text-xs font-medium text-gray-500"
+              >KPIs 16–29</span
+            >
+            <span class="mt-1 block text-sm text-gray-600"
+              >Indirect effects of any modal shift on environment, society and
+              economy.</span
+            >
+          </li>
+        </ol>
+      </div>
+      <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div class="rounded-xl border border-gray-200 p-5">
+          <h3 class="text-lg font-semibold text-gray-900">
+            Two evaluation phases
+          </h3>
+          <ul class="mt-3 space-y-2 text-sm text-gray-700">
+            <li>
+              <span class="font-semibold text-gray-900"
+                >Process evaluation:
+              </span>
+              levels 1–2: how measures were planned and implemented, and what helped
+              or blocked them.
+            </li>
+            <li>
+              <span class="font-semibold text-gray-900"
+                >Impact evaluation:
+              </span>
+              levels 3–4: the effects of those measures, measured before and after
+              implementation.
+            </li>
+          </ul>
+        </div>
+        <div class="rounded-xl border border-gray-200 p-5">
+          <h3 class="text-lg font-semibold text-gray-900">
+            Vertical dimensions
+          </h3>
+          <ul class="mt-3 space-y-2 text-sm text-gray-700">
+            <li>
+              <span class="font-semibold text-gray-900"
+                >Actual vs perceived:
+              </span>
+              levels 1–2: what a city really implemented, and how citizens experience
+              it. Travellers only change habits if they feel the difference.
+            </li>
+            <li>
+              <span class="font-semibold text-gray-900"
+                >Environment, society, economy:
+              </span>
+              level 4: the three dimensions of the sustainability assessment.
+            </li>
+          </ul>
+        </div>
+      </div>
+      <p class="mt-4 text-sm text-gray-600">
+        <span class="font-semibold text-gray-900"
+          >Global and local indicators.</span
+        >
+        Global indicators are measured in every Living Lab at city level and are used
+        to compare them. Local indicators are chosen by each Living Lab to explain
+        its own results, and are not used for comparison.
       </p>
     </section>
-
-    <section>
-      <h2>The KPI framework</h2>
-      <p>
-        The framework organises KPIs into four evaluation domains:
+    <!-- How impact is measured -->
+    <section class="mt-14">
+      <h2>How impact is measured</h2>
+      <p class="mt-3 text-gray-700">
+        SIEF tracks each Living Lab before, during and after its measures are
+        implemented.
       </p>
-      <ul>
-        <li><strong>Accessibility</strong> — how well shared mobility services reach different population groups and areas</li>
-        <li><strong>Safety</strong> — incident rates, perceived safety, and infrastructure conditions</li>
-        <li><strong>Environmental impact</strong> — modal shift toward sustainable transport, emissions reduction</li>
-        <li><strong>Economic viability</strong> — cost efficiency, service adoption rates, and business sustainability</li>
-      </ul>
-      <p>
-        Each KPI has a defined calculation methodology, data requirements, and target direction
-        (whether higher or lower values indicate improvement). Full specifications are available
-        in the KPI Framework PDF.
-      </p>
-      <p>
-        <a href="/files/SIEF_All_KPIs-template.xlsx" class="text-primary hover:underline">
-          Download KPI Framework spreadsheet →
-        </a>
-      </p>
+      <div class="mt-6">
+        <Timeline steps={measurementSteps} client:load />
+      </div>
     </section>
 
-    <section>
-      <h2>Evaluation criteria and methodology</h2>
-      <p>
-        SIEF uses a before/after measurement approach: cities collect baseline KPI values before
-        implementing mobility measures, and then collect post-implementation values to assess impact.
-        This enables the platform to quantify changes attributable to specific measures using
-        ridge regression analysis.
-      </p>
-      <p>
-        The evaluation covers both quantitative metrics (measurable values with units) and
-        qualitative assessments (survey-based perceptions). Together they provide a comprehensive
-        picture of how NSM integration affects urban mobility patterns.
-      </p>
+    <!-- Available Resources -->
+    <section class="mt-14">
+      <h2 class="mb-4">Available Resources</h2>
+      <FeaturesGrid features={resourcesFeatures} columns={3} className="mb-0" />
     </section>
 
-    <nav class="not-prose mt-8 flex gap-4 text-sm">
-      <a href="/methods/collection-plan" class="text-primary hover:underline">Next: Data collection →</a>
-      <a href="/methods/glossary" class="text-primary hover:underline">Glossary →</a>
+    <!-- Where SIEF comes from -->
+    <InfoAlert
+      variant="info"
+      title="Where SIEF comes from"
+      className="mt-14"
+      client:load
+    >
+      <p>
+        The SUM Standardized Impact Evaluation Framework (SIEF) extends the core
+        principles of the CIVITAS Evaluation Framework (CEF). The SIEF is built
+        to examine what works, what does not, and why, aligned to SUM's own
+        objective.
+      </p>
+      <p class="mt-2">
+        Its indicators come from two sources. A systematic literature review of
+        sustainable urban mobility indicators (SCOPUS: 8,943 documents
+        identified, 3,362 retained after the inclusion criteria) produced the
+        candidate list. That list was then validated and circulated with the
+        Living Labs, whose own ranked needs guide which local indicators each of
+        them selects.
+      </p>
+    </InfoAlert>
+
+    <nav class="not-prose mt-12 flex gap-4 text-sm">
+      <a href="/methods/data-quality" class="text-primary hover:underline"
+        >Next: Data quality &rarr;</a
+      >
     </nav>
   </div>
 </Layout>
