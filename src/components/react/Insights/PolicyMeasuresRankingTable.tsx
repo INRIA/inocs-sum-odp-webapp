@@ -7,7 +7,7 @@ import { Tooltip } from "../ui/Tooltip";
 // ---------------------------------------------------------------------------
 
 interface KpiGroupCoefficient {
-  groupId: number;
+  groupId: number | string;
   groupName: string;
   coefficient: number;
   /** Rank within this KPI group (1 = highest coefficient) */

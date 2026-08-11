@@ -49,7 +49,7 @@ export interface ILivingLabMeasure {
 }
 
 export interface IKpiGroup {
-  id: number;
+  id: number | string;
   name: string;
   kpis?: IKpiDefinition[];
   [key: string]: any;

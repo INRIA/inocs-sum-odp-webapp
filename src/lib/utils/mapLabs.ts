@@ -6,6 +6,7 @@ import {
   type CityDataStatus,
   type CityType,
 } from "./cityStatus";
+import { isResultValidated } from "./kpiSufficiency";
 
 /** Marker payload consumed by `LivingLabsMapSection`. */
 export interface MapLab {
@@ -35,7 +36,11 @@ export function buildMapLabs(
     const yearsSet = new Set<number>();
 
     lab.kpi_results
-      ?.filter((kpi) => kpi.result_before || kpi.result_after)
+      ?.filter((kpi) => {
+        const after = kpi.result_after;
+        if (!after) return false;
+        return !lab.validated_at || isResultValidated(after, lab.validated_at);
+      })
       ?.forEach((kpiresult) => {
         const kpiDefinition = allKpis.find(
           (pk) => pk.id === kpiresult.kpidefinition_id,

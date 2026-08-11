@@ -72,11 +72,41 @@ const quantitativePerspectives = await Promise.all(
   }),
 );
 
+// ── MCDA qualitative results per perspective (business activities) ────────
+const qualitativePerspectives = await Promise.all(
+  Object.entries(MCDA_PERSPECTIVES).map(async ([key, label]) => {
+    try {
+      const jobRun = await api.getLatestJobRun(
+        `mcda_analysis_qualitative_${key}`,
+      );
+      const results = jobRun?.output_data?.mcda_results;
+      return {
+        key,
+        label,
+        ranking: results?.ranking ?? ([] as string[]),
+        netFlows: (results?.net_flows ?? {}) as Record<string, number>,
+        alternativeLabels: (results?.alternative_labels ?? {}) as Record<
+          string,
+          string
+        >,
+      };
+    } catch {
+      return {
+        key,
+        label,
+        ranking: [] as string[],
+        netFlows: {} as Record<string, number>,
+        alternativeLabels: {} as Record<string, string>,
+      };
+    }
+  }),
+);
+
 // ── Compute policy measure rows for section 1 ─────────────────────────────
 
 // 1. Rank measures within each KPI group by coefficient (descending)
 type GroupRanking = {
-  groupId: number;
+  groupId: number | string;
   groupName: string;
   ranked: {
     measureId: number;
@@ -252,6 +282,8 @@ policyMeasureRows.sort((a, b) => a.bestKpiRank - b.bestKpiRank);
 
     <InfoAlert
       title="How to read this page"
+      actionText="Analysis methodology"
+      actionHref={getUrl("/methods/models")}
       variant="info"
       className="mb-10"
       client:load
@@ -308,7 +340,7 @@ policyMeasureRows.sort((a, b) => a.bestKpiRank - b.bestKpiRank);
       ctaHref="/tools/mcda_analysis/mcda_analysis_qualitative/regulatory"
       client:load
     >
-      <BusinessActivityRankingTable perspectives={quantitativePerspectives} />
+      <BusinessActivityRankingTable perspectives={qualitativePerspectives} client:load />
     </MethodologySection>
   </div>
 </Layout>

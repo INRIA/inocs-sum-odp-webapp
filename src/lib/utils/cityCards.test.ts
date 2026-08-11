@@ -10,13 +10,15 @@ import {
 } from "./cityCards";
 import type { IKpi, IKpiResultGroup, ILivingLabPopulated } from "../../types";
 import { EnumKpiMetricType, EnumKpiType } from "../../types/KPIs";
+import type { ITransportMode } from "../../types/TransportMode";
+import { EnumTransportModeType } from "../../types/TransportMode";
 
 function kpi(overrides: Partial<IKpi> & Pick<IKpi, "id" | "name">): IKpi {
   return {
     kpi_number: String(overrides.id),
     type: EnumKpiType.GLOBAL,
     progression_target: 1,
-    metric: EnumKpiMetricType.RATIO,
+    metric: EnumKpiMetricType.PERCENTAGE,
     ...overrides,
   } as IKpi;
 }
@@ -33,6 +35,7 @@ function resultGroup(
     living_lab_id: 1,
     value,
     date,
+    updated_at: new Date(date),
   });
   const result_before = before === null ? null : mk(before, dates[0], 1);
   const result_after = after === null ? null : mk(after, dates[1], 2);
@@ -56,6 +59,7 @@ function lab(
     area: 319,
     projects: [],
     kpi_results: [],
+    validated_at: new Date("2025-01-01"),
     ...overrides,
   } as ILivingLabPopulated;
 }
@@ -195,14 +199,14 @@ describe("buildCityCard", () => {
         id: 1,
         name: "Coimbra",
         kpi_results: [
-          // increase target, went up 6% -> improvement
-          resultGroup(1, 100, 106),
-          // decrease target, went down 3% -> improvement
-          resultGroup(2, 100, 97),
-          // decrease target, went up 5% -> regression
-          resultGroup(3, 100, 105),
-          // decrease target, went up 1% -> smaller regression
-          resultGroup(4, 100, 101),
+          // increase target, went up 6 pp -> improvement
+          resultGroup(1, 0.50, 0.56),
+          // decrease target, went down 3 pp -> improvement
+          resultGroup(2, 0.50, 0.47),
+          // decrease target, went up 5 pp -> regression
+          resultGroup(3, 0.30, 0.35),
+          // decrease target, went up 1 pp -> smaller regression
+          resultGroup(4, 0.20, 0.21),
         ],
       }),
       kpis,
@@ -212,12 +216,12 @@ describe("buildCityCard", () => {
       "Public transport share",
       "Travel time",
     ]);
-    expect(card.improved[0].display).toBe("+6.0%");
+    expect(card.improved[0].display).toBe("+6.00%");
     expect(card.regressed.map((k) => k.name)).toEqual([
       "Private car share",
       "Cost of travel",
     ]);
-    expect(card.regressed[0].display).toBe("−5.0%");
+    expect(card.regressed[0].display).toBe("-5.00%");
     expect(card.indicatorsImproved).toBe(2);
     expect(card.indicatorsTotal).toBe(4);
   });
@@ -252,15 +256,72 @@ describe("buildCityCard", () => {
       lab({
         id: 1,
         name: "Coimbra",
-        kpi_results: [resultGroup(6, 100, 110), resultGroup(7, 100, 130)],
+        kpi_results: [resultGroup(6, 0.10, 0.20), resultGroup(7, 0.10, 0.40)],
       }),
       kpis,
     );
 
     expect(card.improved).toHaveLength(1);
     expect(card.improved[0].name).toBe("Modal split");
-    expect(card.improved[0].display).toBe("+20.0%");
+    expect(card.improved[0].display).toBe("+20.00%");
     expect(card.indicatorsTotal).toBe(1);
+  });
+
+  it("groups modal split by transport type: NSM, Public transport, Private Car", () => {
+    const modalSplitKpis: IKpi[] = [
+      kpi({ id: 15, name: "Modal split", kpi_number: "15", progression_target: 1 }),
+      kpi({ id: 16, name: "MS sub-a", kpi_number: "15.a", parent_kpi_id: 15, progression_target: 1 }),
+      kpi({ id: 1, name: "Public transport share", progression_target: 1 }),
+    ];
+
+    const transportModes: ITransportMode[] = [
+      { id: 100, name: "Bike-sharing", type: EnumTransportModeType.NSM },
+      { id: 101, name: "E-scooter", type: EnumTransportModeType.NSM },
+      { id: 102, name: "Bus", type: EnumTransportModeType.PUBLIC_TRANSPORT },
+      { id: 104, name: "Tram", type: EnumTransportModeType.PUBLIC_TRANSPORT },
+      { id: 103, name: "Private Car", type: EnumTransportModeType.PRIVATE },
+    ];
+
+    const card = buildCityCard(
+      lab({
+        id: 1,
+        name: "Coimbra",
+        transport_modes: transportModes,
+        kpi_results: [
+          resultGroup(1, 0.40, 0.50),
+          // NSM: bike-sharing 5%→10%, e-scooter 2%→6% → total 7%→16%
+          { ...resultGroup(16, 0.05, 0.10), transport_mode_id: 100 },
+          { ...resultGroup(16, 0.02, 0.06), transport_mode_id: 101 },
+          // PT: bus 30%→28%, tram 10%→12% → total 40%→40%
+          { ...resultGroup(16, 0.30, 0.28), transport_mode_id: 102 },
+          { ...resultGroup(16, 0.10, 0.12), transport_mode_id: 104 },
+          // Private Car 45%→40%
+          { ...resultGroup(16, 0.45, 0.40), transport_mode_id: 103 },
+        ],
+      }),
+      modalSplitKpis,
+    );
+
+    // Three entries: NSM, Public transport, Private Car
+    expect(card.modalSplit).toHaveLength(3);
+
+    expect(card.modalSplit[0].name).toBe("NSM");
+    expect(card.modalSplit[0].value).toBe("16.0%");
+    expect(card.modalSplit[0].change).toBe("+9.00%");
+    expect(card.modalSplit[0].isImproved).toBe(true);
+
+    expect(card.modalSplit[1].name).toBe("Public transport");
+    expect(card.modalSplit[1].value).toBe("40.0%");
+    expect(card.modalSplit[1].change).toBe("0.00%"); // no change (40%→40%)
+
+    expect(card.modalSplit[2].name).toBe("Private Car");
+    expect(card.modalSplit[2].value).toBe("40.0%");
+    expect(card.modalSplit[2].change).toBe("-5.00%");
+    expect(card.modalSplit[2].isImproved).toBe(false);
+
+    // Only the regular KPI in improved/regressed
+    expect(card.indicatorsTotal).toBe(1);
+    expect(card.improved.map((m) => m.name)).toEqual(["Public transport share"]);
   });
 
   it("marks a city with no comparable results as pending", () => {

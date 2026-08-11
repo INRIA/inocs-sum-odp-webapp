@@ -1,7 +1,7 @@
 import React from "react";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { Badge, RButton, Tooltip } from "../ui";
-import type { CityCardData, CityKpiMovement } from "../../../lib/utils/cityCards";
+import type { CityCardData, CityKpiMovement, CityModalSplitEntry } from "../../../lib/utils/cityCards";
 
 export interface CityCardProps {
   city: CityCardData;
@@ -97,6 +97,42 @@ function KpiGroup({
             >
               {movement.display}
             </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function ModalSplitSection({ entries }: { entries: CityModalSplitEntry[] }) {
+  if (entries.length === 0) return null;
+
+  return (
+    <div className="border-b border-gray-200 px-4 py-3">
+      <div className="mb-2 text-[10px] font-extrabold uppercase tracking-widest text-gray-400">
+        Modal split
+      </div>
+      <ul className="m-0 list-none p-0">
+        {entries.map((entry) => (
+          <li
+            key={entry.id}
+            className="flex items-baseline gap-2 py-0.5 text-xs"
+          >
+            <span className="truncate text-gray-600" title={entry.name}>
+              {entry.name}
+            </span>
+            <span className="ml-auto shrink-0 font-bold tabular-nums text-gray-900">
+              {entry.value}
+            </span>
+            {entry.change !== "—" && (
+              <span
+                className={`shrink-0 text-[11px] tabular-nums ${
+                  entry.isImproved ? "text-success" : "text-danger"
+                }`}
+              >
+                {entry.change}
+              </span>
+            )}
           </li>
         ))}
       </ul>
@@ -242,7 +278,10 @@ export function CityCard({
         </div>
       </Tooltip>
 
-      {/* 4 — movement */}
+      {/* 4 — modal split */}
+      <ModalSplitSection entries={city.modalSplit} />
+
+      {/* 5 — movement */}
       {hasResults ? (
         <div className="flex flex-1 flex-col border-b border-gray-200 px-4 py-3">
           <div className="mb-2 text-xs text-gray-500">

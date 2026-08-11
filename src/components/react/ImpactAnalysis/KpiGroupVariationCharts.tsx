@@ -56,7 +56,7 @@ export const KpiGroupVariationCharts: React.FC<
     mode?: string | null,
   ): string => {
     const normalizedMode = normalizeTransportMode(mode);
-    return normalizedMode ? `${kpiId}__${normalizedMode}` : kpiId;
+    return normalizedMode ? `${kpiId}__${normalizedMode}` : String(kpiId);
   };
 
   const chartsByName = new Map<string, KpiVariationChartData>();

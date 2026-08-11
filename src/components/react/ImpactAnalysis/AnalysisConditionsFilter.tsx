@@ -7,10 +7,10 @@ import { isCuratedDomain, hasCuratedSet } from "../../../config/curatedDomains";
 
 interface AnalysisConditionsFilterProps {
   kpiGroups: IKpiGroup[];
-  selectedGroupId?: number;
-  onGroupSelect: (groupId: number) => void;
-  kpiVariationsData?: Record<number, IKpiVariationData>;
-  variationsByKpis?: Record<number, IKpiVariationData>;
+  selectedGroupId?: string;
+  onGroupSelect: (groupId: string | number) => void;
+  kpiVariationsData?: Record<string, IKpiVariationData>;
+  variationsByKpis?: Record<string, IKpiVariationData>;
 }
 
 export const AnalysisConditionsFilter: React.FC<

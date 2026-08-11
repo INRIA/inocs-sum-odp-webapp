@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { AnalysisConditionsFilter } from "./AnalysisConditionsFilter";
 import { MeasuresImpact } from "./MeasuresImpact";
 import { KpiVariations } from ".";
@@ -18,10 +18,10 @@ const KPI_VARIATIONS_TAB_ID = "kpi-variations";
 interface ImpactAnalysisDashboardProps {
   kpiGroups: IKpiGroup[];
   jobRunOutput: IJobRunOutputData | null;
-  kpiVariationsData: Record<number, IKpiVariationData>;
-  variationsByKpis: Record<number, IKpiVariationData>;
+  kpiVariationsData: Record<string, IKpiVariationData>;
+  variationsByKpis: Record<string, IKpiVariationData>;
   totalPlatformLabs?: number;
-  initialGroupId?: number;
+  initialGroupId?: string;
 }
 
 export const ImpactAnalysisDashboard: React.FC<
@@ -34,56 +34,60 @@ export const ImpactAnalysisDashboard: React.FC<
   totalPlatformLabs,
   initialGroupId,
 }) => {
-  const validInitialGroupId =
-    initialGroupId !== undefined &&
-    !isNaN(Number(initialGroupId)) &&
-    kpiGroups.some((g) => Number(g.id) === Number(initialGroupId))
-      ? Number(initialGroupId)
-      : undefined;
+  // Group IDs can be plain ("1") or compound ("18__nsm") — always strings.
+  const resolveInitialGroupId = (): string | undefined => {
+    if (!initialGroupId) return undefined;
+    const match = kpiGroups.some(
+      (g) => String(g.id) === initialGroupId,
+    );
+    return match ? initialGroupId : undefined;
+  };
 
-  const [selectedGroupId, setSelectedGroupId] = useState<number | undefined>(
-    validInitialGroupId,
+  const [selectedGroupId, setSelectedGroupId] = useState<string | undefined>(
+    resolveInitialGroupId,
   );
   const [activeTabId, setActiveTabId] = useState<string>(MEASURES_TAB_ID);
 
-  const handleGroupSelect = (groupId: number) => {
-    setSelectedGroupId(groupId);
-    setActiveTabId(MEASURES_TAB_ID);
-    if (typeof window !== "undefined") {
-      window.location.hash = "impact-results";
-    }
-  };
+  const handleGroupSelect = useCallback(
+    (groupId: string | number) => {
+      setSelectedGroupId(String(groupId));
+      setActiveTabId(MEASURES_TAB_ID);
+      if (typeof window !== "undefined") {
+        window.location.hash = "impact-results";
+      }
+    },
+    [],
+  );
 
   const resetGroupSelection = () => {
     setSelectedGroupId(undefined);
     setActiveTabId(MEASURES_TAB_ID);
   };
 
-  const selectedGroup =
-    selectedGroupId !== null
-      ? kpiGroups.find((g) => g.id === selectedGroupId) || null
-      : null;
+  const selectedGroup = useMemo(
+    () =>
+      selectedGroupId !== undefined
+        ? kpiGroups.find((g) => String(g.id) === selectedGroupId) ?? null
+        : null,
+    [selectedGroupId, kpiGroups],
+  );
 
   // Find matching analysis result from output_data
   const analysisResult: IGroupAnalysisResult | null = useMemo(() => {
     if (!selectedGroupId || !jobRunOutput?.success) {
       return null;
     }
-
     const match = jobRunOutput.success.find(
-      (item) =>
-        item.group_id === selectedGroupId ||
-        item.results.id === selectedGroupId,
+      (item) => String(item.group_id) === selectedGroupId,
     );
-
-    return match?.results || null;
+    return match?.results ?? null;
   }, [selectedGroupId, jobRunOutput]);
 
   // Get variations data for selected group
-  const selectedVariationsData: IKpiVariationData | null = useMemo(() => {
-    if (!selectedGroupId) return null;
-    return kpiVariationsData[selectedGroupId] || null;
-  }, [selectedGroupId, kpiVariationsData]);
+  const selectedVariationsData: IKpiVariationData | null = useMemo(
+    () => (selectedGroupId ? kpiVariationsData[selectedGroupId] ?? null : null),
+    [selectedGroupId, kpiVariationsData],
+  );
 
   const navigationSections = [
     { id: "how-to", label: "Information about the tool" },

@@ -26,8 +26,8 @@ import { RButton } from "../../components/react";
 const api = new ApiClient(Astro.request);
 
 // Read optional groupId query param for deep-linking from insights page
-const initialGroupIdParam = Astro.url.searchParams.get("groupId");
-const initialGroupId = initialGroupIdParam ? Number(initialGroupIdParam) : undefined;
+// Kept as string to support both numeric ("7") and compound ("19__private_car") IDs
+const initialGroupId = Astro.url.searchParams.get("groupId") ?? undefined;
 
 // Fetch the latest successful job run for kpi_measures_analysis
 let jobRun: IJobRun | null = null;
@@ -110,12 +110,13 @@ try {
 }
 
 // Convert Map to plain object for JSON serialization
+// Keys can be numeric ("7") or compound ("18__public_transport") depending on backend data
 const kpiVariationsData = Object.fromEntries(kpiVariationsDataMap) as Record<
-  number,
+  string,
   IKpiVariationData
 >;
 const variationsByKpis = Object.fromEntries(variationsByKpisMap) as Record<
-  number,
+  string,
   IKpiVariationData
 >;
 

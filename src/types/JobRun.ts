@@ -41,7 +41,7 @@ export interface IJobRunOutputData {
 }
 
 export interface IJobRunImpactAnalysisSuccess {
-  group_id: number;
+  group_id: number | string;
   group_name: string;
   results: IGroupAnalysisResult;
 }

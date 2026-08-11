@@ -18,7 +18,7 @@ export interface TriggerDownloadCsvProps {
   /** 'sm' maps to RButton 'xs' internally */
   size?: "sm" | "md" | "lg";
   living_lab_id?: number;
-  category_id?: number;
+  category_id?: number | string;
   kpidefinition_id?: number;
   disabled?: boolean;
   className?: string;

@@ -17,6 +17,7 @@ function makeCity(overrides: Partial<CityCardData> = {}): CityCardData {
     reportingSince: 2023,
     reportingSinceIsRegistration: false,
     measures: { total: 8, push: 3, pull: 5, other: 0, pushNames: ["M1", "M2", "M3"], pullNames: ["M4", "M5", "M6", "M7", "M8"], otherNames: [] },
+    modalSplit: [],
     improved: [
       { kpiId: 1, name: "Public transport share", change: 0.042, display: "+4.2%" },
     ],

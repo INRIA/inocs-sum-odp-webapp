@@ -46,19 +46,19 @@ function variationArrow(value: number | null): string {
 }
 
 interface CardFilterProps {
-  groups: { id: number; name: string; kpis: IKpiDefinition[] }[];
-  selectedGroupId?: number;
-  onGroupSelect: (groupId: number) => void;
+  groups: { id: number | string; name: string; kpis: IKpiDefinition[] }[];
+  selectedGroupId?: string;
+  onGroupSelect: (groupId: string | number) => void;
   variant?: "small" | "detailed";
-  kpiVariationsData?: Record<number, IKpiVariationData>;
-  variationsByKpis?: Record<number, IKpiVariationData>;
+  kpiVariationsData?: Record<string, IKpiVariationData>;
+  variationsByKpis?: Record<string, IKpiVariationData>;
   detailedDescription?: string;
 }
 
 const SmallCardFilter: React.FC<
   Pick<CardFilterProps, "groups" | "selectedGroupId" | "onGroupSelect">
 > = ({ groups, selectedGroupId, onGroupSelect }) => {
-  const selectedGroup = groups.find((g) => g.id === selectedGroupId);
+  const selectedGroup = groups.find((g) => String(g.id) === selectedGroupId);
   const uniqueKpis = getUniqueParentKpis(selectedGroup?.kpis || []);
   return (
     <div className="flex flex-col">
@@ -68,7 +68,7 @@ const SmallCardFilter: React.FC<
             key={group.id}
             onClick={() => onGroupSelect(group.id)}
             className={`w-full p-2 md:p-3 rounded-lg border-2 font-medium transition-all duration-200 text-start ${
-              selectedGroupId === group.id
+              selectedGroupId === String(group.id)
                 ? "border-warning bg-warning/10 text-dark"
                 : "border-gray-200 bg-white text-gray-700 hover:border-warning/50 hover:bg-warning/5"
             }`}
@@ -131,12 +131,13 @@ const DetailedCardFilter: React.FC<
       className={`flex flex-col gap-3 w-full ${displayLargeScreen ? styleLargeScreen : styleSmallScreen}`}
     >
       {groups.map((group) => {
+        const groupKey = String(group.id);
         const variationData =
-          variationsByKpis?.[group.id] ?? kpiVariationsData[group.id];
+          variationsByKpis?.[groupKey] ?? kpiVariationsData[groupKey];
         const totalVariation = variationData?.totalVariation ?? null;
         const totalPct = variationData?.totalVariationPercentage ?? "—";
         const kpiVariations = variationData?.allKpiVariations ?? [];
-        const isSelected = selectedGroupId === group.id;
+        const isSelected = selectedGroupId === groupKey;
         return (
           <button
             key={group.id}
@@ -204,7 +205,7 @@ export const CardFilter: React.FC<CardFilterProps> = ({
   variationsByKpis,
   detailedDescription,
 }) => {
-  const selectedGroup = groups.find((group) => group.id === selectedGroupId);
+  const selectedGroup = groups.find((group) => String(group.id) === selectedGroupId);
 
   if (variant === "detailed" && kpiVariationsData) {
     return (
