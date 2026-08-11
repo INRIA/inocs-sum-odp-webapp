@@ -2,11 +2,12 @@
 import Layout from "../../layouts/Layout.astro";
 import HowToUseAccordion from "../../components/AnalysisPageSections/HowToUseAccordion.astro";
 import FeaturesGrid from "../../components/AnalysisPageSections/FeaturesGrid.astro";
-import { InfoAlert, KpisFrameworkDiagram } from "../../components/react";
+import { InfoAlert } from "../../components/react";
 import {
   NumberedListIcon,
   DocumentTextIcon,
   TableCellsIcon,
+  ArrowRightCircleIcon,
 } from "@heroicons/react/20/solid";
 import {
   ArrowDownTrayIcon,
@@ -41,7 +42,7 @@ const collectionPlanSteps = [
 ];
 
 const resourcesFeatures: any[] = [
-  {
+    {
     iconComponent: DocumentTextIcon,
     title: "KPI SIEF Framework & Formulas",
     description:
@@ -59,6 +60,12 @@ const resourcesFeatures: any[] = [
         iconComponent: ArrowDownTrayIcon,
         target: "_blank",
         rel: "noopener noreferrer",
+      },
+      {
+        label: "Learn more",
+        href: "/methods/evaluation-framework",
+        variant: "secondary",
+        iconComponent: ArrowRightCircleIcon,
       },
     ],
   },
@@ -154,7 +161,7 @@ const whyDataMattersFeatures: any[] = [
   role="visitor"
   breadcrumbs={[
     { label: "Home", href: "/" },
-    { label: "Data" },
+    { label: "Methods & quality" },
     { label: "KPI Data Collection Planning" },
   ]}
   backHref="/"
@@ -168,12 +175,6 @@ const whyDataMattersFeatures: any[] = [
       <p class="text-gray-600 text-lg">
         Resources and tools to help you collect and calculate KPI data for your
         city.
-      </p>
-      <p class="text-sm text-gray-500 mt-2">
-        See also:
-        <a href="/methods/data-collection" class="text-primary hover:underline">How the data is collected</a>
-        ·
-        <a href="/methods/evaluation-framework" class="text-primary hover:underline">Evaluation framework (SIEF)</a>
       </p>
     </div>
 
@@ -201,8 +202,6 @@ const whyDataMattersFeatures: any[] = [
       <FeaturesGrid features={resourcesFeatures} columns={3} className="mb-0" />
     </section>
 
-    <!-- KPIs framework -->
-    <KpisFrameworkDiagram />
     <!-- Developing Your Data Collection Plan -->
     <HowToUseAccordion
       title="Developing your data collection plan"

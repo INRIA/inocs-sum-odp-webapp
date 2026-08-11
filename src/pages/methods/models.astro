@@ -1,5 +1,39 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import { MethodologyAccordion } from "../../components/AnalysisPageSections";
+import { FAQAccordion, InfoAlert, InfoCard } from "../../components/react";
+const methodologyQuestions = [
+  {
+    question: "What is PROMETHEE?",
+    answer: `PROMETHEE (Preference Ranking Organisation METHod for Enrichment
+              Evaluations) is a Multi-Criteria Decision Analysis (MCDA) method
+              used to evaluate and rank alternatives when multiple, and sometimes conflicting, criteria must be considered simultaneously.
+              It handles both quantitative data (e.g. costs, travel times) and qualitative
+              factors (e.g. environmental impact, social acceptability), making it
+              well-suited for complex decisions like urban transport policy evaluation.
+              It also incorporates the diverse perspectives of multiple stakeholders
+              (citizens, businesses, public authorities) by building preference relations
+              between alternatives based on how each group values the criteria.`,
+  },
+  {
+    question: "What is GAIA?",
+    answer: `GAIA (Graphical Analysis for Interactive Assistance) is the
+              visual, interactive companion to PROMETHEE. It displays evaluation
+              results graphically on a GAIA plane, mapping both the policy
+              alternatives and the evaluation criteria together. This visual
+              representation helps stakeholders (regardless of their technical
+              background) better understand the analysis, communicate results,
+              and identify trade-offs and areas where preferences converge or
+              conflict.`,
+  },
+  {
+    question: "How to read the PROMETHEE-GAIA results?",
+    answer: `PROMETHEE-GAIA results combine two complementary outputs: PROMETHEE and GAIA.
+              Together, they allow users to quickly identify the strongest
+              policy options, understand key trade-offs, and assess the overall
+              robustness and consensus behind the recommended solutions.`,
+  },
+];
 ---
 
 <Layout
@@ -11,105 +45,287 @@ import Layout from "../../layouts/Layout.astro";
   ]}
   backHref="/methods/evaluation-framework"
 >
-  <div class="mx-auto px-4 py-8 max-w-4xl prose prose-gray">
-    <h1>How the Models Work</h1>
+  <div class="mx-auto px-4 py-8 max-w-[1240px]">
+    <h1 class="text-3xl font-bold text-gray-900 mb-3">How the Models Work</h1>
+    <p class="text-base text-dark max-w-[70ch] mb-2">
+      The platform runs two complementary analyses: one estimates what each mobility
+      measure contributed to observed KPI changes, the other ranks options across
+      competing criteria.
+    </p>
+    <div class="w-14 h-1 rounded bg-primary mb-8"></div>
 
-    <section>
-      <h2>Impact analysis model — ridge regression</h2>
-      <p>
-        The impact analysis tool estimates the contribution of each mobility measure to observed
-        KPI changes across Living Labs. It uses <strong>ridge regression</strong>, a variant of
-        linear regression designed to handle situations where the number of predictors (measures)
-        is large relative to the number of observations (cities).
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-7 items-stretch">
+
+      <!-- Left panel: Impact analysis -->
+      <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+        <div class="h-1 bg-primary"></div>
+
+        <div class="px-7 pt-6 pb-5">
+          <span class="inline-block text-xs font-bold tracking-widest uppercase text-primary bg-primary/7 px-3 py-1 rounded-full mb-3">
+            Model 1 · Regression
+          </span>
+          <h2 class="text-xl font-bold text-gray-900 mb-3">Impact analysis model</h2>
+          <p class="text-sm text-dark leading-relaxed mb-5 max-w-[56ch]">
+            The impact analysis tool estimates the contribution of each mobility
+            measure to observed KPI changes across Living Labs. It uses <strong
+              >ridge regression</strong
+            >, a variant of linear regression designed to handle situations where
+            the number of predictors (measures) is large relative to the number of
+            observations (cities).
+          </p>
+          <a
+            href="/tools/impact_analysis"
+            class="inline-flex items-center gap-2 bg-primary text-white text-sm font-semibold px-4 py-2.5 rounded-lg shadow-sm hover:bg-primary/90 transition-colors"
+          >Use the impact analysis tool →</a>
+        </div>
+
+        <div class="border-t border-gray-200 flex-1 flex flex-col [&_details.group]:mb-0 [&_details.group>summary]:rounded-none [&_details.group>summary]:border-x-0 [&_details.group>summary]:border-t-0 [&_details.group>summary]:border-b [&_details.group>summary]:border-gray-200 [&_details.group>div]:rounded-none [&_details.group>div]:border-x-0 [&_details.group>div]:mt-0 [&_details.group>div]:border-b [&_details.group>div]:border-gray-200 [&_details.group:last-child>summary]:border-b-0 [&_details.group:last-child>div]:border-b-0">
+          <MethodologyAccordion
+            title="Understanding the methodology"
+            subtitle="Regression analysis approach"
+            content=""
+          >
+            <p class="text-sm text-gray-700 leading-relaxed mb-4">
+              The impact analysis assesses the effect of push and pull measures implemented across
+              multiple Living Labs as part of Sustainable Urban Mobility Plan
+              (SUMP) interventions. Policy measures are combinations of restrictions on private car use (push) and
+              incentives for shared mobility adoption (pull).
+            </p>
+            <p class="text-sm text-gray-700 leading-relaxed mb-3">
+              The analysis follows a three-step process:
+            </p>
+            <ol
+              class="list-decimal list-inside text-sm text-gray-700 leading-relaxed mb-4 space-y-2 ml-4"
+            >
+              <li>
+                <strong>Baseline data collection</strong> : KPIs are measured before
+                the interventions.
+              </li>
+              <li>
+                <strong>Impact estimation</strong> : KPIs are recalculated after implementation
+                and compared to the baseline.
+              </li>
+              <li>
+                <strong>Interactive interface</strong> : Results are communicated through
+                a dedicated interface to support stakeholder exploration.
+              </li>
+            </ol>
+            <p class="text-sm text-gray-700 leading-relaxed mb-3">
+              To quantify the contribution of each measure, a <strong
+                >Ridge regression model</strong
+              > (linear regression with L2 regularization) is used. Each measure is
+              encoded as a binary variable (implemented = 1, not implemented = 0) per
+              Living Lab. The model associates a regression coefficient to each measure,
+              estimating its individual contribution to the observed change in each
+              KPI. Ridge regularization is chosen because the number of measures exceeds
+              the number of Living Labs, helping prevent overfitting and address multicollinearity.
+            </p>
+            <p class="text-sm text-gray-700 leading-relaxed">
+              Both univariate (per KPI) and multivariate (grouped KPIs of the same
+              type, ie. environmental, societal, economic) analyses are conducted
+              to ensure robustness, especially when data points are limited for
+              local KPIs.
+            </p>
+          </MethodologyAccordion>
+
+          <MethodologyAccordion
+            title="Data collection"
+            subtitle="What data is this analysis based on?"
+            content=""
+          >
+            <div class="grid grid-cols-1 gap-4">
+              <InfoCard
+                title="KPIs tracking"
+                description="Collection of KPI data before and after the implementation of push and pull measures across all Living Labs"
+                showIcon={false}
+                textAlign="center"
+              />
+              <InfoCard
+                title="Push and pull measures implementation"
+                description="Binary records (0/1) per Living Lab indicating which push and/or pull measures were applied (e.g. parking charging, vehicle sharing)"
+                showIcon={false}
+                textAlign="center"
+              />
+              <InfoCard
+                title="Participating cities"
+                description="SUM Living Labs and Contributing cities participating in the SUM Open Data Platform, providing a diverse dataset for analysis"
+                showIcon={false}
+                textAlign="center"
+              />
+              <p class="text-sm text-gray-700">
+                The analysis draws on data collected across all Living Labs,
+                combining intervention records and performance measurements
+                (KPIs). These inputs feed into the regression model to estimate
+                the impact of each measure on mobility outcomes.
+              </p>
+            </div>
+          </MethodologyAccordion>
+
+          <MethodologyAccordion
+            title="How to interpret the results ?"
+            subtitle="Understanding regression coefficients and model accuracy"
+            content=""
+          >
+            <div class="space-y-4">
+              <p class="text-sm text-gray-700 leading-relaxed">
+                The model outputs a regression coefficient (&beta;) for each measure,
+                representing its estimated contribution to the observed change in
+                a given KPI:
+              </p>
+              <ul
+                class="list-disc list-inside text-sm text-gray-700 leading-relaxed space-y-2 ml-4"
+              >
+                <li>
+                  A <strong>positive coefficient</strong> indicates the measure contributed
+                  to an increase in that KPI.
+                </li>
+                <li>
+                  A <strong>negative coefficient</strong> indicates a decrease.
+                </li>
+                <li>
+                  A coefficient <strong>close to zero</strong> suggests the measure
+                  had little to no isolated impact on that KPI.
+                </li>
+              </ul>
+              <p class="text-sm text-gray-700 leading-relaxed mt-4">
+                Results should be interpreted with the following in mind:
+              </p>
+              <ul
+                class="list-disc list-inside text-sm text-gray-700 leading-relaxed space-y-2 ml-4"
+              >
+                <li>
+                  If a measure was implemented uniformly across all Living Labs,
+                  its individual effect may be harder to isolate, and results
+                  should be read with caution.
+                </li>
+                <li>
+                  The <strong>mean squared error (MSE)</strong> of the model provides
+                  an indication of estimation accuracy. A lower MSE means the model
+                  fits the observed data more closely.
+                </li>
+              </ul>
+            </div>
+          </MethodologyAccordion>
+        </div>
+      </div>
+
+      <!-- Right panel: MCDA -->
+      <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+        <div class="h-1 bg-secondary-dark"></div>
+
+        <div class="px-7 pt-6 pb-5">
+          <span class="inline-block text-xs font-bold tracking-widest uppercase text-secondary-dark bg-secondary-dark/10 px-3 py-1 rounded-full mb-3">
+            Model 2 · Decision analysis
+          </span>
+          <h2 class="text-xl font-bold text-gray-900 mb-3">Multi-Criteria Decision Analysis (MCDA)</h2>
+          <p class="text-sm text-dark leading-relaxed mb-5 max-w-[56ch]">
+            The multi-criteria decision analysis (MCDA) tool uses the
+            <strong>PROMETHEE II</strong> (Preference Ranking Organisation METHod for
+            Enrichment Evaluations) method to rank business activities for New Shared
+            Mobility according to multiple criteria simultaneously.
+          </p>
+          <a
+            href="/tools/mcda_analysis/"
+            class="inline-flex items-center gap-2 bg-secondary-dark text-white text-sm font-semibold px-4 py-2.5 rounded-lg shadow-sm hover:bg-secondary-dark/90 transition-colors"
+          >Use the decision tool →</a>
+        </div>
+
+        <div class="border-t border-gray-200 flex-1 flex flex-col [&_details.group]:mb-0 [&_details.group>summary]:rounded-none [&_details.group>summary]:border-x-0 [&_details.group>summary]:border-t-0 [&_details.group>summary]:border-b [&_details.group>summary]:border-gray-200 [&_details.group>div]:rounded-none [&_details.group>div]:border-x-0 [&_details.group>div]:mt-0 [&_details.group>div]:border-b [&_details.group>div]:border-gray-200 [&_details.group:last-child>summary]:border-b-0 [&_details.group:last-child>div]:border-b-0">
+          <MethodologyAccordion
+            title="PROMETHEE-GAIA Multi-Criteria Analysis"
+            subtitle="Multi-criteria decision analysis approach with PROMETHEE and GAIA visualization"
+            content=""
+          >
+            <div class="grid grid-cols-1 gap-3 mt-2">
+              <FAQAccordion questions={methodologyQuestions} client:load />
+              <InfoAlert title="Pro tip for interpretation" variant="success">
+                <p>
+                  Compare results across different perspectives to identify
+                  measures that work well for multiple stakeholders.
+                </p>
+              </InfoAlert>
+            </div>
+          </MethodologyAccordion>
+
+          <MethodologyAccordion
+            title="How to interpret the results ?"
+            subtitle="Understanding Multi-Criteria Analysis outputs and model accuracy"
+            content=""
+          >
+            <p class="mb-4 text-sm text-gray-700 leading-relaxed">
+              PROMETHEE-GAIA results combine two complementary outputs that work
+              together to support decision-making. PROMETHEE produces a ranked
+              order of the transport policy alternatives, reflecting how each
+              city's interventions perform across all weighted criteria and
+              stakeholder perspectives. A higher rank indicates a policy that
+              better satisfies the overall set of criteria as valued by the
+              stakeholders involved. The GAIA plane then brings a visual dimension
+              to these rankings, mapping both the policy alternatives and the
+              evaluation criteria onto a two-dimensional graph. On this plane,
+              criteria pointing in similar directions indicate aligned objectives,
+              while criteria pointing in opposite directions reveal trade-offs.
+              Policies positioned close to a criterion's axis perform well on that
+              specific criterion. A decision axis summarizes the overall PROMETHEE
+              ranking direction, helping users quickly identify the most globally
+              preferred alternatives.
+            </p>
+            <p class="mb-6 text-sm text-gray-700">Together, these two outputs allow users to:</p>
+            <div class="grid grid-cols-1 gap-4">
+              <InfoCard
+                title="Rank Alternatives"
+                description="Compare transport policies based on their overall performance across all criteria and stakeholder groups"
+                showIcon={false}
+                textAlign="center"
+              />
+              <InfoCard
+                title="Identify Trade-offs"
+                description="Spot tensions between competing objectives (e.g. cost reduction vs. environmental impact) that cannot be simultaneously optimized"
+                showIcon={false}
+                textAlign="center"
+              />
+              <InfoCard
+                title="Explore Consensus"
+                description="Identify areas where different stakeholders' preferences align, supporting more inclusive and robust decision-making"
+                showIcon={false}
+                textAlign="center"
+              />
+            </div>
+          </MethodologyAccordion>
+        </div>
+      </div>
+
+    </div>
+
+    <section class="mt-12">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">Data context and limitations</h2>
+      <p class="text-gray-600 mb-6">
+        The platform is decision <em>support</em>. Validated data does not make every question
+        answerable — the method, the sample and the value judgements built into the models each set a
+        boundary.
       </p>
 
-      <h3>What it does</h3>
-      <p>
-        Ridge regression fits a model that relates each measure's presence (binary: implemented
-        or not) to the observed change in a KPI value. The regularisation parameter (lambda)
-        prevents any single measure from dominating the model when data coverage is limited.
-      </p>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <InfoAlert title="You can use it to" variant="success" hideIcon>
+          <ul class="list-disc list-inside text-sm leading-relaxed space-y-2 mt-2">
+            <li>See which measures tend to <strong>co-occur</strong> with improvements in a KPI across cities</li>
+            <li>Compare your city against peers on a common, validated indicator set</li>
+            <li>See how a ranking shifts when different stakeholder priorities are applied</li>
+            <li>Judge how much data sits behind any given result, before you rely on it</li>
+            <li>Build a shortlist of measures worth a local feasibility study</li>
+          </ul>
+        </InfoAlert>
 
-      <h3>Inputs</h3>
-      <ul>
-        <li>Before/after KPI values per city</li>
-        <li>Binary indicator of which measures each city implemented</li>
-        <li>City-level covariates (where available)</li>
-      </ul>
-
-      <h3>Outputs</h3>
-      <ul>
-        <li>Estimated coefficient for each measure — its associated direction of KPI change</li>
-        <li>Evidence strength badge based on data coverage (Limited / Moderate / Strong)</li>
-        <li>Ranking of measures by estimated impact magnitude</li>
-      </ul>
-
-      <h3>Important assumptions</h3>
-      <p>
-        The model assumes linear relationships between measures and KPI changes. It cannot
-        establish causal relationships — only statistical associations. Results should be
-        interpreted in conjunction with local context. See
-        <a href="/methods/limitations" class="text-primary hover:underline">Limitations</a> for details.
-      </p>
-
-      <p>
-        <a href="/tools/impact_analysis" class="text-primary hover:underline">Use the impact analysis tool →</a>
-      </p>
+        <InfoAlert title="You cannot use it to" variant="danger" hideIcon>
+          <ul class="list-disc list-inside text-sm leading-relaxed space-y-2 mt-2">
+            <li>Conclude that a measure <strong>caused</strong> an observed outcome</li>
+            <li>Assume a result from one set of cities transfers to yours unchanged</li>
+            <li>Read an MCDA ranking as an objective ordering independent of whose priorities were used</li>
+            <li>Treat a missing value as a zero, or as evidence that nothing happened</li>
+            <li>Replace local expertise, stakeholder engagement or regulatory assessment</li>
+          </ul>
+        </InfoAlert>
+      </div>
     </section>
 
-    <section>
-      <h2>MCDA model — PROMETHEE II</h2>
-      <p>
-        The multi-criteria decision analysis (MCDA) tool uses the
-        <strong>PROMETHEE II</strong> (Preference Ranking Organisation METHod for Enrichment
-        Evaluations) method to rank business activities for New Shared Mobility according to
-        multiple criteria simultaneously.
-      </p>
-
-      <h3>What it does</h3>
-      <p>
-        PROMETHEE II computes pairwise preference comparisons between alternatives (NSM business
-        activities) across multiple weighted goals. For each pair, it calculates how much one
-        alternative is preferred over another. Aggregating these pairwise comparisons yields
-        a net flow score (phi) for each alternative, and the alternatives are ranked by descending
-        phi value.
-      </p>
-
-      <h3>Inputs</h3>
-      <ul>
-        <li>Set of alternatives (NSM business activities)</li>
-        <li>Goal weights per stakeholder perspective</li>
-        <li>Performance scores per alternative per goal</li>
-      </ul>
-
-      <h3>Outputs</h3>
-      <ul>
-        <li>Net flow (phi) score per alternative — higher is better</li>
-        <li>Ranked list of alternatives by perspective</li>
-        <li>GAIA plane visualisation showing trade-offs and stakeholder alignment</li>
-      </ul>
-
-      <h3>GAIA companion</h3>
-      <p>
-        The GAIA (Geometrical Analysis for Interactive Aid) plane is a 2D projection of the
-        PROMETHEE results that helps visualise conflicts and synergies between goals and
-        alternatives. The decision axis (d-axis) indicates the overall PROMETHEE ranking direction.
-      </p>
-
-      <h3>Important assumptions</h3>
-      <p>
-        Goal weights reflect stakeholder priorities from expert surveys and may not reflect all
-        real-world contexts. Performance scores are derived from platform data. See
-        <a href="/methods/limitations" class="text-primary hover:underline">Limitations</a> for details.
-      </p>
-
-      <p>
-        <a href="/tools/mcda_analysis/" class="text-primary hover:underline">Use the decision tool →</a>
-      </p>
-    </section>
-
-    <nav class="not-prose mt-8 flex gap-4 text-sm">
-      <a href="/methods/limitations" class="text-primary hover:underline">Next: Limitations →</a>
-    </nav>
   </div>
 </Layout>

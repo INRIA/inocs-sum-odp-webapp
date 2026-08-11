@@ -8,7 +8,7 @@ import {
 } from "../../../components/react/Insights";
 import type { PolicyMeasureRow } from "../../../components/react/Insights";
 import type { PolicyMeasureOverviewRow } from "../../../components/react/Insights";
-import { InfoAlert } from "../../../components/react/ui";
+import { InfoAlert, RButton } from "../../../components/react/ui";
 import { MCDA_PERSPECTIVES } from "../../../lib/helpers";
 import ApiClient from "../../../lib/api-client/ApiClient";
 import { getUrl } from "../../../lib/helpers";
@@ -218,6 +218,17 @@ policyMeasureRows.sort((a, b) => a.bestKpiRank - b.bestKpiRank);
     </div>
 
     <PolicyMeasuresOverview rows={overviewRows} client:load />
+
+    <div class="flex justify-end mb-10">
+      <RButton
+        variant="secondary"
+        size="lg"
+        text="Policy measures data"
+        href={getUrl("/data/measures")}
+        defaultArrow
+        client:load
+      />
+    </div>
 
     <div class="mt-12 mb-8">
       <hr class="border-t border-warning border-dotted" />

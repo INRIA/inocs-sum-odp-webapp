@@ -8,11 +8,11 @@ import {
 } from "../components/react";
 import heroImage from "../assets/img/sum-hero.png";
 import ApiClient from "../lib/api-client/ApiClient";
-import { getUrl, getYearFromDate } from "../lib/helpers";
+import { getUrl } from "../lib/helpers";
 import { type ILivingLabPopulated } from "../types";
 import { COLOR_GREEN } from "../styles/constants";
-import { getCityType, getCityDataStatus } from "../lib/utils/cityStatus";
 import { computePlatformCounters } from "../lib/utils/platformCounters";
+import { buildMapLabs } from "../lib/utils/mapLabs";
 
 const api = new ApiClient(Astro.request);
 
@@ -26,42 +26,7 @@ const transportModes = (await api.getTransportModes())?.filter(
 
 const platformCounters = computePlatformCounters(livingLabsData ?? []);
 
-const labs = livingLabsData?.map((lab) => {
-  const kpiSet = new Set<number>();
-  const yearsSet = new Set<number>();
-  lab.kpi_results
-    ?.filter((kpi) => kpi.result_before || kpi.result_after)
-    ?.forEach((kpiresult) => {
-      const kpiDefinition = allKPIs?.find(
-        (pk) => pk.id === kpiresult.kpidefinition_id,
-      );
-      kpiSet.add(kpiDefinition?.parent_kpi_id ?? kpiDefinition?.id ?? 0);
-      const year = getYearFromDate(kpiresult.result_after?.date);
-      year && yearsSet.add(year);
-    });
-
-  const labId = Number(lab.id);
-  const cityType = getCityType(labId);
-  const dataStatus = getCityDataStatus(lab.kpi_results ?? null);
-
-  return {
-    id: String(lab.id),
-    name: lab.name,
-    coordinates:
-      lab.lat != null && lab.lng != null
-        ? { lat: parseFloat(lab.lat), lng: parseFloat(lab.lng) }
-        : null,
-    radius: lab.radius ?? 50,
-    cityType,
-    dataStatus,
-    totalMeasures: lab.projects?.length ?? 0,
-    kpisCollected: kpiSet.size,
-    yearsCollected: Array.from(yearsSet),
-    transportModes: lab.transport_modes?.filter((tm) => tm.type === "NSM")
-      .length ?? 0,
-    sustainablePercentage: 0.4,
-  };
-});
+const labs = buildMapLabs(livingLabsData ?? [], allKPIs ?? []);
 
 const experienceDoors = [
   {
@@ -73,9 +38,8 @@ const experienceDoors = [
     entries: [
       { label: "Policy measures", href: "/insights/measures" },
       { label: "Cities", href: "/insights/cities" },
-      { label: "Plan for my city", href: "/insights/plan" },
     ],
-    cta: { label: "Explore insights", href: "/insights/measures" },
+    cta: { label: "Explore insights", href: "/insights/cities" },
     colorAccent: "secondary",
   },
   {

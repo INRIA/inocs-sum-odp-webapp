@@ -1,6 +1,37 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import { InfoAlert } from "../../components/react/ui";
+import { InfoAlert, Timeline } from "../../components/react/ui";
+
+const validationSteps = [
+  {
+    stepLabel: "Step 1",
+    title: "Submission",
+    description:
+      "City submits — A Living Lab data editor enters KPI values, measures and modal split figures for a given reporting period.",
+    footnote: "Draft — not yet visible",
+  },
+  {
+    stepLabel: "Step 2",
+    title: "Format & completeness check",
+    description:
+      "Automatic — Values are checked against the data type, unit and expected range defined for each KPI in the SIEF framework, and the required fields needed to compute it are verified.",
+    footnote: "Rejected at entry, with the reason shown",
+  },
+  {
+    stepLabel: "Step 3",
+    title: "Consistency cross-check",
+    description:
+      "Administrator — Values are compared against known ranges and against the city's own earlier submissions to surface anomalies.",
+    footnote: "Queried with the city before publication",
+  },
+  {
+    stepLabel: "Step 4",
+    title: "Validation & publication",
+    description:
+      "The Administrator confirms the submission as validated and stamps it with a validation date.",
+    footnote: "Live in dashboards, analyses and downloads",
+  },
+];
 ---
 
 <Layout
@@ -8,44 +39,58 @@ import { InfoAlert } from "../../components/react/ui";
   breadcrumbs={[
     { label: "Home", href: "/" },
     { label: "Methods & quality" },
-    { label: "Data quality & curation" },
+    { label: "Data quality" },
   ]}
   backHref="/methods/evaluation-framework"
 >
-  <div class="mx-auto px-4 py-8 max-w-4xl prose prose-gray">
-    <h1>Data Quality &amp; Curation</h1>
-
-    <InfoAlert title="Placeholder content" variant="warning" client:load>
-      <p>The curator role and review cadence must be confirmed by the consortium.
-      Current values are placeholders.</p>
-    </InfoAlert>
+  <div class="mx-auto px-4 py-8 max-w-[1080px]">
+    <h1 class="text-3xl font-bold text-primary mb-3">
+      Data quality
+    </h1>
+    <p class="text-base text-dark max-w-[62ch] mb-2">
+      Every figure on this platform comes from a city that measured it and a review process that
+      checked it. This page explains how data is validated before it is published and how quality
+      is communicated to users.
+    </p>
+    <div class="w-14 h-1 rounded bg-primary mb-8"></div>
 
     <section class="mt-6">
-      <h2>Data validation workflow</h2>
-      <p>
-        All data submitted to the SUM platform passes through a structured validation process
-        before being made available for analysis and display. This ensures data integrity and
-        comparability across cities.
+      <span
+        class="inline-block text-xs font-bold tracking-widest uppercase text-primary bg-primary/7 px-3 py-1 rounded-full mb-3"
+      >
+        Part 1 — Data quality
+      </span>
+      <h2 class="text-2xl font-bold text-primary mb-2">How data is validated</h2>
+      <p class="text-dark max-w-[70ch] mb-6">
+        Quality is controlled in two places: who is allowed to publish, and what each submission has
+        to pass. Nothing reaches a dashboard, an analysis or a download straight from a submission
+        form. This is what makes figures comparable across cities.
       </p>
-      <p>The validation workflow consists of:</p>
-      <ol>
-        <li>
-          <strong>Format validation</strong> — Submitted values are checked against expected data
-          types, units, and ranges for each KPI.
-        </li>
-        <li>
-          <strong>Completeness check</strong> — Required fields and minimum data requirements
-          are verified before a submission is accepted.
-        </li>
-        <li>
-          <strong>Plausibility review</strong> — Values are compared against known ranges and
-          against other submissions from the same city to detect anomalies.
-        </li>
-        <li>
-          <strong>Consortium review</strong> — The data curation team performs a final check
-          and confirms the submission as validated.
-        </li>
-      </ol>
+
+      <!-- Gate step: city approval -->
+      <InfoAlert title="A city is approved before it can publish anything" variant="info" client:load>
+        <p class="text-sm">
+          New cities joining the platform are validated by the ODP Administrator, who also
+          cross-checks their data for consistency with the rest of the platform. Only approved
+          Living Labs and contributing cities hold a profile that can submit data.
+        </p>
+      </InfoAlert>
+
+      <p
+        class="text-xs font-bold tracking-widest uppercase text-dark mt-6 mb-4 flex items-center gap-3"
+      >
+        Then, for every submission
+        <span class="flex-1 h-px bg-gray-200"></span>
+      </p>
+
+      <!-- Validation pipeline -->
+      <Timeline steps={validationSteps} client:load />
+
+      <p class="text-sm text-dark border-l-3 border-primary/30 pl-4 mt-6 max-w-[80ch]">
+        The platform is owned by <strong>ERTICO</strong> and hosted on the ERTICO Academy website.
+        Hosting is being transferred from INRIA, which built and operated the platform during the SUM
+        project, to ERTICO during 2026. The validation steps above are unchanged by that transfer.
+      </p>
     </section>
 
     <section>

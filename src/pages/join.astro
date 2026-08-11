@@ -49,18 +49,16 @@ const steps = [
 
 <Layout
   role="visitor"
-  breadcrumbs={[
-    { label: "Home", href: "/" },
-    { label: "Join & Resources" },
-  ]}
+  breadcrumbs={[{ label: "Home", href: "/" }, { label: "How to contribute ?" }]}
   backHref="/"
 >
   <!-- Page header -->
   <div class="mx-auto px-4 py-8 max-w-5xl">
-    <h1 class="text-3xl font-bold text-gray-900 mb-2">Join & Resources</h1>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">How to contribute ?</h1>
     <p class="text-lg text-gray-600 mb-8">
       Learn how to contribute your city's data to the SUM Open Data Platform,
-      access resources for data collection, and find answers to common questions.
+      access resources for data collection, and find answers to common
+      questions.
     </p>
   </div>
 
@@ -139,25 +137,29 @@ const steps = [
   <section class="py-12 px-4 max-w-5xl mx-auto">
     <h2 class="text-2xl font-bold text-gray-900 mb-4">Resources</h2>
     <p class="text-gray-600 mb-6">
-      Access templates, guides, and tools to help you collect and calculate KPI data for your city.
+      Access templates, guides, and tools to help you collect and calculate KPI
+      data for your city.
     </p>
     <div class="grid sm:grid-cols-2 gap-4">
+      <a
+        href={getUrl("/methods/collection-plan")}
+        class="block p-6 bg-white rounded-xl border border-gray-200 hover:shadow-md transition-shadow"
+      >
+        <h3 class="font-semibold text-gray-900 mb-1">
+          Data collection planning
+        </h3>
+        <p class="text-sm text-gray-600">
+          KPI framework, spreadsheet templates, and survey tools for your city.
+        </p>
+      </a>
       <a
         href={getUrl("/tools/resources")}
         class="block p-6 bg-white rounded-xl border border-gray-200 hover:shadow-md transition-shadow"
       >
         <h3 class="font-semibold text-gray-900 mb-1">Resource library</h3>
         <p class="text-sm text-gray-600">
-          Models, optimisation tools and software for integrated mobility planning.
-        </p>
-      </a>
-      <a
-        href={getUrl("/data/collection-plan")}
-        class="block p-6 bg-white rounded-xl border border-gray-200 hover:shadow-md transition-shadow"
-      >
-        <h3 class="font-semibold text-gray-900 mb-1">Data collection planning</h3>
-        <p class="text-sm text-gray-600">
-          KPI framework, spreadsheet templates, and survey tools for your city.
+          Models, optimisation tools and software for integrated mobility
+          planning.
         </p>
       </a>
     </div>
@@ -171,7 +173,12 @@ const steps = [
         Find answers about data access, contributing results, measures, KPIs,
         and technical integration.
       </p>
-      <RButton href={getUrl("/faq")} variant="primary" className="bg-primary text-light" client:load>
+      <RButton
+        href={getUrl("/faq")}
+        variant="primary"
+        className="bg-primary text-light"
+        client:load
+      >
         Go to the FAQ →
       </RButton>
     </div>
@@ -179,8 +186,15 @@ const steps = [
 
   <!-- Login/signup CTAs -->
   <section class="py-12 px-4">
-    <div class="text-center flex flex-col md:flex-row gap-4 mx-auto justify-center">
-      <RButton href="/lab-admin/login" variant="primary" className="bg-warning text-light" client:load>
+    <div
+      class="text-center flex flex-col md:flex-row gap-4 mx-auto justify-center"
+    >
+      <RButton
+        href="/lab-admin/login"
+        variant="primary"
+        className="bg-warning text-light"
+        client:load
+      >
         Login to your account →
       </RButton>
       <RButton href="/lab-admin/signup" variant="primary" client:load>

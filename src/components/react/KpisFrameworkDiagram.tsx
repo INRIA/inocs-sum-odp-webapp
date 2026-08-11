@@ -19,8 +19,8 @@ export const KpisFrameworkDiagram: React.FC = () => {
         The SUM Standardized Impact Evaluation Framework
       </h2>
 
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6 xl:gap-8">
-        <aside className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700 lg:w-80 lg:shrink-0 xl:w-96">
+      <div className="flex flex-col gap-4 lg:items-center lg:gap-6 xl:gap-8">
+        <aside className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
           <p className="font-medium text-gray-900">
             The SUM Standardized Impact Evaluation Framework (SIEF) extends CIVITAS CEF to verify SUM’s core target: at least a 25%
             shift from daily private car use to NSM and/or public transport in

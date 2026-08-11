@@ -63,24 +63,17 @@ const ROUTES: RouteEntry[] = [
   { pattern: "/data/kpis", experience: "data" },
   { pattern: "/data/modal-split", experience: "data" },
   { pattern: "/data/measures", experience: "data" },
-  { pattern: "/data/collection-plan", experience: "data" },
+  { pattern: "/methods/collection-plan", experience: "data" },
   { pattern: "/tools/impact_analysis", experience: "data" },
   { pattern: "/tools/mcda_analysis", experience: "data" }, // prefix match
   {
     pattern: "/living-lab-city/:labId",
     experience: "data",
-    counterpart: "/insights/city/:labId",
   },
 
   // Insights experience
-  {
-    pattern: "/insights/city/:labId",
-    experience: "insights",
-    counterpart: "/living-lab-city/:labId",
-  },
   { pattern: "/insights/measures", experience: "insights" },
   { pattern: "/insights/cities", experience: "insights" },
-  { pattern: "/insights/plan", experience: "insights" },
   { pattern: "/insights", experience: "insights" },
 
   // Insights — Join page
@@ -113,7 +106,7 @@ const DATA_MENU: ExperienceMenu = {
         { href: "/data/measures", label: "Policy measures" },
         { href: "/data/kpis", label: "KPIs" },
         { href: "/data/modal-split", label: "Modal split" },
-        { href: "/data/collection-plan", label: "Data collection process" },
+        { href: "/methods/collection-plan", label: "Data collection process" },
       ],
     },
     {
@@ -128,10 +121,9 @@ const DATA_MENU: ExperienceMenu = {
       label: "Methods & quality",
       subItems: [
         { href: "/methods/evaluation-framework", label: "Evaluation framework" },
-        { href: "/methods/data-collection", label: "Data collection" },
+        { href: "/methods/collection-plan", label: "Data collection" },
         { href: "/methods/data-quality", label: "Data quality" },
         { href: "/methods/models", label: "How the models work" },
-        { href: "/methods/limitations", label: "Limitations" },
         { href: "/methods/glossary", label: "Glossary" },
         { href: "/faq", label: "FAQ" },
       ],
@@ -142,12 +134,12 @@ const DATA_MENU: ExperienceMenu = {
 const INSIGHTS_MENU: ExperienceMenu = {
   id: "insights",
   label: "Insights",
-  home: "/insights/measures",
+  home: "/insights/cities",
   descriptor: "Evidence for decision makers",
   items: [
     { label: "Home", href: "/" },
     { href: "/insights/cities", label: "Cities performance" }, // Epic 9
-    { href: "/insights/goals", label: "Observed Policy measures" }, // Epic 8
+    { href: "/insights/measures", label: "Observed Policy measures" }, // Epic 8
     // { href: "/insights/plan", label: "Plan for my city" }, // Epic 10
     { href: "/join", label: "Contribute" }, // T18
   ],

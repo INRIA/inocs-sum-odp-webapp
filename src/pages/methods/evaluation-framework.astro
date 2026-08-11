@@ -1,5 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import { KpisFrameworkDiagram } from "../../components/react";
 ---
 
 <Layout
@@ -13,6 +14,10 @@ import Layout from "../../layouts/Layout.astro";
 >
   <div class="mx-auto px-4 py-8 max-w-4xl prose prose-gray">
     <h1>Evaluation Framework (SIEF)</h1>
+
+    <div class="not-prose">
+      <KpisFrameworkDiagram />
+    </div>
 
     <section>
       <h2>What SIEF is and why it exists</h2>
@@ -69,7 +74,7 @@ import Layout from "../../layouts/Layout.astro";
     </section>
 
     <nav class="not-prose mt-8 flex gap-4 text-sm">
-      <a href="/methods/data-collection" class="text-primary hover:underline">Next: Data collection →</a>
+      <a href="/methods/collection-plan" class="text-primary hover:underline">Next: Data collection →</a>
       <a href="/methods/glossary" class="text-primary hover:underline">Glossary →</a>
     </nav>
   </div>

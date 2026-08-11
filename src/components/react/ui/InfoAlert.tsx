@@ -44,10 +44,10 @@ const variantClasses: Record<
     buttonBg: "border-primary hover:border-primary/90 text-primary",
   },
   success: {
-    bg: "bg-success/50",
-    border: "border-green-200",
-    text: "text-primary",
-    buttonBg: "border-success hover:border-success/90 text-primary",
+    bg: "bg-success/10",
+    border: "border-success/40",
+    text: "text-secondary-dark",
+    buttonBg: "border-success hover:border-success/90 text-secondary-dark",
   },
   warning: {
     bg: "bg-warning/50",
@@ -56,10 +56,10 @@ const variantClasses: Record<
     buttonBg: "border-warning hover:border-warning/90 text-dark",
   },
   danger: {
-    bg: "bg-danger/50",
-    border: "border-red-200",
-    text: "text-danger",
-    buttonBg: "border-danger hover:border-danger/90 text-primary",
+    bg: "bg-danger/8",
+    border: "border-danger/35",
+    text: "text-dark",
+    buttonBg: "border-danger hover:border-danger/90 text-dark",
   },
   info: {
     bg: "bg-info/50",

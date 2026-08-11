@@ -4,7 +4,7 @@ const LINKS = [
   { label: "KPI Dashboard", description: "Explore key performance indicators across cities", href: "/data/kpis" },
   { label: "Modal Split", description: "Transport mode share data by city", href: "/data/modal-split" },
   { label: "Policy Measures", description: "Mobility measures implemented by cities", href: "/data/measures" },
-  { label: "Data Collection Plan", description: "Framework and methodology", href: "/data/collection-plan" },
+  { label: "Data Collection Plan", description: "Framework and methodology", href: "/methods/collection-plan" },
   { label: "Impact Analysis", description: "Statistical analysis of measure effectiveness", href: "/tools/impact_analysis" },
   { label: "MCDA Tool", description: "Multi-criteria decision analysis", href: "/tools/mcda_analysis" },
   { label: "Resources", description: "Documents, lessons, and references", href: "/tools/resources" },
