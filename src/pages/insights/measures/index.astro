@@ -208,8 +208,19 @@ policyMeasureRows.sort((a, b) => a.bestKpiRank - b.bestKpiRank);
 >
   <div class="mx-auto max-w-5xl px-4 py-12">
     <div class="mb-10">
-      <h1 class="text-3xl font-bold text-gray-900 mb-3">Policy measures</h1>
-      <p class="text-gray-500 text-lg">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h1 class="text-3xl font-bold text-gray-900">Policy measures</h1>
+        <RButton
+          variant="secondary"
+          size="lg"
+          text="Policy measures data"
+          href={getUrl("/data/measures")}
+          defaultArrow
+          className="self-end sm:self-auto"
+          client:load
+        />
+      </div>
+      <p class="text-gray-500 text-lg mt-3">
         Measures are policy actions, infrastructure changes, service rollouts,
         or regulatory shifts implemented by cities to impact how people move
         through urban spaces. Each measure reported falls under one of two
@@ -218,17 +229,6 @@ policyMeasureRows.sort((a, b) => a.bestKpiRank - b.bestKpiRank);
     </div>
 
     <PolicyMeasuresOverview rows={overviewRows} client:load />
-
-    <div class="flex justify-end mb-10">
-      <RButton
-        variant="secondary"
-        size="lg"
-        text="Policy measures data"
-        href={getUrl("/data/measures")}
-        defaultArrow
-        client:load
-      />
-    </div>
 
     <div class="mt-12 mb-8">
       <hr class="border-t border-warning border-dotted" />
