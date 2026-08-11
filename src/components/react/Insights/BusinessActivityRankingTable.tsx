@@ -1,5 +1,6 @@
 import React from "react";
 import { Badge } from "../ui/Badge";
+import { Tooltip } from "../ui/Tooltip";
 
 interface PerspectiveResult {
   key: string;
@@ -81,7 +82,13 @@ export function BusinessActivityRankingTable({ perspectives }: Props) {
                 key={p.key}
                 className="text-center py-3 px-2 font-semibold text-primary"
               >
-                {p.label}
+                Ranked by {p.label.toLowerCase()}
+                <a
+                  href={`/tools/mcda_analysis/mcda_analysis_qualitative/${p.key}`}
+                  className="block text-xs font-normal text-secondary hover:text-primary underline mt-1"
+                >
+                  View full analysis
+                </a>
               </th>
             ))}
           </tr>
@@ -110,12 +117,24 @@ export function BusinessActivityRankingTable({ perspectives }: Props) {
 
                 return (
                   <td key={pr.perspectiveKey} className="text-center py-3 px-2">
-                    <Badge
-                      color={isTop3 ? "secondary" : "light"}
-                      size="sm"
+                    <Tooltip
+                      placement="bottom"
+                      content={
+                        <a
+                          href={`/tools/mcda_analysis/mcda_analysis_qualitative/${pr.perspectiveKey}`}
+                          className="text-secondary underline hover:text-primary"
+                        >
+                          View {pr.perspectiveLabel} analysis
+                        </a>
+                      }
                     >
-                      #{pr.rank}
-                    </Badge>
+                      <Badge
+                        color={isTop3 ? "secondary" : "light"}
+                        size="sm"
+                      >
+                        #{pr.rank}
+                      </Badge>
+                    </Tooltip>
                   </td>
                 );
               })}

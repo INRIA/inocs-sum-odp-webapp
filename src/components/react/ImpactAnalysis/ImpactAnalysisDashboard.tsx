@@ -21,12 +21,29 @@ interface ImpactAnalysisDashboardProps {
   kpiVariationsData: Record<number, IKpiVariationData>;
   variationsByKpis: Record<number, IKpiVariationData>;
   totalPlatformLabs?: number;
+  initialGroupId?: number;
 }
 
 export const ImpactAnalysisDashboard: React.FC<
   ImpactAnalysisDashboardProps
-> = ({ kpiGroups, jobRunOutput, kpiVariationsData, variationsByKpis, totalPlatformLabs }) => {
-  const [selectedGroupId, setSelectedGroupId] = useState<number>();
+> = ({
+  kpiGroups,
+  jobRunOutput,
+  kpiVariationsData,
+  variationsByKpis,
+  totalPlatformLabs,
+  initialGroupId,
+}) => {
+  const validInitialGroupId =
+    initialGroupId !== undefined &&
+    !isNaN(Number(initialGroupId)) &&
+    kpiGroups.some((g) => Number(g.id) === Number(initialGroupId))
+      ? Number(initialGroupId)
+      : undefined;
+
+  const [selectedGroupId, setSelectedGroupId] = useState<number | undefined>(
+    validInitialGroupId,
+  );
   const [activeTabId, setActiveTabId] = useState<string>(MEASURES_TAB_ID);
 
   const handleGroupSelect = (groupId: number) => {
@@ -112,7 +129,6 @@ export const ImpactAnalysisDashboard: React.FC<
       variationsByKpis={variationsByKpis}
     />
   );
-
   return (
     <div className="space-y-6">
       {selectedGroupId === undefined && (

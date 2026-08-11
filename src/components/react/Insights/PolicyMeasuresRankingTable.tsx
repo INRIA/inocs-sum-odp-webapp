@@ -1,11 +1,13 @@
 import React from "react";
 import { Badge } from "../ui/Badge";
+import { Tooltip } from "../ui/Tooltip";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 interface KpiGroupCoefficient {
+  groupId: number;
   groupName: string;
   coefficient: number;
   /** Rank within this KPI group (1 = highest coefficient) */
@@ -14,6 +16,7 @@ interface KpiGroupCoefficient {
 }
 
 interface PerspectiveRank {
+  perspectiveKey: string;
   perspectiveLabel: string;
   rank: number;
   totalInPerspective: number;
@@ -29,6 +32,8 @@ export interface PolicyMeasureRow {
   perspectives: PerspectiveRank[];
   /** Best (lowest) rank across all KPI groups — used for overall sort */
   bestKpiRank: number;
+  /** Number of cities that implement this measure */
+  cityCount: number;
 }
 
 interface Props {
@@ -61,6 +66,9 @@ export function PolicyMeasuresRankingTable({ rows }: Props) {
               Policy measure
             </th>
             <th className="text-left py-3 px-2 font-semibold text-primary">
+              Implemented by
+            </th>
+            <th className="text-left py-3 px-2 font-semibold text-primary">
               Data analysis ranking results
             </th>
           </tr>
@@ -74,24 +82,76 @@ export function PolicyMeasuresRankingTable({ rows }: Props) {
               <td className="py-3 pr-4 font-bold text-primary">{idx + 1}</td>
               <td className="py-3 pr-4 font-medium text-dark">{row.name}</td>
 
+              <td className="py-3 px-2 text-sm text-dark/70">
+                {row.cityCount > 0 ? `${row.cityCount} ${row.cityCount === 1 ? "city" : "cities"}` : "—"}
+              </td>
+
               <td className="py-3 px-2 text-sm text-dark">
                 <div className="flex flex-wrap gap-1">
                   {(() => {
-                    const kpiTop3 = row.kpiGroups.filter((kg) => kg.rank <= 3).length;
-                    const perspTop3 = row.perspectives.filter((pr) => pr.rank <= 3).length;
-                    if (kpiTop3 === 0 && perspTop3 === 0) return null;
+                    const kpiTop3Groups = row.kpiGroups.filter((kg) => kg.rank <= 3);
+                    const perspTop3Count = row.perspectives.filter((pr) => pr.rank <= 3).length;
+                    if (kpiTop3Groups.length === 0 && perspTop3Count === 0) return null;
                     return (
                       <>
-                        {kpiTop3 > 0 && (
-                          <Badge color="secondary" size="sm">
-                            Top ranked in {kpiTop3} KPI group{kpiTop3 !== 1 ? "s" : ""}
-                          </Badge>
+                        {kpiTop3Groups.length > 0 && (
+                          <Tooltip
+                            placement="bottom"
+                            tooltipClassName="w-72"
+                            content={
+                              <ul className="list-none p-0 m-0 space-y-1">
+                                {kpiTop3Groups.map((kg) => (
+                                  <li key={kg.groupId}>
+                                    <a
+                                      href={`/tools/impact_analysis?groupId=${kg.groupId}#impact-results`}
+                                      className="text-secondary underline hover:text-primary"
+                                    >
+                                      {kg.groupName}
+                                    </a>
+                                    <span className="text-dark/60 ml-1">
+                                      (rank {kg.rank}/{kg.totalInGroup})
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            }
+                          >
+                            <Badge color="secondary" size="sm">
+                              Top ranked in {kpiTop3Groups.length} KPI group{kpiTop3Groups.length !== 1 ? "s" : ""}
+                            </Badge>
+                          </Tooltip>
                         )}
-                        {perspTop3 > 0 && (
-                          <Badge color="info" size="sm">
-                            Top ranked in {perspTop3} perspective{perspTop3 !== 1 ? "s" : ""}
-                          </Badge>
-                        )}
+                        {(() => {
+                          const perspTop3Groups = row.perspectives.filter((pr) => pr.rank <= 3);
+                          if (perspTop3Groups.length === 0) return null;
+                          return (
+                            <Tooltip
+                              placement="bottom"
+                              tooltipClassName="w-72"
+                              content={
+                                <ul className="list-none p-0 m-0 space-y-1">
+                                  {perspTop3Groups.map((pr) => (
+                                    <li key={pr.perspectiveKey}>
+                                      <a
+                                        href={`/tools/mcda_analysis/mcda_analysis_quantitative/${pr.perspectiveKey}`}
+                                        className="text-secondary underline hover:text-primary"
+                                      >
+                                        {pr.perspectiveLabel}
+                                      </a>
+                                      <span className="text-dark/60 ml-1">
+                                        (rank {pr.rank}/{pr.totalInPerspective})
+                                      </span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              }
+                            >
+                              <Badge color="info" size="sm">
+                                Top ranked in {perspTop3Groups.length} perspective{perspTop3Groups.length !== 1 ? "s" : ""}
+                              </Badge>
+                            </Tooltip>
+                          );
+                        })()}
                       </>
                     );
                   })()}

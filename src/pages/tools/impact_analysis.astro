@@ -25,6 +25,10 @@ import { RButton } from "../../components/react";
 
 const api = new ApiClient(Astro.request);
 
+// Read optional groupId query param for deep-linking from insights page
+const initialGroupIdParam = Astro.url.searchParams.get("groupId");
+const initialGroupId = initialGroupIdParam ? Number(initialGroupIdParam) : undefined;
+
 // Fetch the latest successful job run for kpi_measures_analysis
 let jobRun: IJobRun | null = null;
 let kpiGroups: IKpiGroup[] = [];
@@ -244,6 +248,7 @@ const howToUseSteps = [
             kpiVariationsData={kpiVariationsData}
             variationsByKpis={variationsByKpis}
             totalPlatformLabs={livingLabsMap.size}
+            initialGroupId={initialGroupId}
             client:load
           />
         </section>

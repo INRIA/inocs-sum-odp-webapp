@@ -76,6 +76,7 @@ const quantitativePerspectives = await Promise.all(
 
 // 1. Rank measures within each KPI group by coefficient (descending)
 type GroupRanking = {
+  groupId: number;
   groupName: string;
   ranked: {
     measureId: number;
@@ -91,6 +92,7 @@ const groupRankings: GroupRanking[] = successItems.map((item) => {
     (a, b) => b.coefficient - a.coefficient,
   );
   return {
+    groupId: item.group_id,
     groupName: item.group_name,
     ranked: sorted.map((m, i) => ({
       measureId: m.id,
@@ -145,7 +147,7 @@ for (const p of quantitativePerspectives) {
 // 3. Build MCDA perspective lookup: normalised name → ranks per perspective
 const perspectiveLookup = new Map<
   string,
-  { perspectiveLabel: string; rank: number; total: number }[]
+  { perspectiveKey: string; perspectiveLabel: string; rank: number; total: number }[]
 >();
 for (const p of quantitativePerspectives) {
   if (p.ranking.length === 0) continue;
@@ -157,6 +159,7 @@ for (const p of quantitativePerspectives) {
       perspectiveLookup.set(normalised, []);
     }
     perspectiveLookup.get(normalised)!.push({
+      perspectiveKey: p.key,
       perspectiveLabel: p.label,
       rank: i + 1,
       total: p.ranking.length,
@@ -164,7 +167,14 @@ for (const p of quantitativePerspectives) {
   }
 }
 
-// 4. Assemble rows
+// 4. Build city-count lookup from allMeasures (normalised name → count)
+const cityCountByName = new Map<string, number>();
+for (const m of allMeasures) {
+  const key = m.name.toLowerCase().trim();
+  cityCountByName.set(key, (m.living_lab_projects_implementation ?? []).length);
+}
+
+// 5. Assemble rows
 const policyMeasureRows: PolicyMeasureRow[] = Array.from(
   measureByName.entries(),
 ).map(([normName, { measureId, name }]) => {
@@ -173,6 +183,7 @@ const policyMeasureRows: PolicyMeasureRow[] = Array.from(
       const entry = gr.ranked.find((m) => m.measureId === measureId);
       if (!entry) return null;
       return {
+        groupId: gr.groupId,
         groupName: gr.groupName,
         coefficient: entry.coefficient,
         rank: entry.rank,
@@ -182,6 +193,7 @@ const policyMeasureRows: PolicyMeasureRow[] = Array.from(
     .filter((x): x is NonNullable<typeof x> => x !== null);
 
   const perspectives = (perspectiveLookup.get(normName) ?? []).map((p) => ({
+    perspectiveKey: p.perspectiveKey,
     perspectiveLabel: p.perspectiveLabel,
     rank: p.rank,
     totalInPerspective: p.total,
@@ -190,7 +202,9 @@ const policyMeasureRows: PolicyMeasureRow[] = Array.from(
   const bestKpiRank =
     kpiGroups.length > 0 ? Math.min(...kpiGroups.map((g) => g.rank)) : Infinity;
 
-  return { measureId, name, kpiGroups, perspectives, bestKpiRank };
+  const cityCount = cityCountByName.get(normName) ?? 0;
+
+  return { measureId, name, kpiGroups, perspectives, bestKpiRank, cityCount };
 });
 
 // Sort by best KPI rank (measures with impact analysis data first, then MCDA-only)
@@ -206,7 +220,7 @@ policyMeasureRows.sort((a, b) => a.bestKpiRank - b.bestKpiRank);
   ]}
   backHref={getUrl("/insights/measures")}
 >
-  <div class="mx-auto max-w-5xl px-4 py-12">
+  <div class="mx-auto max-w-7xl px-4 py-12">
     <div class="mb-10">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 class="text-3xl font-bold text-gray-900">Policy measures</h1>
@@ -267,7 +281,7 @@ policyMeasureRows.sort((a, b) => a.bestKpiRank - b.bestKpiRank);
     {/* Section 1: Policy Measures */}
     <MethodologySection
       title="Data driven policy measure ranking"
-      subtitle="How the policy measures contributed to the KPIs performance across cities, provided by ridge regression analysis (cities, policy measures and KPIs before vs after values)."
+      subtitle="Estimation of how the policy measures contributed to the KPIs performance across cities, provided by ridge regression analysis (cities, policy measures and KPIs before vs after values)."
       badges={[
         { label: "Data driven", color: "info" },
         { label: "Ridge regression", color: "secondary" },
@@ -275,22 +289,23 @@ policyMeasureRows.sort((a, b) => a.bestKpiRank - b.bestKpiRank);
       ]}
       ctaLabel="KPIs Impact analysis"
       ctaHref="/tools/impact_analysis"
+      ctas={[{ label: "Quantitative MCDA", href: "/tools/mcda_analysis/mcda_analysis_quantitative/regulatory" }]}
       client:load
     >
-      <PolicyMeasuresRankingTable rows={policyMeasureRows} />
+      <PolicyMeasuresRankingTable rows={policyMeasureRows} client:load />
     </MethodologySection>
 
     {/* Section 2: Business Activities */}
     <MethodologySection
-      title="Business Activities stakeholder rating"
+      title="Business Activities stakeholder ranking"
       subtitle="Main insights from MCDA analysis about Business activities rated by the people who operate, regulate and deliver mobility in the SUM Living Labs."
       badges={[
         { label: "Perceived performance", color: "info" },
         { label: "Qualitative analysis", color: "secondary" },
         { label: "Stakeholder survey", color: "light" },
       ]}
-      ctaLabel="MCDA decision tool"
-      ctaHref="/tools/mcda_analysis/"
+      ctaLabel="Qualitative MCDA"
+      ctaHref="/tools/mcda_analysis/mcda_analysis_qualitative/regulatory"
       client:load
     >
       <BusinessActivityRankingTable perspectives={quantitativePerspectives} />

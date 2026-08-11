@@ -4,6 +4,11 @@ import { Badge } from "../ui/Badge";
 import { RButton } from "../ui/RButton";
 import type { BadgeColor } from "../ui/Badge";
 
+interface Cta {
+  label: string;
+  href: string;
+}
+
 interface MethodologySectionProps {
   title: string;
   subtitle: string;
@@ -11,6 +16,7 @@ interface MethodologySectionProps {
   open?: boolean;
   ctaLabel?: string;
   ctaHref?: string;
+  ctas?: Cta[];
   children?: React.ReactNode;
 }
 
@@ -21,8 +27,14 @@ export function MethodologySection({
   open = true,
   ctaLabel,
   ctaHref,
+  ctas,
   children,
 }: MethodologySectionProps) {
+  const allCtas: Cta[] = [
+    ...(ctaLabel && ctaHref ? [{ label: ctaLabel, href: ctaHref }] : []),
+    ...(ctas ?? []),
+  ];
+
   return (
     <ExpansionPanel
       arrow
@@ -40,15 +52,18 @@ export function MethodologySection({
               ))}
             </div>
           </div>
-          {ctaLabel && ctaHref && (
-            <div className="shrink-0 mt-4">
-              <RButton
-                variant="secondary"
-                size="lg"
-                text={ctaLabel}
-                href={ctaHref}
-                defaultArrow
-              />
+          {allCtas.length > 0 && (
+            <div className="shrink-0 mt-4 flex flex-row lg:flex-col gap-3">
+              {allCtas.map((cta) => (
+                <RButton
+                  key={cta.label}
+                  variant="secondary"
+                  size="lg"
+                  text={cta.label}
+                  href={cta.href}
+                  defaultArrow
+                />
+              ))}
             </div>
           )}
         </div>

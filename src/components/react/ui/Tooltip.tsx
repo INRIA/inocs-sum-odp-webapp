@@ -31,17 +31,15 @@ export function Tooltip({
   };
 
   return (
-    <div className={className}>
+    <div
+      className={className}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       {children ? (
-        <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-          {children}
-        </div>
+        <div>{children}</div>
       ) : (
-        <QuestionMarkCircleIcon
-          className={` ${iconClassName}`}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        />
+        <QuestionMarkCircleIcon className={` ${iconClassName}`} />
       )}
       <div
         role="tooltip"
@@ -53,7 +51,7 @@ export function Tooltip({
           placement === "top"
             ? "bottom-full left-1/2 -translate-x-1/2 mb-2"
             : placement === "bottom"
-            ? "top-full left-1/2 -translate-x-1/2 mt-2"
+            ? "top-full left-1/2 -translate-x-1/2 mt-0"
             : placement === "left"
             ? "right-full top-1/2 -translate-y-1/2 mr-2"
             : "left-full top-1/2 -translate-y-1/2 ml-2"
