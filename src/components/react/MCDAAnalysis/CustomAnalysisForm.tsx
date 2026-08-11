@@ -441,7 +441,7 @@ export const CustomAnalysisForm: React.FC<CustomAnalysisFormProps> = ({
         <div className="flex items-start justify-between gap-3">
           <AnalysisSectionDivider
             step={4}
-            title="Score Matrix"
+            title="Your ratings"
             description="Provide one score for each activity-goal pair"
           />
           <CustomHelpToolTip

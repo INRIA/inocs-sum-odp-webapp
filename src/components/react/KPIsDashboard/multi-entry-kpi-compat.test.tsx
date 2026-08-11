@@ -67,7 +67,7 @@ describe("multi-entry KPI compatibility", () => {
       },
     ];
 
-    render(<KpiLivingLabsSingleCard kpi={kpi} labTimelines={labTimelines} />);
+    render(<KpiLivingLabsSingleCard kpi={kpi} labTimelines={labTimelines} baselineLabs={[]} />);
 
     expect(screen.getByText("2021-01-01")).toBeInTheDocument();
     expect(screen.getByText("2022-01-01")).toBeInTheDocument();

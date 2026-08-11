@@ -9,6 +9,7 @@ import {
   getModalSplitKpiResults,
   createMapMarker,
 } from "../../lib/helpers/living-lab";
+import { isImplementationKpi } from "../../config/implementationKpis";
 import {
   DataDisplayCard,
   LivingLabKPIsView,
@@ -16,6 +17,8 @@ import {
 } from "../../components/react";
 import { TriggerDownloadCsv } from "../../components/react/TriggerDownloadCsv/TriggerDownloadCsv";
 import type { IKpiResultGroup } from "../../types";
+import { displayLabType } from "../../lib/labels";
+import { getCityDataStatus, getFullCityStatus } from "../../lib/utils/cityStatus";
 
 const api = new ApiClient(Astro.request);
 
@@ -62,6 +65,14 @@ const nonModalSplitKpis = allKpis.filter(
   (kpi) => !kpi.kpi_number.startsWith("15"),
 );
 
+// T02: split outcome KPIs from implementation-record KPIs
+const outcomeKpis = nonModalSplitKpis.filter(
+  (kpi) => !isImplementationKpi(kpi.id),
+);
+const implementationKpis = nonModalSplitKpis.filter((kpi) =>
+  isImplementationKpi(kpi.id),
+);
+
 const mapMarker = createMapMarker(livingLabData);
 const kpiResultsByCategory = categories.map((category) => ({
   ...category,
@@ -71,6 +82,20 @@ const kpiResultsByCategory = categories.map((category) => ({
     category.kpis?.some((kpi) => kpi.id === kpiResult.kpidefinition_id),
   ),
 }));
+
+// T06: determine city data status at SSR time
+const cityKpiResults = (livingLabData?.kpi_results as IKpiResultGroup[] | undefined) ?? null;
+const cityStatus = getFullCityStatus(Number(livingLabData?.id), cityKpiResults);
+const hasData = cityStatus.dataStatus === "has_data";
+
+// Registration date: use created_at if available
+const registrationDate = livingLabData?.created_at
+  ? new Date(livingLabData.created_at as unknown as string).toLocaleDateString("en-GB", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+  : null;
 ---
 
 <Layout
@@ -83,7 +108,7 @@ const kpiResultsByCategory = categories.map((category) => ({
 >
   <div class="lg:mx-10 mx-auto px-1 py-4 flex flex-col gap-8">
     <h2>
-      <strong>{livingLabData?.name}</strong> Living lab data dashboard
+      <strong>{livingLabData?.name}</strong> — {displayLabType(Number(livingLabData?.id))} data dashboard
     </h2>
 
     <!-- Map Section -->
@@ -100,7 +125,7 @@ const kpiResultsByCategory = categories.map((category) => ({
       <div class="w-full lg:w-1/4">
         <DataDisplayCard
           data={[
-            { label: "Living Lab", value: livingLabData?.name },
+            { label: displayLabType(Number(livingLabData?.id)), value: livingLabData?.name },
             {
               label: "Location",
               //value: `${livingLabData?.city}, ${livingLabData?.country}`,
@@ -168,9 +193,9 @@ const kpiResultsByCategory = categories.map((category) => ({
       }
     </div>
 
-    <!-- KPIs Section -->
+    <!-- KPIs Section — T06: data-pending empty state -->
     {
-      livingLabData?.kpi_results && livingLabData?.kpi_results?.length > 0 ? (
+      hasData ? (
         <section class="flex flex-col gap-4">
           <h3 class="text-center">Key Performance Indicators (KPIs)</h3>
 
@@ -185,12 +210,51 @@ const kpiResultsByCategory = categories.map((category) => ({
           <div class="flex flex-wrap gap-0">
             <LivingLabKPIsView
               categories={kpiResultsByCategory ?? []}
-              kpis={nonModalSplitKpis}
+              kpis={outcomeKpis}
+              implementationKpis={implementationKpis}
+              lab_validated_at={livingLabData?.validated_at ?? null}
+              living_lab_id={Number(livingLabData.id)}
               client:load
             />
           </div>
         </section>
-      ) : null
+      ) : (
+        <section class="flex flex-col gap-4">
+          <h3 class="text-center">Key Performance Indicators (KPIs)</h3>
+          <div class="bg-blue-50 border border-blue-200 rounded-xl p-8 flex flex-col gap-4 max-w-2xl mx-auto w-full">
+            <div class="flex items-center gap-3">
+              <div class="flex flex-col gap-1">
+                <h4 class="font-bold text-gray-900">{livingLabData?.name}</h4>
+                <div class="flex gap-2 flex-wrap">
+                  <span class="inline-block px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                    {cityStatus.typeLabel}
+                  </span>
+                  <span class="inline-block px-2.5 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning">
+                    {cityStatus.statusLabel}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {registrationDate && (
+              <p class="text-sm text-gray-600">
+                Registered on: <span class="font-medium">{registrationDate}</span>
+              </p>
+            )}
+
+            <div class="bg-white rounded-lg border border-blue-200 p-4">
+              <p class="text-gray-700 font-medium">
+                Registered (no data yet)
+              </p>
+              <p class="text-sm text-gray-500 mt-1">
+                This city has been registered on the SUM Open Data Platform but
+                has not yet published KPI data. Data will appear here once the
+                city team submits their baseline and follow-up measurements.
+              </p>
+            </div>
+          </div>
+        </section>
+      )
     }
   </div>
 </Layout>

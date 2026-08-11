@@ -10,14 +10,20 @@ import {
 } from "./KpiCards";
 import { ChartPieIcon, ChartBarIcon } from "@heroicons/react/24/outline";
 import { TriggerDownloadCsv } from "./TriggerDownloadCsv/TriggerDownloadCsv";
+import { ImplementationRecordTable } from "./KPIsDashboard/ImplementationRecordTable";
 
 interface IKpiResultsByCategory extends ICategory {
   kpiResults: IKpiResultGroup[];
 }
+
 type Props = {
   kpis?: IKpi[];
+  /** Implementation-record KPIs — rendered in a table, not as charts (T02) */
+  implementationKpis?: IKpi[];
   categories?: IKpiResultsByCategory[];
   living_lab_id?: number;
+  /** Lab validation timestamp for data-sufficiency check (T03) */
+  lab_validated_at?: Date | null;
 
   modalSplitKpis?: {
     kpiName: string;
@@ -31,7 +37,9 @@ type Props = {
 export function LivingLabKPIsView({
   categories = [],
   kpis,
+  implementationKpis,
   living_lab_id,
+  lab_validated_at,
   modalSplitKpis,
 }: Props) {
   const [chartView, setChartView] = useState<ModalSplitChartView>("doughnut");
@@ -46,6 +54,7 @@ export function LivingLabKPIsView({
           kpi={parentKpi}
           key={parentKpi.id}
           kpiResults={resultKpis[0]}
+          lab_validated_at={lab_validated_at}
         />
       );
     }
@@ -56,10 +65,12 @@ export function LivingLabKPIsView({
           parentKpi={parentKpi}
           kpis={kpis ?? []}
           results={resultKpis}
+          lab_validated_at={lab_validated_at}
         />
       );
     }
   };
+
   const getCategorySection = (kpiResults: IKpiResultGroup[]) => {
     const parentKpis = new Map<number, IKpi>();
     const kpiResultsMap = new Map<number, IKpiResultGroup[]>();
@@ -87,7 +98,6 @@ export function LivingLabKPIsView({
               (kpiResultsMap.get(a)?.length ?? 0),
           )
           .map(([key, parentKpi]) => (
-            // <div className="break-inside-avoid">
             <div
               key={key}
               className={`break-inside-avoid ${
@@ -197,8 +207,21 @@ export function LivingLabKPIsView({
     );
   }
 
+  // Collect all kpiResults across categories that match an implementationKpi
+  const implementationResults: IKpiResultGroup[] =
+    (implementationKpis ?? []).length > 0
+      ? categories.flatMap((cat) =>
+          (cat.kpiResults ?? []).filter((kr) =>
+            (implementationKpis ?? []).some(
+              (k) => k.id === kr.kpidefinition_id,
+            ),
+          ),
+        )
+      : [];
+
   return (
     <div className="flex flex-col gap-4 mx-auto w-full">
+      {/* Outcome KPI charts grouped by category */}
       {categories.map(
         ({ id, name, kpiResults }, index) =>
           kpiResults?.length > 0 &&
@@ -225,6 +248,19 @@ export function LivingLabKPIsView({
               content={getCategorySection(kpiResults)}
             />
           ),
+      )}
+
+      {/* Implementation Record Table — process metrics, no charts */}
+      {implementationResults.length > 0 && living_lab_id !== undefined && (
+        <div className="mt-4">
+          <h5 className="text-center mb-3">Implementation Record</h5>
+          <ImplementationRecordTable
+            view="lab"
+            kpis={implementationKpis ?? []}
+            kpiResults={implementationResults}
+            living_lab_id={living_lab_id}
+          />
+        </div>
       )}
     </div>
   );

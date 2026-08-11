@@ -4,15 +4,9 @@ import {
   InfoSection,
   FeaturesGrid,
   HowToUseAccordion,
-  MethodologyAccordion,
   AnalysisFeatureCard,
 } from "../../../components/AnalysisPageSections";
-import {
-  FAQAccordion,
-  InfoAlert,
-  InfoCard,
-  RButton,
-} from "../../../components/react";
+import { RButton } from "../../../components/react";
 
 // Define badge icon SVG
 const badgeIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
@@ -135,38 +129,6 @@ const analysisApproaches = [
   },
 ];
 
-const methodologyQuestions = [
-  {
-    question: "What is PROMETHEE?",
-    answer: `PROMETHEE (Preference Ranking Organisation METHod for Enrichment
-              Evaluations) is a Multi-Criteria Decision Analysis (MCDA) method
-              used to evaluate and rank alternatives when multiple, and sometimes conflicting, criteria must be considered simultaneously.
-              It handles both quantitative data (e.g. costs, travel times) and qualitative
-              factors (e.g. environmental impact, social acceptability), making it
-              well-suited for complex decisions like urban transport policy evaluation.
-              It also incorporates the diverse perspectives of multiple stakeholders
-              (citizens, businesses, public authorities) by building preference relations
-              between alternatives based on how each group values the criteria.`,
-  },
-  {
-    question: "What is GAIA?",
-    answer: `GAIA (Graphical Analysis for Interactive Assistance) is the
-              visual, interactive companion to PROMETHEE. It displays evaluation
-              results graphically on a GAIA plane, mapping both the policy
-              alternatives and the evaluation criteria together. This visual
-              representation helps stakeholders (regardless of their technical
-              background) better understand the analysis, communicate results,
-              and identify trade-offs and areas where preferences converge or
-              conflict.`,
-  },
-  {
-    question: "How to read the PROMETHEE-GAIA results?",
-    answer: `PROMETHEE-GAIA results combine two complementary outputs: PROMETHEE and GAIA.
-              Together, they allow users to quickly identify the strongest
-              policy options, understand key trade-offs, and assess the overall
-              robustness and consensus behind the recommended solutions.`,
-  },
-];
 ---
 
 <Layout
@@ -193,7 +155,7 @@ const methodologyQuestions = [
       <FeaturesGrid features={mcdaFeatures} />
 
       <div class="flex flex-row justify-center gap-4">
-        <RButton variant="secondary" href="#how-to">
+        <RButton variant="secondary" href="/methods/models">
           About the methodology
         </RButton>
         <RButton variant="primary" href="#choose-approach">
@@ -229,6 +191,7 @@ const methodologyQuestions = [
             Select the version that best fits your data availability and
             analysis needs. Each version provides comprehensive insights using
             the PROMETHEE GAIA methodology.
+            <a href="/methods/models" class="text-primary hover:underline">Learn more about the methodology →</a>
           </p>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -241,73 +204,7 @@ const methodologyQuestions = [
       </div>
     </section>
 
-    <section
-      id="how-to"
-      class="mx-auto px-1 py-8 gap-y-0 flex flex-col border-t border-gray-200"
-    >
-      <div class="text-center mb-10">
-        <h2 class="text-gray-900">Understanding the Methodology</h2>
-      </div>
-      <!-- Methodology -->
-      <MethodologyAccordion
-        title="PROMETHEE-GAIA Multi-Criteria Analysis"
-        subtitle="Multi-criteria decision analysis approach with PROMETHEE and GAIA visualization"
-        content=""
-      >
-        <div class="grid grid-cols-1 gap-3 mt-2">
-          <FAQAccordion questions={methodologyQuestions} client:load />
-          <InfoAlert title="Pro tip for interpretation" variant="success">
-            <p>
-              Compare results across different perspectives to identify measures
-              that work well for multiple stakeholders.
-            </p>
-          </InfoAlert>
-        </div>
-      </MethodologyAccordion>
 
-      <MethodologyAccordion
-        title="How to interpret the results ?"
-        subtitle="Understanding Multi-Criteria Analysis outputs and model accuracy"
-        content=""
-      >
-        <p class="mb-4">
-          PROMETHEE-GAIA results combine two complementary outputs that work
-          together to support decision-making. PROMETHEE produces a ranked order
-          of the transport policy alternatives, reflecting how each city's
-          interventions perform across all weighted criteria and stakeholder
-          perspectives. A higher rank indicates a policy that better satisfies
-          the overall set of criteria as valued by the stakeholders involved.
-          The GAIA plane then brings a visual dimension to these rankings,
-          mapping both the policy alternatives and the evaluation criteria onto
-          a two-dimensional graph. On this plane, criteria pointing in similar
-          directions indicate aligned objectives, while criteria pointing in
-          opposite directions reveal trade-offs. Policies positioned close to a
-          criterion's axis perform well on that specific criterion. A decision
-          axis summarizes the overall PROMETHEE ranking direction, helping users
-          quickly identify the most globally preferred alternatives.
-        </p>
-        <p class="mb-6">Together, these two outputs allow users to:</p>
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <InfoCard
-            title="Rank Alternatives"
-            description="Compare transport policies based on their overall performance across all criteria and stakeholder groups"
-            showIcon={false}
-            textAlign="center"
-          />
-          <InfoCard
-            title="Identify Trade-offs"
-            description="Spot tensions between competing objectives (e.g. cost reduction vs. environmental impact) that cannot be simultaneously optimized"
-            showIcon={false}
-            textAlign="center"
-          />
-          <InfoCard
-            title="Explore Consensus"
-            description="Identify areas where different stakeholders' preferences align, supporting more inclusive and robust decision-making"
-            showIcon={false}
-            textAlign="center"
-          />
-        </div>
-      </MethodologyAccordion>
-    </section>
+
   </div>
 </Layout>

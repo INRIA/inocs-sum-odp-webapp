@@ -20,11 +20,12 @@ interface ImpactAnalysisDashboardProps {
   jobRunOutput: IJobRunOutputData | null;
   kpiVariationsData: Record<number, IKpiVariationData>;
   variationsByKpis: Record<number, IKpiVariationData>;
+  totalPlatformLabs?: number;
 }
 
 export const ImpactAnalysisDashboard: React.FC<
   ImpactAnalysisDashboardProps
-> = ({ kpiGroups, jobRunOutput, kpiVariationsData, variationsByKpis }) => {
+> = ({ kpiGroups, jobRunOutput, kpiVariationsData, variationsByKpis, totalPlatformLabs }) => {
   const [selectedGroupId, setSelectedGroupId] = useState<number>();
   const [activeTabId, setActiveTabId] = useState<string>(MEASURES_TAB_ID);
 
@@ -76,12 +77,14 @@ export const ImpactAnalysisDashboard: React.FC<
     () => [
       {
         id: MEASURES_TAB_ID,
-        label: "Measures Impact",
+        label: "Linked measures",
         content: (
           <MeasuresImpact
             selectedGroup={selectedGroup}
             analysisResult={analysisResult}
             kpiCount={selectedVariationsData?.allKpiVariations.length || 0}
+            totalPlatformLabs={totalPlatformLabs ?? 0}
+            variationsData={selectedVariationsData}
           />
         ),
       },
@@ -92,6 +95,7 @@ export const ImpactAnalysisDashboard: React.FC<
           <KpiVariations
             selectedGroup={selectedGroup}
             variationsData={selectedVariationsData}
+            totalPlatformLabs={totalPlatformLabs}
           />
         ),
       },
@@ -159,7 +163,7 @@ export const ImpactAnalysisDashboard: React.FC<
 
       <PageNavigation
         sections={navigationSections}
-        disclaimer="The impact levels reported by this assessment tool are algorithmic estimates derived from implemented measures and observed KPI changes. They serve as indicative values and may not exactly reflect real-world outcomes."
+        disclaimer="The associations reported by this assessment tool are algorithmic estimates derived from implemented measures and observed KPI changes. They indicate statistical associations, not proven causal relationships. Results may not exactly reflect real-world outcomes."
       />
     </div>
   );

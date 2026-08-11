@@ -1,7 +1,6 @@
 // T010 — kpiresults CSV route tests
 import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from "vitest";
 import { GET } from "./kpiresults";
-import { EmptyCsvError } from "../../../../bff/services/csv-export.service";
 
 // Mock the controller so tests never hit the database
 vi.mock("../../../../bff/controllers/csv-export.controller", () => ({
@@ -88,14 +87,30 @@ describe("GET /api/v1/csv/kpiresults", () => {
     });
   });
 
-  it("returns 404 when controller throws EmptyCsvError", async () => {
-    mockGetKpiResultsCsv.mockRejectedValueOnce(new EmptyCsvError());
+  it("returns 200 with header-only CSV when controller returns empty data", async () => {
+    mockGetKpiResultsCsv.mockResolvedValueOnce(
+      '"KPI Group","KPI Number","KPI Name (parent)","KPI subtitle (child)","Transport Mode (modal split)","Metric(unit)","Lab","Value","Date"',
+    );
 
     const res = await GET({ url: makeUrl({ living_lab_id: "999" }) } as never);
 
-    expect(res.status).toBe(404);
-    const body = await res.json();
-    expect(body.error).toBeTruthy();
+    expect(res.status).toBe(200);
+    expect(res.headers.get("Content-Type")).toContain("text/csv");
+  });
+
+  it("accepts kpidefinition_id without living_lab_id (regression: was 400 via ModalSplitCard)", async () => {
+    mockGetKpiResultsCsv.mockResolvedValueOnce('"KPI Group","KPI Number"');
+    const res = await GET({ url: makeUrl({ kpidefinition_id: "42" }) } as never);
+    expect(res.status).toBe(200);
+  });
+
+  it("treats empty-string living_lab_id as absent (not 400)", async () => {
+    mockGetKpiResultsCsv.mockResolvedValueOnce('"KPI Group"');
+    const res = await GET({ url: makeUrl({ living_lab_id: "" }) } as never);
+    expect(res.status).toBe(200);
+    expect(mockGetKpiResultsCsv).toHaveBeenCalledWith(
+      expect.objectContaining({ living_lab_id: undefined }),
+    );
   });
 
   it("returns 400 when living_lab_id is not a positive integer", async () => {

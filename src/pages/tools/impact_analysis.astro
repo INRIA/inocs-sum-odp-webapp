@@ -5,7 +5,6 @@ import {
   InfoSection,
   FeaturesGrid,
   HowToUseAccordion,
-  MethodologyAccordion,
 } from "../../components/AnalysisPageSections";
 import ApiClient from "../../lib/api-client/ApiClient";
 import type {
@@ -21,7 +20,8 @@ import {
   aggregateVariationsByKpis,
 } from "../../lib/helpers/impact-analysis-format";
 import { formatDateWithTime } from "../../lib/helpers";
-import { InfoCard, RButton } from "../../components/react";
+import { RButton } from "../../components/react";
+
 
 const api = new ApiClient(Astro.request);
 
@@ -194,7 +194,7 @@ const howToUseSteps = [
       <!-- Features Grid -->
       <FeaturesGrid features={impactAnalysisFeatures} />
       <div class="flex flex-row justify-center gap-4">
-        <RButton variant="secondary" href="#how-to">
+        <RButton variant="secondary" href="/methods/models">
           Learn how it works
         </RButton>
         <RButton variant="primary" href="#impact-results">
@@ -214,145 +214,10 @@ const howToUseSteps = [
       />
 
       <!-- Methodology -->
-      <MethodologyAccordion
-        title="Understanding the methodology"
-        subtitle="Regression analysis approach"
-        content={""}
-      >
-        <p class="text-sm text-gray-700 leading-relaxed mb-4">
-          The impact analysis assesses the effect of push and pull measures —
-          combinations of restrictions on private car use (push) and incentives
-          for shared mobility adoption (pull) — implemented across multiple
-          Living Labs as part of Sustainable Urban Mobility Plan (SUMP)
-          interventions.
-        </p>
-        <p class="text-sm text-gray-700 leading-relaxed mb-3">
-          The analysis follows a three-step process:
-        </p>
-        <ol
-          class="list-decimal list-inside text-sm text-gray-700 leading-relaxed mb-4 space-y-2 ml-4"
-        >
-          <li>
-            <strong>Baseline data collection</strong> : KPIs are measured before the
-            interventions.
-          </li>
-          <li>
-            <strong>Impact estimation</strong> : KPIs are recalculated after implementation
-            and compared to the baseline.
-          </li>
-          <li>
-            <strong>Interactive interface</strong> : Results are communicated through
-            a dedicated interface to support stakeholder exploration.
-          </li>
-        </ol>
-        <p class="text-sm text-gray-700 leading-relaxed mb-3">
-          To quantify the contribution of each measure, a <strong
-            >Ridge regression model</strong
-          > (linear regression with L2 regularization) is used. Each measure is encoded
-          as a binary variable (implemented = 1, not implemented = 0) per Living Lab.
-          The model associates a regression coefficient to each measure, estimating
-          its individual contribution to the observed change in each KPI. Ridge regularization
-          is chosen because the number of measures exceeds the number of Living Labs,
-          helping prevent overfitting and address multicollinearity.
-        </p>
-        <p class="text-sm text-gray-700 leading-relaxed">
-          Both univariate (per KPI) and multivariate (grouped KPIs of the same
-          type, ie. environmental, societal, economic) analyses are conducted to
-          ensure robustness, especially when data points are limited for local
-          KPIs.
-        </p>
-      </MethodologyAccordion>
-
-      <MethodologyAccordion
-        title="Data collection"
-        subtitle="What data is this analysis based on?"
-        content=""
-      >
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <InfoCard
-            title="KPIs tracking"
-            description="Collection of KPI data before and after the implementation of push and pull measures across all Living Labs"
-            showIcon={false}
-            textAlign="center"
-          />
-          <InfoCard
-            title="Push and pull measures implementation"
-            description="Binary records (0/1) per Living Lab indicating which push and/or pull measures were applied (e.g. parking charging, vehicle sharing)"
-            showIcon={false}
-            textAlign="center"
-          />
-          <InfoCard
-            title={livingLabsMap.size > 0
-              ? `${livingLabsMap.size} Living Labs`
-              : "Living Labs"}
-            description="Cities participating in the SUM Open Data Platform that have implemented various combinations of push and pull measures, providing a diverse dataset for analysis"
-            showIcon={false}
-            textAlign="center"
-          />
-          <div class="col-span-2 lg:col-span-3">
-            <p>
-              The analysis draws on data collected across all Living Labs,
-              combining intervention records and performance measurements
-              (KPIs). These inputs feed into the regression model to estimate
-              the impact of each measure on mobility outcomes.
-            </p>
-          </div>
-        </div>
-      </MethodologyAccordion>
-
-      <MethodologyAccordion
-        title="How to interpret the results ?"
-        subtitle="Understanding regression coefficients and model accuracy"
-        content=""
-      >
-        <div class="space-y-4">
-          <p class="text-sm text-gray-700 leading-relaxed">
-            The model outputs a regression coefficient (β) for each measure,
-            representing its estimated contribution to the observed change in a
-            given KPI:
-          </p>
-          <ul
-            class="list-disc list-inside text-sm text-gray-700 leading-relaxed space-y-2 ml-4"
-          >
-            <li>
-              A <strong>positive coefficient</strong> indicates the measure contributed
-              to an increase in that KPI.
-            </li>
-            <li>
-              A <strong>negative coefficient</strong> indicates a decrease.
-            </li>
-            <li>
-              A coefficient <strong>close to zero</strong> suggests the measure had
-              little to no isolated impact on that KPI.
-            </li>
-          </ul>
-          <p class="text-sm text-gray-700 leading-relaxed mt-4">
-            Results should be interpreted with the following in mind:
-          </p>
-          <ul
-            class="list-disc list-inside text-sm text-gray-700 leading-relaxed space-y-2 ml-4"
-          >
-            <!-- <li>
-              <strong>Short-term KPIs</strong> (e.g. user satisfaction, intention
-              to use NSM) reflect the immediate effectiveness of the measures.
-            </li>
-            <li>
-              <strong>Long-term KPIs</strong> (e.g. GHG emissions, energy consumption)
-              reveal the broader sustainability impact over time.
-            </li> -->
-            <li>
-              If a measure was implemented uniformly across all Living Labs, its
-              individual effect may be harder to isolate, and results should be
-              read with caution.
-            </li>
-            <li>
-              The <strong>mean squared error (MSE)</strong> of the model provides
-              an indication of estimation accuracy. A lower MSE means the model fits
-              the observed data more closely.
-            </li>
-          </ul>
-        </div>
-      </MethodologyAccordion>
+      <p class="text-sm text-gray-500 mb-4">
+        Detailed methodology:
+        <a href="/methods/models" class="text-primary hover:underline">Impact analysis methodology</a>
+      </p>
     </section>
 
     {
@@ -378,6 +243,7 @@ const howToUseSteps = [
             jobRunOutput={jobRunOutput}
             kpiVariationsData={kpiVariationsData}
             variationsByKpis={variationsByKpis}
+            totalPlatformLabs={livingLabsMap.size}
             client:load
           />
         </section>

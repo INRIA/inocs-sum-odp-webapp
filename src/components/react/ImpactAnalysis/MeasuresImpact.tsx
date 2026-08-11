@@ -1,5 +1,5 @@
 import React from "react";
-import type { IKpiGroup, IGroupAnalysisResult } from "../../../types";
+import type { IKpiGroup, IGroupAnalysisResult, IKpiVariationData } from "../../../types";
 import { AnalysisSectionDivider } from "../ui/AnalysisSectionDivider";
 import { MeasureImpactCard } from "./MeasureImpactCard";
 import { D3HorizontalBarChart } from "./D3HorizontalBarChart";
@@ -11,26 +11,44 @@ import {
   calculateStatistics,
 } from "../../../lib/helpers/impact-analysis-format";
 import { InfoAlert } from "../ui";
+import { displayCategoryName } from "../../../lib/labels";
+import { EvidenceBadge } from "./EvidenceBadge";
+import {
+  computeEvidenceRatio,
+  getEvidenceBadge,
+} from "../../../config/evidenceStrength";
 
 interface MeasuresImpactProps {
   selectedGroup: IKpiGroup | null;
   analysisResult: IGroupAnalysisResult | null;
   kpiCount: number;
+  totalPlatformLabs: number;
+  variationsData: IKpiVariationData | null;
 }
 
 export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
   selectedGroup,
   analysisResult,
   kpiCount,
+  totalPlatformLabs,
+  variationsData,
 }) => {
+  const categoryLabel = selectedGroup
+    ? displayCategoryName(selectedGroup.name)
+    : "";
+
   const divider = (
     <AnalysisSectionDivider
       step={2}
-      title="Measures Impact"
+      title={
+        selectedGroup
+          ? `Measures linked to ${categoryLabel} improvement`
+          : "Linked measures"
+      }
       // subtitle="Analyse how implemented measures contributed to the KPIs variations"
       description={
-        "Estimation of the level of contribution for each measure to KPIs in the scope " +
-        selectedGroup?.name +
+        "Estimation of the strength of association for each measure to KPIs in the scope " +
+        categoryLabel +
         "."
       }
     />
@@ -59,12 +77,12 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
         {divider}
         <InfoAlert
           variant="warning"
-          title="Not enough data to estimate measure impact"
+          title="Not enough data to estimate measure association"
           className="mt-6"
         >
           <p>
-            Impact coefficients could not be computed for the KPI group{" "}
-            <strong>{selectedGroup.name}</strong>. This typically occurs when
+            Association coefficients could not be computed for the KPI group{" "}
+            <strong>{categoryLabel}</strong>. This typically occurs when
             only one living lab has reported KPI results for this group — the
             model requires data from at least two cities to attribute changes to
             specific policy measures.
@@ -85,6 +103,18 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
   const bottomMeasures = getBottomMeasures(measures, 3);
   const sortedMeasures = sortMeasuresByCoefficient(measures);
   const stats = calculateStatistics(measures);
+
+  // Compute evidence badge
+  const labsWithData = livingLabsAnalysis.length;
+  const kpiObservations = variationsData?.allKpiVariations.length ?? kpiCount;
+  const totalMeasures = measures.length;
+  const evidenceRatio = computeEvidenceRatio(
+    labsWithData,
+    kpiObservations,
+    totalPlatformLabs || Math.max(labsWithData, 1),
+    totalMeasures,
+  );
+  const badge = getEvidenceBadge(evidenceRatio);
 
   const renderStatCard = ({
     title,
@@ -109,14 +139,19 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
     <div>
       {divider}
 
+      {/* Evidence Badge */}
+      <div className="mt-4 flex items-center gap-2">
+        <EvidenceBadge badge={badge} cityCount={labsWithData} />
+      </div>
+
       {/* Statistics Summary */}
       <div className="mt-6 grid grid-cols-2 gap-4 mx-auto w-full md:w-2/3">
         {renderStatCard({
           title: (
             <>
-              Policy Measures estimated to have contributed to{" "}
+              Policy Measures statistically associated with{" "}
               <span className="text-secondary font-bold">
-                KPIs improvements
+                KPI improvements
               </span>
             </>
           ),
@@ -128,9 +163,9 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
         {renderStatCard({
           title: (
             <>
-              Policy Measures estimated to have contributed to{" "}
+              Policy Measures statistically associated with{" "}
               <span className="text-danger font-bold">
-                KPI decline or had adverse effects
+                KPI decline
               </span>
             </>
           ),
@@ -145,7 +180,7 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
           value: measures.length,
         })}
         {renderStatCard({
-          title: "Total Living Labs Compared",
+          title: "Cities with data",
           value: analysisResult.living_labs_analysis.length,
         })}
         {renderStatCard({
@@ -159,7 +194,7 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-6">
-        {/* Top Impactful Measures */}
+        {/* Top Associated Measures */}
         <div className="mt-8">
           <div className="flex items-center gap-3 mb-4">
             <svg
@@ -174,13 +209,12 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
               />
             </svg>
             <h5>
-              Policy Measures driving improvements for KPIs in group{" "}
-              <strong>{selectedGroup.name}</strong>{" "}
+              Top {topMeasures.length} measures linked to{" "}
+              <strong>{categoryLabel}</strong> improvement
             </h5>
           </div>
           <p className="text-dark mb-4 h-10">
-            Top {topMeasures.length} policy measures estimated to have
-            contributed to KPI improvements
+            Measures statistically associated with KPI improvements
           </p>
           <div className="grid grid-cols-1 gap-3">
             {topMeasures.map((measure, index) => (
@@ -194,7 +228,7 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
           </div>
         </div>
 
-        {/* Bottom Impactful Measures */}
+        {/* Bottom Associated Measures */}
         <div className="mt-8">
           <div className="flex items-center gap-3 mb-4">
             <svg
@@ -209,13 +243,12 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
               />
             </svg>
             <h5>
-              Policy Measures associated with decline for KPIs in group{" "}
-              <strong>{selectedGroup.name}</strong>
+              Bottom {bottomMeasures.length} measures linked to{" "}
+              <strong>{categoryLabel}</strong> regression
             </h5>
           </div>
           <p className="text-dark mb-4 h-10">
-            Bottom {bottomMeasures.length} policy measures estimated to have
-            contributed negatively or had adverse effects
+            Measures statistically associated with KPI decline
           </p>
           <div className="grid grid-cols-1 gap-3">
             {bottomMeasures.map((measure, index) => (
@@ -233,7 +266,7 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
       <div className="mt-12">
         <p className="text-dark mb-6">
           Comprehensive view of all {measures.length} policy measures ranked by
-          their contribution coefficient. Hover over bars to see detailed
+          their association coefficient. Hover over bars to see detailed
           information and implementing cities.
         </p>
         <D3HorizontalBarChart
@@ -251,19 +284,18 @@ export const MeasuresImpact: React.FC<MeasuresImpactProps> = ({
       >
         <ul className="list-disc list-inside space-y-1">
           <li>
-            Coefficients represent the estimated contribution of each measure to
+            Coefficients represent the estimated statistical association of each measure to
             KPI changes
           </li>
           <li>
-            Positive levels indicate the policy measures that most likely
-            contributed to the improvement of KPI values
+            Positive values indicate measures most strongly associated with improvement of KPI values
           </li>
           <li>
-            Negative levels may indicate measures needing refinement or
+            Negative values may indicate measures needing refinement or
             context-specific challenges
           </li>
           <li>
-            Level of contribution from external conditions (out from policy
+            Association strength from external conditions (out from policy
             measures analysed):{" "}
             <span className="font-mono font-semibold">
               {formatCoefficient(analysisResult.variation_under_no_measures)}

@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { COLOR_BLUE, COLOR_ORANGE } from "../../styles/constants";
 
+export type MarkerShape = "circle" | "diamond";
+
 export type MarkerData = {
   id: string;
   name?: string;
   coordinates: { lat: number; lng: number };
   radius?: number;
   color?: string; // Optional marker color, defaults to COLOR_BLUE
+  opacity?: number; // Optional marker opacity (0–1), defaults to 1
+  shape?: MarkerShape; // Optional marker shape, defaults to "circle"
   // allow attaching any payload if needed
   meta?: Record<string, any>;
 };
@@ -85,25 +89,32 @@ export function MapViewer({
     return null;
   }
 
-  const createMarkerIcon = (color: string = COLOR_BLUE) =>
-    leaflet.divIcon({
-      html: `
-                  <div style="
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    background: ${color};
-                    font-size: 1rem;
+  const createMarkerIcon = (
+    color: string = COLOR_BLUE,
+    shape: MarkerShape = "circle",
+    opacity: number = 1,
+  ) => {
+    const opacityStyle = opacity < 1 ? `opacity: ${opacity};` : "";
+    const styles =
+      shape === "diamond"
+        ? `background: ${color};
+                    width: 0.85rem;
+                    height: 0.85rem;
+                    margin-left: -0.10rem;
+                    margin-top: -0.10rem;
+                    transform: rotate(45deg);${opacityStyle}`
+        : `background: ${color};
                     width: 1rem;
                     height: 1rem;
                     margin-left: -0.20rem;
                     margin-top: -0.30rem;
                     border-radius: 50% 50% 50% 0;
-                    transform: rotate(-45deg);
-                  ">
-                  </div>
-                `,
+                    transform: rotate(-45deg);${opacityStyle}`;
+
+    return leaflet.divIcon({
+      html: `<div style="display:flex;align-items:center;justify-content:center;${styles}"></div>`,
     });
+  };
 
   return (
     <MapContainer
@@ -124,7 +135,7 @@ export function MapViewer({
           <React.Fragment key={m.id}>
             <Marker
               position={[m.coordinates.lat, m.coordinates.lng]}
-              icon={createMarkerIcon(m.color)}
+              icon={createMarkerIcon(m.color, m.shape, m.opacity)}
               draggable={!!onMarkerDrag}
               eventHandlers={{
                 click: () => onMarkerClick && onMarkerClick(m),

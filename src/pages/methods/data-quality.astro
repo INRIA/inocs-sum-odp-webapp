@@ -1,0 +1,123 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { InfoAlert, Timeline } from "../../components/react/ui";
+
+const readingChecks = [
+  {
+    stepLabel: "1",
+    title: "How much evidence?",
+    description:
+      "Look at the evidence strength badge. Limited means few cities stand behind the number.",
+  },
+  {
+    stepLabel: "2",
+    title: "How old is it?",
+    description:
+      "Check the validation date. Older data may not reflect current conditions in that city.",
+  },
+  {
+    stepLabel: "3",
+    title: "Does the context match?",
+    description:
+      "Compare transport mix, population and regulatory setting. A measure that worked elsewhere may not suit yours.",
+  },
+  {
+    stepLabel: "4",
+    title: "Whose priorities?",
+    description:
+      "For any ranking, confirm which stakeholder weighting produced it and try again with the other perspectives and weights.",
+  },
+];
+
+const validationSteps = [
+  {
+    stepLabel: "1",
+    title: "City Submission",
+    description:
+      "A Living Lab data editor enters KPI values, policy measures and modal split figures for a given reporting period.",
+  },
+  {
+    stepLabel: "2",
+    title: "Format and data check",
+    description:
+      "Values are checked against the data type, unit and expected range defined for each KPI in the SIEF framework, and the required fields needed to compute it are verified.",
+    footnote: "Automatic checks on submission form.",
+  },
+  {
+    stepLabel: "3",
+    title: "Administrator review",
+    description:
+      "Values are compared against known ranges and against the city's own earlier submissions to surface anomalies.",
+    footnote: "Contacts the city editor if necessary.",
+  },
+  {
+    stepLabel: "4",
+    title: "Validation & publication",
+    description:
+      "The Administrator confirms the data submitted and validates the city.",
+    footnote: "Data feeds the impact analysis results",
+  },
+];
+---
+
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Evaluation methods" },
+    { label: "Data quality" },
+  ]}
+  backHref="/methods/evaluation-framework"
+>
+  <div class="mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-primary mb-3">Data quality</h1>
+    <p class="text-base text-dark mb-2">
+      Every figure on this platform comes from a city that measured it and a
+      review process that checked it. This page explains how data is validated
+      before it is published and how quality is communicated to users.
+    </p>
+    <div class="w-14 h-1 rounded bg-primary mb-8"></div>
+
+    <section class="mt-6">
+      <h2 class="text-2xl font-bold text-primary mb-2">
+        How data is validated
+      </h2>
+      <p class="text-dark mb-6">
+        <strong>A city is approved before it can publish anything.</strong> New cities
+        joining the platform are validated by the ODP Administrator, who also cross-checks
+        their data for consistency with the rest of the platform. Living lab data
+        is displayed in the platform but only validated data is used in the data analysis
+        and impact assessment results. The validation process is designed to ensure
+        that the data is accurate, complete, and reliable.
+      </p>
+
+      <!-- Validation pipeline -->
+      <Timeline steps={validationSteps} client:load />
+    </section>
+
+    <section class="mt-12 flex-col flex gap-4">
+      <h2 class="text-2xl font-bold text-primary">How to read the data</h2>
+      <p class="text-dark">
+        A short discipline that covers most of the ways platform results get
+        over-read.
+      </p>
+
+      <Timeline steps={readingChecks} client:load />
+
+      <InfoAlert variant="info" title="The bottom line" className="mt-6">
+        <p>
+          Platform results are decision support, not prescriptions. Local
+          feasibility studies, stakeholder engagement and regulatory
+          requirements remain essential inputs to any mobility planning
+          decision.
+        </p>
+      </InfoAlert>
+    </section>
+
+    <nav class="not-prose mt-8 flex gap-4 text-sm">
+      <a href="/methods/models" class="text-primary hover:underline"
+        >Next: Impact analysis methodology →</a
+      >
+    </nav>
+  </div>
+</Layout>

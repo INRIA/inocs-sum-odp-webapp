@@ -36,3 +36,5 @@ specs_obsolete/
 
 # Prisma
 .env
+.claude
+_bmad

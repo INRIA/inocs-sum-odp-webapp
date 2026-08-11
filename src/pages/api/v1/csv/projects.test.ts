@@ -1,7 +1,6 @@
 // T018 — projects CSV route tests
 import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from "vitest";
 import { GET } from "./projects";
-import { EmptyCsvError } from "../../../../bff/services/csv-export.service";
 
 // Mock the controller so tests never hit the database
 vi.mock("../../../../bff/controllers/csv-export.controller", () => ({
@@ -64,16 +63,16 @@ describe("GET /api/v1/csv/projects", () => {
     );
   });
 
-  it("returns 404 when controller throws EmptyCsvError", async () => {
-    mockGetProjectsCsv.mockRejectedValueOnce(
-      new EmptyCsvError("No projects found"),
+  it("returns 200 with header-only CSV when controller returns empty data", async () => {
+    mockGetProjectsCsv.mockResolvedValueOnce(
+      '"Lab","Project Name","Project Type","Start Date","Description"',
     );
 
     const res = await GET({ url: makeUrl({ living_lab_id: "999" }) } as never);
 
-    expect(res.status).toBe(404);
-    const body = await res.json();
-    expect(body.error).toBeTruthy();
+    expect(res.status).toBe(200);
+    const body = await res.text();
+    expect(body).toBe('"Lab","Project Name","Project Type","Start Date","Description"');
   });
 
   it("returns 400 when living_lab_id is not a positive integer", async () => {

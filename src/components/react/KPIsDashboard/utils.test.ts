@@ -387,10 +387,14 @@ describe("KPIsDashboard Utils", () => {
       },
     ];
 
+    const VALIDATED_AT = new Date("2025-01-01");
+    const UPDATED_AT = new Date("2023-06-01T00:00:00Z");
+
     const mockLivingLabs: ILivingLabKpiData[] = [
       {
         id: 1,
         name: "Geneva Lab",
+        validated_at: VALIDATED_AT,
         kpiResults: [
           {
             living_lab_id: 1,
@@ -401,6 +405,7 @@ describe("KPIsDashboard Utils", () => {
               living_lab_id: 1,
               value: 100,
               date: "2023-06-15",
+              updated_at: UPDATED_AT,
             },
             result_after: null,
             results: [
@@ -410,6 +415,7 @@ describe("KPIsDashboard Utils", () => {
                 living_lab_id: 1,
                 value: 100,
                 date: "2023-06-15",
+                updated_at: UPDATED_AT,
               },
             ],
           },
@@ -436,7 +442,8 @@ describe("KPIsDashboard Utils", () => {
 
       expect(result.size).toBe(1);
       expect(result.has(1)).toBe(true);
-      expect(result.get(1)).toHaveLength(1);
+      // 1 validated result → baseline mode → 1 entry in baselineLabs
+      expect(result.get(1)!.baselineLabs).toHaveLength(1);
     });
 
     it("excludes KPIs without data", () => {
@@ -456,6 +463,7 @@ describe("KPIsDashboard Utils", () => {
         {
           id: 1,
           name: "Geneva Lab",
+          validated_at: VALIDATED_AT,
           kpiResults: [
             {
               living_lab_id: 1,
@@ -466,6 +474,7 @@ describe("KPIsDashboard Utils", () => {
                 living_lab_id: 1,
                 value: 100,
                 date: "2023-06-15",
+                updated_at: UPDATED_AT,
               },
               result_after: null,
               results: [
@@ -475,6 +484,7 @@ describe("KPIsDashboard Utils", () => {
                   living_lab_id: 1,
                   value: 100,
                   date: "2023-06-15",
+                  updated_at: UPDATED_AT,
                 },
               ],
             },
@@ -487,6 +497,7 @@ describe("KPIsDashboard Utils", () => {
                 living_lab_id: 1,
                 value: 80,
                 date: "2023-06-15",
+                updated_at: UPDATED_AT,
               },
               result_after: null,
               results: [
@@ -496,6 +507,7 @@ describe("KPIsDashboard Utils", () => {
                   living_lab_id: 1,
                   value: 80,
                   date: "2023-06-15",
+                  updated_at: UPDATED_AT,
                 },
               ],
             },

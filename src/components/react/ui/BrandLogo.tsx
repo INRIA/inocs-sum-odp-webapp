@@ -1,4 +1,3 @@
-import { A } from "../../../../docs/assets/textarea.9JPkEnx5";
 import { getUrl } from "../../../lib/helpers";
 
 interface Props {

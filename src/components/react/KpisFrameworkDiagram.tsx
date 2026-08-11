@@ -5,7 +5,7 @@ export const KpisFrameworkDiagram: React.FC = () => {
     "Policies",
     "Transport system",
     "Modal split (primary project outcome)",
-    "Impacts - Sustainability assessment",
+    "Sustainability outcomes",
   ];
 
   const verticalDimensions = [
@@ -19,8 +19,8 @@ export const KpisFrameworkDiagram: React.FC = () => {
         The SUM Standardized Impact Evaluation Framework
       </h2>
 
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6 xl:gap-8">
-        <aside className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700 lg:w-80 lg:shrink-0 xl:w-96">
+      <div className="flex flex-col gap-4 lg:items-center lg:gap-6 xl:gap-8">
+        <aside className="hidden rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
           <p className="font-medium text-gray-900">
             The SUM Standardized Impact Evaluation Framework (SIEF) extends CIVITAS CEF to verify SUM’s core target: at least a 25%
             shift from daily private car use to NSM and/or public transport in
@@ -81,7 +81,7 @@ export const KpisFrameworkDiagram: React.FC = () => {
                 <div className="space-y-2 p-3 text-sm">
                   <div className="rounded-xl border-2 border-lime-500 p-2">
                     <p className="font-semibold">Policies</p>
-                    <p>1. Level of completion of SUMP measures</p>
+                    <p>1. Level of completion of SUMP (city plan) measures</p>
                     <p>2. Community involvement</p>
                     <p>3. Balance of pull-push planned/implemented measures</p>
                     <p>4. Number of NSM modes integrated in the system</p>
@@ -135,7 +135,7 @@ export const KpisFrameworkDiagram: React.FC = () => {
 
               <div className="rounded-xl border-2 border-sky-400 p-3">
                 <p className="mb-2 text-lg font-semibold text-gray-900">
-                  Impacts - Sustainability assessment
+                  Sustainability outcomes
                 </p>
                 <div className="grid grid-cols-1 gap-2 md:grid-cols-3 text-sm">
                   <div className="rounded-xl border border-gray-400 p-2">

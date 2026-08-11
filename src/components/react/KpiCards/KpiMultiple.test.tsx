@@ -57,29 +57,33 @@ describe("KpiMultiple", () => {
     },
   ];
 
+  // Data-sufficiency gate requires lab_validated_at > result.updated_at
+  const LAB_VALIDATED_AT = new Date("2025-01-01");
+  const UPDATED_AT = new Date("2023-06-01T00:00:00Z");
+
   const results: IKpiResultGroup[] = [
     {
       living_lab_id: 1,
       kpidefinition_id: 101,
       results: [
-        { id: 1, kpidefinition_id: 101, living_lab_id: 1, value: 40, date: "2022-01-01" },
-        { id: 2, kpidefinition_id: 101, living_lab_id: 1, value: 35, date: "2023-01-01" },
-        { id: 3, kpidefinition_id: 101, living_lab_id: 1, value: 30, date: "2024-01-01" },
+        { id: 1, kpidefinition_id: 101, living_lab_id: 1, value: 40, date: "2022-01-01", updated_at: UPDATED_AT },
+        { id: 2, kpidefinition_id: 101, living_lab_id: 1, value: 35, date: "2023-01-01", updated_at: UPDATED_AT },
+        { id: 3, kpidefinition_id: 101, living_lab_id: 1, value: 30, date: "2024-01-01", updated_at: UPDATED_AT },
       ],
     },
     {
       living_lab_id: 1,
       kpidefinition_id: 102,
       results: [
-        { id: 4, kpidefinition_id: 102, living_lab_id: 1, value: 20, date: "2022-01-01" },
-        { id: 5, kpidefinition_id: 102, living_lab_id: 1, value: 25, date: "2023-01-01" },
-        { id: 6, kpidefinition_id: 102, living_lab_id: 1, value: 30, date: "2024-01-01" },
+        { id: 4, kpidefinition_id: 102, living_lab_id: 1, value: 20, date: "2022-01-01", updated_at: UPDATED_AT },
+        { id: 5, kpidefinition_id: 102, living_lab_id: 1, value: 25, date: "2023-01-01", updated_at: UPDATED_AT },
+        { id: 6, kpidefinition_id: 102, living_lab_id: 1, value: 30, date: "2024-01-01", updated_at: UPDATED_AT },
       ],
     },
   ];
 
   it("renders parent and child KPI sections", () => {
-    render(<KpiMultiple parentKpi={parentKpi} kpis={kpis} results={results} />);
+    render(<KpiMultiple parentKpi={parentKpi} kpis={kpis} results={results} lab_validated_at={LAB_VALIDATED_AT} />);
 
     expect(screen.getByText("Modal Split")).toBeInTheDocument();
     expect(screen.getByText("Car")).toBeInTheDocument();
@@ -88,7 +92,7 @@ describe("KpiMultiple", () => {
   });
 
   it("builds line chart with all sorted dates and datasets", () => {
-    render(<KpiMultiple parentKpi={parentKpi} kpis={kpis} results={results} />);
+    render(<KpiMultiple parentKpi={parentKpi} kpis={kpis} results={results} lab_validated_at={LAB_VALIDATED_AT} />);
 
     expect(lineMock).toHaveBeenCalledTimes(1);
     const props = lineMock.mock.calls[0][0] as {

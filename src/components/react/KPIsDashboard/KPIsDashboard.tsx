@@ -2,6 +2,7 @@ import React, { useState, useMemo, useCallback } from "react";
 import type { KPIsDashboardProps, KpiLivingLabsCardsFilter } from "./types";
 import { KpiLivingLabsCards } from "./KpiLivingLabsCards";
 import { ModalSplitLivingLabsCards } from "./ModalSplitLivingLabsCards";
+import { ImplementationRecordTable } from "./ImplementationRecordTable";
 import { DataDashboardFilter } from "../ui/DataDashboardFilter";
 import { generateLabColorsWithSeed } from "../../../lib/helpers/colorUtils";
 import { PageNavigation } from "../ui/PageNavigation";
@@ -10,28 +11,29 @@ import {
   ArrowUpCircleIcon,
   ArrowDownCircleIcon,
   PresentationChartLineIcon,
+  TableCellsIcon,
 } from "@heroicons/react/24/outline";
 
 export const KPIsDashboard: React.FC<KPIsDashboardProps> = ({
   livingLabs,
   kpis,
+  implementationKpis = [],
   availableYears,
   categories,
   modalSplitData = [],
   transportModes = [],
 }) => {
-  // State for sidebar collapse - shared between filter component and navigation
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Memoized handler for open state changes to prevent re-renders
   const handleOpenChange = useCallback((isOpen: boolean) => {
     setIsSidebarOpen(isOpen);
   }, []);
 
-  // Memoized toggle handler for navigation
   const handleNavigationToggle = useCallback(() => {
     setIsSidebarOpen((prev) => !prev);
   }, []);
+
+  const hasImplementationTable = implementationKpis.length > 0;
 
   const navigationSections = useMemo(
     () => [
@@ -51,16 +53,24 @@ export const KPIsDashboard: React.FC<KPIsDashboardProps> = ({
         label: "Data section",
         icon: <PresentationChartLineIcon className="w-5 h-5 md:w-8 md:h-8" />,
       },
+      ...(hasImplementationTable
+        ? [
+            {
+              id: "data-dashboard-implementation-record",
+              label: "Implementation record",
+              icon: <TableCellsIcon className="w-5 h-5 md:w-8 md:h-8" />,
+            },
+          ]
+        : []),
       {
         id: "data-dashboard-kpis-end",
         label: "Bottom of page",
         icon: <ArrowDownCircleIcon className="w-5 h-5 md:w-8 md:h-8" />,
       },
     ],
-    [handleNavigationToggle],
+    [handleNavigationToggle, hasImplementationTable],
   );
-  // Generate consistent color assignments for all labs (defined once at parent level)
-  // Uses seeded randomness based on lab IDs for deterministic but varied colors
+
   const labColors = useMemo(
     () =>
       generateLabColorsWithSeed(
@@ -69,14 +79,12 @@ export const KPIsDashboard: React.FC<KPIsDashboardProps> = ({
     [livingLabs],
   );
 
-  // Initialize filter with all labs and years selected
   const [filter, setFilter] = useState<KpiLivingLabsCardsFilter>({
     selectedLabIds: livingLabs?.map((lab) => lab.id) ?? [],
     selectedYears: availableYears ?? [],
     selectedCategoryIds: categories?.map((cat) => cat.id) ?? [],
   });
 
-  // Handler for filter changes from DataDashboardFilter component
   const handleFilterChange = useCallback(
     (newFilter: KpiLivingLabsCardsFilter) => {
       setFilter(newFilter);
@@ -92,7 +100,6 @@ export const KPIsDashboard: React.FC<KPIsDashboardProps> = ({
 
   return (
     <div className="relative">
-      {/* Main content area - full width */}
       <div className="flex flex-col gap-6">
         {/* Summary and Filter Toggle */}
         <div className="flex items-center justify-between text-sm text-gray-600">
@@ -100,7 +107,6 @@ export const KPIsDashboard: React.FC<KPIsDashboardProps> = ({
             Showing {filter.selectedLabIds?.length} of {livingLabs.length}{" "}
             living labs • {getKpisCount} KPIs • {availableYears.length} years
           </span>
-          {/* Filter component with internal toggle button and panel */}
           <DataDashboardFilter
             livingLabs={livingLabs}
             availableYears={availableYears}
@@ -131,6 +137,20 @@ export const KPIsDashboard: React.FC<KPIsDashboardProps> = ({
             />
           )}
         </section>
+
+        {/* Implementation Record Table — process metrics, no charts */}
+        {hasImplementationTable && (
+          <section id="data-dashboard-implementation-record">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">
+              Implementation Record
+            </h3>
+            <ImplementationRecordTable
+              view="global"
+              kpis={implementationKpis}
+              livingLabs={livingLabs}
+            />
+          </section>
+        )}
 
         <section id="data-dashboard-kpis-end" />
 

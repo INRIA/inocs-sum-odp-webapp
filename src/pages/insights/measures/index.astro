@@ -1,0 +1,299 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import {
+  MethodologySection,
+  BusinessActivityRankingTable,
+  PolicyMeasuresRankingTable,
+  PolicyMeasuresOverview,
+} from "../../../components/react/Insights";
+import type { PolicyMeasureRow } from "../../../components/react/Insights";
+import type { PolicyMeasureOverviewRow } from "../../../components/react/Insights";
+import { InfoAlert, RButton } from "../../../components/react/ui";
+import { MCDA_PERSPECTIVES } from "../../../lib/helpers";
+import ApiClient from "../../../lib/api-client/ApiClient";
+import { getUrl } from "../../../lib/helpers";
+import type { ILivingLabPopulated } from "../../../types";
+
+const api = new ApiClient(Astro.request);
+
+// ── All policy measures + living labs from the platform ──────────────────
+const allMeasures = (await api.getMeasures()) ?? [];
+const livingLabsData = ((await api.getLivingLabs()) ??
+  []) as ILivingLabPopulated[];
+const labNameById = new Map(livingLabsData.map((l) => [l.id, l.name]));
+
+const overviewRows: PolicyMeasureOverviewRow[] = allMeasures.map((m) => ({
+  id: m.id,
+  name: m.name,
+  type: m.type,
+  cities: (m.living_lab_projects_implementation ?? []).map((impl) => ({
+    id: impl.living_lab_id,
+    name: labNameById.get(impl.living_lab_id) ?? `Lab ${impl.living_lab_id}`,
+  })),
+}));
+
+// Sort: PUSH first, then PULL, alphabetical within each
+overviewRows.sort((a, b) => {
+  if (a.type !== b.type) return a.type === "PUSH" ? -1 : 1;
+  return a.name.localeCompare(b.name);
+});
+
+// ── Impact analysis data (kpi_measures_analysis) ──────────────────────────
+const impactJobRun = await api.getLatestJobRun("kpi_measures_analysis");
+const successItems = impactJobRun?.output_data?.success ?? [];
+
+// ── MCDA quantitative results per perspective ─────────────────────────────
+const quantitativePerspectives = await Promise.all(
+  Object.entries(MCDA_PERSPECTIVES).map(async ([key, label]) => {
+    try {
+      const jobRun = await api.getLatestJobRun(
+        `mcda_analysis_quantitative_${key}`,
+      );
+      const results = jobRun?.output_data?.mcda_results;
+      return {
+        key,
+        label,
+        ranking: results?.ranking ?? ([] as string[]),
+        netFlows: (results?.net_flows ?? {}) as Record<string, number>,
+        alternativeLabels: (results?.alternative_labels ?? {}) as Record<
+          string,
+          string
+        >,
+      };
+    } catch {
+      return {
+        key,
+        label,
+        ranking: [] as string[],
+        netFlows: {} as Record<string, number>,
+        alternativeLabels: {} as Record<string, string>,
+      };
+    }
+  }),
+);
+
+// ── Compute policy measure rows for section 1 ─────────────────────────────
+
+// 1. Rank measures within each KPI group by coefficient (descending)
+type GroupRanking = {
+  groupName: string;
+  ranked: {
+    measureId: number;
+    name: string;
+    coefficient: number;
+    rank: number;
+    total: number;
+  }[];
+};
+
+const groupRankings: GroupRanking[] = successItems.map((item) => {
+  const sorted = [...item.results.measure_coefficients].sort(
+    (a, b) => b.coefficient - a.coefficient,
+  );
+  return {
+    groupName: item.group_name,
+    ranked: sorted.map((m, i) => ({
+      measureId: m.id,
+      name: m.name,
+      coefficient: m.coefficient,
+      rank: i + 1,
+      total: sorted.length,
+    })),
+  };
+});
+
+// 2. Collect all unique measures from BOTH impact analysis AND MCDA perspectives
+//    Use normalised name as the merge key (impact analysis uses IDs, MCDA uses string keys)
+const measureByName = new Map<string, { measureId: number; name: string }>();
+
+// From impact analysis coefficients
+for (const gr of groupRankings) {
+  for (const m of gr.ranked) {
+    const key = m.name.toLowerCase().trim();
+    if (!measureByName.has(key)) {
+      measureByName.set(key, { measureId: m.measureId, name: m.name });
+    }
+  }
+}
+
+// From living lab reported measures (includes measures not in regression)
+let nextSyntheticId = -1;
+for (const item of successItems) {
+  for (const lab of item.results.living_labs_analysis) {
+    for (const m of lab.measures) {
+      const key = m.measure_name?.toLowerCase()?.trim();
+      if (!measureByName.has(key)) {
+        const id =
+          typeof m.measure_id === "number" ? m.measure_id : nextSyntheticId--;
+        measureByName.set(key, { measureId: id, name: m.measure_name });
+      }
+    }
+  }
+}
+
+// From MCDA quantitative perspectives (may contain measures not in impact analysis)
+for (const p of quantitativePerspectives) {
+  for (const altKey of p.ranking) {
+    const label = p.alternativeLabels[altKey] ?? altKey;
+    const key = label.toLowerCase().trim();
+    if (!measureByName.has(key)) {
+      measureByName.set(key, { measureId: nextSyntheticId--, name: label });
+    }
+  }
+}
+
+// 3. Build MCDA perspective lookup: normalised name → ranks per perspective
+const perspectiveLookup = new Map<
+  string,
+  { perspectiveLabel: string; rank: number; total: number }[]
+>();
+for (const p of quantitativePerspectives) {
+  if (p.ranking.length === 0) continue;
+  for (let i = 0; i < p.ranking.length; i++) {
+    const altKey = p.ranking[i];
+    const label = p.alternativeLabels[altKey] ?? altKey;
+    const normalised = label.toLowerCase().trim();
+    if (!perspectiveLookup.has(normalised)) {
+      perspectiveLookup.set(normalised, []);
+    }
+    perspectiveLookup.get(normalised)!.push({
+      perspectiveLabel: p.label,
+      rank: i + 1,
+      total: p.ranking.length,
+    });
+  }
+}
+
+// 4. Assemble rows
+const policyMeasureRows: PolicyMeasureRow[] = Array.from(
+  measureByName.entries(),
+).map(([normName, { measureId, name }]) => {
+  const kpiGroups = groupRankings
+    .map((gr) => {
+      const entry = gr.ranked.find((m) => m.measureId === measureId);
+      if (!entry) return null;
+      return {
+        groupName: gr.groupName,
+        coefficient: entry.coefficient,
+        rank: entry.rank,
+        totalInGroup: entry.total,
+      };
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null);
+
+  const perspectives = (perspectiveLookup.get(normName) ?? []).map((p) => ({
+    perspectiveLabel: p.perspectiveLabel,
+    rank: p.rank,
+    totalInPerspective: p.total,
+  }));
+
+  const bestKpiRank =
+    kpiGroups.length > 0 ? Math.min(...kpiGroups.map((g) => g.rank)) : Infinity;
+
+  return { measureId, name, kpiGroups, perspectives, bestKpiRank };
+});
+
+// Sort by best KPI rank (measures with impact analysis data first, then MCDA-only)
+policyMeasureRows.sort((a, b) => a.bestKpiRank - b.bestKpiRank);
+---
+
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: getUrl("/") },
+    { label: "Insights", href: getUrl("/insights/measures") },
+    { label: "Policy measures" },
+  ]}
+  backHref={getUrl("/insights/measures")}
+>
+  <div class="mx-auto max-w-5xl px-4 py-12">
+    <div class="mb-10">
+      <h1 class="text-3xl font-bold text-gray-900 mb-3">Policy measures</h1>
+      <p class="text-gray-500 text-lg">
+        Measures are policy actions, infrastructure changes, service rollouts,
+        or regulatory shifts implemented by cities to impact how people move
+        through urban spaces. Each measure reported falls under one of two
+        strategic categories: push and pull measures.
+      </p>
+    </div>
+
+    <PolicyMeasuresOverview rows={overviewRows} client:load />
+
+    <div class="flex justify-end mb-10">
+      <RButton
+        variant="secondary"
+        size="lg"
+        text="Policy measures data"
+        href={getUrl("/data/measures")}
+        defaultArrow
+        client:load
+      />
+    </div>
+
+    <div class="mt-12 mb-8">
+      <hr class="border-t border-warning border-dotted" />
+      <h2 class="mt-6 mb-1">Insights from reported policy measures</h2>
+      <p class="text-dark/70 text-sm">Main data driven cross-city patterns from the platform's analytical tools. Insights from Ridge regression Impact analysis and MCDA decision tool.</p>
+    </div>
+
+    <InfoAlert
+      title="How to read this page"
+      variant="info"
+      className="mb-10"
+      client:load
+    >
+      <p>
+        Everything below is produced by the analysis tools on this platform,
+        from data submitted by SUM Living Labs and from expert surveys carried
+        out within the project. It reflects
+        <strong>patterns across cities</strong>, it does not include local indicators,
+        local context, or the local knowledge each city holds about why something
+        worked.
+      </p>
+      <p class="mt-2">
+        These results are a starting point for a conversation, not a
+        recommendation for any individual city. Each section links to the full
+        interactive analysis, where you can change the stakeholder perspective
+        and see every ranking. For the methodology, its assumptions and its
+        documented limitations, see the project's official deliverables in the <a
+          href="https://sum-project.eu/resources/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="font-medium underline hover:text-blue-900"
+          >SUM resources library</a
+        >.
+      </p>
+    </InfoAlert>
+    {/* Section 1: Policy Measures */}
+    <MethodologySection
+      title="Data driven policy measure ranking"
+      subtitle="How the policy measures contributed to the KPIs performance across cities, provided by ridge regression analysis (cities, policy measures and KPIs before vs after values)."
+      badges={[
+        { label: "Data driven", color: "info" },
+        { label: "Ridge regression", color: "secondary" },
+        { label: "KPIs performance", color: "light" },
+      ]}
+      ctaLabel="KPIs Impact analysis"
+      ctaHref="/tools/impact_analysis"
+      client:load
+    >
+      <PolicyMeasuresRankingTable rows={policyMeasureRows} />
+    </MethodologySection>
+
+    {/* Section 2: Business Activities */}
+    <MethodologySection
+      title="Business Activities stakeholder rating"
+      subtitle="Main insights from MCDA analysis about Business activities rated by the people who operate, regulate and deliver mobility in the SUM Living Labs."
+      badges={[
+        { label: "Perceived performance", color: "info" },
+        { label: "Qualitative analysis", color: "secondary" },
+        { label: "Stakeholder survey", color: "light" },
+      ]}
+      ctaLabel="MCDA decision tool"
+      ctaHref="/tools/mcda_analysis/"
+      client:load
+    >
+      <BusinessActivityRankingTable perspectives={quantitativePerspectives} />
+    </MethodologySection>
+  </div>
+</Layout>

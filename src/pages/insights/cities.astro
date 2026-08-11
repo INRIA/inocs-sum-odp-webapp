@@ -1,0 +1,96 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { CitiesGrid, CitiesKpiStrip } from "../../components/react/Insights";
+import { LivingLabsMapSection } from "../../components/react";
+import ApiClient from "../../lib/api-client/ApiClient";
+import { getUrl } from "../../lib/helpers";
+import { buildCityCards } from "../../lib/utils/cityCards";
+import { buildMapLabs } from "../../lib/utils/mapLabs";
+import { computePlatformCounters } from "../../lib/utils/platformCounters";
+import type { IKpi, IKpiResultGroup, ILivingLabPopulated } from "../../types";
+
+const api = new ApiClient(Astro.request);
+const livingLabs = ((await api.getLivingLabs()) ?? []) as ILivingLabPopulated[];
+const kpis = ((await api.getKPIs()) ?? []) as IKpi[];
+
+const cityCards = buildCityCards(livingLabs, kpis);
+const mapLabs = buildMapLabs(livingLabs, kpis);
+
+const counters = computePlatformCounters(livingLabs);
+
+const countries = new Set(
+  livingLabs.map((lab) => lab.country).filter(Boolean),
+).size;
+
+const kpiRecords = livingLabs.reduce((sum, lab) => {
+  const results = (lab.kpi_results ?? []) as IKpiResultGroup[];
+  return sum + results.reduce((s, g) => s + (g.results?.length ?? 0), 0);
+}, 0);
+
+const policyMeasures = new Set(
+  livingLabs.flatMap((lab) => (lab.projects ?? []).map((p) => p.id)),
+).size;
+
+const snapshotDate = new Date().toLocaleDateString("en-GB", {
+  month: "long",
+  year: "numeric",
+});
+---
+
+<Layout
+  role="visitor"
+  breadcrumbs={[
+    { label: "Home", href: getUrl("/") },
+    { label: "Insights", href: getUrl("/insights/measures") },
+    { label: "Cities" },
+  ]}
+  backHref={getUrl("/insights/measures")}
+>
+  <div class="mx-auto max-w-7xl px-4 py-10 sm:px-8">
+    <header class="mb-8">
+      <h1 class="mb-3 text-3xl font-bold text-primary sm:text-4xl">Cities</h1>
+      <p class="mb-3 max-w-4xl text-base text-gray-600">
+        Find general insights of the contributing cities, which policy measures they have implemented and their KPIs performance over time.
+        Click on a city to see its detailed information and KPIs.
+      </p>
+    </header>
+
+    <CitiesKpiStrip
+      sumLivingLabs={counters.sumLivingLabs}
+      contributingCities={counters.contributingCities}
+      countries={countries}
+      kpiRecords={kpiRecords}
+      policyMeasures={policyMeasures}
+      client:load
+    />
+  </div>
+
+  <LivingLabsMapSection labs={mapLabs} client:only="react" />
+
+  <div class="mx-auto max-w-7xl px-4 pb-12 sm:px-8">
+    {
+      cityCards.length === 0 ? (
+        <div class="rounded-xl border border-gray-100 bg-gray-50 p-8 text-center text-gray-400">
+          No cities registered yet.
+        </div>
+      ) : (
+        <CitiesGrid cities={cityCards} client:load />
+      )
+    }
+
+    <div
+      class="mt-8 rounded-xl border border-gray-200 bg-gray-50/70 px-5 py-4 text-sm text-gray-600"
+    >
+      <b class="font-semibold text-gray-900">Adding your city.</b> Any European city
+      can register, record the measures it is implementing, and report its indicators.
+      Cities appear here as soon as they join, with or without results.
+      <a href={getUrl("/join")} class="font-semibold text-primary hover:underline"
+        >How to join →</a
+      >
+    </div>
+
+    <p class="mt-6 border-t border-gray-200 pt-4 text-xs text-gray-400">
+      SUM Open Data Platform · cards update as cities report · {snapshotDate}
+    </p>
+  </div>
+</Layout>

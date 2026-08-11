@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { KpiLivingLabsMultipleCard } from "./KpiLivingLabsMultipleCard";
 import type { IKpi } from "../../../types";
-import type { IKpiTimelineMap, ILabKpiTimeline } from "./types";
+import type { IKpiTimelineMap, ILabKpiTimeline, ILabPartition } from "./types";
 
 const mockD3TimelineChart = vi.fn();
 vi.mock("./D3TimelineChart", () => ({
@@ -70,6 +70,12 @@ describe("KpiLivingLabsMultipleCard", () => {
     vi.clearAllMocks();
   });
 
+  /** Wrap chart timelines into the ILabPartition shape expected by the component */
+  const partition = (...timelines: ILabKpiTimeline[]): ILabPartition => ({
+    chartLabs: timelines,
+    baselineLabs: [],
+  });
+
   it("renders parent KPI title and badge", () => {
     const parentKpi = createMockKpi(1, "Air Quality");
     render(
@@ -86,7 +92,7 @@ describe("KpiLivingLabsMultipleCard", () => {
 
   it("renders parent chart when parent has data", () => {
     const parentKpi = createMockKpi(1, "Air Quality");
-    const kpiTimelineMap: IKpiTimelineMap = new Map([[1, [createMockTimeline(1)]]]);
+    const kpiTimelineMap: IKpiTimelineMap = new Map([[1, partition(createMockTimeline(1))]]);
 
     render(
       <KpiLivingLabsMultipleCard
@@ -107,8 +113,8 @@ describe("KpiLivingLabsMultipleCard", () => {
       createMockKpi(3, "PM10", 1),
     ];
     const kpiTimelineMap: IKpiTimelineMap = new Map([
-      [2, [createMockTimeline(1)]],
-      [3, [createMockTimeline(1)]],
+      [2, partition(createMockTimeline(1))],
+      [3, partition(createMockTimeline(1))],
     ]);
 
     render(
@@ -134,7 +140,7 @@ describe("KpiLivingLabsMultipleCard", () => {
       createMockKpi(2, "PM2.5", 1),
       createMockKpi(3, "PM10", 1),
     ];
-    const kpiTimelineMap: IKpiTimelineMap = new Map([[2, [createMockTimeline(1)]]]);
+    const kpiTimelineMap: IKpiTimelineMap = new Map([[2, partition(createMockTimeline(1))]]);
 
     render(
       <KpiLivingLabsMultipleCard
@@ -155,8 +161,8 @@ describe("KpiLivingLabsMultipleCard", () => {
     const parentKpi = createMockKpi(1, "Air Quality");
     const childKpis: IKpi[] = [createMockKpi(2, "PM2.5", 1)];
     const kpiTimelineMap: IKpiTimelineMap = new Map([
-      [1, [createMockTimeline(1), createMockTimeline(2)]],
-      [2, [createMockTimeline(1)]],
+      [1, partition(createMockTimeline(1), createMockTimeline(2))],
+      [2, partition(createMockTimeline(1))],
     ]);
 
     render(
@@ -174,7 +180,7 @@ describe("KpiLivingLabsMultipleCard", () => {
 
   it("passes configured height to parent timeline chart", () => {
     const parentKpi = createMockKpi(1, "Air Quality");
-    const kpiTimelineMap: IKpiTimelineMap = new Map([[1, [createMockTimeline(1)]]]);
+    const kpiTimelineMap: IKpiTimelineMap = new Map([[1, partition(createMockTimeline(1))]]);
 
     render(
       <KpiLivingLabsMultipleCard
@@ -191,7 +197,7 @@ describe("KpiLivingLabsMultipleCard", () => {
   it("passes configured facetHeight to faceted chart", () => {
     const parentKpi = createMockKpi(1, "Air Quality");
     const childKpis: IKpi[] = [createMockKpi(2, "PM2.5", 1)];
-    const kpiTimelineMap: IKpiTimelineMap = new Map([[2, [createMockTimeline(1)]]]);
+    const kpiTimelineMap: IKpiTimelineMap = new Map([[2, partition(createMockTimeline(1))]]);
 
     render(
       <KpiLivingLabsMultipleCard
@@ -212,8 +218,8 @@ describe("KpiLivingLabsMultipleCard", () => {
     parentKpi.metric = "ratio" as never;
     const childKpis: IKpi[] = [createMockKpi(2, "PM2.5", 1)];
     const kpiTimelineMap: IKpiTimelineMap = new Map([
-      [1, [createMockTimeline(1)]],
-      [2, [createMockTimeline(1)]],
+      [1, partition(createMockTimeline(1))],
+      [2, partition(createMockTimeline(1))],
     ]);
 
     render(

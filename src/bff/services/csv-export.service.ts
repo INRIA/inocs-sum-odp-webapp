@@ -6,7 +6,7 @@ import type {
   ProjectsCsvFilters,
   CsvHeaderDef,
 } from "../../types/CsvExport";
-import { CsvSerializer, EmptyCsvError } from "../../lib/utils/CsvSerializer";
+import { CsvSerializer } from "../../lib/utils/CsvSerializer";
 
 // Re-export so existing consumers (controller, routes, tests) don't need changes
 export type {
@@ -16,7 +16,7 @@ export type {
   ProjectsCsvFilters,
   CsvHeaderDef,
 };
-export { CsvSerializer, EmptyCsvError };
+export { CsvSerializer };
 
 // ── KPI Results headers ───────────────────────────────────────────────────────
 

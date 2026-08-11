@@ -453,11 +453,11 @@ export const buildMcdaKeyInsights = (
   return [
     {
       title: "Top performer",
-      description: "Highest PROMETHEE net flow",
+      description: "Highest overall score",
       value: topKey ? labels[topKey] || topKey : "N/A",
       detail: topKey ? `φ = ${formatPhi(topPhi)}` : "",
       tooltip:
-        "PROMETHEE II ranks alternatives by net flow (φ). The highest φ is currently the top performer.",
+        "Overall score (φ): PROMETHEE II ranks alternatives by net flow. The highest overall score is currently the top performer.",
     },
     {
       title: "Sensitivity level",
@@ -477,7 +477,7 @@ export const buildMcdaKeyInsights = (
     },
     {
       title: "Score spread",
-      description: "The difference between the highest and lowest net flow",
+      description: "The difference between the highest and lowest overall score",
       value: formatPhi(spread),
       detail: `(max-min) = (${formatPhi(maxScore)}) - (${formatPhi(minScore)}). How separated the alternatives are.`,
       tooltip:

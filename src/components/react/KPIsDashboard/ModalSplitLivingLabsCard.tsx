@@ -12,6 +12,8 @@ import { TriggerDownloadCsv } from "../TriggerDownloadCsv";
 export const ModalSplitLivingLabsCard: React.FC<
   ModalSplitLivingLabsCardProps
 > = ({ kpiId, kpiNumber, kpiName, labs, filter }) => {
+  const kpiDefinitionId = parseInt(kpiId, 10);
+  const isValidKpiId = Number.isFinite(kpiDefinitionId) && kpiDefinitionId > 0;
   const selectedLabIds = filter.selectedLabIds ?? [];
   const selectedYears = filter.selectedYears ?? [];
 
@@ -104,7 +106,8 @@ export const ModalSplitLivingLabsCard: React.FC<
             <TriggerDownloadCsv
               type="kpi-results-definition"
               size="sm"
-              kpidefinition_id={Number(kpiId)}
+              kpidefinition_id={isValidKpiId ? kpiDefinitionId : undefined}
+              disabled={!isValidKpiId}
             />
           </div>{" "}
         </div>
