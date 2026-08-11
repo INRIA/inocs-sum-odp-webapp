@@ -11,8 +11,8 @@ describe("resolveExperience", () => {
     const state = resolveExperience("/data/kpis", sp());
     expect(state.active).toBe("data");
     expect(state.isShared).toBe(false);
-    expect(state.switchSegments[0].active).toBe(true); // Data segment
-    expect(state.switchSegments[1].active).toBe(false); // Insights segment
+    expect(state.switchSegments[0].active).toBe(false); // Insights segment
+    expect(state.switchSegments[1].active).toBe(true); // Data segment
   });
 
   it("resolves /data/measures to data experience", () => {
@@ -125,15 +125,16 @@ describe("resolveExperience", () => {
     expect(dataSeg?.href).toBe("/data/kpis");
   });
 
-  it("insights switch segment href falls back to /insights when no counterpart", () => {
+  it("insights switch segment href falls back to /insights/cities when no counterpart", () => {
     const state = resolveExperience("/data/measures", sp());
     const insightsSeg = state.switchSegments.find((s) => s.label === "Insights");
-    expect(insightsSeg?.href).toBe("/insights/measures");
+    expect(insightsSeg?.href).toBe("/insights/cities");
   });
 
-  it("resolves /join to shared experience", () => {
+  it("resolves /join to insights experience", () => {
     const state = resolveExperience("/join", sp());
-    expect(state.isShared).toBe(true);
+    expect(state.isShared).toBe(false);
+    expect(state.active).toBe("insights");
   });
 
   it("resolves /methods/glossary to data experience", () => {

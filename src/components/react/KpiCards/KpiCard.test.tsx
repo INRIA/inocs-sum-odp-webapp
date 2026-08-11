@@ -32,45 +32,51 @@ describe("KpiCard", () => {
     metric: "percentage" as never,
   };
 
+  // Data-sufficiency gate requires lab_validated_at > result.updated_at
+  const LAB_VALIDATED_AT = new Date("2025-01-01");
+  const UPDATED_AT = new Date("2023-06-01T00:00:00Z");
+
   it("renders KPI metadata and chart when data exists", () => {
     const kpiResults: IKpiResultGroup = {
       living_lab_id: 1,
       kpidefinition_id: 1,
       results: [
-        { id: 1, kpidefinition_id: 1, living_lab_id: 1, value: 10, date: "2023-01-01" },
+        { id: 1, kpidefinition_id: 1, living_lab_id: 1, value: 10, date: "2023-01-01", updated_at: UPDATED_AT },
+        { id: 2, kpidefinition_id: 1, living_lab_id: 1, value: 15, date: "2023-06-01", updated_at: UPDATED_AT },
       ],
     };
 
-    render(<KpiCard kpi={kpi} kpiResults={kpiResults} />);
+    render(<KpiCard kpi={kpi} kpiResults={kpiResults} lab_validated_at={LAB_VALIDATED_AT} />);
 
     expect(screen.getByText("Air quality")).toBeInTheDocument();
     expect(screen.getByText(/KPI 1/)).toBeInTheDocument();
     expect(screen.getByTestId("line-chart")).toBeInTheDocument();
   });
 
-  it("renders no-data message when results is empty", () => {
+  it("returns null when results is empty (hidden mode)", () => {
     const kpiResults: IKpiResultGroup = {
       living_lab_id: 1,
       kpidefinition_id: 1,
       results: [],
     };
 
-    render(<KpiCard kpi={kpi} kpiResults={kpiResults} />);
+    const { container } = render(<KpiCard kpi={kpi} kpiResults={kpiResults} lab_validated_at={LAB_VALIDATED_AT} />);
 
-    expect(screen.getByText("No data to display")).toBeInTheDocument();
+    expect(container.innerHTML).toBe("");
   });
 
-  // T025 — TriggerDownloadCsv integration tests
+  // T025 — TriggerDownloadCsv integration tests (chart mode = ≥2 validated results)
   it("renders TriggerDownloadCsv with kpi-results-lab type when kpiResults is defined", () => {
     const kpiResults: IKpiResultGroup = {
       living_lab_id: 3,
       kpidefinition_id: 1,
       results: [
-        { id: 2, kpidefinition_id: 1, living_lab_id: 3, value: 20, date: "2024-01-01" },
+        { id: 2, kpidefinition_id: 1, living_lab_id: 3, value: 20, date: "2024-01-01", updated_at: UPDATED_AT },
+        { id: 3, kpidefinition_id: 1, living_lab_id: 3, value: 25, date: "2024-06-01", updated_at: UPDATED_AT },
       ],
     };
 
-    render(<KpiCard kpi={kpi} kpiResults={kpiResults} />);
+    render(<KpiCard kpi={kpi} kpiResults={kpiResults} lab_validated_at={LAB_VALIDATED_AT} />);
 
     const downloadBtn = screen.getByTestId("trigger-download-csv");
     expect(downloadBtn).toBeInTheDocument();
@@ -83,11 +89,12 @@ describe("KpiCard", () => {
       living_lab_id: 5,
       kpidefinition_id: 1,
       results: [
-        { id: 3, kpidefinition_id: 1, living_lab_id: 5, value: 30, date: "2024-02-01" },
+        { id: 3, kpidefinition_id: 1, living_lab_id: 5, value: 30, date: "2024-02-01", updated_at: UPDATED_AT },
+        { id: 4, kpidefinition_id: 1, living_lab_id: 5, value: 35, date: "2024-06-01", updated_at: UPDATED_AT },
       ],
     };
 
-    render(<KpiCard kpi={kpi} kpiResults={kpiResults} />);
+    render(<KpiCard kpi={kpi} kpiResults={kpiResults} lab_validated_at={LAB_VALIDATED_AT} />);
 
     const downloadBtn = screen.getByTestId("trigger-download-csv");
     const props = JSON.parse(downloadBtn.getAttribute("data-props") ?? "{}");
@@ -99,11 +106,12 @@ describe("KpiCard", () => {
       living_lab_id: 1,
       kpidefinition_id: 1,
       results: [
-        { id: 4, kpidefinition_id: 1, living_lab_id: 1, value: 40, date: "2024-03-01" },
+        { id: 4, kpidefinition_id: 1, living_lab_id: 1, value: 40, date: "2024-03-01", updated_at: UPDATED_AT },
+        { id: 5, kpidefinition_id: 1, living_lab_id: 1, value: 45, date: "2024-06-01", updated_at: UPDATED_AT },
       ],
     };
 
-    render(<KpiCard kpi={kpi} kpiResults={kpiResults} />);
+    render(<KpiCard kpi={kpi} kpiResults={kpiResults} lab_validated_at={LAB_VALIDATED_AT} />);
 
     const downloadBtn = screen.getByTestId("trigger-download-csv");
     const props = JSON.parse(downloadBtn.getAttribute("data-props") ?? "{}");
@@ -115,11 +123,12 @@ describe("KpiCard", () => {
       living_lab_id: 1,
       kpidefinition_id: 1,
       results: [
-        { id: 5, kpidefinition_id: 1, living_lab_id: 1, value: 50, date: "2024-04-01" },
+        { id: 5, kpidefinition_id: 1, living_lab_id: 1, value: 50, date: "2024-04-01", updated_at: UPDATED_AT },
+        { id: 6, kpidefinition_id: 1, living_lab_id: 1, value: 55, date: "2024-06-01", updated_at: UPDATED_AT },
       ],
     };
 
-    render(<KpiCard kpi={kpi} kpiResults={kpiResults} />);
+    render(<KpiCard kpi={kpi} kpiResults={kpiResults} lab_validated_at={LAB_VALIDATED_AT} />);
 
     const downloadBtn = screen.getByTestId("trigger-download-csv");
     const props = JSON.parse(downloadBtn.getAttribute("data-props") ?? "{}");

@@ -80,13 +80,19 @@ const toNumericId = (value: unknown, fallback: number): number => {
   return fallback;
 };
 
+// Data-sufficiency gate constants
+const VALIDATED_AT = new Date("2025-01-01");
+const UPDATED_AT = new Date("2023-06-01T00:00:00Z");
+
 const createMockLivingLab = (
   id: number,
   name: string,
   kpiResults: Array<Record<string, any>> = [],
+  validated_at?: Date | null,
 ): ILivingLabKpiData => ({
   id,
   name,
+  validated_at,
   kpiResults: kpiResults.map((item, index) => {
     if (Array.isArray(item.results)) {
       return item as IKpiResultGroup;
@@ -115,6 +121,7 @@ const createMockLivingLab = (
         transport_mode_id: result.transport_mode_id,
         value: Number(result.value),
         date: String(result.date),
+        updated_at: validated_at ? UPDATED_AT : undefined,
       })),
     };
   }),
@@ -163,7 +170,7 @@ describe("KpiLivingLabsCards", () => {
             result_before: { id: "rb-1", date: "2023-01-01", value: 50 },
             result_after: { id: "ra-1", date: "2023-12-31", value: 60 },
           },
-        ]),
+        ], VALIDATED_AT),
       ];
 
       const category = createMockCategory(1, "Environment", kpis);
@@ -234,7 +241,7 @@ describe("KpiLivingLabsCards", () => {
             result_before: { id: "rb-1", date: "2023-01-01", value: 50 },
             result_after: { id: "ra-1", date: "2024-12-31", value: 60 },
           },
-        ]),
+        ], VALIDATED_AT),
         createMockLivingLab(2, "Lyon", [
           {
             id: "result-2",
@@ -243,7 +250,7 @@ describe("KpiLivingLabsCards", () => {
             result_before: { id: "rb-2", date: "2024-01-01", value: 70 },
             result_after: { id: "ra-2", date: "2024-12-31", value: 80 },
           },
-        ]),
+        ], VALIDATED_AT),
       ];
 
       const category = createMockCategory(1, "Environment", kpis);
@@ -352,9 +359,9 @@ describe("KpiLivingLabsCards", () => {
             kpidefinition_id: "kpi-1",
             livinglab_id: "lab-1",
             result_before: { id: "rb-1", date: "2023-01-01", value: 50 },
-            result_after: null,
+            result_after: { id: "ra-1", date: "2023-06-01", value: 55 },
           },
-        ]),
+        ], VALIDATED_AT),
       ];
 
       const category = createMockCategory(1, "Environment", kpis);
@@ -450,7 +457,7 @@ describe("KpiLivingLabsCards", () => {
             result_before: { id: "rb-2", date: "2023-01-01", value: 100 },
             result_after: null,
           },
-        ]),
+        ], VALIDATED_AT),
       ];
 
       const category1 = createMockCategory(1, "Environment", [kpi1]);
