@@ -11,7 +11,19 @@ import type { IKpi, IKpiResultGroup, ILivingLabPopulated } from "../../types";
 
 const api = new ApiClient(Astro.request);
 const livingLabs = ((await api.getLivingLabs()) ?? []) as ILivingLabPopulated[];
-const kpis = ((await api.getKPIs()) ?? []) as IKpi[];
+
+const [allKpis, siefCategories] = await Promise.all([
+  api.getKPIs(),
+  api.getCategories("KPI_SIEF"),
+]);
+const siefKpiIds = new Set(
+  (siefCategories ?? []).flatMap((cat) =>
+    (cat.kpis ?? []).map((kpi) => Number(kpi.id)),
+  ),
+);
+const kpis = ((allKpis ?? []) as IKpi[]).filter((kpi) =>
+  siefKpiIds.has(Number(kpi.id)),
+);
 
 const cityCards = buildCityCards(livingLabs, kpis);
 const mapLabs = buildMapLabs(livingLabs, kpis);

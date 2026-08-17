@@ -38,7 +38,7 @@ describe("CityCard", () => {
     expect(screen.getByText("Coimbra")).toBeInTheDocument();
     expect(screen.getByText("Portugal")).toBeInTheDocument();
     expect(screen.getByText("SUM Living Lab")).toBeInTheDocument();
-    expect(screen.getByText("143,000")).toBeInTheDocument();
+    expect(screen.getByText("143K")).toBeInTheDocument();
     expect(screen.getByText("319 km²")).toBeInTheDocument();
     expect(screen.getByText("Reporting since")).toBeInTheDocument();
     expect(screen.getByText("2023")).toBeInTheDocument();
@@ -91,7 +91,7 @@ describe("CityCard", () => {
     expect(screen.queryByText("Improved")).not.toBeInTheDocument();
     // Context and measures stay visible so the card never looks broken.
     expect(screen.getByText("8 measures")).toBeInTheDocument();
-    expect(screen.getByText("143,000")).toBeInTheDocument();
+    expect(screen.getByText("143K")).toBeInTheDocument();
   });
 
   it("labels the year as registration when nothing has been reported", () => {

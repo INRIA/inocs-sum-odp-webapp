@@ -1,4 +1,5 @@
 import React from "react";
+import { formatPopulation } from "../../../lib/helpers/format";
 
 interface InsightsCityOverviewProps {
   cityName: string;
@@ -32,7 +33,7 @@ export function InsightsCityOverview({
                 <div>
                   <dt className="text-gray-500 inline">Population: </dt>
                   <dd className="inline text-gray-900">
-                    {population.toLocaleString()}
+                    {formatPopulation(population)}
                   </dd>
                 </div>
               )}

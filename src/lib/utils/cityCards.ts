@@ -207,6 +207,7 @@ export function buildCityKpiMovements(
   labValidatedAt?: Date | null,
 ): KpiMovements {
   const lookup = buildKpiLookup(kpis);
+  const knownKpiIds = new Set(kpis.map((k) => Number(k.id)));
 
   // Transport mode lookup for modal split NSM filtering
   // Use Number() for consistent key types — IDs may arrive as BigInt or string from Prisma.
@@ -233,6 +234,7 @@ export function buildCityKpiMovements(
   for (const group of kpiResults) {
     const definitionId = Number(group.kpidefinition_id);
     if (!Number.isFinite(definitionId)) continue;
+    if (!knownKpiIds.has(definitionId)) continue;
 
     // Mirror the living-lab-city page: only use results whose updated_at is
     // before the lab's validation date.  When labValidatedAt is null,

@@ -19,6 +19,7 @@ import { TriggerDownloadCsv } from "../../components/react/TriggerDownloadCsv/Tr
 import type { IKpiResultGroup } from "../../types";
 import { displayLabType } from "../../lib/labels";
 import { getCityDataStatus, getFullCityStatus } from "../../lib/utils/cityStatus";
+import { formatPopulation } from "../../lib/helpers/format";
 
 const api = new ApiClient(Astro.request);
 
@@ -132,7 +133,9 @@ const registrationDate = livingLabData?.created_at
             },
             {
               label: "Population",
-              value: livingLabData?.population,
+              value: livingLabData?.population != null
+                ? formatPopulation(livingLabData.population)
+                : undefined,
             },
             {
               label: "Area (km²)",

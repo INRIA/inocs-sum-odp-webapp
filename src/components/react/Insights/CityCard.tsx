@@ -2,6 +2,7 @@ import React from "react";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { Badge, RButton, Tooltip } from "../ui";
 import type { CityCardData, CityKpiMovement, CityModalSplitEntry } from "../../../lib/utils/cityCards";
+import { formatPopulation } from "../../../lib/helpers/format";
 
 export interface CityCardProps {
   city: CityCardData;
@@ -147,11 +148,6 @@ function PendingResults({ isContributingCity }: { isContributingCity: boolean })
         <InformationCircleIcon className="h-4 w-4 shrink-0 text-gray-400" />
         Results not published yet
       </div>
-      <div className="text-xs leading-relaxed text-gray-400">
-        {isContributingCity
-          ? "This city has recorded the measures it is implementing. Indicator values will follow."
-          : "Measures are recorded. Indicator values will appear here once this city reports its follow-up figures."}
-      </div>
     </div>
   );
 }
@@ -243,7 +239,7 @@ export function CityCard({
           label="Population"
           value={
             city.population != null
-              ? numberFormatter.format(city.population)
+              ? formatPopulation(city.population)
               : "—"
           }
         />

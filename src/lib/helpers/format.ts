@@ -104,3 +104,15 @@ export function toSafeJsonString(obj: any): string {
 export function notNullOrUndefined<T>(value: T | null | undefined): value is T {
   return value !== null && value !== undefined;
 }
+
+export function formatPopulation(value: number): string {
+  if (value >= 1_000_000) {
+    const s = (value / 1_000_000).toFixed(1).replace(/\.0$/, "");
+    return `${s}M`;
+  }
+  if (value >= 1_000) {
+    const s = (value / 1_000).toFixed(1).replace(/\.0$/, "");
+    return `${s}K`;
+  }
+  return String(value);
+}

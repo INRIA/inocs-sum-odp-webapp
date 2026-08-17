@@ -340,13 +340,14 @@ describe("buildCityCard", () => {
     expect(card.indicatorsTotal).toBe(0);
   });
 
-  it("falls back to a readable label when the KPI definition is unknown", () => {
+  it("ignores KPI results whose definition is not in the provided kpi list", () => {
     const card = buildCityCard(
       lab({ id: 1, name: "Coimbra", kpi_results: [resultGroup(999, 100, 110)] }),
       kpis,
     );
 
-    expect(card.improved[0].name).toBe("KPI 999");
+    expect(card.improved).toEqual([]);
+    expect(card.indicatorsTotal).toBe(0);
   });
 });
 
